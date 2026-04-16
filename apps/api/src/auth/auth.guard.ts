@@ -5,9 +5,12 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import * as jwt from "jsonwebtoken";
+import { PrismaService } from "../prisma.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  constructor(private prisma: PrismaService) {}
+
   canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest();
     const auth = req.headers["authorization"] || req.headers["Authorization"];

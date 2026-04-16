@@ -20,6 +20,8 @@ async function bootstrap() {
       return cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ["GET", "HEAD", "PUT", "POST", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept"],
   });
 
   // Swagger/OpenAPI generation is done via the separate script `src/swagger.ts`.

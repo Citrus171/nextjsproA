@@ -6,6 +6,7 @@ import {
   postsControllerList,
   postsControllerCreate,
   postsControllerUpdate,
+  postsControllerGet,
   postsControllerRemove,
   usersControllerRegister,
 } from "./index";
@@ -72,7 +73,7 @@ export function createClient(options: ClientOptions) {
         }
       }
       return Promise.reject(err);
-    }
+    },
   );
 
   return {
@@ -82,7 +83,11 @@ export function createClient(options: ClientOptions) {
       if (token && options.setToken) options.setToken(token);
       return r.data;
     },
-    register: async (name: string | undefined, email: string, password: string) => {
+    register: async (
+      name: string | undefined,
+      email: string,
+      password: string,
+    ) => {
       const r = await usersControllerRegister({ name, email, password });
       return r.data;
     },
@@ -101,8 +106,12 @@ export function createClient(options: ClientOptions) {
       const r = await postsControllerCreate({ title, content });
       return r.data;
     },
-    updatePost: async (id: string, title: string, content: string) => {
-      const r = await postsControllerUpdate(id, { title, content });
+    getPost: async (id: string) => {
+      const r = await postsControllerGet(id);
+      return r.data;
+    },
+    updatePost: async (id: string, data: { title: string; content: string }) => {
+      const r = await axios.put(`/api/posts/${id}`, data);
       return r.data;
     },
     deletePost: async (id: string) => {

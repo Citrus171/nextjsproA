@@ -18,6 +18,11 @@ class CreatePostDto {
   content: string;
 }
 
+class UpdatePostDto {
+  title?: string;
+  content?: string;
+}
+
 @Controller("posts")
 export class PostsController {
   constructor(private posts: PostsService) {}
@@ -43,7 +48,7 @@ export class PostsController {
 
   @Put(":id")
   @UseGuards(AuthGuard)
-  async update(@Param("id") id: string, @Body() body: any) {
+  async update(@Param("id") id: string, @Body() body: UpdatePostDto) {
     return this.posts.update(id, body);
   }
 

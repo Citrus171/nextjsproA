@@ -1,5 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
+import * as fs from "fs";
 
 @Injectable()
 export class PostsService {
@@ -27,10 +28,27 @@ export class PostsService {
   }
 
   async update(id: string, data: { title?: string; content?: string }) {
-    return this.prisma.post.update({ where: { id }, data });
+    fs.appendFileSync('debug.log', `Update called with id: ${id}, data: ${JSON.stringify(data)}\n`);
+    try {
+      const post = await this.prisma.post.findUnique({ where: { id } });
+      fs.appendFileSync('debug.log', `Post found: ${!!post}\n`);
+      if (!post) {
+        throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
+      }
+      const result = await this.prisma.post.update({ where: { id }, data });
+      fs.appendFileSync('debug.log', `Update result: ${JSON.stringify(result)}\n`);
+      return result;
+    } catch (error) {
+      fs.appendFileSync('debug.log', `Update error: ${error}\n`);
+      throw error;
+    }
   }
 
   async remove(id: string) {
+    const post = await this.prisma.post.findUnique({ where: { id } });
+    if (!post) {
+      throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
+    }
     return this.prisma.post.delete({ where: { id } });
   }
 }
