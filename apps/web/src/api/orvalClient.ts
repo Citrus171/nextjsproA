@@ -1,4 +1,4 @@
-import { createClient } from "../../../../packages/api-client/src";
+import { createClient } from "../../../../packages/api-client/src/client";
 import { useAuth } from "../auth/AuthProvider";
 
 export function useApiClient() {
