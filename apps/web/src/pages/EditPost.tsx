@@ -7,6 +7,7 @@ export default function EditPost() {
   const { id } = useParams<{ id: string }>();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [image, setImage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export default function EditPost() {
         const data = await api.getPost(id);
         setTitle(data.title || "");
         setContent(data.content || "");
+        setImage(data.image || null);
       } catch (err) {
         alert("Failed to load post");
       }
@@ -61,6 +63,15 @@ export default function EditPost() {
           onChange={(e) => setContent(e.target.value)}
         />
       </div>
+      {image && (
+        <div>
+          <img
+            src={`http://localhost:3000/${image}`}
+            alt="Post image"
+            style={{ maxWidth: "300px", maxHeight: "200px" }}
+          />
+        </div>
+      )}
       <button type="submit">Save</button>
       <button type="button" onClick={remove} style={{ marginLeft: 8 }}>
         Delete

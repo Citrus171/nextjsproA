@@ -6,12 +6,13 @@ export default function CreatePost() {
   const api = useApiClient();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [image, setImage] = useState<File | null>(null);
   const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.createPost(title, content);
+      await api.createPost(title, content, image || undefined);
       navigate("/");
     } catch (err) {
       alert("Failed to create post");
@@ -33,6 +34,13 @@ export default function CreatePost() {
           placeholder="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
+        />
+      </div>
+      <div>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImage(e.target.files?.[0] || null)}
         />
       </div>
       <button type="submit">Create</button>

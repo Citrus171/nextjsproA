@@ -102,8 +102,8 @@ export function createClient(options: ClientOptions) {
       const r = await postsControllerList();
       return r.data;
     },
-    createPost: async (title: string, content: string) => {
-      const r = await postsControllerCreate({ title, content });
+    createPost: async (title: string, content: string, image?: Blob) => {
+      const r = await postsControllerCreate({ title, content, image });
       return r.data;
     },
     getPost: async (id: string) => {

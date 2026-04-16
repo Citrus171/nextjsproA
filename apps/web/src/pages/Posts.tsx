@@ -25,6 +25,13 @@ export default function Posts() {
         >
           <h3>{p.title}</h3>
           <p>{p.content}</p>
+          {p.image && (
+            <img
+              src={`http://localhost:3000/${p.image}`}
+              alt="Post image"
+              style={{ maxWidth: "300px", maxHeight: "200px" }}
+            />
+          )}
           <div>
             <Link to={`/edit/${p.id}`}>Edit</Link>{" "}
             <button

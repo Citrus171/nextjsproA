@@ -26,6 +26,7 @@ export class UsersController {
 
   @Post("register")
   async register(@Body() dto: RegisterDto) {
+    console.log('Register request:', dto);
     try {
       const user = await this.users.createUser(
         dto.email,

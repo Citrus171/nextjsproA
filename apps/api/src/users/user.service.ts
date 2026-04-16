@@ -8,11 +8,16 @@ export class UsersService {
 
   async createUser(email: string, password: string, name?: string) {
     console.log('Creating user:', email, name);
-    const hashed = await bcrypt.hash(password, 10);
-    console.log('Hashed password');
-    const result = await this.prisma.user.create({ data: { email, password: hashed, name } });
-    console.log('User created:', result.id);
-    return result;
+    try {
+      const hashed = await bcrypt.hash(password, 10);
+      console.log('Hashed password');
+      const result = await this.prisma.user.create({ data: { email, password: hashed, name } });
+      console.log('User created:', result.id);
+      return result;
+    } catch (e) {
+      console.error('Error in createUser:', e);
+      throw e;
+    }
   }
 
   async findByEmail(email: string) {

@@ -9,8 +9,11 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from "@nestjs/common";
-import { ApiProperty, ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { ApiProperty, ApiTags, ApiBearerAuth, ApiConsumes, ApiBody } from "@nestjs/swagger";
 import { PostsService } from "./post.service";
 import { AuthGuard } from "../auth/auth.guard";
 
@@ -20,6 +23,9 @@ class CreatePostDto {
 
   @ApiProperty()
   content: string;
+
+  @ApiProperty({ required: false })
+  image?: string;
 }
 
 class UpdatePostDto {
@@ -38,9 +44,21 @@ export class PostsController {
 
   @HttpPost()
   @UseGuards(AuthGuard)
-  async create(@Req() req: any, @Body() dto: CreatePostDto) {
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  async create(@Req() req: any, @Body() dto: CreatePostDto, @UploadedFile() file: Express.Multer.File) {
     const authorId = req.user?.id || dto["authorId"] || "";
-    return this.posts.create(authorId, dto.title, dto.content);
+    return this.posts.create(authorId, dto.title, dto.content, file);
   }
 
   @Get()

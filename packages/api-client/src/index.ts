@@ -10,6 +10,12 @@ import type {
   AxiosRequestConfig,
   AxiosResponse
 } from 'axios'
+export type PostsControllerCreateBody = {
+  content?: string;
+  image?: Blob;
+  title?: string;
+};
+
 export interface LoginDto {
   email: string;
   password: string;
@@ -18,11 +24,6 @@ export interface LoginDto {
 export interface UpdatePostDto {
   content?: string;
   title?: string;
-}
-
-export interface CreatePostDto {
-  content: string;
-  title: string;
 }
 
 export interface RegisterDto {
@@ -45,11 +46,21 @@ export interface RegisterDto {
   }
 
 export const postsControllerCreate = <TData = AxiosResponse<void>>(
-    createPostDto: CreatePostDto, options?: AxiosRequestConfig
- ): Promise<TData> => {
+    postsControllerCreateBody: PostsControllerCreateBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {const formData = new FormData();
+if(postsControllerCreateBody.title !== undefined) {
+ formData.append('title', postsControllerCreateBody.title)
+ }
+if(postsControllerCreateBody.content !== undefined) {
+ formData.append('content', postsControllerCreateBody.content)
+ }
+if(postsControllerCreateBody.image !== undefined) {
+ formData.append('image', postsControllerCreateBody.image)
+ }
+
     return axios.post(
       `/api/posts`,
-      createPostDto,options
+      formData,options
     );
   }
 

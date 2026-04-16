@@ -1,10 +1,13 @@
 import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as cookieParser from "cookie-parser";
+import * as path from "path";
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix("api");
+  app.useStaticAssets(path.join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
   app.use(cookieParser());
   // Allow browser (Vite) origin to send cookies. Use env override or accept multiple dev ports.
   const webOrigin = process.env.WEB_ORIGIN || "http://localhost:5173";

@@ -1,13 +1,25 @@
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import * as fs from "fs";
+import * as path from "path";
 
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(authorId: string, title: string, content: string) {
-    return this.prisma.post.create({ data: { title, content, authorId } });
+  async create(authorId: string, title: string, content: string, file?: Express.Multer.File) {
+    let imagePath: string | undefined;
+    if (file) {
+      const uploadDir = path.join(__dirname, '../../uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const fileName = `${Date.now()}-${file.originalname}`;
+      const filePath = path.join(uploadDir, fileName);
+      fs.writeFileSync(filePath, file.buffer);
+      imagePath = `uploads/${fileName}`;
+    }
+    return this.prisma.post.create({ data: { title, content, authorId, image: imagePath } });
   }
 
   async findAll(page = 1, perPage = 10) {
