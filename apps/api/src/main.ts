@@ -1,5 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as cookieParser from "cookie-parser";
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,8 +25,16 @@ async function bootstrap() {
     allowedHeaders: ["Content-Type", "Authorization", "Accept"],
   });
 
-  // Swagger/OpenAPI generation is done via the separate script `src/swagger.ts`.
-  // Skip setting up Swagger UI during normal dev server to avoid runtime scanner issues.
+  // Setup Swagger UI
+  const config = new DocumentBuilder()
+    .setTitle("API")
+    .setDescription("API description")
+    .setVersion("1.0")
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("api", app, document);
 
   await app.listen(3000);
   console.log("API listening on http://localhost:3000");

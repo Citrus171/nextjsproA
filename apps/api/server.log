@@ -1,0 +1,27 @@
+
+> apps-api@0.1.0 start:dev
+> ts-node-dev --respawn --transpile-only src/main.ts
+
+[INFO] 22:20:40 ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.2, typescript ver. 5.9.3)
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +18ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsersModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPostsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUsersController {/api/users}:[39m[38;5;3m +35ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/users/register, POST} route[39m[38;5;3m +3ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPostsController {/api/posts}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/posts, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/posts, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/posts/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/posts/:id, PUT} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/posts/:id, DELETE} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/api/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/login, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/refresh, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/api/auth/logout, POST} route[39m[38;5;3m +1ms[39m
+Prisma connected
+Prisma connected
+Prisma connected
+[32m[Nest] 25147  - [39m2026/04/16 22:20:41 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +17ms[39m
+API listening on http://localhost:3000

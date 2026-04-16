@@ -6,6 +6,6 @@
     "orval": "^6.0.0"
   },
   "scripts": {
-    "generate": "orval -c orval.config.ts"
+    "generate": "orval"
   }
 }

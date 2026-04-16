@@ -10,19 +10,28 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common";
+import { ApiProperty, ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import { PostsService } from "./post.service";
 import { AuthGuard } from "../auth/auth.guard";
 
 class CreatePostDto {
+  @ApiProperty()
   title: string;
+
+  @ApiProperty()
   content: string;
 }
 
 class UpdatePostDto {
+  @ApiProperty({ required: false })
   title?: string;
+
+  @ApiProperty({ required: false })
   content?: string;
 }
 
+@ApiTags('posts')
+@ApiBearerAuth()
 @Controller("posts")
 export class PostsController {
   constructor(private posts: PostsService) {}

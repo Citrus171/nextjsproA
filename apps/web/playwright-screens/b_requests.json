@@ -4,7 +4,7 @@
     "url": "http://localhost:5175/api/posts",
     "headers": {
       "sec-ch-ua-platform": "\"Windows\"",
-      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xN3VibXAwMDAwa2J0cnJtZHdtMnU4IiwiZW1haWwiOiJ1c2VyMTc3NjMyODAyMzg5NkBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjgwMjUsImV4cCI6MTc3NjMyODkyNX0.3L2D04XdJgEevF2NLcQcrvhDcQgr3dff5YA6j0HM32o",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xOWFtZjMwMDB2a2J0cmtqbmp6aGFsIiwiZW1haWwiOiJ1c2VyMTc3NjMzMDQ2Mzk2OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMzA0NjUsImV4cCI6MTc3NjMzMTM2NX0.V_3yPWQH8aSb0oL3TnC93Z7GnMdXnf5dHGlA9bGMr7I",
       "referer": "http://localhost:5175/create",
       "accept-language": "en-US",
       "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
@@ -19,7 +19,7 @@
     "url": "http://localhost:5175/api/auth/refresh",
     "headers": {
       "sec-ch-ua-platform": "\"Windows\"",
-      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xN3VibXAwMDAwa2J0cnJtZHdtMnU4IiwiZW1haWwiOiJ1c2VyMTc3NjMyODAyMzg5NkBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjgwMjUsImV4cCI6MTc3NjMyODkyNX0.3L2D04XdJgEevF2NLcQcrvhDcQgr3dff5YA6j0HM32o",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xOWFtZjMwMDB2a2J0cmtqbmp6aGFsIiwiZW1haWwiOiJ1c2VyMTc3NjMzMDQ2Mzk2OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMzA0NjUsImV4cCI6MTc3NjMzMTM2NX0.V_3yPWQH8aSb0oL3TnC93Z7GnMdXnf5dHGlA9bGMr7I",
       "referer": "http://localhost:5175/create",
       "accept-language": "en-US",
       "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
@@ -38,7 +38,7 @@
       "access-control-allow-credentials": "true",
       "access-control-allow-origin": "http://localhost:5175",
       "content-length": "67",
-      "date": "Thu, 16 Apr 2026 08:27:06 GMT",
+      "date": "Thu, 16 Apr 2026 09:07:46 GMT",
       "content-type": "application/json; charset=utf-8",
       "vary": "Origin",
       "x-powered-by": "Express"
@@ -50,7 +50,7 @@
     "url": "http://localhost:5175/api/posts",
     "headers": {
       "sec-ch-ua-platform": "\"Windows\"",
-      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xN3VibXAwMDAwa2J0cnJtZHdtMnU4IiwiZW1haWwiOiJ1c2VyMTc3NjMyODAyMzg5NkBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjgwMjUsImV4cCI6MTc3NjMyODkyNX0.3L2D04XdJgEevF2NLcQcrvhDcQgr3dff5YA6j0HM32o",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xOWFtZjMwMDB2a2J0cmtqbmp6aGFsIiwiZW1haWwiOiJ1c2VyMTc3NjMzMDQ2Mzk2OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMzA0NjUsImV4cCI6MTc3NjMzMTM2NX0.V_3yPWQH8aSb0oL3TnC93Z7GnMdXnf5dHGlA9bGMr7I",
       "referer": "http://localhost:5175/create",
       "accept-language": "en-US",
       "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
@@ -65,17 +65,17 @@
     "url": "http://localhost:5175/api/auth/refresh",
     "status": 201,
     "headers": {
-      "etag": "W/\"bf-HzB7BzR4Ud38D0br2hBUaqqnrpo\"",
+      "etag": "W/\"bf-xtOVHck39bHZhn8cbTy78TmDgQo\"",
       "connection": "close",
       "access-control-allow-credentials": "true",
       "access-control-allow-origin": "http://localhost:5175",
       "content-length": "191",
-      "date": "Thu, 16 Apr 2026 08:27:06 GMT",
+      "date": "Thu, 16 Apr 2026 09:07:46 GMT",
       "content-type": "application/json; charset=utf-8",
       "vary": "Origin",
       "x-powered-by": "Express"
     },
-    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xN3VibXAwMDAwa2J0cnJtZHdtMnU4IiwiaWF0IjoxNzc2MzI4MDI2LCJleHAiOjE3NzYzMjg5MjZ9.8Ac_ykThI7PHNNT7jnx8Omb3Mx-fpXxKSFSrdXufgaA\"}"
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xOWFtZjMwMDB2a2J0cmtqbmp6aGFsIiwiaWF0IjoxNzc2MzMwNDY2LCJleHAiOjE3NzYzMzEzNjZ9.ecugy2bvosCWGwiOmYBkhuHg4_xH3evh7xr40kPNs8c\"}"
   },
   {
     "type": "response",
@@ -87,7 +87,7 @@
       "access-control-allow-credentials": "true",
       "access-control-allow-origin": "http://localhost:5175",
       "content-length": "67",
-      "date": "Thu, 16 Apr 2026 08:27:06 GMT",
+      "date": "Thu, 16 Apr 2026 09:07:46 GMT",
       "content-type": "application/json; charset=utf-8",
       "vary": "Origin",
       "x-powered-by": "Express"

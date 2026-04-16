@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createClient } from "../../../../packages/api-client/src";
+import { createClient } from "../../../../packages/api-client/src/client";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -12,7 +12,6 @@ export default function Register() {
     e.preventDefault();
     try {
       const client = createClient({
-        baseURL: "/api",
         getToken: async () => null,
       });
       const res = await client.register(name || undefined, email, password);

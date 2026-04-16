@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { useNavigate } from "react-router-dom";
-import { createClient } from "../../../../packages/api-client/src";
+import { createClient } from "../../../../packages/api-client/src/client";
 
 export default function LoginWithAuth() {
   const [email, setEmail] = useState("");
@@ -14,7 +14,6 @@ export default function LoginWithAuth() {
     e.preventDefault();
     setError(null);
     const client = createClient({
-      baseURL: "/api",
       getToken: async () => null,
     });
     try {

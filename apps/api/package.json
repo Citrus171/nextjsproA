@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "openapi": "node ./dist/swagger.js || ts-node src/swagger.ts"
+    "openapi": "curl -s http://localhost:3000/api-json > /home/user/nestjsA_begin/packages/api-client/openapi.json"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

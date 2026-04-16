@@ -5,14 +5,21 @@ import {
   HttpException,
   HttpStatus,
 } from "@nestjs/common";
+import { ApiProperty, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "./user.service";
 
 class RegisterDto {
+  @ApiProperty()
   email: string;
+
+  @ApiProperty()
   password: string;
+
+  @ApiProperty({ required: false })
   name?: string;
 }
 
+@ApiTags('users')
 @Controller("users")
 export class UsersController {
   constructor(private users: UsersService) {}

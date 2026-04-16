@@ -7,15 +7,20 @@ import {
   Req,
   Res,
 } from "@nestjs/common";
+import { ApiProperty, ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 
 class LoginDto {
+  @ApiProperty()
   email: string;
+
+  @ApiProperty()
   password: string;
 }
 
+@ApiTags('auth')
 @Controller("auth")
 export class AuthController {
   constructor(private auth: AuthService) {}

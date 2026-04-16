@@ -6,7 +6,7 @@ export function useApiClient() {
 
   // Create a client bound to current token
   const client = createClient({
-    baseURL: "/api",
+    // baseURL omitted: Orval-generated functions already include '/api' prefix
     getToken: async () => token,
     setToken: (t) => setToken(t),
     onUnauthorized: () => {
