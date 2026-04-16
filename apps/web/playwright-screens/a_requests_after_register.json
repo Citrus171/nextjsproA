@@ -1,0 +1,32 @@
+[
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/users/register",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/register",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "content-type": "application/json",
+      "sec-ch-ua-mobile": "?0",
+      "accept-language": "en-US"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/users/register",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"56-8enMJ5bqiIUY6OB+0zu6iHTxt4k\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "86",
+      "date": "Thu, 16 Apr 2026 07:33:45 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"id\":\"cmo15xrkh0004kbnhpup2m0d3\",\"email\":\"user1776324825299@example.test\",\"name\":\"u\"}"
+  }
+]

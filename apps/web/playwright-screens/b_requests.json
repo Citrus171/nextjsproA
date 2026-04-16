@@ -1,0 +1,825 @@
+[
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:47 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-ZRbqJ26FBWUJnk3U8Y3OI8vvevg\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:47 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI3LCJleHAiOjE3NzYzMjU3Mjd9.rznaTSy4Fp47zOIb2iTr5E4p6NtVQDflKQg6JIORqwA\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:47 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-93quy0PH/5fulm99LrEhd9+Ikwc\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI4LCJleHAiOjE3NzYzMjU3Mjh9.NdRYnQBIAiK7J6dw5MaL9gE_g8KQ4LKDkwq6_ZmgQGI\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:48 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-YdcIgFB8FhOXDTdDlMoSEKuKw50\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:49 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI5LCJleHAiOjE3NzYzMjU3Mjl9.QqbLS9a0MLKznZqcW_a4b21Cj0m_YYDQw7pDBxTIpT0\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:49 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/posts",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "authorization": "Bearer xeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiZW1haWwiOiJ1c2VyMTc3NjMyNDgyNTI5OUBleGFtcGxlLnRlc3QiLCJpYXQiOjE3NzYzMjQ4MjYsImV4cCI6MTc3NjMyNTcyNn0.A0lgs0oepwEWyymGBs0UZLFGmihQRCqkyZtHPPv7woQ",
+      "referer": "http://localhost:5175/create",
+      "accept-language": "en-US",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "sec-ch-ua-mobile": "?0",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "content-type": "application/json"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "status": 201,
+    "headers": {
+      "etag": "W/\"bf-YdcIgFB8FhOXDTdDlMoSEKuKw50\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "191",
+      "date": "Thu, 16 Apr 2026 07:33:49 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW8xNXhya2gwMDA0a2JuaHB1cDJtMGQzIiwiaWF0IjoxNzc2MzI0ODI5LCJleHAiOjE3NzYzMjU3Mjl9.QqbLS9a0MLKznZqcW_a4b21Cj0m_YYDQw7pDBxTIpT0\"}"
+  },
+  {
+    "type": "request",
+    "url": "http://localhost:5175/api/auth/refresh",
+    "headers": {
+      "sec-ch-ua-platform": "\"Windows\"",
+      "referer": "http://localhost:5175/create",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.7727.15 Safari/537.36",
+      "sec-ch-ua": "\"HeadlessChrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"",
+      "accept-language": "en-US",
+      "sec-ch-ua-mobile": "?0"
+    }
+  },
+  {
+    "type": "response",
+    "url": "http://localhost:5175/api/posts",
+    "status": 401,
+    "headers": {
+      "etag": "W/\"43-uIOU42UFCvk1wag7W9LVHbUrPhI\"",
+      "connection": "close",
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "http://localhost:5175",
+      "content-length": "67",
+      "date": "Thu, 16 Apr 2026 07:33:49 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "vary": "Origin",
+      "x-powered-by": "Express"
+    },
+    "body": "{\"message\":\"Invalid token\",\"error\":\"Unauthorized\",\"statusCode\":401}"
+  }
+]
