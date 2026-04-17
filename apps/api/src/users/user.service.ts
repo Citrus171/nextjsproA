@@ -27,4 +27,13 @@ export class UsersService {
   async findById(id: string) {
     return this.prisma.user.findUnique({ where: { id } });
   }
+
+  // TanStack Start との対比用: DB から全ユーザーを取得（パスワード除外）
+  // TanStack Start: export const getUsers = createServerFn(async () => db.user.findMany())
+  // NestJS:  この1行が「サーバー関数の中身」に相当する
+  async findAll() {
+    return this.prisma.user.findMany({
+      select: { id: true, email: true, name: true, createdAt: true },
+    });
+  }
 }

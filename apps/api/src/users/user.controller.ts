@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   HttpException,
   HttpStatus,
@@ -32,6 +33,14 @@ class RegisterDto {
 @Controller("users")
 export class UsersController {
   constructor(private users: UsersService) {}
+
+  // TanStack Start との対比用エンドポイント
+  // TanStack Start: モーダルから await getUsers() を呼ぶだけで完結
+  // NestJS:  ① このルート定義 ② service.findAll() ③ フロントの useQuery の3段階が必要
+  @Get()
+  async findAll() {
+    return this.users.findAll();
+  }
 
   @Post("register")
   @ApiResponse({ status: 201, type: UserResponseDto })

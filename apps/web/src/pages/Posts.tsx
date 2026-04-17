@@ -3,6 +3,7 @@ import type { PostResponseDto } from "../../../../packages/api-client/src/index"
 import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useApiClient } from "../api/orvalClient";
 import { Link } from "react-router-dom";
+import UsersModal from "./UsersModal";
 
 const PER_PAGE = 5;
 
@@ -36,6 +37,10 @@ export default function Posts() {
       <div style={{ marginBottom: 12 }}>
         <Link to="/create">New Post</Link>
       </div>
+
+      {/* 学習用: TanStack Start vs NestJS+React の対比モーダル */}
+      <UsersModal />
+      <hr />
 
       <div style={{ opacity: isFetching ? 0.5 : 1 }}>
         {data?.items?.map((p: PostResponseDto) => (
