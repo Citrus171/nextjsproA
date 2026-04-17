@@ -13,3 +13,4 @@ apps/api/debug.log
 apps/api/prisma/dev.db
 apps/api/uploads/
 memo/
+.playwright-mcp/
