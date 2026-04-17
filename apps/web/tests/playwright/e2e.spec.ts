@@ -36,7 +36,7 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await page.waitForURL(`${baseUrl}/`);
 
   // 4. Verify post appears in list
-  await expect(page.locator("h2")).toContainText("E2E Test Post");
+  await expect(page.locator("h3")).toContainText("E2E Test Post");
   await expect(page.locator("p")).toContainText("This is a test post content");
 
   // 5. Logout
