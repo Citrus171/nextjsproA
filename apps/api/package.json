@@ -31,6 +31,9 @@
     },
     "transformIgnorePatterns": [
       "/node_modules/(?!uuid)"
+    ],
+    "setupFiles": [
+      "reflect-metadata"
     ]
   },
   "dependencies": {
