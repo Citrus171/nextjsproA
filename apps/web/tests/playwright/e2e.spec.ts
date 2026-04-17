@@ -4,9 +4,89 @@ import fs from "fs";
 const baseUrl = "http://localhost:5175";
 const apiBase = "http://localhost:3000/api";
 
+test("post owner can update their own post", async ({ request }) => {
+  const email = `owner${Date.now()}@example.test`;
+  const password = "password123";
+
+  // Register and login as owner
+  await request.post(`${apiBase}/users/register`, {
+    data: { email, password, name: "Owner" },
+  });
+  const loginRes = await request.post(`${apiBase}/auth/login`, {
+    data: { email, password },
+  });
+  const { accessToken } = await loginRes.json();
+
+  // Create a post
+  const createRes = await request.post(`${apiBase}/posts`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    data: { title: "Original title", content: "Original content" },
+  });
+  const post = await createRes.json();
+  expect(createRes.status()).toBe(201);
+
+  // Update the post as owner → 200
+  const updateRes = await request.put(`${apiBase}/posts/${post.id}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    data: { title: "Updated title", content: "Updated content" },
+  });
+  expect(updateRes.status()).toBe(200);
+  const updated = await updateRes.json();
+  expect(updated.title).toBe("Updated title");
+  expect(updated.content).toBe("Updated content");
+});
+
+test("non-owner cannot update or delete another user's post", async ({ request }) => {
+  const ownerEmail = `owner2${Date.now()}@example.test`;
+  const otherEmail = `other2${Date.now()}@example.test`;
+  const password = "password123";
+
+  // Register owner and create a post
+  await request.post(`${apiBase}/users/register`, {
+    data: { email: ownerEmail, password, name: "Owner" },
+  });
+  const ownerLogin = await request.post(`${apiBase}/auth/login`, {
+    data: { email: ownerEmail, password },
+  });
+  const { accessToken: ownerToken } = await ownerLogin.json();
+
+  const createRes = await request.post(`${apiBase}/posts`, {
+    headers: { Authorization: `Bearer ${ownerToken}` },
+    data: { title: "Owner post", content: "Owner content" },
+  });
+  const post = await createRes.json();
+
+  // Register other user
+  await request.post(`${apiBase}/users/register`, {
+    data: { email: otherEmail, password, name: "Other" },
+  });
+  const otherLogin = await request.post(`${apiBase}/auth/login`, {
+    data: { email: otherEmail, password },
+  });
+  const { accessToken: otherToken } = await otherLogin.json();
+
+  // Other user tries to update → 403
+  const updateRes = await request.put(`${apiBase}/posts/${post.id}`, {
+    headers: { Authorization: `Bearer ${otherToken}` },
+    data: { title: "Hacked title" },
+  });
+  expect(updateRes.status()).toBe(403);
+
+  // Other user tries to delete → 403
+  const deleteRes = await request.delete(`${apiBase}/posts/${post.id}`, {
+    headers: { Authorization: `Bearer ${otherToken}` },
+  });
+  expect(deleteRes.status()).toBe(403);
+
+  // Confirm post is unchanged
+  const getRes = await request.get(`${apiBase}/posts/${post.id}`);
+  const unchanged = await getRes.json();
+  expect(unchanged.title).toBe("Owner post");
+});
+
 test("A-D auth refresh flow (UI)", async ({ page, request, context }) => {
   const email = `user${Date.now()}@example.test`;
-  const password = "pass";
+  const password = "password123";
 
   // A: Register via UI
   const requests: any[] = [];

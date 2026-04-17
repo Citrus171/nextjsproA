@@ -18,16 +18,16 @@
     "url": "http://localhost:5175/api/users/register",
     "status": 201,
     "headers": {
-      "etag": "W/\"56-d9FEK3C2Uf3/RyTe4+GWvxObsRU\"",
+      "etag": "W/\"56-5YkzXI/vxWQacTvUk2EnAVTVui4\"",
       "connection": "close",
       "access-control-allow-credentials": "true",
       "access-control-allow-origin": "http://localhost:5175",
       "content-length": "86",
-      "date": "Thu, 16 Apr 2026 09:07:44 GMT",
+      "date": "Fri, 17 Apr 2026 02:23:39 GMT",
       "content-type": "application/json; charset=utf-8",
       "vary": "Origin",
       "x-powered-by": "Express"
     },
-    "body": "{\"id\":\"cmo19amf3000vkbtrkjnjzhal\",\"email\":\"user1776330463969@example.test\",\"name\":\"u\"}"
+    "body": "{\"id\":\"cmo2aatrg000okbcdl00zz7oe\",\"email\":\"user1776392618996@example.test\",\"name\":\"u\"}"
   }
 ]
