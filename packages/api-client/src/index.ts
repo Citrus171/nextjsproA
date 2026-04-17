@@ -10,6 +10,12 @@ import type {
   AxiosRequestConfig,
   AxiosResponse
 } from 'axios'
+export type PostsControllerUpdateBody = {
+  content?: string;
+  image?: Blob;
+  title?: string;
+};
+
 export type PostsControllerCreateBody = {
   content?: string;
   image?: Blob;
@@ -26,12 +32,8 @@ export interface AccessTokenResponseDto {
 
 export interface LoginDto {
   email: string;
+  /** @minLength 8 */
   password: string;
-}
-
-export interface UpdatePostDto {
-  content?: string;
-  title?: string;
 }
 
 export interface PostResponseDto {
@@ -42,6 +44,11 @@ export interface PostResponseDto {
   /** @nullable */
   image?: string | null;
   title: string;
+}
+
+export interface PostListResponseDto {
+  items: PostResponseDto[];
+  total: number;
 }
 
 export interface UserResponseDto {
@@ -55,6 +62,7 @@ export interface UserResponseDto {
 export interface RegisterDto {
   email: string;
   name?: string;
+  /** @minLength 8 */
   password: string;
 }
 
@@ -90,7 +98,7 @@ if(postsControllerCreateBody.image !== undefined) {
     );
   }
 
-export const postsControllerList = <TData = AxiosResponse<void>>(
+export const postsControllerList = <TData = AxiosResponse<PostListResponseDto>>(
      options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
@@ -98,7 +106,7 @@ export const postsControllerList = <TData = AxiosResponse<void>>(
     );
   }
 
-export const postsControllerGet = <TData = AxiosResponse<void>>(
+export const postsControllerGet = <TData = AxiosResponse<PostResponseDto>>(
     id: string, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.get(
@@ -106,17 +114,27 @@ export const postsControllerGet = <TData = AxiosResponse<void>>(
     );
   }
 
-export const postsControllerUpdate = <TData = AxiosResponse<void>>(
+export const postsControllerUpdate = <TData = AxiosResponse<PostResponseDto>>(
     id: string,
-    updatePostDto: UpdatePostDto, options?: AxiosRequestConfig
- ): Promise<TData> => {
+    postsControllerUpdateBody: PostsControllerUpdateBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {const formData = new FormData();
+if(postsControllerUpdateBody.title !== undefined) {
+ formData.append('title', postsControllerUpdateBody.title)
+ }
+if(postsControllerUpdateBody.content !== undefined) {
+ formData.append('content', postsControllerUpdateBody.content)
+ }
+if(postsControllerUpdateBody.image !== undefined) {
+ formData.append('image', postsControllerUpdateBody.image)
+ }
+
     return axios.put(
       `/api/posts/${id}`,
-      updatePostDto,options
+      formData,options
     );
   }
 
-export const postsControllerRemove = <TData = AxiosResponse<void>>(
+export const postsControllerRemove = <TData = AxiosResponse<PostResponseDto>>(
     id: string, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.delete(
@@ -151,10 +169,10 @@ export const authControllerLogout = <TData = AxiosResponse<LogoutResponseDto>>(
 
 export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>
 export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>
-export type PostsControllerListResult = AxiosResponse<void>
-export type PostsControllerGetResult = AxiosResponse<void>
-export type PostsControllerUpdateResult = AxiosResponse<void>
-export type PostsControllerRemoveResult = AxiosResponse<void>
+export type PostsControllerListResult = AxiosResponse<PostListResponseDto>
+export type PostsControllerGetResult = AxiosResponse<PostResponseDto>
+export type PostsControllerUpdateResult = AxiosResponse<PostResponseDto>
+export type PostsControllerRemoveResult = AxiosResponse<PostResponseDto>
 export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>
 export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>
 export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>

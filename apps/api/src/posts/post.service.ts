@@ -39,7 +39,12 @@ export class PostsService {
     return this.prisma.post.findUnique({ where: { id } });
   }
 
-  async update(id: string, userId: string, data: { title?: string; content?: string }) {
+  async update(
+    id: string,
+    userId: string,
+    data: { title?: string; content?: string },
+    file?: Express.Multer.File,
+  ) {
     const post = await this.prisma.post.findUnique({ where: { id } });
     if (!post) {
       throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
@@ -47,7 +52,20 @@ export class PostsService {
     if (post.authorId !== userId) {
       throw new ForbiddenException("You are not the owner of this post");
     }
-    return this.prisma.post.update({ where: { id }, data });
+    let imagePath: string | undefined;
+    if (file) {
+      const uploadDir = path.join(__dirname, '../../uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const fileName = `${Date.now()}-${file.originalname}`;
+      fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
+      imagePath = `uploads/${fileName}`;
+    }
+    return this.prisma.post.update({
+      where: { id },
+      data: { ...data, ...(imagePath ? { image: imagePath } : {}) },
+    });
   }
 
   async remove(id: string, userId: string) {

@@ -8,6 +8,7 @@ export default function EditPost() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function EditPost() {
     e.preventDefault();
     if (!id) return;
     try {
-      await api.updatePost(id, { title, content });
+      await api.updatePost(id, { title, content }, imageFile ?? undefined);
       navigate("/");
     } catch (err) {
       alert("Failed to update post");
@@ -63,8 +64,9 @@ export default function EditPost() {
           onChange={(e) => setContent(e.target.value)}
         />
       </div>
-      {image && (
+      {image && !imageFile && (
         <div>
+          <p>現在の画像:</p>
           <img
             src={`http://localhost:3000/${image}`}
             alt="Post image"
@@ -72,6 +74,23 @@ export default function EditPost() {
           />
         </div>
       )}
+      {imageFile && (
+        <div>
+          <p>新しい画像（プレビュー）:</p>
+          <img
+            src={URL.createObjectURL(imageFile)}
+            alt="Preview"
+            style={{ maxWidth: "300px", maxHeight: "200px" }}
+          />
+        </div>
+      )}
+      <div>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+        />
+      </div>
       <button type="submit">Save</button>
       <button type="button" onClick={remove} style={{ marginLeft: 8 }}>
         Delete

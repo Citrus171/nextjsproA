@@ -110,8 +110,12 @@ export function createClient(options: ClientOptions) {
       const r = await postsControllerGet(id);
       return r.data;
     },
-    updatePost: async (id: string, data: { title: string; content: string }) => {
-      const r = await axios.put(`/api/posts/${id}`, data);
+    updatePost: async (id: string, data: { title?: string; content?: string }, image?: Blob) => {
+      const formData = new FormData();
+      if (data.title !== undefined) formData.append('title', data.title);
+      if (data.content !== undefined) formData.append('content', data.content);
+      if (image) formData.append('image', image);
+      const r = await axios.put(`/api/posts/${id}`, formData);
       return r.data;
     },
     deletePost: async (id: string) => {

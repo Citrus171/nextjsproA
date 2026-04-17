@@ -94,10 +94,27 @@ export class PostsController {
 
   @Put(":id")
   @UseGuards(AuthGuard)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 200, type: PostResponseDto })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
-  async update(@Req() req: any, @Param("id") id: string, @Body() body: UpdatePostDto) {
-    return this.posts.update(id, req.user.id, body);
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  async update(
+    @Req() req: any,
+    @Param("id") id: string,
+    @Body() body: UpdatePostDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.posts.update(id, req.user.id, body, file);
   }
 
   @Delete(":id")
