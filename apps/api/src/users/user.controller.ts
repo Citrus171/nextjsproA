@@ -54,8 +54,6 @@ export class UsersController {
       );
       return { id: user.id, email: user.email, name: user.name };
     } catch (e: any) {
-      // Log the raw error for debugging in dev
-      // eslint-disable-next-line no-console
       console.error("UsersController.register error:", e && (e.stack || e));
       // Handle unique constraint (Prisma P2002) as bad request
       if (e?.code === "P2002" || (e?.meta && /unique/i.test(String(e.meta)))) {
