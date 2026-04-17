@@ -101,12 +101,16 @@ jobs:
         run: npx playwright install --with-deps
         if: steps.cache-playwright.outputs.cache-hit != 'true'
 
+      - name: Build API
+        run: npm run build --workspace=apps-api
+
       - name: Start API server
         run: npm run start &
         working-directory: apps/api
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
           NODE_ENV: test
+          JWT_SECRET: ci-test-secret
 
       - name: Wait for API
         run: npx wait-on http://localhost:3000/api-json
