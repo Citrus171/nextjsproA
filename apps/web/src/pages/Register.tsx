@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createClient } from "../../../../packages/api-client/src/client";
+import { usersControllerRegister } from "../../../../packages/api-client/src/index";
+import type { AxiosError } from "axios";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -11,22 +12,16 @@ export default function Register() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const client = createClient({
-        getToken: async () => null,
-      });
-      const res = await client.register(name || undefined, email, password);
-      const r: any = res;
-      if (r?.error || r?.message) {
-        alert(r.error || r.message || "Register failed");
-        return;
-      }
-      if (r?.id) {
-        navigate("/login");
-        return;
-      }
-      alert(JSON.stringify(res) || "Register failed");
+      await usersControllerRegister({ name: name || undefined, email, password });
+      navigate("/login");
     } catch (err) {
-      alert((err as any)?.message || "Register failed");
+      const axiosErr = err as AxiosError<{ error?: string; message?: string }>;
+      const msg =
+        axiosErr.response?.data?.error ||
+        axiosErr.response?.data?.message ||
+        axiosErr.message ||
+        "Register failed";
+      alert(msg);
     }
   };
 

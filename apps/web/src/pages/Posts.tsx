@@ -52,7 +52,7 @@ export default function Posts() {
             <p>{p.content}</p>
             {p.image && (
               <img
-                src={`http://localhost:3000/${p.image}`}
+                src={`/${p.image}`}
                 alt="Post image"
                 style={{ maxWidth: "300px", maxHeight: "200px" }}
               />

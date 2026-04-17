@@ -59,7 +59,7 @@ export class PostsController {
     },
   })
   async create(@Req() req: any, @Body() dto: CreatePostDto, @UploadedFile() file: Express.Multer.File) {
-    const authorId = req.user?.id || dto["authorId"] || "";
+    const authorId = req.user.id;
     return this.posts.create(authorId, dto.title, dto.content, file);
   }
 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { useNavigate } from "react-router-dom";
-import { createClient } from "../../../../packages/api-client/src/client";
+import { useApiClient } from "../api/orvalClient";
 
 export default function LoginWithAuth() {
   const [email, setEmail] = useState("");
@@ -9,15 +9,13 @@ export default function LoginWithAuth() {
   const [error, setError] = useState<string | null>(null);
   const { setToken } = useAuth();
   const navigate = useNavigate();
+  const api = useApiClient();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const client = createClient({
-      getToken: async () => null,
-    });
     try {
-      const res = await client.login(email, password);
+      const res = await api.login(email, password);
       if (res?.accessToken) {
         setToken(res.accessToken);
         navigate("/");

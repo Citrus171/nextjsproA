@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
+import React, { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 type AuthContextValue = {
@@ -13,21 +12,8 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [token, setTokenState] = useState<string | null>(() =>
-    localStorage.getItem("token"),
-  );
+  const [token, setTokenState] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (token) localStorage.setItem("token", token);
-    else localStorage.removeItem("token");
-    // Ensure axios sends Authorization header for all requests when token changes
-    if (token) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    } else {
-      delete axios.defaults.headers.common["Authorization"];
-    }
-  }, [token]);
 
   const setToken = (t: string | null) => setTokenState(t);
   const clearToken = () => {

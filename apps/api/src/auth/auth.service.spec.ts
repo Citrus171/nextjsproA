@@ -133,7 +133,7 @@ describe("AuthService", () => {
   // ─── findRefreshToken ────────────────────────────────────────
   describe("findRefreshToken", () => {
     it("トークンレコードを返す", async () => {
-      const rec = { token: "t", userId: "user1", expiresAt: new Date() };
+      const rec = { token: "t", userId: "user1", expiresAt: new Date(Date.now() + 60 * 60 * 1000) };
       mockPrisma.refreshToken.findUnique.mockResolvedValue(rec);
 
       const result = await service.findRefreshToken("t");
@@ -145,6 +145,15 @@ describe("AuthService", () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValue(null);
 
       const result = await service.findRefreshToken("ghost");
+
+      expect(result).toBeNull();
+    });
+
+    it("期限切れトークンは null を返す", async () => {
+      const expired = { token: "t", userId: "user1", expiresAt: new Date(Date.now() - 1000) };
+      mockPrisma.refreshToken.findUnique.mockResolvedValue(expired);
+
+      const result = await service.findRefreshToken("t");
 
       expect(result).toBeNull();
     });

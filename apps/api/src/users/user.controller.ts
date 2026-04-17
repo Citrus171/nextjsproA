@@ -6,28 +6,10 @@ import {
   HttpException,
   HttpStatus,
 } from "@nestjs/common";
-import { ApiProperty, ApiTags, ApiResponse } from "@nestjs/swagger";
-import { IsEmail, IsString, MinLength, MaxLength, IsOptional } from "class-validator";
+import { ApiTags, ApiResponse } from "@nestjs/swagger";
 import { UsersService } from "./user.service";
 import { UserResponseDto } from "./dto/user-response.dto";
-
-class RegisterDto {
-  @ApiProperty({ example: "user@example.com" })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({ example: "password123", minLength: 8 })
-  @IsString()
-  @MinLength(8)
-  @MaxLength(100)
-  password: string;
-
-  @ApiProperty({ required: false, example: "Alice" })
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  name?: string;
-}
+import { RegisterDto } from "./dto/register.dto";
 
 @ApiTags('users')
 @Controller("users")
@@ -45,7 +27,6 @@ export class UsersController {
   @Post("register")
   @ApiResponse({ status: 201, type: UserResponseDto })
   async register(@Body() dto: RegisterDto) {
-    console.log('Register request:', dto);
     try {
       const user = await this.users.createUser(
         dto.email,
@@ -54,7 +35,6 @@ export class UsersController {
       );
       return { id: user.id, email: user.email, name: user.name };
     } catch (e: any) {
-      console.error("UsersController.register error:", e && (e.stack || e));
       // Handle unique constraint (Prisma P2002) as bad request
       if (e?.code === "P2002" || (e?.meta && /unique/i.test(String(e.meta)))) {
         throw new HttpException(

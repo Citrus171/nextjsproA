@@ -42,6 +42,16 @@ export class PostsService {
     return this.prisma.post.findUnique({ where: { id } });
   }
 
+  private deleteUploadedFile(imagePath: string | null) {
+    if (!imagePath) return;
+    const fullPath = path.join(__dirname, "../../", imagePath);
+    try {
+      if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+
   async update(
     id: string,
     userId: string,
@@ -56,10 +66,12 @@ export class PostsService {
       throw new ForbiddenException("You are not the owner of this post");
     }
     const imagePath = this.saveUploadedFile(file);
-    return this.prisma.post.update({
+    const updated = await this.prisma.post.update({
       where: { id },
       data: { ...data, ...(imagePath ? { image: imagePath } : {}) },
     });
+    if (imagePath && post.image) this.deleteUploadedFile(post.image);
+    return updated;
   }
 
   async remove(id: string, userId: string) {
