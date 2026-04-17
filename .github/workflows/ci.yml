@@ -143,8 +143,7 @@ jobs:
 
       # Web checks
       - name: Web Typecheck
-        run: node_modules/.bin/tsc --noEmit
-        working-directory: apps/web
+        run: npm run typecheck:web
 
       - name: Web Build
         run: npm run build

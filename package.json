@@ -17,7 +17,8 @@
     "openapi": "npm run openapi --workspace=apps/api",
     "generate": "npm run generate --workspace=packages/api-client",
     "lint:api": "eslint \"apps/api/{src,test}/**/*.ts\" --config apps/api/eslint.config.js",
-    "typecheck:api": "tsc --noEmit --project apps/api/tsconfig.json"
+    "typecheck:api": "tsc --noEmit --project apps/api/tsconfig.json",
+    "typecheck:web": "tsc --noEmit --project apps/web/tsconfig.json"
   },
   "engines": {
     "node": ">=18"
