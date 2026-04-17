@@ -31,6 +31,7 @@ export class AuthService {
   async rotateRefreshToken(oldToken: string) {
     const rec = await this.prisma.refreshToken.findUnique({
       where: { token: oldToken },
+      include: { user: { select: { email: true } } },
     });
     if (!rec) return null;
     await this.prisma.refreshToken.delete({ where: { token: oldToken } });
@@ -39,7 +40,7 @@ export class AuthService {
     await this.prisma.refreshToken.create({
       data: { token: newToken, userId: rec.userId, expiresAt },
     });
-    return { newToken, userId: rec.userId };
+    return { newToken, userId: rec.userId, email: rec.user.email };
   }
 
   async revokeRefreshToken(token: string) {
