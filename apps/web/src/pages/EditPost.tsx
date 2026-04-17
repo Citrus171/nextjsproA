@@ -23,7 +23,7 @@ export default function EditPost() {
         alert("Failed to load post");
       }
     })();
-  }, [id]);
+  }, [id, api]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +68,7 @@ export default function EditPost() {
         <div>
           <p>現在の画像:</p>
           <img
-            src={`http://localhost:3000/${image}`}
+            src={`/${image}`}
             alt="Post image"
             style={{ maxWidth: "300px", maxHeight: "200px" }}
           />

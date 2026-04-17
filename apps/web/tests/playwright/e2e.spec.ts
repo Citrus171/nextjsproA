@@ -26,8 +26,9 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await page.waitForURL(`${baseUrl}/`);
   await expect(page.locator("nav")).toContainText("Logout");
 
-  // 3. Create post
-  await page.goto(`${baseUrl}/create`);
+  // 3. Create post (use link click to preserve in-memory auth token)
+  await page.click('a[href="/create"]');
+  await page.waitForURL(`${baseUrl}/create`);
   await page.fill('input[placeholder="title"]', "E2E Test Post");
   await page.fill('textarea[placeholder="content"]', "This is a test post content");
   await page.click('button:has-text("Create")');

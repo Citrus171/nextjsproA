@@ -41,8 +41,6 @@ export class AuthController {
   async refresh(@Req() req: Request, @Res() res: Response) {
     const token = req.cookies?.refreshToken;
     if (!token) return res.status(401).json({ error: "No refresh token" });
-    const rec = await this.auth.findRefreshToken(token);
-    if (!rec) return res.status(401).json({ error: "Invalid refresh token" });
     const rot = await this.auth.rotateRefreshToken(token);
     if (!rot) return res.status(401).json({ error: "Invalid refresh token" });
     const payload: JwtPayload = { sub: rot.userId, email: rot.email };

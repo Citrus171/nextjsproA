@@ -33,7 +33,7 @@ export class AuthService {
       where: { token: oldToken },
       include: { user: { select: { email: true } } },
     });
-    if (!rec) return null;
+    if (!rec || rec.expiresAt <= new Date()) return null;
     await this.prisma.refreshToken.delete({ where: { token: oldToken } });
     const newToken = crypto.randomBytes(48).toString("hex");
     const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 30 * 1000);
@@ -52,6 +52,8 @@ export class AuthService {
   }
 
   async findRefreshToken(token: string) {
-    return this.prisma.refreshToken.findUnique({ where: { token } });
+    const rec = await this.prisma.refreshToken.findUnique({ where: { token } });
+    if (rec && rec.expiresAt <= new Date()) return null;
+    return rec;
   }
 }

@@ -14,7 +14,7 @@ import axios from "axios";
 
 // ① HTTP 通信の定義（TanStack Start には不要な部分）
 async function fetchUsers() {
-  const res = await axios.get("http://localhost:3000/api/users");
+  const res = await axios.get("/api/users");
   return res.data as { id: string; email: string; name: string | null; createdAt: string }[];
 }
 

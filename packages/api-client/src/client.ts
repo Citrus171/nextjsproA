@@ -22,20 +22,18 @@ export type ClientOptions = {
 export function createClient(options: ClientOptions) {
   if (options.baseURL) axios.defaults.baseURL = options.baseURL;
 
-  axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  const reqId = axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     try {
       const token = options.getToken ? await options.getToken() : null;
       if (token) {
-        config.headers = config.headers || {};
-        // @ts-ignore
-        config.headers["Authorization"] = `Bearer ${token}`;
+        (config.headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
       }
     } catch (e) {}
     return config;
   });
 
   let isRefreshing = false;
-  let refreshQueue: Array<(value: string | PromiseLike<string | null> | null) => void> = [];
+  let refreshQueue: Array<(value: string | null) => void> = [];
 
   async function doRefresh() {
     if (isRefreshing) {
@@ -59,7 +57,7 @@ export function createClient(options: ClientOptions) {
     }
   }
 
-  axios.interceptors.response.use(
+  const resId = axios.interceptors.response.use(
     (res: AxiosResponse) => res,
     async (err: AxiosError) => {
       const original = err?.config;
@@ -69,7 +67,7 @@ export function createClient(options: ClientOptions) {
         const newToken = await doRefresh();
         if (newToken) {
           original.headers = original.headers || {};
-          original.headers["Authorization"] = `Bearer ${newToken}`;
+          (original.headers as Record<string, string>)["Authorization"] = `Bearer ${newToken}`;
           return axios(original);
         }
       }
@@ -78,6 +76,10 @@ export function createClient(options: ClientOptions) {
   );
 
   return {
+    dispose: () => {
+      axios.interceptors.request.eject(reqId);
+      axios.interceptors.response.eject(resId);
+    },
     login: async (email: string, password: string) => {
       const r = await authControllerLogin({ email, password });
       const token = r?.data?.accessToken;
@@ -112,11 +114,7 @@ export function createClient(options: ClientOptions) {
       return r.data;
     },
     updatePost: async (id: string, data: { title?: string; content?: string }, image?: Blob) => {
-      const formData = new FormData();
-      if (data.title !== undefined) formData.append('title', data.title);
-      if (data.content !== undefined) formData.append('content', data.content);
-      if (image) formData.append('image', image);
-      const r = await axios.put(`/api/posts/${id}`, formData);
+      const r = await postsControllerUpdate(id, { ...data, image });
       return r.data;
     },
     deletePost: async (id: string) => {
