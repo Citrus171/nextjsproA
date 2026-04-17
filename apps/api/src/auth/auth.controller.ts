@@ -33,7 +33,7 @@ export class AuthController {
     const accessToken = this.jwt.sign(payload);
     const refresh = await this.auth.createRefreshToken(user.id);
     this.setRefreshCookie(res, refresh);
-    return res.json({ accessToken });
+    return res.status(200).json({ accessToken });
   }
 
   @Post("refresh")
@@ -48,7 +48,7 @@ export class AuthController {
     const payload: JwtPayload = { sub: rot.userId, email: rot.email };
     const accessToken = this.jwt.sign(payload);
     this.setRefreshCookie(res, rot.newToken);
-    return res.json({ accessToken });
+    return res.status(200).json({ accessToken });
   }
 
   @Post("logout")
@@ -57,7 +57,7 @@ export class AuthController {
     const token = req.cookies?.refreshToken;
     if (token) await this.auth.revokeRefreshToken(token);
     res.clearCookie("refreshToken", { path: "/" });
-    return res.json({ ok: true });
+    return res.status(200).json({ ok: true });
   }
 
   private setRefreshCookie(res: Response, token: string) {

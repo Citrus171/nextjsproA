@@ -1,0 +1,13 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "rootDir": ".",
+  "testRegex": "test/.*\\.e2e\\.ts$",
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "transformIgnorePatterns": ["/node_modules/(?!uuid)"],
+  "modulePaths": ["<rootDir>/node_modules"],
+  "testTimeout": 30000
+}
