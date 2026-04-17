@@ -98,8 +98,8 @@ export function createClient(options: ClientOptions) {
     refresh: async () => {
       return doRefresh();
     },
-    listPosts: async () => {
-      const r = await postsControllerList();
+    listPosts: async (page = 1, perPage = 10) => {
+      const r = await postsControllerList({ params: { page, perPage } });
       return r.data;
     },
     createPost: async (title: string, content: string, image?: Blob) => {
