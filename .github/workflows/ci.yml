@@ -7,12 +7,9 @@ on:
     branches: [main]
 
 jobs:
-  api:
-    name: API — typecheck / test / build
+  test:
+    name: Test Suite
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/api
 
     steps:
       - uses: actions/checkout@v4
@@ -21,25 +18,28 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: apps/api/package-lock.json
 
       - run: npm ci
 
-      - name: Typecheck
-        run: node_modules/.bin/tsc --noEmit
-
-      - name: Unit tests
-        run: npm test
-
-      - name: Build
-        run: npm run build
-
-  web:
-    name: Web — typecheck / build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
+      - name: Install Playwright browsers
         working-directory: apps/web
+        run: npx playwright install --with-deps
+
+      - name: API tests
+        run: npm test
+        working-directory: apps/api
+
+      - name: Web unit tests
+        run: npm test -- --run
+        working-directory: apps/web
+
+      - name: Web E2E tests
+        run: npm run test:e2e
+        working-directory: apps/web
+
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -48,7 +48,6 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
 
       - run: npm ci
 
@@ -56,8 +55,31 @@ jobs:
         working-directory: packages/api-client
         run: npm install --legacy-peer-deps
 
-      - name: Typecheck
-        run: node_modules/.bin/tsc --noEmit
+      # API checks
+      - name: API Lint
+        run: npm run lint
+        working-directory: apps/api
 
-      - name: Build
+      - name: API Typecheck
+        run: npm run typecheck
+        working-directory: apps/api
+
+      - name: API Build
         run: npm run build
+        working-directory: apps/api
+
+      # Web checks
+      - name: Web Typecheck
+        run: node_modules/.bin/tsc --noEmit
+        working-directory: apps/web
+
+      - name: Web Build
+        run: npm run build
+        working-directory: apps/web
+
+      # OpenAPI generation check
+      - name: Check OpenAPI generation
+        run: |
+          npm run openapi
+          git diff --exit-code packages/api-client/openapi.json
+        working-directory: apps/api
