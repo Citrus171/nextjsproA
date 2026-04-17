@@ -95,14 +95,16 @@ export class PostsController {
   @Put(":id")
   @UseGuards(AuthGuard)
   @ApiResponse({ status: 200, type: PostResponseDto })
-  async update(@Param("id") id: string, @Body() body: UpdatePostDto) {
-    return this.posts.update(id, body);
+  @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
+  async update(@Req() req: any, @Param("id") id: string, @Body() body: UpdatePostDto) {
+    return this.posts.update(id, req.user.id, body);
   }
 
   @Delete(":id")
   @UseGuards(AuthGuard)
   @ApiResponse({ status: 200, type: PostResponseDto })
-  async remove(@Param("id") id: string) {
-    return this.posts.remove(id);
+  @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
+  async remove(@Req() req: any, @Param("id") id: string) {
+    return this.posts.remove(id, req.user.id);
   }
 }

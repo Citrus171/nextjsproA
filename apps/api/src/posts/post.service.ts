@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
+import { Injectable, HttpException, HttpStatus, ForbiddenException } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import * as fs from "fs";
 import * as path from "path";
@@ -39,27 +39,24 @@ export class PostsService {
     return this.prisma.post.findUnique({ where: { id } });
   }
 
-  async update(id: string, data: { title?: string; content?: string }) {
-    fs.appendFileSync('debug.log', `Update called with id: ${id}, data: ${JSON.stringify(data)}\n`);
-    try {
-      const post = await this.prisma.post.findUnique({ where: { id } });
-      fs.appendFileSync('debug.log', `Post found: ${!!post}\n`);
-      if (!post) {
-        throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
-      }
-      const result = await this.prisma.post.update({ where: { id }, data });
-      fs.appendFileSync('debug.log', `Update result: ${JSON.stringify(result)}\n`);
-      return result;
-    } catch (error) {
-      fs.appendFileSync('debug.log', `Update error: ${error}\n`);
-      throw error;
-    }
-  }
-
-  async remove(id: string) {
+  async update(id: string, userId: string, data: { title?: string; content?: string }) {
     const post = await this.prisma.post.findUnique({ where: { id } });
     if (!post) {
       throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
+    }
+    if (post.authorId !== userId) {
+      throw new ForbiddenException("You are not the owner of this post");
+    }
+    return this.prisma.post.update({ where: { id }, data });
+  }
+
+  async remove(id: string, userId: string) {
+    const post = await this.prisma.post.findUnique({ where: { id } });
+    if (!post) {
+      throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
+    }
+    if (post.authorId !== userId) {
+      throw new ForbiddenException("You are not the owner of this post");
     }
     return this.prisma.post.delete({ where: { id } });
   }
