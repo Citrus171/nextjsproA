@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    name: Test Suite
+    name: Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -21,10 +21,6 @@ jobs:
 
       - run: npm ci
 
-      - name: Install Playwright browsers
-        working-directory: apps/web
-        run: npx playwright install --with-deps
-
       - name: API tests
         run: npm test
         working-directory: apps/api
@@ -32,6 +28,33 @@ jobs:
       - name: Web unit tests
         run: npm test -- --run
         working-directory: apps/web
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    # E2Eはmainブランチのみ (高速化)
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('apps/web/package-lock.json') }}
+
+      - name: Install Playwright browsers
+        working-directory: apps/web
+        run: npx playwright install --with-deps
+        if: steps.cache-playwright.outputs.cache-hit != 'true'
 
       - name: Web E2E tests
         run: npm run test:e2e
@@ -53,7 +76,7 @@ jobs:
 
       - name: Install api-client deps
         working-directory: packages/api-client
-        run: npm install --legacy-peer-deps
+        run: npm ci
 
       # API checks
       - name: API Lint
