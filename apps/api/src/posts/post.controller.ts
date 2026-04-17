@@ -15,29 +15,47 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
-import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiResponse } from "@nestjs/swagger";
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
+  ApiResponse,
+} from "@nestjs/swagger";
 import { PostResponseDto, PostListResponseDto } from "./dto/post-response.dto";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./post.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const imageUploadOptions = {
   storage: memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE },
   fileFilter: (_req: any, file: Express.Multer.File, cb: any) => {
+    if (!file || !file.originalname || !file.mimetype) {
+      // empty file field is allowed as "no image" input
+      return cb(null, false);
+    }
     if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new BadRequestException(`Unsupported file type: ${file.mimetype}`), false);
+      cb(
+        new BadRequestException(`Unsupported file type: ${file.mimetype}`),
+        false,
+      );
     }
   },
 };
 
-@ApiTags('posts')
+@ApiTags("posts")
 @ApiBearerAuth()
 @Controller("posts")
 export class PostsController {
@@ -45,20 +63,24 @@ export class PostsController {
 
   @HttpPost()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', imageUploadOptions))
-  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor("image", imageUploadOptions))
+  @ApiConsumes("multipart/form-data")
   @ApiResponse({ status: 201, type: PostResponseDto })
   @ApiBody({
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        title: { type: 'string' },
-        content: { type: 'string' },
-        image: { type: 'string', format: 'binary' },
+        title: { type: "string" },
+        content: { type: "string" },
+        image: { type: "string", format: "binary" },
       },
     },
   })
-  async create(@Req() req: any, @Body() dto: CreatePostDto, @UploadedFile() file: Express.Multer.File) {
+  async create(
+    @Req() req: any,
+    @Body() dto: CreatePostDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     const authorId = req.user.id;
     return this.posts.create(authorId, dto.title, dto.content, file);
   }
@@ -79,17 +101,17 @@ export class PostsController {
 
   @Put(":id")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('image', imageUploadOptions))
-  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor("image", imageUploadOptions))
+  @ApiConsumes("multipart/form-data")
   @ApiResponse({ status: 200, type: PostResponseDto })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
   @ApiBody({
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        title: { type: 'string' },
-        content: { type: 'string' },
-        image: { type: 'string', format: 'binary' },
+        title: { type: "string" },
+        content: { type: "string" },
+        image: { type: "string", format: "binary" },
       },
     },
   })
