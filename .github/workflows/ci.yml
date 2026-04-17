@@ -11,6 +11,21 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -21,9 +36,17 @@ jobs:
 
       - run: npm ci
 
+      - name: Setup test database
+        run: npx prisma migrate deploy
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+
       - name: API tests
         run: npm test
         working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
 
       - name: Web unit tests
         run: npm test -- --run
@@ -35,6 +58,21 @@ jobs:
     # E2Eはmainブランチのみ (高速化)
     if: github.ref == 'refs/heads/main'
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -45,8 +83,15 @@ jobs:
 
       - run: npm ci
 
+      - name: Setup test database
+        run: npx prisma migrate deploy
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+
       - name: Cache Playwright browsers
         uses: actions/cache@v3
+        id: cache-playwright
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('apps/web/package-lock.json') }}
@@ -56,9 +101,21 @@ jobs:
         run: npx playwright install --with-deps
         if: steps.cache-playwright.outputs.cache-hit != 'true'
 
+      - name: Start API server
+        run: npm run start &
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          NODE_ENV: test
+
+      - name: Wait for API
+        run: npx wait-on http://localhost:3000/api-json
+
       - name: Web E2E tests
         run: npm run test:e2e
         working-directory: apps/web
+        env:
+          VITE_API_BASE_URL: http://localhost:3000
 
   quality:
     name: Code Quality
