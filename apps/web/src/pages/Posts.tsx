@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { PostResponseDto } from "../../../../packages/api-client/src/index";
 import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { useApiClient } from "../api/orvalClient";
 import { Link } from "react-router-dom";
@@ -37,7 +38,7 @@ export default function Posts() {
       </div>
 
       <div style={{ opacity: isFetching ? 0.5 : 1 }}>
-        {data?.items?.map((p) => (
+        {data?.items?.map((p: PostResponseDto) => (
           <div
             key={p.id}
             style={{ borderBottom: "1px solid #ddd", padding: "8px 0" }}

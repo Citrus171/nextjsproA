@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
+import type { InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import {
   authControllerLogin,
   authControllerRefresh,
@@ -21,7 +22,7 @@ export type ClientOptions = {
 export function createClient(options: ClientOptions) {
   if (options.baseURL) axios.defaults.baseURL = options.baseURL;
 
-  axios.interceptors.request.use(async (config) => {
+  axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     try {
       const token = options.getToken ? await options.getToken() : null;
       if (token) {
@@ -34,7 +35,7 @@ export function createClient(options: ClientOptions) {
   });
 
   let isRefreshing = false;
-  let refreshQueue: Array<(token?: string | null) => void> = [];
+  let refreshQueue: Array<(value: string | PromiseLike<string | null> | null) => void> = [];
 
   async function doRefresh() {
     if (isRefreshing) {
@@ -59,12 +60,12 @@ export function createClient(options: ClientOptions) {
   }
 
   axios.interceptors.response.use(
-    (res) => res,
-    async (err) => {
+    (res: AxiosResponse) => res,
+    async (err: AxiosError) => {
       const original = err?.config;
       if (!original) return Promise.reject(err);
-      if (err?.response?.status === 401 && !original._retry) {
-        original._retry = true;
+      if (err?.response?.status === 401 && !(original as InternalAxiosRequestConfig & { _retry?: boolean })._retry) {
+        (original as InternalAxiosRequestConfig & { _retry?: boolean })._retry = true;
         const newToken = await doRefresh();
         if (newToken) {
           original.headers = original.headers || {};
