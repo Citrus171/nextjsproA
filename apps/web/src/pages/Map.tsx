@@ -17,10 +17,13 @@ const DEFAULT_CENTER: [number, number] = [35.9062, 139.6236];
 export default function Map() {
   const api = useApiClient();
   const [markers, setMarkers] = useState<MarkerDto[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.getMapMarkers().then(setMarkers).catch(console.error);
+    api.getMapMarkers().then(setMarkers).catch(() => setError("マーカーデータの取得に失敗しました"));
   }, [api]);
+
+  if (error) return <p style={{ padding: 16, color: "red" }}>{error}</p>;
 
   return (
     <div style={{ height: "calc(100vh - 40px)", width: "100%" }}>
@@ -39,8 +42,8 @@ export default function Map() {
           attribution="&copy; OpenStreetMap contributors"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {markers.map((m, i) => (
-          <Marker key={i} position={[m.lat, m.lng]}>
+        {markers.map((m) => (
+          <Marker key={`${m.lat}-${m.lng}`} position={[m.lat, m.lng]}>
             <Popup minWidth={220}>
               <div style={{ textAlign: "center" }}>
                 <strong style={{ fontSize: "1.1em" }}>{m.title}</strong>
