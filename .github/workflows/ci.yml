@@ -105,7 +105,7 @@ jobs:
         run: npm run build --workspace=apps-api
 
       - name: Start API server
-        run: npm run start &
+        run: npm run start > /tmp/api.log 2>&1 &
         working-directory: apps/api
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
@@ -113,7 +113,7 @@ jobs:
           JWT_SECRET: ci-test-secret
 
       - name: Wait for API
-        run: npx wait-on http://localhost:3000/api-json
+        run: npx wait-on -t 60000 http://localhost:3000/api-json || (cat /tmp/api.log && exit 1)
 
       - name: Web E2E tests
         run: npm run test:e2e
