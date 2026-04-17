@@ -10,6 +10,7 @@ import {
   postsControllerGet,
   postsControllerRemove,
   usersControllerRegister,
+  mapControllerGetMarkers,
 } from "./index";
 
 export type ClientOptions = {
@@ -119,6 +120,10 @@ export function createClient(options: ClientOptions) {
     },
     deletePost: async (id: string) => {
       const r = await postsControllerRemove(id);
+      return r.data;
+    },
+    getMapMarkers: async () => {
+      const r = await mapControllerGetMarkers();
       return r.data;
     },
   };

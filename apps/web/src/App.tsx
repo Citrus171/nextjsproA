@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Posts from "./pages/Posts";
 import CreatePost from "./pages/CreatePost";
 import EditPost from "./pages/EditPost";
+import Map from "./pages/Map";
 import { useAuth } from "./auth/AuthProvider";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -24,7 +25,8 @@ export default function App() {
         ) : (
           <button onClick={clearToken}>Logout</button>
         )}{" "}
-        | <Link to="/register">Register</Link>
+        | <Link to="/register">Register</Link>{" "}
+        | <Link to="/saitama-map">Map</Link>
       </nav>
       <Routes>
         <Route path="/" element={<Posts />} />
@@ -32,6 +34,7 @@ export default function App() {
         <Route path="/edit/:id" element={<PrivateRoute><EditPost /></PrivateRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/saitama-map" element={<PrivateRoute><Map /></PrivateRoute>} />
       </Routes>
     </>
   );

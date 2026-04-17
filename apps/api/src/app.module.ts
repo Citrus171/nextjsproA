@@ -4,6 +4,7 @@ import { PrismaService } from "./prisma.service";
 import { UsersModule } from "./users/user.module";
 import { PostsModule } from "./posts/post.module";
 import { AuthModule } from "./auth/auth.module";
+import { MapModule } from "./map/map.module";
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { AuthModule } from "./auth/auth.module";
     UsersModule,
     PostsModule,
     AuthModule,
+    MapModule,
   ],
   providers: [PrismaService],
 })
