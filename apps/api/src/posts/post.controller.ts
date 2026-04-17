@@ -15,44 +15,12 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
-import { ApiProperty, ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiResponse } from "@nestjs/swagger";
-import { IsString, MinLength, MaxLength, IsOptional } from "class-validator";
+import { ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiResponse } from "@nestjs/swagger";
 import { PostResponseDto, PostListResponseDto } from "./dto/post-response.dto";
+import { CreatePostDto } from "./dto/create-post.dto";
+import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./post.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-
-class CreatePostDto {
-  @ApiProperty({ example: "My first post" })
-  @IsString()
-  @MinLength(1)
-  @MaxLength(100)
-  title: string;
-
-  @ApiProperty({ example: "Hello world!" })
-  @IsString()
-  @MinLength(1)
-  content: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  image?: string;
-}
-
-class UpdatePostDto {
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(100)
-  title?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  content?: string;
-}
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB

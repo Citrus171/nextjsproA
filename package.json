@@ -1,0 +1,23 @@
+{
+  "name": "nestjsa",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start:api": "npm run start:dev --workspace=apps/api",
+    "start:web": "npm run dev --workspace=apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspace=apps/api",
+    "test:e2e": "npm run test:e2e --workspace=apps/web",
+    "prisma:migrate": "npm run prisma:migrate --workspace=apps/api",
+    "prisma:generate": "npm run prisma:generate --workspace=apps/api",
+    "openapi": "npm run openapi --workspace=apps/api",
+    "generate": "npm run generate --workspace=packages/api-client"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -8,7 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  private saveFile(file: Express.Multer.File): string {
+  private saveUploadedFile(file?: Express.Multer.File): string | undefined {
+    if (!file) return undefined;
     const uploadDir = path.join(__dirname, "../../uploads");
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -20,7 +21,7 @@ export class PostsService {
   }
 
   async create(authorId: string, title: string, content: string, file?: Express.Multer.File) {
-    const imagePath = file ? this.saveFile(file) : undefined;
+    const imagePath = this.saveUploadedFile(file);
     return this.prisma.post.create({ data: { title, content, authorId, image: imagePath } });
   }
 
@@ -54,7 +55,7 @@ export class PostsService {
     if (post.authorId !== userId) {
       throw new ForbiddenException("You are not the owner of this post");
     }
-    const imagePath = file ? this.saveFile(file) : undefined;
+    const imagePath = this.saveUploadedFile(file);
     return this.prisma.post.update({
       where: { id },
       data: { ...data, ...(imagePath ? { image: imagePath } : {}) },
