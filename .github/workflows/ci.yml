@@ -89,6 +89,12 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
 
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+
       - name: Cache Playwright browsers
         uses: actions/cache@v3
         id: cache-playwright
