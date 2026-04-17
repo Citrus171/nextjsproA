@@ -25,7 +25,10 @@ export default defineConfig({
       },
     },
   },
+  resolve: {
+    dedupe: ["react", "react-dom"],
+  },
   optimizeDeps: {
-    include: ["axios"],
+    include: ["axios", "react-leaflet", "@react-leaflet/core", "leaflet"],
   },
 });

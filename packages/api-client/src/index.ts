@@ -175,4 +175,20 @@ export type PostsControllerUpdateResult = AxiosResponse<PostResponseDto>
 export type PostsControllerRemoveResult = AxiosResponse<PostResponseDto>
 export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>
 export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>
+
+export interface MarkerDto {
+  lat: number;
+  lng: number;
+  title: string;
+  description: string;
+  imageUrl?: string;
+}
+
+export const mapControllerGetMarkers = <TData = AxiosResponse<MarkerDto[]>>(
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/map/markers`, options);
+};
+
+export type MapControllerGetMarkersResult = AxiosResponse<MarkerDto[]>
 export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>
