@@ -1,14 +1,16 @@
 const typescriptEslint = require("@typescript-eslint/eslint-plugin");
 const tsParser = require("@typescript-eslint/parser");
+const path = require("path");
+
+const apiDir = __dirname;
 
 module.exports = [
   {
-    files: ["src/**/*.ts"],
+    files: ["**/*.ts"],
+    ignores: ["**/node_modules/**", "**/dist/**"],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
-        project: "tsconfig.json",
-        tsconfigRootDir: __dirname,
         sourceType: "module",
       },
     },
@@ -23,10 +25,12 @@ module.exports = [
     },
   },
   {
-    files: ["test/**/*.ts"],
+    files: [path.join(apiDir, "src/**/*.ts").replace(/\\/g, "/")],
     languageOptions: {
       parser: tsParser,
       parserOptions: {
+        project: path.join(apiDir, "tsconfig.json"),
+        tsconfigRootDir: apiDir,
         sourceType: "module",
       },
     },
