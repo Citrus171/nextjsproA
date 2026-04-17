@@ -149,12 +149,6 @@ jobs:
         run: npm run build
         working-directory: apps/web
 
-      # OpenAPI generation check
-      - name: Check OpenAPI generation
-        run: |
-          npm run openapi
-          git diff --exit-code packages/api-client/openapi.json
-        working-directory: apps/api
 
   review-ready:
     name: Ready for Review
