@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -13,11 +14,12 @@ import {
   UploadedFile,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { memoryStorage } from "multer";
 import { ApiProperty, ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiResponse } from "@nestjs/swagger";
 import { IsString, MinLength, MaxLength, IsOptional } from "class-validator";
 import { PostResponseDto, PostListResponseDto } from "./dto/post-response.dto";
 import { PostsService } from "./post.service";
-import { AuthGuard } from "../auth/auth.guard";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 class CreatePostDto {
   @ApiProperty({ example: "My first post" })
@@ -52,6 +54,21 @@ class UpdatePostDto {
   content?: string;
 }
 
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const imageUploadOptions = {
+  storage: memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (_req: any, file: Express.Multer.File, cb: any) => {
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new BadRequestException(`Unsupported file type: ${file.mimetype}`), false);
+    }
+  },
+};
+
 @ApiTags('posts')
 @ApiBearerAuth()
 @Controller("posts")
@@ -59,8 +76,8 @@ export class PostsController {
   constructor(private posts: PostsService) {}
 
   @HttpPost()
-  @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image', imageUploadOptions))
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, type: PostResponseDto })
   @ApiBody({
@@ -93,8 +110,8 @@ export class PostsController {
   }
 
   @Put(":id")
-  @UseGuards(AuthGuard)
-  @UseInterceptors(FileInterceptor('image'))
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('image', imageUploadOptions))
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 200, type: PostResponseDto })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
@@ -118,7 +135,7 @@ export class PostsController {
   }
 
   @Delete(":id")
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, type: PostResponseDto })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
   async remove(@Req() req: any, @Param("id") id: string) {

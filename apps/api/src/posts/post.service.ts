@@ -2,23 +2,25 @@ import { Injectable, HttpException, HttpStatus, ForbiddenException } from "@nest
 import { PrismaService } from "../prisma.service";
 import * as fs from "fs";
 import * as path from "path";
+import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(authorId: string, title: string, content: string, file?: Express.Multer.File) {
-    let imagePath: string | undefined;
-    if (file) {
-      const uploadDir = path.join(__dirname, '../../uploads');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      const fileName = `${Date.now()}-${file.originalname}`;
-      const filePath = path.join(uploadDir, fileName);
-      fs.writeFileSync(filePath, file.buffer);
-      imagePath = `uploads/${fileName}`;
+  private saveFile(file: Express.Multer.File): string {
+    const uploadDir = path.join(__dirname, "../../uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
+    const ext = path.extname(file.originalname).toLowerCase();
+    const fileName = `${uuidv4()}${ext}`;
+    fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
+    return `uploads/${fileName}`;
+  }
+
+  async create(authorId: string, title: string, content: string, file?: Express.Multer.File) {
+    const imagePath = file ? this.saveFile(file) : undefined;
     return this.prisma.post.create({ data: { title, content, authorId, image: imagePath } });
   }
 
@@ -52,16 +54,7 @@ export class PostsService {
     if (post.authorId !== userId) {
       throw new ForbiddenException("You are not the owner of this post");
     }
-    let imagePath: string | undefined;
-    if (file) {
-      const uploadDir = path.join(__dirname, '../../uploads');
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-      const fileName = `${Date.now()}-${file.originalname}`;
-      fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
-      imagePath = `uploads/${fileName}`;
-    }
+    const imagePath = file ? this.saveFile(file) : undefined;
     return this.prisma.post.update({
       where: { id },
       data: { ...data, ...(imagePath ? { image: imagePath } : {}) },
