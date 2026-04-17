@@ -137,16 +137,13 @@ jobs:
 
       # API checks
       - name: API Lint
-        run: npm run lint
-        working-directory: apps/api
+        run: npm run lint --workspace=apps-api
 
       - name: API Typecheck
-        run: npm run typecheck
-        working-directory: apps/api
+        run: npm run typecheck --workspace=apps-api
 
       - name: API Build
-        run: npm run build
-        working-directory: apps/api
+        run: npm run build --workspace=apps-api
 
       # Web checks
       - name: Web Typecheck
