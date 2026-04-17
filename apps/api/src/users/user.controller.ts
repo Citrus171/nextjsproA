@@ -6,17 +6,25 @@ import {
   HttpStatus,
 } from "@nestjs/common";
 import { ApiProperty, ApiTags, ApiResponse } from "@nestjs/swagger";
+import { IsEmail, IsString, MinLength, MaxLength, IsOptional } from "class-validator";
 import { UsersService } from "./user.service";
 import { UserResponseDto } from "./dto/user-response.dto";
 
 class RegisterDto {
-  @ApiProperty()
+  @ApiProperty({ example: "user@example.com" })
+  @IsEmail()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: "password123", minLength: 8 })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(100)
   password: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, example: "Alice" })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
   name?: string;
 }
 

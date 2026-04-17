@@ -14,26 +14,41 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiProperty, ApiTags, ApiBearerAuth, ApiConsumes, ApiBody, ApiResponse } from "@nestjs/swagger";
+import { IsString, MinLength, MaxLength, IsOptional } from "class-validator";
 import { PostResponseDto, PostListResponseDto } from "./dto/post-response.dto";
 import { PostsService } from "./post.service";
 import { AuthGuard } from "../auth/auth.guard";
 
 class CreatePostDto {
-  @ApiProperty()
+  @ApiProperty({ example: "My first post" })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: "Hello world!" })
+  @IsString()
+  @MinLength(1)
   content: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   image?: string;
 }
 
 class UpdatePostDto {
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(100)
   title?: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
   content?: string;
 }
 

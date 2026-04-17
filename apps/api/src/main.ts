@@ -2,10 +2,12 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { ValidationPipe } from "@nestjs/common";
 import * as cookieParser from "cookie-parser";
 import * as path from "path";
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.setGlobalPrefix("api");
   app.useStaticAssets(path.join(__dirname, '..', 'uploads'), { prefix: '/uploads' });
   app.use(cookieParser());

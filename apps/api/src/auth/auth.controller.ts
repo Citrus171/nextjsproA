@@ -8,16 +8,20 @@ import {
   Res,
 } from "@nestjs/common";
 import { ApiProperty, ApiTags, ApiResponse } from "@nestjs/swagger";
+import { IsEmail, IsString, MinLength } from "class-validator";
 import { AuthService } from "./auth.service";
 import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { AccessTokenResponseDto, LogoutResponseDto } from "./dto/auth-response.dto";
 
 class LoginDto {
-  @ApiProperty()
+  @ApiProperty({ example: "user@example.com" })
+  @IsEmail()
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: "password123", minLength: 8 })
+  @IsString()
+  @MinLength(8)
   password: string;
 }
 
