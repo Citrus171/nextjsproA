@@ -176,6 +176,8 @@ jobs:
     if: success() && github.event_name == 'pull_request'
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Comment on PR
         run: |
           gh pr comment ${{ github.event.number }} --body "✅ **All CI checks passed!**
