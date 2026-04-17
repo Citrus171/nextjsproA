@@ -7,10 +7,11 @@ import {
   Req,
   Res,
 } from "@nestjs/common";
-import { ApiProperty, ApiTags } from "@nestjs/swagger";
+import { ApiProperty, ApiTags, ApiResponse } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import * as jwt from "jsonwebtoken";
 import { Request, Response } from "express";
+import { AccessTokenResponseDto, LogoutResponseDto } from "./dto/auth-response.dto";
 
 class LoginDto {
   @ApiProperty()
@@ -26,6 +27,7 @@ export class AuthController {
   constructor(private auth: AuthService) {}
 
   @Post("login")
+  @ApiResponse({ status: 200, type: AccessTokenResponseDto })
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const user = await this.auth.validateUser(dto.email, dto.password);
     if (!user)
@@ -48,6 +50,7 @@ export class AuthController {
   }
 
   @Post("refresh")
+  @ApiResponse({ status: 200, type: AccessTokenResponseDto })
   async refresh(@Req() req: Request, @Res() res: Response) {
     const token = req.cookies?.refreshToken;
     if (!token) return res.status(401).json({ error: "No refresh token" });
@@ -70,6 +73,7 @@ export class AuthController {
   }
 
   @Post("logout")
+  @ApiResponse({ status: 200, type: LogoutResponseDto })
   async logout(@Req() req: Request, @Res() res: Response) {
     const token = req.cookies?.refreshToken;
     if (token) await this.auth.revokeRefreshToken(token);

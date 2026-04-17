@@ -16,6 +16,14 @@ export type PostsControllerCreateBody = {
   title?: string;
 };
 
+export interface LogoutResponseDto {
+  ok: boolean;
+}
+
+export interface AccessTokenResponseDto {
+  accessToken: string;
+}
+
 export interface LoginDto {
   email: string;
   password: string;
@@ -24,6 +32,24 @@ export interface LoginDto {
 export interface UpdatePostDto {
   content?: string;
   title?: string;
+}
+
+export interface PostResponseDto {
+  authorId: string;
+  content: string;
+  createdAt: string;
+  id: string;
+  /** @nullable */
+  image?: string | null;
+  title: string;
+}
+
+export interface UserResponseDto {
+  createdAt: string;
+  email: string;
+  id: string;
+  /** @nullable */
+  name?: string | null;
 }
 
 export interface RegisterDto {
@@ -36,7 +62,7 @@ export interface RegisterDto {
 
 
 
-  export const usersControllerRegister = <TData = AxiosResponse<void>>(
+  export const usersControllerRegister = <TData = AxiosResponse<UserResponseDto>>(
     registerDto: RegisterDto, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
@@ -45,7 +71,7 @@ export interface RegisterDto {
     );
   }
 
-export const postsControllerCreate = <TData = AxiosResponse<void>>(
+export const postsControllerCreate = <TData = AxiosResponse<PostResponseDto>>(
     postsControllerCreateBody: PostsControllerCreateBody, options?: AxiosRequestConfig
  ): Promise<TData> => {const formData = new FormData();
 if(postsControllerCreateBody.title !== undefined) {
@@ -98,7 +124,7 @@ export const postsControllerRemove = <TData = AxiosResponse<void>>(
     );
   }
 
-export const authControllerLogin = <TData = AxiosResponse<void>>(
+export const authControllerLogin = <TData = AxiosResponse<AccessTokenResponseDto>>(
     loginDto: LoginDto, options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
@@ -107,7 +133,7 @@ export const authControllerLogin = <TData = AxiosResponse<void>>(
     );
   }
 
-export const authControllerRefresh = <TData = AxiosResponse<void>>(
+export const authControllerRefresh = <TData = AxiosResponse<AccessTokenResponseDto>>(
      options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
@@ -115,7 +141,7 @@ export const authControllerRefresh = <TData = AxiosResponse<void>>(
     );
   }
 
-export const authControllerLogout = <TData = AxiosResponse<void>>(
+export const authControllerLogout = <TData = AxiosResponse<LogoutResponseDto>>(
      options?: AxiosRequestConfig
  ): Promise<TData> => {
     return axios.post(
@@ -123,12 +149,12 @@ export const authControllerLogout = <TData = AxiosResponse<void>>(
     );
   }
 
-export type UsersControllerRegisterResult = AxiosResponse<void>
-export type PostsControllerCreateResult = AxiosResponse<void>
+export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>
+export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>
 export type PostsControllerListResult = AxiosResponse<void>
 export type PostsControllerGetResult = AxiosResponse<void>
 export type PostsControllerUpdateResult = AxiosResponse<void>
 export type PostsControllerRemoveResult = AxiosResponse<void>
-export type AuthControllerLoginResult = AxiosResponse<void>
-export type AuthControllerRefreshResult = AxiosResponse<void>
-export type AuthControllerLogoutResult = AxiosResponse<void>
+export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>
+export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>
+export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>

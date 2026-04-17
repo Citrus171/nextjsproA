@@ -5,8 +5,9 @@ import {
   HttpException,
   HttpStatus,
 } from "@nestjs/common";
-import { ApiProperty, ApiTags } from "@nestjs/swagger";
+import { ApiProperty, ApiTags, ApiResponse } from "@nestjs/swagger";
 import { UsersService } from "./user.service";
+import { UserResponseDto } from "./dto/user-response.dto";
 
 class RegisterDto {
   @ApiProperty()
@@ -25,6 +26,7 @@ export class UsersController {
   constructor(private users: UsersService) {}
 
   @Post("register")
+  @ApiResponse({ status: 201, type: UserResponseDto })
   async register(@Body() dto: RegisterDto) {
     console.log('Register request:', dto);
     try {
