@@ -36,23 +36,21 @@ const ALLOWED_MIME_TYPES = [
 ];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
+export function imageFileFilter(_req: any, file: Express.Multer.File, cb: any) {
+  if (!file || !file.originalname || !file.mimetype) {
+    return cb(null, false);
+  }
+  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new BadRequestException(`Unsupported file type: ${file.mimetype}`), false);
+  }
+}
+
 const imageUploadOptions = {
   storage: memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE },
-  fileFilter: (_req: any, file: Express.Multer.File, cb: any) => {
-    if (!file || !file.originalname || !file.mimetype) {
-      // empty file field is allowed as "no image" input
-      return cb(null, false);
-    }
-    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(
-        new BadRequestException(`Unsupported file type: ${file.mimetype}`),
-        false,
-      );
-    }
-  },
+  fileFilter: imageFileFilter,
 };
 
 @ApiTags("posts")

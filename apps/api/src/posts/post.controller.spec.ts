@@ -1,5 +1,5 @@
-import { ForbiddenException, HttpException } from "@nestjs/common";
-import { PostsController } from "./post.controller";
+import { BadRequestException, ForbiddenException, HttpException } from "@nestjs/common";
+import { PostsController, imageFileFilter } from "./post.controller";
 import { PostsService } from "./post.service";
 
 const makePost = (overrides = {}) => ({
@@ -133,6 +133,33 @@ describe("PostsController", () => {
       await expect(
         controller.update(req, "no-such", {} as any, undefined as any),
       ).rejects.toThrow(HttpException);
+    });
+  });
+
+  // ─── imageFileFilter ─────────────────────────────────────────
+  describe("imageFileFilter", () => {
+    it("fileがnullの時、cb(null, false)を呼ぶこと", () => {
+      const cb = jest.fn();
+      imageFileFilter({}, null, cb);
+      expect(cb).toHaveBeenCalledWith(null, false);
+    });
+
+    it("originalnameがない時、cb(null, false)を呼ぶこと", () => {
+      const cb = jest.fn();
+      imageFileFilter({}, { mimetype: "image/png" } as any, cb);
+      expect(cb).toHaveBeenCalledWith(null, false);
+    });
+
+    it("許可されたMIMEタイプの時、cb(null, true)を呼ぶこと", () => {
+      const cb = jest.fn();
+      imageFileFilter({}, { originalname: "photo.png", mimetype: "image/png" } as any, cb);
+      expect(cb).toHaveBeenCalledWith(null, true);
+    });
+
+    it("許可されていないMIMEタイプの時、BadRequestExceptionを渡すこと", () => {
+      const cb = jest.fn();
+      imageFileFilter({}, { originalname: "doc.pdf", mimetype: "application/pdf" } as any, cb);
+      expect(cb).toHaveBeenCalledWith(expect.any(BadRequestException), false);
     });
   });
 
