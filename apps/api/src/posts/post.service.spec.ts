@@ -1,5 +1,9 @@
 import { ForbiddenException, HttpException } from "@nestjs/common";
+import * as fs from "fs";
 import { PostsService } from "./post.service";
+
+jest.mock("fs");
+const mockFs = fs as jest.Mocked<typeof fs>;
 
 // PrismaService のモック
 const mockPrisma = {
@@ -19,6 +23,10 @@ describe("PostsService", () => {
   beforeEach(() => {
     service = new PostsService(mockPrisma as any);
     jest.clearAllMocks();
+    mockFs.existsSync.mockReturnValue(true);
+    mockFs.writeFileSync.mockReturnValue(undefined);
+    mockFs.mkdirSync.mockReturnValue(undefined as any);
+    mockFs.unlinkSync.mockReturnValue(undefined);
   });
 
   // ─── findAll ────────────────────────────────────────────────
@@ -71,6 +79,28 @@ describe("PostsService", () => {
       });
       expect(result).toEqual(created);
     });
+
+    it("ファイルありで投稿を作成する時、imagePathが設定されること", async () => {
+      const created = { id: "1", title: "T", content: "C", authorId: "u1", image: "uploads/uuid.png", createdAt: new Date() };
+      mockPrisma.post.create.mockResolvedValue(created);
+      const file = { originalname: "photo.png", buffer: Buffer.from("") } as any;
+
+      await service.create("u1", "T", "C", file);
+
+      expect(mockPrisma.post.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ image: expect.stringMatching(/^uploads\//) }),
+      });
+    });
+
+    it("アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと", async () => {
+      mockFs.existsSync.mockReturnValue(false);
+      mockPrisma.post.create.mockResolvedValue({} as any);
+      const file = { originalname: "photo.png", buffer: Buffer.from("") } as any;
+
+      await service.create("u1", "T", "C", file);
+
+      expect(mockFs.mkdirSync).toHaveBeenCalled();
+    });
   });
 
   // ─── update ─────────────────────────────────────────────────
@@ -112,6 +142,27 @@ describe("PostsService", () => {
       await expect(
         service.update("no-such-post", "user1", { title: "X" }),
       ).rejects.toThrow(HttpException);
+    });
+
+    it("ファイルありかつ既存画像がある時、古い画像ファイルが削除されること", async () => {
+      const postWithImage = { ...existingPost, image: "uploads/old.png" };
+      mockPrisma.post.findUnique.mockResolvedValue(postWithImage);
+      mockPrisma.post.update.mockResolvedValue({ ...postWithImage, image: "uploads/new.png" });
+      const file = { originalname: "new.png", buffer: Buffer.from("") } as any;
+
+      await service.update("post1", "user1", {}, file);
+
+      expect(mockFs.unlinkSync).toHaveBeenCalled();
+    });
+
+    it("ファイルありかつ既存画像がない時、unlinkSyncを呼ばないこと", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost); // image: null
+      mockPrisma.post.update.mockResolvedValue({ ...existingPost, image: "uploads/new.png" });
+      const file = { originalname: "new.png", buffer: Buffer.from("") } as any;
+
+      await service.update("post1", "user1", {}, file);
+
+      expect(mockFs.unlinkSync).not.toHaveBeenCalled();
     });
   });
 
