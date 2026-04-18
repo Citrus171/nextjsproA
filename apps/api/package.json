@@ -39,6 +39,7 @@
     "setupFiles": [
       "reflect-metadata"
     ],
+    "coverageDirectory": "<rootDir>/../coverage",
     "coverageThreshold": {
       "global": {
         "lines": 80,
