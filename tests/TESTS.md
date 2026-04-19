@@ -138,6 +138,20 @@
 
 ---
 
+### MapService (`src/map/map.service.spec.ts`)
+
+#### getMarkers
+
+- [x] bbox内のPostマーカーが type='post' で返ること
+- [x] bbox内のSightingマーカーが type='sighting' で返ること
+- [x] statusフィルタ指定時にPostクエリのwhereにstatusが含まれること
+- [x] statusフィルタ指定時にSightingクエリのwhereにpost.statusが含まれること
+- [x] bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
+- [x] bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
+- [x] フィルタなしで全マーカー（Post+Sighting）が返ること
+
+---
+
 ### AuthService (`src/auth/auth.service.spec.ts`)
 
 （既存テスト・詳細省略）
