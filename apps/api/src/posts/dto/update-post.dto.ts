@@ -1,5 +1,50 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, MinLength, MaxLength, IsOptional } from "class-validator";
+import { Type, Transform } from "class-transformer";
+import {
+  IsString,
+  MinLength,
+  MaxLength,
+  IsOptional,
+  IsDateString,
+  ValidateNested,
+  IsNumber,
+  IsBoolean,
+  IsEnum,
+} from "class-validator";
+import { parseJsonField } from "../../utils/transform";
+
+export class UpdatePetDetailDto {
+  @ApiProperty({ required: false }) @IsOptional() @IsString() name?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() color?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() age?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() features?: string;
+  @ApiProperty({ required: false, enum: ["male", "female", "unknown"] })
+  @IsOptional()
+  @IsEnum(["male", "female", "unknown"])
+  gender?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() breed?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() size?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() collar?: string;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  microchip?: boolean;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  neutered?: boolean;
+}
+
+export class UpdateLocationDto {
+  @ApiProperty({ required: false, enum: ["saitama"] })
+  @IsOptional()
+  @IsEnum(["saitama"])
+  prefecture?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() city?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsString() address?: string;
+  @ApiProperty({ required: false }) @IsOptional() @IsNumber() lat?: number;
+  @ApiProperty({ required: false }) @IsOptional() @IsNumber() lng?: number;
+}
 
 export class UpdatePostDto {
   @ApiProperty({ required: false })
@@ -13,5 +58,29 @@ export class UpdatePostDto {
   @IsOptional()
   @IsString()
   @MinLength(1)
-  content?: string;
+  description?: string;
+
+  @ApiProperty({ required: false, example: "2024-01-01" })
+  @IsOptional()
+  @IsDateString()
+  lostDate?: string;
+
+  @ApiProperty({ required: false, enum: ["lost", "resolved"] })
+  @IsOptional()
+  @IsEnum(["lost", "resolved"])
+  status?: string;
+
+  @ApiProperty({ required: false, type: UpdatePetDetailDto })
+  @IsOptional()
+  @Transform(parseJsonField)
+  @ValidateNested()
+  @Type(() => UpdatePetDetailDto)
+  petDetail?: UpdatePetDetailDto;
+
+  @ApiProperty({ required: false, type: UpdateLocationDto })
+  @IsOptional()
+  @Transform(parseJsonField)
+  @ValidateNested()
+  @Type(() => UpdateLocationDto)
+  location?: UpdateLocationDto;
 }

@@ -11,7 +11,7 @@ import { UsersService } from "./user.service";
 import { UserResponseDto } from "./dto/user-response.dto";
 import { RegisterDto } from "./dto/register.dto";
 
-@ApiTags('users')
+@ApiTags("users")
 @Controller("users")
 export class UsersController {
   constructor(private users: UsersService) {}
@@ -31,20 +31,20 @@ export class UsersController {
       const user = await this.users.createUser(
         dto.email,
         dto.password,
-        dto.name,
+        dto.nickname
       );
-      return { id: user.id, email: user.email, name: user.name };
+      return { id: user.id, email: user.email, nickname: user.nickname };
     } catch (e: any) {
       // Handle unique constraint (Prisma P2002) as bad request
       if (e?.code === "P2002" || (e?.meta && /unique/i.test(String(e.meta)))) {
         throw new HttpException(
           { error: "Email already exists" },
-          HttpStatus.BAD_REQUEST,
+          HttpStatus.BAD_REQUEST
         );
       }
       throw new HttpException(
         { error: "Internal server error" },
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }

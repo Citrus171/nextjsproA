@@ -7,25 +7,163 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PostStatus {
+  lost
+  resolved
+}
+
+enum Gender {
+  male
+  female
+  unknown
+}
+
+enum Prefecture {
+  saitama
+}
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  posts     Post[]
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  nickname      String
+  posts         Post[]
+  sightings     Sighting[]
   refreshTokens RefreshToken[]
-  createdAt DateTime @default(now())
+  conversations Conversation[] @relation("ConversationOwner")
+  sighterConversations Conversation[] @relation("ConversationSighter")
+  messages      Message[]
+  postFavorites    PostFavorite[]
+  sightingFavorites SightingFavorite[]
+  createdAt     DateTime       @default(now())
 }
 
 model Post {
+  id          String     @id @default(cuid())
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  status      PostStatus @default(lost)
+  title       String?
+  description String
+  lostDate    DateTime
+  resolvedAt  DateTime?
+  petDetail   PetDetail?
+  location    Location?
+  images      Image[]
+  sightings   Sighting[]
+  conversations Conversation[]
+  favorites   PostFavorite[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model PetDetail {
+  id         String   @id @default(cuid())
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId     String   @unique
+  name       String
+  color      String
+  age        String
+  features   String
+  gender     Gender?
+  breed      String?
+  size       String?
+  collar     String?
+  microchip  Boolean?
+  neutered   Boolean?
+}
+
+model Location {
+  id         String     @id @default(cuid())
+  post       Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId     String     @unique
+  prefecture Prefecture
+  city       String
+  address    String
+  lat        Float
+  lng        Float
+}
+
+model Image {
   id        String   @id @default(cuid())
-  title     String
-  content   String
-  image     String?
-  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId  String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  url       String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+}
+
+model Sighting {
+  id        String           @id @default(cuid())
+  post      Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  lat       Float
+  lng       Float
+  address   String?
+  sightedAt DateTime
+  comment   String?
+  images    SightingImage[]
+  conversations Conversation[]
+  favorites SightingFavorite[]
+  createdAt DateTime         @default(now())
+}
+
+model SightingImage {
+  id         String   @id @default(cuid())
+  sighting   Sighting @relation(fields: [sightingId], references: [id], onDelete: Cascade)
+  sightingId String
+  url        String
+  createdAt  DateTime @default(now())
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  sighting  Sighting  @relation(fields: [sightingId], references: [id], onDelete: Cascade)
+  sightingId String
+  owner     User      @relation("ConversationOwner", fields: [ownerId], references: [id])
+  ownerId   String
+  sighter   User      @relation("ConversationSighter", fields: [sighterId], references: [id])
+  sighterId String
+  messages  Message[]
+  createdAt DateTime  @default(now())
+
+  @@unique([postId, sightingId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId String
+  sender         User         @relation(fields: [senderId], references: [id])
+  senderId       String
+  body           String
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+}
+
+model PostFavorite {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
+}
+
+model SightingFavorite {
+  id         String   @id @default(cuid())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  sighting   Sighting @relation(fields: [sightingId], references: [id], onDelete: Cascade)
+  sightingId String
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, sightingId])
 }
 
 model RefreshToken {

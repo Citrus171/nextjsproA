@@ -6,9 +6,11 @@ import * as bcrypt from "bcrypt";
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async createUser(email: string, password: string, name?: string) {
+  async createUser(email: string, password: string, nickname: string) {
     const hashed = await bcrypt.hash(password, 10);
-    return this.prisma.user.create({ data: { email, password: hashed, name } });
+    return this.prisma.user.create({
+      data: { email, password: hashed, nickname },
+    });
   }
 
   async findByEmail(email: string) {
@@ -24,7 +26,7 @@ export class UsersService {
   // NestJS:  この1行が「サーバー関数の中身」に相当する
   async findAll() {
     return this.prisma.user.findMany({
-      select: { id: true, email: true, name: true, createdAt: true },
+      select: { id: true, email: true, nickname: true, createdAt: true },
     });
   }
 }
