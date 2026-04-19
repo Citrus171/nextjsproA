@@ -31,7 +31,7 @@ export class UsersController {
       const user = await this.users.createUser(
         dto.email,
         dto.password,
-        dto.nickname
+        dto.name
       );
       return { id: user.id, email: user.email, nickname: user.nickname };
     } catch (e: any) {
