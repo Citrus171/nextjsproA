@@ -82,6 +82,18 @@ apps/api/src/
 │           ├── オーナーが削除できる
 │           ├── オーナー以外は ForbiddenException を伝播する
 │           └── 存在しない投稿は HttpException を伝播する
+├── sightings/
+│   └── sighting.service.spec.ts
+│       ├── create
+│       │   ├── 有効なデータでSightingを作成できること
+│       │   ├── 投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException
+│       │   └── 存在しないPostにSightingを作成しようとすると NotFoundException
+│       ├── findByPost
+│       │   └── postIdに紐づくSighting一覧をcreatedAt降順で返すこと
+│       └── remove
+│           ├── 本人がSightingを削除できること
+│           ├── 他者が削除しようとすると ForbiddenException
+│           └── 存在しないSightingを削除しようとすると NotFoundException
 └── users/
     └── user.service.spec.ts
         └── UserService（既存）

@@ -118,6 +118,26 @@
 
 ---
 
+### SightingsService (`src/sightings/sighting.service.spec.ts`)
+
+#### create
+
+- [x] 有効なデータでSightingを作成できること
+- [x] 投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException
+- [x] 存在しないPostにSightingを作成しようとすると NotFoundException
+
+#### findByPost
+
+- [x] postIdに紐づくSighting一覧をcreatedAt降順で返すこと
+
+#### remove
+
+- [x] 本人がSightingを削除できること
+- [x] 他者が削除しようとすると ForbiddenException
+- [x] 存在しないSightingを削除しようとすると NotFoundException
+
+---
+
 ### AuthService (`src/auth/auth.service.spec.ts`)
 
 （既存テスト・詳細省略）
