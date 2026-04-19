@@ -19,6 +19,7 @@
 - [x] ファイルなしで投稿を作成する
 - [x] ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 - [x] アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
+- [x] 画像が sharp でリサイズ・JPEG変換されること
 - [x] lostDate なしは BadRequestException をスローする
 - [x] 画像が5枚超の場合 BadRequestException をスローする
 - [x] petDetail と location を含む時、トランザクションで一括作成する

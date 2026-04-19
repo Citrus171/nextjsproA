@@ -10,6 +10,14 @@ import { PostsService } from "./post.service";
 jest.mock("fs");
 const mockFs = fs as jest.Mocked<typeof fs>;
 
+jest.mock("sharp", () =>
+  jest.fn().mockReturnValue({
+    resize: jest.fn().mockReturnThis(),
+    jpeg: jest.fn().mockReturnThis(),
+    toBuffer: jest.fn().mockResolvedValue(Buffer.from("processed-image")),
+  })
+);
+
 const mockPrisma = {
   post: {
     create: jest.fn(),
@@ -225,6 +233,44 @@ describe("PostsService", () => {
       );
 
       expect(mockFs.mkdirSync).toHaveBeenCalled();
+    });
+
+    it("画像が sharp でリサイズ・JPEG変換されること", async () => {
+      const sharpMock = jest.requireMock("sharp") as jest.Mock;
+      const mockInstance = {
+        resize: jest.fn().mockReturnThis(),
+        jpeg: jest.fn().mockReturnThis(),
+        toBuffer: jest.fn().mockResolvedValue(Buffer.from("processed-image")),
+      };
+      sharpMock.mockReturnValue(mockInstance);
+
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post1",
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      mockPrisma.image.create.mockResolvedValue({});
+      const rawBuf = Buffer.from("raw");
+      const files = [{ originalname: "photo.png", buffer: rawBuf } as any];
+
+      await service.create(
+        "u1",
+        { description: "C", lostDate: "2024-01-01" },
+        files
+      );
+
+      expect(sharpMock).toHaveBeenCalledWith(rawBuf);
+      expect(mockInstance.resize).toHaveBeenCalledWith({
+        width: 1200,
+        withoutEnlargement: true,
+      });
+      expect(mockInstance.jpeg).toHaveBeenCalledWith({ quality: 80 });
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        expect.stringContaining("post1"),
+        Buffer.from("processed-image")
+      );
     });
 
     it("lostDate なしは BadRequestException をスローする", async () => {

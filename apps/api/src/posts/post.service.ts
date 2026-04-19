@@ -11,6 +11,7 @@ import type { PostStatus, Gender, Prefecture } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
 import { v4 as uuidv4 } from "uuid";
+import * as sharp from "sharp";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 
@@ -20,14 +21,20 @@ const MAX_IMAGES = 5;
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  private saveFile(postId: string, file: Express.Multer.File): string {
+  private async saveFile(
+    postId: string,
+    file: Express.Multer.File
+  ): Promise<string> {
     const uploadDir = path.join(__dirname, "../../uploads", postId);
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
-    const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
-    const fileName = `${uuidv4()}${ext}`;
-    fs.writeFileSync(path.join(uploadDir, fileName), file.buffer);
+    const processedBuffer = await sharp(file.buffer)
+      .resize({ width: 1200, withoutEnlargement: true })
+      .jpeg({ quality: 80 })
+      .toBuffer();
+    const fileName = `${uuidv4()}.jpg`;
+    fs.writeFileSync(path.join(uploadDir, fileName), processedBuffer);
     return `uploads/${postId}/${fileName}`;
   }
 
@@ -99,7 +106,7 @@ export class PostsService {
         }
 
         for (const file of files) {
-          const url = this.saveFile(post.id, file);
+          const url = await this.saveFile(post.id, file);
           savedUrls.push(url);
           await tx.image.create({ data: { postId: post.id, url } });
         }
@@ -166,7 +173,7 @@ export class PostsService {
     const savedUrls: string[] = [];
     try {
       for (const file of files) {
-        const url = this.saveFile(postId, file);
+        const url = await this.saveFile(postId, file);
         savedUrls.push(url);
       }
 
