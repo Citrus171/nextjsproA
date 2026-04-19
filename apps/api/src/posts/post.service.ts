@@ -29,19 +29,23 @@ export class PostsService {
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
+
+    let processedBuffer: Buffer;
     try {
-      const processedBuffer = await sharp(file.buffer)
+      processedBuffer = await sharp(file.buffer)
         .resize({ width: 1200, withoutEnlargement: true })
         .jpeg({ quality: 80 })
         .toBuffer();
-      const fileName = `${uuidv4()}.jpg`;
-      fs.writeFileSync(path.join(uploadDir, fileName), processedBuffer);
-      return `uploads/${postId}/${fileName}`;
-    } catch (error) {
+    } catch (err) {
       throw new BadRequestException(
         "画像処理に失敗しました。ファイルが破損または無効な形式です。"
       );
     }
+
+    const fileName = `${uuidv4()}.jpg`;
+    // 書き込みエラー（例: disk full）はここでそのまま例外として伝播させる
+    fs.writeFileSync(path.join(uploadDir, fileName), processedBuffer);
+    return `uploads/${postId}/${fileName}`;
   }
 
   private deleteFile(url: string): void {
