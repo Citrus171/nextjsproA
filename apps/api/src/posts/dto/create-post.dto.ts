@@ -55,10 +55,9 @@ export class CreatePostDto {
   @MinLength(1)
   description: string;
 
-  @ApiProperty({ required: false, example: "2024-01-01" })
-  @IsOptional()
+  @ApiProperty({ example: "2024-01-01" })
   @IsDateString()
-  lostDate?: string;
+  lostDate: string;
 
   @ApiProperty({ required: false, type: CreatePetDetailDto })
   @IsOptional()

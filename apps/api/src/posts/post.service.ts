@@ -47,7 +47,10 @@ export class PostsService {
       throw new BadRequestException(`最大${MAX_IMAGES}枚まで添付できます`);
     }
 
-    const lostDate = dto.lostDate ? new Date(dto.lostDate) : new Date();
+    if (!dto.lostDate) {
+      throw new BadRequestException("lostDateは必須です");
+    }
+    const lostDate = new Date(dto.lostDate);
     const savedUrls: string[] = [];
 
     // トランザクション失敗時に保存済みファイルを削除する
@@ -204,7 +207,10 @@ export class PostsService {
   }
 
   async update(id: string, userId: string, dto: UpdatePostDto) {
-    const post = await this.prisma.post.findUnique({ where: { id } });
+    const post = await this.prisma.post.findUnique({
+      where: { id },
+      include: { petDetail: true, location: true },
+    });
     if (!post) {
       throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
     }
@@ -227,14 +233,23 @@ export class PostsService {
 
       if (petDetail !== undefined) {
         const pd = petDetail;
+        // petDetailが存在しない場合はcreateパスになるため、必須フィールドを検証する
+        if (
+          !post.petDetail &&
+          (!pd.name || !pd.color || !pd.age || !pd.features)
+        ) {
+          throw new BadRequestException(
+            "petDetailを新規作成する場合、name/color/age/featuresは必須です"
+          );
+        }
         await tx.petDetail.upsert({
           where: { postId: id },
           create: {
             postId: id,
-            name: pd.name ?? "",
-            color: pd.color ?? "",
-            age: pd.age ?? "",
-            features: pd.features ?? "",
+            name: pd.name!,
+            color: pd.color!,
+            age: pd.age!,
+            features: pd.features!,
             ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
             ...(pd.breed !== undefined && { breed: pd.breed }),
             ...(pd.size !== undefined && { size: pd.size }),
@@ -259,15 +274,28 @@ export class PostsService {
 
       if (location !== undefined) {
         const loc = location;
+        // locationが存在しない場合はcreateパスになるため、必須フィールドを検証する
+        if (
+          !post.location &&
+          (!loc.prefecture ||
+            !loc.city ||
+            !loc.address ||
+            loc.lat === undefined ||
+            loc.lng === undefined)
+        ) {
+          throw new BadRequestException(
+            "locationを新規作成する場合、prefecture/city/address/lat/lngは必須です"
+          );
+        }
         await tx.location.upsert({
           where: { postId: id },
           create: {
             postId: id,
-            prefecture: (loc.prefecture ?? "saitama") as Prefecture,
-            city: loc.city ?? "",
-            address: loc.address ?? "",
-            lat: loc.lat ?? 0,
-            lng: loc.lng ?? 0,
+            prefecture: loc.prefecture! as Prefecture,
+            city: loc.city!,
+            address: loc.address!,
+            lat: loc.lat!,
+            lng: loc.lng!,
           },
           update: {
             ...(loc.prefecture !== undefined && {

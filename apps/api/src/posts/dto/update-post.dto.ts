@@ -11,17 +11,7 @@ import {
   IsBoolean,
   IsEnum,
 } from "class-validator";
-
-const parseJsonField = ({ value }: { value: unknown }) => {
-  if (typeof value === "string") {
-    try {
-      return JSON.parse(value);
-    } catch {
-      return value;
-    }
-  }
-  return value;
-};
+import { parseJsonField } from "../../utils/transform";
 
 export class UpdatePetDetailDto {
   @ApiProperty({ required: false }) @IsOptional() @IsString() name?: string;

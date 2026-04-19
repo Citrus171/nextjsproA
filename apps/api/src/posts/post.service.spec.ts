@@ -156,6 +156,7 @@ describe("PostsService", () => {
       const result = await service.create("u1", {
         title: "T",
         description: "C",
+        lostDate: "2024-01-01",
       });
 
       expect(mockPrisma.post.create).toHaveBeenCalledWith({
@@ -191,7 +192,11 @@ describe("PostsService", () => {
         { originalname: "photo.png", buffer: Buffer.from("") } as any,
       ];
 
-      await service.create("u1", { title: "T", description: "C" }, files);
+      await service.create(
+        "u1",
+        { title: "T", description: "C", lostDate: "2024-01-01" },
+        files
+      );
 
       expect(mockFs.writeFileSync).toHaveBeenCalled();
       expect(mockPrisma.image.create).toHaveBeenCalledWith({
@@ -213,9 +218,19 @@ describe("PostsService", () => {
         { originalname: "photo.png", buffer: Buffer.from("") } as any,
       ];
 
-      await service.create("u1", { title: "T", description: "C" }, files);
+      await service.create(
+        "u1",
+        { title: "T", description: "C", lostDate: "2024-01-01" },
+        files
+      );
 
       expect(mockFs.mkdirSync).toHaveBeenCalled();
+    });
+
+    it("lostDate なしは BadRequestException をスローする", async () => {
+      await expect(
+        service.create("u1", { description: "C" } as any)
+      ).rejects.toThrow(BadRequestException);
     });
 
     it("画像が5枚超の場合 BadRequestException をスローする", async () => {
@@ -225,7 +240,11 @@ describe("PostsService", () => {
       );
 
       await expect(
-        service.create("u1", { description: "C" }, files)
+        service.create(
+          "u1",
+          { description: "C", lostDate: "2024-01-01" },
+          files
+        )
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -267,6 +286,7 @@ describe("PostsService", () => {
       await service.create("u1", {
         title: "T",
         description: "C",
+        lostDate: "2024-01-01",
         petDetail,
         location,
       });
@@ -315,7 +335,11 @@ describe("PostsService", () => {
       ];
 
       await expect(
-        service.create("u1", { title: "T", description: "C" }, files)
+        service.create(
+          "u1",
+          { title: "T", description: "C", lostDate: "2024-01-01" },
+          files
+        )
       ).rejects.toThrow("disk full");
       // 1枚目の保存済みファイルがクリーンアップされること
       expect(mockFs.unlinkSync).toHaveBeenCalledTimes(1);
@@ -476,6 +500,8 @@ describe("PostsService", () => {
       lostDate: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
+      petDetail: null,
+      location: null,
     };
 
     it("オーナーが更新でき、petDetail/location/images を含むレスポンスを返す", async () => {
@@ -587,6 +613,22 @@ describe("PostsService", () => {
           create: expect.objectContaining({ postId: "post1", name: "Mimi" }),
         })
       );
+    });
+
+    it("petDetail 未存在かつ必須フィールドなしは BadRequestException", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+
+      await expect(
+        service.update("post1", "user1", { petDetail: { name: "Mimi" } })
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("location 未存在かつ必須フィールドなしは BadRequestException", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+
+      await expect(
+        service.update("post1", "user1", { location: { city: "さいたま市" } })
+      ).rejects.toThrow(BadRequestException);
     });
 
     it("location を upsert できる", async () => {
