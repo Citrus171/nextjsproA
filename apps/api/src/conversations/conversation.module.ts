@@ -1,10 +1,20 @@
 import { Module } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { JwtModule } from "@nestjs/jwt";
 import { PrismaService } from "../prisma.service";
 import { ConversationsController } from "./conversation.controller";
 import { ConversationsService } from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
 
 @Module({
+  imports: [
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>("JWT_SECRET"),
+      }),
+    }),
+  ],
   controllers: [ConversationsController],
   providers: [ConversationsService, ConversationsGateway, PrismaService],
 })

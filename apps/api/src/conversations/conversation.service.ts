@@ -5,6 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { CreateConversationDto } from "./dto/create-conversation.dto";
 import { CreateMessageDto } from "./dto/create-message.dto";
@@ -30,22 +31,24 @@ export class ConversationsService {
       );
     }
 
-    const existing = await this.prisma.conversation.findUnique({
-      where: {
-        postId_sightingId: { postId: dto.postId, sightingId: dto.sightingId },
-      },
-    });
-    if (existing)
-      throw new ConflictException("この組み合わせの会話はすでに存在します");
-
-    return this.prisma.conversation.create({
-      data: {
-        postId: dto.postId,
-        sightingId: dto.sightingId,
-        ownerId: post.userId,
-        sighterId: sighting.userId,
-      },
-    });
+    try {
+      return await this.prisma.conversation.create({
+        data: {
+          postId: dto.postId,
+          sightingId: dto.sightingId,
+          ownerId: post.userId,
+          sighterId: sighting.userId,
+        },
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === "P2002"
+      ) {
+        throw new ConflictException("この組み合わせの会話はすでに存在します");
+      }
+      throw e;
+    }
   }
 
   async findAllForUser(userId: string) {

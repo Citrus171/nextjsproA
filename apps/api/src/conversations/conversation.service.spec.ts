@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { ConversationsService } from "./conversation.service";
 
 const mockPrisma = {
@@ -43,7 +44,6 @@ describe("ConversationsService", () => {
         id: "sighting-1",
         userId: "sighter-1",
       });
-      mockPrisma.conversation.findUnique.mockResolvedValue(null);
       mockPrisma.conversation.create.mockResolvedValue({
         id: "conv-1",
         postId: "post-1",
@@ -74,7 +74,12 @@ describe("ConversationsService", () => {
         id: "sighting-1",
         userId: "sighter-1",
       });
-      mockPrisma.conversation.findUnique.mockResolvedValue({ id: "conv-1" });
+      mockPrisma.conversation.create.mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+          code: "P2002",
+          clientVersion: "0.0.0",
+        })
+      );
 
       await expect(service.create("owner-1", dto)).rejects.toThrow(
         ConflictException
