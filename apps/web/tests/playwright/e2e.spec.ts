@@ -1,8 +1,12 @@
 import { test, expect } from "@playwright/test";
 
-const baseUrl = process.env.VITE_API_BASE_URL ? "http://localhost:5173" : "http://localhost:5175";
+const baseUrl = process.env.VITE_API_BASE_URL
+  ? "http://localhost:5173"
+  : "http://localhost:5175";
 
-test("basic E2E flow: register → login → create post → view posts", async ({ page }) => {
+test("basic E2E flow: register → login → create post → view posts", async ({
+  page,
+}) => {
   const email = `e2e-${Date.now()}@test.com`;
   const password = "password123";
 
@@ -13,11 +17,10 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await page.fill('input[placeholder="name"]', "E2E User");
   await page.click('button:has-text("Register")');
 
-  // Wait for navigation or API response
-  await page.waitForTimeout(1000);
+  // Wait for redirect to login (Register component navigates on success)
+  await page.waitForURL(`${baseUrl}/login`);
 
   // 2. Login
-  await page.goto(`${baseUrl}/login`);
   await page.fill('input[placeholder="email"]', email);
   await page.fill('input[placeholder="password"]', password);
   await page.click('button:has-text("Login")');
@@ -30,7 +33,10 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await page.click('a[href="/create"]');
   await page.waitForURL(`${baseUrl}/create`);
   await page.fill('input[placeholder="title"]', "E2E Test Post");
-  await page.fill('textarea[placeholder="content"]', "This is a test post content");
+  await page.fill(
+    'textarea[placeholder="content"]',
+    "This is a test post content"
+  );
   await page.click('button:has-text("Create")');
 
   // Should navigate back to posts page
