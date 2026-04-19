@@ -18,7 +18,8 @@
     "generate": "npm run generate --workspace=packages/api-client",
     "lint:api": "eslint \"apps/api/{src,test}/**/*.ts\" --config apps/api/eslint.config.js",
     "typecheck:api": "tsc --noEmit --project apps/api/tsconfig.json",
-    "typecheck:web": "tsc --noEmit --project apps/web/tsconfig.json"
+    "typecheck:web": "tsc --noEmit --project apps/web/tsconfig.json",
+    "prepare": "husky"
   },
   "engines": {
     "node": ">=18"
@@ -26,9 +27,12 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.58.2",
     "@typescript-eslint/parser": "^8.58.2",
-    "eslint": "^10.2.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "eslint": "^10.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.1.0"
   }
