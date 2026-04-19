@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsEnum, IsNumber, IsOptional } from "class-validator";
+import { IsIn, IsNumber, IsOptional } from "class-validator";
 
 export class GetMarkersQueryDto {
   @ApiPropertyOptional()
@@ -29,6 +29,6 @@ export class GetMarkersQueryDto {
 
   @ApiPropertyOptional({ enum: ["lost", "resolved"] })
   @IsOptional()
-  @IsEnum(["lost", "resolved"])
+  @IsIn(["lost", "resolved"])
   status?: "lost" | "resolved";
 }

@@ -8,7 +8,7 @@ export class MapMarkerDto {
   @ApiProperty({ required: false }) postId?: string;
   @ApiProperty() lat: number;
   @ApiProperty() lng: number;
-  @ApiProperty({ enum: ["lost", "resolved"] }) status: string;
+  @ApiProperty({ enum: ["lost", "resolved"] }) status: "lost" | "resolved";
 }
 
 /** @deprecated 後方互換のためのエイリアス */
