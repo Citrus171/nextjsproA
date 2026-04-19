@@ -18,6 +18,7 @@ apps/api/src/
 │   │   │   ├── ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 │   │   │   ├── アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
 │   │   │   ├── 画像が sharp でリサイズ・JPEG変換されること
+│   │   │   ├── 画像処理でSharpエラーが発生した場合 BadRequestException をスローする
 │   │   │   ├── 画像が5枚超の場合 BadRequestException をスローする
 │   │   │   ├── petDetail と location を含む時、トランザクションで一括作成する
 │   │   │   └── lostDate を指定して作成できる

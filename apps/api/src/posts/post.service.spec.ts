@@ -376,8 +376,8 @@ describe("PostsService", () => {
       mockPrisma.image.create.mockResolvedValue({});
 
       const files = [
-        { originalname: "a.png", buffer: Buffer.from("") } as any,
-        { originalname: "b.png", buffer: Buffer.from("") } as any,
+        { originalname: "a.png", buffer: Buffer.from("raw") } as any,
+        { originalname: "b.png", buffer: Buffer.from("raw") } as any,
       ];
 
       await expect(
@@ -770,6 +770,24 @@ describe("PostsService", () => {
       await expect(service.remove("no-such-post", "user1")).rejects.toThrow(
         HttpException
       );
+    });
+
+    it("画像処理でSharpエラーが発生した場合 BadRequestException をスローする", async () => {
+      const sharpMock = jest.requireMock("sharp") as jest.Mock;
+      sharpMock.mockImplementation(() => {
+        throw new Error("Sharp processing failed");
+      });
+
+      const rawBuf = Buffer.from("raw");
+      const files = [{ originalname: "photo.png", buffer: rawBuf } as any];
+
+      await expect(
+        service.create(
+          "u1",
+          { description: "C", lostDate: "2024-01-01" },
+          files
+        )
+      ).rejects.toThrow(BadRequestException);
     });
   });
 });
