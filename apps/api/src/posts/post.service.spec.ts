@@ -366,6 +366,13 @@ describe("PostsService", () => {
     });
 
     it("トランザクション失敗時に保存済みファイルを削除する", async () => {
+      const sharpMock = jest.requireMock("sharp") as jest.Mock;
+      sharpMock.mockReturnValue({
+        resize: jest.fn().mockReturnThis(),
+        jpeg: jest.fn().mockReturnThis(),
+        toBuffer: jest.fn().mockResolvedValue(Buffer.from("processed-image")),
+      });
+
       mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
       // 1枚目は保存成功、2枚目でエラー
       mockFs.writeFileSync
@@ -376,8 +383,8 @@ describe("PostsService", () => {
       mockPrisma.image.create.mockResolvedValue({});
 
       const files = [
-        { originalname: "a.png", buffer: Buffer.from("") } as any,
-        { originalname: "b.png", buffer: Buffer.from("") } as any,
+        { originalname: "a.png", buffer: Buffer.from("raw") } as any,
+        { originalname: "b.png", buffer: Buffer.from("raw") } as any,
       ];
 
       await expect(
