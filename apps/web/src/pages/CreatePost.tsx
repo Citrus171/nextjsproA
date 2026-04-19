@@ -5,14 +5,14 @@ import { useApiClient } from "../api/orvalClient";
 export default function CreatePost() {
   const api = useApiClient();
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [description, setDescription] = useState("");
+  const [lostDate, setLostDate] = useState("");
   const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.createPost(title, content, image || undefined);
+      await api.createPost(title, description, lostDate);
       navigate("/");
     } catch (err) {
       alert("Failed to create post");
@@ -31,16 +31,17 @@ export default function CreatePost() {
       </div>
       <div>
         <textarea
-          placeholder="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          placeholder="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
       </div>
       <div>
         <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImage(e.target.files?.[0] || null)}
+          type="date"
+          placeholder="lostDate"
+          value={lostDate}
+          onChange={(e) => setLostDate(e.target.value)}
         />
       </div>
       <button type="submit">Create</button>

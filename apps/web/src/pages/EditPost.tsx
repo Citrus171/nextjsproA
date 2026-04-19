@@ -6,9 +6,7 @@ export default function EditPost() {
   const api = useApiClient();
   const { id } = useParams<{ id: string }>();
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [image, setImage] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [description, setDescription] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,8 +15,7 @@ export default function EditPost() {
       try {
         const data = await api.getPost(id);
         setTitle(data.title || "");
-        setContent(data.content || "");
-        setImage(data.image || null);
+        setDescription(data.description || "");
       } catch (err) {
         alert("Failed to load post");
       }
@@ -29,7 +26,7 @@ export default function EditPost() {
     e.preventDefault();
     if (!id) return;
     try {
-      await api.updatePost(id, { title, content }, imageFile ?? undefined);
+      await api.updatePost(id, { title, description });
       navigate("/");
     } catch (err) {
       alert("Failed to update post");
@@ -59,36 +56,9 @@ export default function EditPost() {
       </div>
       <div>
         <textarea
-          placeholder="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-        />
-      </div>
-      {image && !imageFile && (
-        <div>
-          <p>現在の画像:</p>
-          <img
-            src={`/${image}`}
-            alt="Post image"
-            style={{ maxWidth: "300px", maxHeight: "200px" }}
-          />
-        </div>
-      )}
-      {imageFile && (
-        <div>
-          <p>新しい画像（プレビュー）:</p>
-          <img
-            src={URL.createObjectURL(imageFile)}
-            alt="Preview"
-            style={{ maxWidth: "300px", maxHeight: "200px" }}
-          />
-        </div>
-      )}
-      <div>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+          placeholder="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
         />
       </div>
       <button type="submit">Save</button>

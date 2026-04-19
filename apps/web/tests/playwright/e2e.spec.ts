@@ -34,9 +34,10 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await page.waitForURL(`${baseUrl}/create`);
   await page.fill('input[placeholder="title"]', "E2E Test Post");
   await page.fill(
-    'textarea[placeholder="content"]',
+    'textarea[placeholder="description"]',
     "This is a test post content"
   );
+  await page.fill('input[type="date"]', "2024-01-01");
   await page.click('button:has-text("Create")');
 
   // Should navigate back to posts page
@@ -44,7 +45,7 @@ test("basic E2E flow: register → login → create post → view posts", async 
 
   // 4. Verify post appears in list
   await expect(page.locator("h3")).toContainText("E2E Test Post");
-  await expect(page.locator("p")).toContainText("This is a test post content");
+  await expect(page.locator("p")).toContainText("This is a test post content"); // description
 
   // 5. Logout
   await page.click('button:has-text("Logout")');

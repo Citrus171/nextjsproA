@@ -23,15 +23,18 @@ export type ClientOptions = {
 export function createClient(options: ClientOptions) {
   if (options.baseURL) axios.defaults.baseURL = options.baseURL;
 
-  const reqId = axios.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-    try {
-      const token = options.getToken ? await options.getToken() : null;
-      if (token) {
-        (config.headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
-      }
-    } catch (e) {}
-    return config;
-  });
+  const reqId = axios.interceptors.request.use(
+    async (config: InternalAxiosRequestConfig) => {
+      try {
+        const token = options.getToken ? await options.getToken() : null;
+        if (token) {
+          (config.headers as Record<string, string>)["Authorization"] =
+            `Bearer ${token}`;
+        }
+      } catch (e) {}
+      return config;
+    }
+  );
 
   let isRefreshing = false;
   let refreshQueue: Array<(value: string | null) => void> = [];
@@ -63,17 +66,22 @@ export function createClient(options: ClientOptions) {
     async (err: AxiosError) => {
       const original = err?.config;
       if (!original) return Promise.reject(err);
-      if (err?.response?.status === 401 && !(original as InternalAxiosRequestConfig & { _retry?: boolean })._retry) {
-        (original as InternalAxiosRequestConfig & { _retry?: boolean })._retry = true;
+      if (
+        err?.response?.status === 401 &&
+        !(original as InternalAxiosRequestConfig & { _retry?: boolean })._retry
+      ) {
+        (original as InternalAxiosRequestConfig & { _retry?: boolean })._retry =
+          true;
         const newToken = await doRefresh();
         if (newToken) {
           original.headers = original.headers || {};
-          (original.headers as Record<string, string>)["Authorization"] = `Bearer ${newToken}`;
+          (original.headers as Record<string, string>)["Authorization"] =
+            `Bearer ${newToken}`;
           return axios(original);
         }
       }
       return Promise.reject(err);
-    },
+    }
   );
 
   return {
@@ -90,7 +98,7 @@ export function createClient(options: ClientOptions) {
     register: async (
       name: string | undefined,
       email: string,
-      password: string,
+      password: string
     ) => {
       const r = await usersControllerRegister({ name, email, password });
       return r.data;
@@ -106,16 +114,23 @@ export function createClient(options: ClientOptions) {
       const r = await postsControllerList({ params: { page, perPage } });
       return r.data;
     },
-    createPost: async (title: string, content: string, image?: Blob) => {
-      const r = await postsControllerCreate({ title, content, image });
+    createPost: async (
+      title: string,
+      description: string,
+      lostDate: string
+    ) => {
+      const r = await postsControllerCreate({ title, description, lostDate });
       return r.data;
     },
     getPost: async (id: string) => {
       const r = await postsControllerGet(id);
       return r.data;
     },
-    updatePost: async (id: string, data: { title?: string; content?: string }, image?: Blob) => {
-      const r = await postsControllerUpdate(id, { ...data, image });
+    updatePost: async (
+      id: string,
+      data: { title?: string; description?: string }
+    ) => {
+      const r = await postsControllerUpdate(id, data);
       return r.data;
     },
     deletePost: async (id: string) => {

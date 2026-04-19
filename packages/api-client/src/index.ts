@@ -5,20 +5,16 @@
  * API description
  * OpenAPI spec version: 1.0
  */
-import axios from 'axios'
-import type {
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios'
+import axios from "axios";
+import type { AxiosRequestConfig, AxiosResponse } from "axios";
 export type PostsControllerUpdateBody = {
-  content?: string;
-  image?: Blob;
+  description?: string;
   title?: string;
 };
 
 export type PostsControllerCreateBody = {
-  content?: string;
-  image?: Blob;
+  description?: string;
+  lostDate?: string;
   title?: string;
 };
 
@@ -37,13 +33,13 @@ export interface LoginDto {
 }
 
 export interface PostResponseDto {
-  authorId: string;
-  content: string;
   createdAt: string;
+  description: string;
   id: string;
+  lostDate: string;
   /** @nullable */
-  image?: string | null;
-  title: string;
+  title?: string | null;
+  userId: string;
 }
 
 export interface PostListResponseDto {
@@ -66,115 +62,98 @@ export interface RegisterDto {
   password: string;
 }
 
-
-
-
-
-  export const usersControllerRegister = <TData = AxiosResponse<UserResponseDto>>(
-    registerDto: RegisterDto, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.post(
-      `/api/users/register`,
-      registerDto,options
-    );
-  }
+export const usersControllerRegister = <TData = AxiosResponse<UserResponseDto>>(
+  registerDto: RegisterDto,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/users/register`, registerDto, options);
+};
 
 export const postsControllerCreate = <TData = AxiosResponse<PostResponseDto>>(
-    postsControllerCreateBody: PostsControllerCreateBody, options?: AxiosRequestConfig
- ): Promise<TData> => {const formData = new FormData();
-if(postsControllerCreateBody.title !== undefined) {
- formData.append('title', postsControllerCreateBody.title)
- }
-if(postsControllerCreateBody.content !== undefined) {
- formData.append('content', postsControllerCreateBody.content)
- }
-if(postsControllerCreateBody.image !== undefined) {
- formData.append('image', postsControllerCreateBody.image)
- }
-
-    return axios.post(
-      `/api/posts`,
-      formData,options
-    );
+  postsControllerCreateBody: PostsControllerCreateBody,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  const formData = new FormData();
+  if (postsControllerCreateBody.title !== undefined) {
+    formData.append("title", postsControllerCreateBody.title);
   }
+  if (postsControllerCreateBody.description !== undefined) {
+    formData.append("description", postsControllerCreateBody.description);
+  }
+  if (postsControllerCreateBody.lostDate !== undefined) {
+    formData.append("lostDate", postsControllerCreateBody.lostDate);
+  }
+
+  return axios.post(`/api/posts`, formData, options);
+};
 
 export const postsControllerList = <TData = AxiosResponse<PostListResponseDto>>(
-     options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.get(
-      `/api/posts`,options
-    );
-  }
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/posts`, options);
+};
 
 export const postsControllerGet = <TData = AxiosResponse<PostResponseDto>>(
-    id: string, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.get(
-      `/api/posts/${id}`,options
-    );
-  }
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/posts/${id}`, options);
+};
 
 export const postsControllerUpdate = <TData = AxiosResponse<PostResponseDto>>(
-    id: string,
-    postsControllerUpdateBody: PostsControllerUpdateBody, options?: AxiosRequestConfig
- ): Promise<TData> => {const formData = new FormData();
-if(postsControllerUpdateBody.title !== undefined) {
- formData.append('title', postsControllerUpdateBody.title)
- }
-if(postsControllerUpdateBody.content !== undefined) {
- formData.append('content', postsControllerUpdateBody.content)
- }
-if(postsControllerUpdateBody.image !== undefined) {
- formData.append('image', postsControllerUpdateBody.image)
- }
-
-    return axios.put(
-      `/api/posts/${id}`,
-      formData,options
-    );
+  id: string,
+  postsControllerUpdateBody: PostsControllerUpdateBody,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  const formData = new FormData();
+  if (postsControllerUpdateBody.title !== undefined) {
+    formData.append("title", postsControllerUpdateBody.title);
   }
+  if (postsControllerUpdateBody.description !== undefined) {
+    formData.append("description", postsControllerUpdateBody.description);
+  }
+
+  return axios.put(`/api/posts/${id}`, formData, options);
+};
 
 export const postsControllerRemove = <TData = AxiosResponse<PostResponseDto>>(
-    id: string, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.delete(
-      `/api/posts/${id}`,options
-    );
-  }
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.delete(`/api/posts/${id}`, options);
+};
 
-export const authControllerLogin = <TData = AxiosResponse<AccessTokenResponseDto>>(
-    loginDto: LoginDto, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.post(
-      `/api/auth/login`,
-      loginDto,options
-    );
-  }
+export const authControllerLogin = <
+  TData = AxiosResponse<AccessTokenResponseDto>,
+>(
+  loginDto: LoginDto,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/auth/login`, loginDto, options);
+};
 
-export const authControllerRefresh = <TData = AxiosResponse<AccessTokenResponseDto>>(
-     options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.post(
-      `/api/auth/refresh`,undefined,options
-    );
-  }
+export const authControllerRefresh = <
+  TData = AxiosResponse<AccessTokenResponseDto>,
+>(
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/auth/refresh`, undefined, options);
+};
 
 export const authControllerLogout = <TData = AxiosResponse<LogoutResponseDto>>(
-     options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.post(
-      `/api/auth/logout`,undefined,options
-    );
-  }
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/auth/logout`, undefined, options);
+};
 
-export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>
-export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>
-export type PostsControllerListResult = AxiosResponse<PostListResponseDto>
-export type PostsControllerGetResult = AxiosResponse<PostResponseDto>
-export type PostsControllerUpdateResult = AxiosResponse<PostResponseDto>
-export type PostsControllerRemoveResult = AxiosResponse<PostResponseDto>
-export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>
-export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>
+export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>;
+export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>;
+export type PostsControllerListResult = AxiosResponse<PostListResponseDto>;
+export type PostsControllerGetResult = AxiosResponse<PostResponseDto>;
+export type PostsControllerUpdateResult = AxiosResponse<PostResponseDto>;
+export type PostsControllerRemoveResult = AxiosResponse<PostResponseDto>;
+export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>;
+export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>;
 
 export interface MarkerDto {
   lat: number;
@@ -190,5 +169,5 @@ export const mapControllerGetMarkers = <TData = AxiosResponse<MarkerDto[]>>(
   return axios.get(`/api/map/markers`, options);
 };
 
-export type MapControllerGetMarkersResult = AxiosResponse<MarkerDto[]>
-export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>
+export type MapControllerGetMarkersResult = AxiosResponse<MarkerDto[]>;
+export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>;

@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import type { PostResponseDto } from "../../../../packages/api-client/src/index";
-import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { useApiClient } from "../api/orvalClient";
 import { Link } from "react-router-dom";
 import UsersModal from "./UsersModal";
@@ -49,14 +53,7 @@ export default function Posts() {
             style={{ borderBottom: "1px solid #ddd", padding: "8px 0" }}
           >
             <h3>{p.title}</h3>
-            <p>{p.content}</p>
-            {p.image && (
-              <img
-                src={`/${p.image}`}
-                alt="Post image"
-                style={{ maxWidth: "300px", maxHeight: "200px" }}
-              />
-            )}
+            <p>{p.description}</p>
             <div>
               <Link to={`/edit/${p.id}`}>Edit</Link>{" "}
               <button
@@ -78,17 +75,32 @@ export default function Posts() {
         ))}
       </div>
 
-      <div style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 12 }}>
-        <button onClick={() => setPage((p: number) => Math.max(1, p - 1))} disabled={page === 1}>
+      <div
+        style={{
+          marginTop: 16,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <button
+          onClick={() => setPage((p: number) => Math.max(1, p - 1))}
+          disabled={page === 1}
+        >
           Prev
         </button>
         <span>
           {page} / {totalPages}
         </span>
-        <button onClick={() => setPage((p: number) => p + 1)} disabled={page >= totalPages}>
+        <button
+          onClick={() => setPage((p: number) => p + 1)}
+          disabled={page >= totalPages}
+        >
           Next
         </button>
-        <span style={{ marginLeft: 8, color: "#888" }}>Total: {data?.total}</span>
+        <span style={{ marginLeft: 8, color: "#888" }}>
+          Total: {data?.total}
+        </span>
       </div>
     </div>
   );
