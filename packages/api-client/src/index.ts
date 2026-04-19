@@ -7,16 +7,77 @@
  */
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
-export type PostsControllerUpdateBody = {
-  description?: string;
-  title?: string;
+export type SightingsControllerFindByPostParams = {
+  postId: string;
+};
+
+export type MapControllerGetMarkersStatus =
+  (typeof MapControllerGetMarkersStatus)[keyof typeof MapControllerGetMarkersStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const MapControllerGetMarkersStatus = {
+  lost: "lost",
+  resolved: "resolved",
+} as const;
+
+export type MapControllerGetMarkersParams = {
+  minLat?: number;
+  maxLat?: number;
+  minLng?: number;
+  maxLng?: number;
+  status?: MapControllerGetMarkersStatus;
+};
+
+export type PostsControllerAddImagesBody = {
+  images?: Blob[];
 };
 
 export type PostsControllerCreateBody = {
   description?: string;
+  images?: Blob[];
+  /** JSON string */
+  location?: string;
   lostDate?: string;
+  /** JSON string */
+  petDetail?: string;
   title?: string;
 };
+
+export interface CreateSightingDto {
+  address?: string;
+  comment?: string;
+  lat: number;
+  lng: number;
+  postId: string;
+  sightedAt: string;
+}
+
+export type MapMarkerDtoType =
+  (typeof MapMarkerDtoType)[keyof typeof MapMarkerDtoType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const MapMarkerDtoType = {
+  post: "post",
+  sighting: "sighting",
+} as const;
+
+export type MapMarkerDtoStatus =
+  (typeof MapMarkerDtoStatus)[keyof typeof MapMarkerDtoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const MapMarkerDtoStatus = {
+  lost: "lost",
+  resolved: "resolved",
+} as const;
+
+export interface MapMarkerDto {
+  id: string;
+  lat: number;
+  lng: number;
+  postId?: string;
+  status: MapMarkerDtoStatus;
+  type: MapMarkerDtoType;
+}
 
 export interface LogoutResponseDto {
   ok: boolean;
@@ -32,14 +93,66 @@ export interface LoginDto {
   password: string;
 }
 
-export interface PostResponseDto {
-  createdAt: string;
-  description: string;
-  id: string;
-  lostDate: string;
-  /** @nullable */
-  title?: string | null;
-  userId: string;
+export interface AddImagesResponseDto {
+  images: ImageResponseDto[];
+  remainingSlots: number;
+}
+
+export type UpdatePostDtoStatus =
+  (typeof UpdatePostDtoStatus)[keyof typeof UpdatePostDtoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdatePostDtoStatus = {
+  lost: "lost",
+  resolved: "resolved",
+} as const;
+
+export interface UpdatePostDto {
+  description?: string;
+  location?: UpdateLocationDto;
+  lostDate?: string;
+  petDetail?: UpdatePetDetailDto;
+  status?: UpdatePostDtoStatus;
+  title?: string;
+}
+
+export type UpdateLocationDtoPrefecture =
+  (typeof UpdateLocationDtoPrefecture)[keyof typeof UpdateLocationDtoPrefecture];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdateLocationDtoPrefecture = {
+  saitama: "saitama",
+} as const;
+
+export interface UpdateLocationDto {
+  address?: string;
+  city?: string;
+  lat?: number;
+  lng?: number;
+  prefecture?: UpdateLocationDtoPrefecture;
+}
+
+export type UpdatePetDetailDtoGender =
+  (typeof UpdatePetDetailDtoGender)[keyof typeof UpdatePetDetailDtoGender];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdatePetDetailDtoGender = {
+  male: "male",
+  female: "female",
+  unknown: "unknown",
+} as const;
+
+export interface UpdatePetDetailDto {
+  age?: string;
+  breed?: string;
+  collar?: string;
+  color?: string;
+  features?: string;
+  gender?: UpdatePetDetailDtoGender;
+  microchip?: boolean;
+  name?: string;
+  neutered?: boolean;
+  size?: string;
 }
 
 export interface PostListResponseDto {
@@ -47,12 +160,75 @@ export interface PostListResponseDto {
   total: number;
 }
 
+/**
+ * @nullable
+ */
+export type PostResponseDtoPetDetail = PetDetailResponseDto | null;
+
+/**
+ * @nullable
+ */
+export type PostResponseDtoLocation = LocationResponseDto | null;
+
+export interface ImageResponseDto {
+  createdAt: string;
+  id: string;
+  url: string;
+}
+
+export interface PostResponseDto {
+  createdAt: string;
+  description: string;
+  id: string;
+  images: ImageResponseDto[];
+  /** @nullable */
+  location?: PostResponseDtoLocation;
+  lostDate: string;
+  /** @nullable */
+  petDetail?: PostResponseDtoPetDetail;
+  /** @nullable */
+  resolvedAt?: string | null;
+  status: string;
+  /** @nullable */
+  title?: string | null;
+  updatedAt: string;
+  userId: string;
+}
+
+export interface LocationResponseDto {
+  address: string;
+  city: string;
+  id: string;
+  lat: number;
+  lng: number;
+  prefecture: string;
+}
+
+export interface PetDetailResponseDto {
+  age: string;
+  /** @nullable */
+  breed?: string | null;
+  /** @nullable */
+  collar?: string | null;
+  color: string;
+  features: string;
+  /** @nullable */
+  gender?: string | null;
+  id: string;
+  /** @nullable */
+  microchip?: boolean | null;
+  name: string;
+  /** @nullable */
+  neutered?: boolean | null;
+  /** @nullable */
+  size?: string | null;
+}
+
 export interface UserResponseDto {
   createdAt: string;
   email: string;
   id: string;
-  /** @nullable */
-  name?: string | null;
+  nickname: string;
 }
 
 export interface RegisterDto {
@@ -61,6 +237,12 @@ export interface RegisterDto {
   /** @minLength 8 */
   password: string;
 }
+
+export const usersControllerFindAll = <TData = AxiosResponse<void>>(
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/users`, options);
+};
 
 export const usersControllerRegister = <TData = AxiosResponse<UserResponseDto>>(
   registerDto: RegisterDto,
@@ -83,6 +265,17 @@ export const postsControllerCreate = <TData = AxiosResponse<PostResponseDto>>(
   if (postsControllerCreateBody.lostDate !== undefined) {
     formData.append("lostDate", postsControllerCreateBody.lostDate);
   }
+  if (postsControllerCreateBody.petDetail !== undefined) {
+    formData.append("petDetail", postsControllerCreateBody.petDetail);
+  }
+  if (postsControllerCreateBody.location !== undefined) {
+    formData.append("location", postsControllerCreateBody.location);
+  }
+  if (postsControllerCreateBody.images !== undefined) {
+    postsControllerCreateBody.images.forEach((value) =>
+      formData.append("images", value)
+    );
+  }
 
   return axios.post(`/api/posts`, formData, options);
 };
@@ -102,18 +295,10 @@ export const postsControllerGet = <TData = AxiosResponse<PostResponseDto>>(
 
 export const postsControllerUpdate = <TData = AxiosResponse<PostResponseDto>>(
   id: string,
-  postsControllerUpdateBody: PostsControllerUpdateBody,
+  updatePostDto: UpdatePostDto,
   options?: AxiosRequestConfig
 ): Promise<TData> => {
-  const formData = new FormData();
-  if (postsControllerUpdateBody.title !== undefined) {
-    formData.append("title", postsControllerUpdateBody.title);
-  }
-  if (postsControllerUpdateBody.description !== undefined) {
-    formData.append("description", postsControllerUpdateBody.description);
-  }
-
-  return axios.put(`/api/posts/${id}`, formData, options);
+  return axios.patch(`/api/posts/${id}`, updatePostDto, options);
 };
 
 export const postsControllerRemove = <TData = AxiosResponse<PostResponseDto>>(
@@ -121,6 +306,33 @@ export const postsControllerRemove = <TData = AxiosResponse<PostResponseDto>>(
   options?: AxiosRequestConfig
 ): Promise<TData> => {
   return axios.delete(`/api/posts/${id}`, options);
+};
+
+export const postsControllerAddImages = <
+  TData = AxiosResponse<AddImagesResponseDto>,
+>(
+  id: string,
+  postsControllerAddImagesBody: PostsControllerAddImagesBody,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  const formData = new FormData();
+  if (postsControllerAddImagesBody.images !== undefined) {
+    postsControllerAddImagesBody.images.forEach((value) =>
+      formData.append("images", value)
+    );
+  }
+
+  return axios.post(`/api/posts/${id}/images`, formData, options);
+};
+
+export const postsControllerRemoveImage = <
+  TData = AxiosResponse<ImageResponseDto>,
+>(
+  id: string,
+  imageId: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.delete(`/api/posts/${id}/images/${imageId}`, options);
 };
 
 export const authControllerLogin = <
@@ -146,28 +358,63 @@ export const authControllerLogout = <TData = AxiosResponse<LogoutResponseDto>>(
   return axios.post(`/api/auth/logout`, undefined, options);
 };
 
+export const mapControllerGetMarkers = <TData = AxiosResponse<MapMarkerDto[]>>(
+  params?: MapControllerGetMarkersParams,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/map/markers`, {
+    ...options,
+    params: { ...params, ...options?.params },
+  });
+};
+
+/**
+ * @summary 目撃情報を作成する
+ */
+export const sightingsControllerCreate = <TData = AxiosResponse<void>>(
+  createSightingDto: CreateSightingDto,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/sightings`, createSightingDto, options);
+};
+
+/**
+ * @summary postId別の目撃情報一覧を取得する
+ */
+export const sightingsControllerFindByPost = <TData = AxiosResponse<void>>(
+  params: SightingsControllerFindByPostParams,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/sightings`, {
+    ...options,
+    params: { ...params, ...options?.params },
+  });
+};
+
+/**
+ * @summary 目撃情報を削除する（本人のみ）
+ */
+export const sightingsControllerRemove = <TData = AxiosResponse<void>>(
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.delete(`/api/sightings/${id}`, options);
+};
+
+export type UsersControllerFindAllResult = AxiosResponse<void>;
 export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>;
 export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>;
 export type PostsControllerListResult = AxiosResponse<PostListResponseDto>;
 export type PostsControllerGetResult = AxiosResponse<PostResponseDto>;
 export type PostsControllerUpdateResult = AxiosResponse<PostResponseDto>;
 export type PostsControllerRemoveResult = AxiosResponse<PostResponseDto>;
+export type PostsControllerAddImagesResult =
+  AxiosResponse<AddImagesResponseDto>;
+export type PostsControllerRemoveImageResult = AxiosResponse<ImageResponseDto>;
 export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>;
 export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>;
-
-export interface MarkerDto {
-  lat: number;
-  lng: number;
-  title: string;
-  description: string;
-  imageUrl?: string;
-}
-
-export const mapControllerGetMarkers = <TData = AxiosResponse<MarkerDto[]>>(
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.get(`/api/map/markers`, options);
-};
-
-export type MapControllerGetMarkersResult = AxiosResponse<MarkerDto[]>;
 export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>;
+export type MapControllerGetMarkersResult = AxiosResponse<MapMarkerDto[]>;
+export type SightingsControllerCreateResult = AxiosResponse<void>;
+export type SightingsControllerFindByPostResult = AxiosResponse<void>;
+export type SightingsControllerRemoveResult = AxiosResponse<void>;
