@@ -82,6 +82,16 @@ apps/api/src/
 │           ├── オーナーが削除できる
 │           ├── オーナー以外は ForbiddenException を伝播する
 │           └── 存在しない投稿は HttpException を伝播する
+├── map/
+│   └── map.service.spec.ts
+│       └── getMarkers
+│           ├── bbox内のPostマーカーが type='post' で返ること
+│           ├── bbox内のSightingマーカーが type='sighting' で返ること
+│           ├── statusフィルタ指定時にPostクエリのwhereにstatusが含まれること
+│           ├── statusフィルタ指定時にSightingクエリのwhereにpost.statusが含まれること
+│           ├── bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
+│           ├── bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
+│           └── フィルタなしで全マーカー（Post+Sighting）が返ること
 ├── sightings/
 │   └── sighting.service.spec.ts
 │       ├── create
