@@ -19,9 +19,11 @@
 - [x] ファイルなしで投稿を作成する
 - [x] ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 - [x] アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
+- [x] lostDate なしは BadRequestException をスローする
 - [x] 画像が5枚超の場合 BadRequestException をスローする
 - [x] petDetail と location を含む時、トランザクションで一括作成する
 - [x] lostDate を指定して作成できる
+- [x] トランザクション失敗時に保存済みファイルを削除する
 
 #### addImages
 
@@ -40,13 +42,15 @@
 
 #### update
 
-- [x] オーナーが更新できる
+- [x] オーナーが更新できき、petDetail/location/images を含むレスポンスを返す
 - [x] オーナー以外は ForbiddenException
 - [x] 存在しない投稿は HttpException (404)
 - [x] lostDate を更新できる
 - [x] status を更新できる
 - [x] petDetail を upsert できる
+- [x] petDetail 未存在かつ必須フィールドなしは BadRequestException
 - [x] location を upsert できる
+- [x] location 未存在かつ必須フィールドなしは BadRequestException
 
 #### remove
 
@@ -119,3 +123,68 @@
 ### UserService (`src/users/user.service.spec.ts`)
 
 （既存テスト・詳細省略）
+
+---
+
+## E2E (`test/app.e2e.ts`)
+
+### POST /api/users/register
+
+- [x] オーナーユーザーを登録できる (201)
+- [x] 非オーナーユーザーを登録できる (201)
+- [x] 重複メールは 400 を返す
+- [x] 短すぎるパスワードは 400 を返す
+
+### POST /api/auth/login
+
+- [x] オーナー: accessToken を返す (200)
+- [x] 非オーナー: accessToken を返す (200)
+- [x] 誤パスワードは 400 を返す
+
+### POST /api/posts
+
+- [x] 認証済みで投稿を作成できる (201)
+- [x] 未認証は 401 を返す
+
+### GET /api/posts
+
+- [x] ゲストでも一覧を取得できる (200)
+- [x] page / perPage クエリが機能する
+
+### GET /api/posts/:id
+
+- [x] ゲストでも詳細を取得できる (200)
+
+### PATCH /api/posts/:id
+
+- [x] 未認証は 401 を返す
+- [x] 非オーナーは 403 を返す
+- [x] オーナーは更新できる (200)
+
+### POST /api/posts/:id/images
+
+- [x] 未認証は 401 を返す
+- [x] 非オーナーは 403 を返す
+- [x] オーナーは画像をアップロードできる (201)
+
+### DELETE /api/posts/:id/images/:imageId
+
+- [x] 未認証は 401 を返す
+- [x] 非オーナーは 403 を返す
+- [x] オーナーは画像を削除できる (200)
+
+### DELETE /api/posts/:id
+
+- [x] 未認証は 401 を返す
+- [x] 非オーナーは 403 を返す
+- [x] オーナーは削除できる (200)
+- [x] 存在しない投稿は 404 を返す
+
+### POST /api/auth/refresh
+
+- [x] 有効な refreshToken で新しい accessToken を返す (200)
+- [x] Cookie なしは 401 を返す
+
+### POST /api/auth/logout
+
+- [x] ログアウトで Cookie が削除される (200)

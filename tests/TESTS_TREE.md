@@ -83,4 +83,46 @@ apps/api/src/
 └── users/
     └── user.service.spec.ts
         └── UserService（既存）
+
+apps/api/test/
+└── app.e2e.ts
+    ├── POST /api/users/register
+    │   ├── オーナーユーザーを登録できる (201)
+    │   ├── 非オーナーユーザーを登録できる (201)
+    │   ├── 重複メールは 400 を返す
+    │   └── 短すぎるパスワードは 400 を返す
+    ├── POST /api/auth/login
+    │   ├── オーナー: accessToken を返す (200)
+    │   ├── 非オーナー: accessToken を返す (200)
+    │   └── 誤パスワードは 400 を返す
+    ├── POST /api/posts
+    │   ├── 認証済みで投稿を作成できる (201)
+    │   └── 未認証は 401 を返す
+    ├── GET /api/posts
+    │   ├── ゲストでも一覧を取得できる (200)
+    │   └── page / perPage クエリが機能する
+    ├── GET /api/posts/:id
+    │   └── ゲストでも詳細を取得できる (200)
+    ├── PATCH /api/posts/:id
+    │   ├── 未認証は 401 を返す
+    │   ├── 非オーナーは 403 を返す
+    │   └── オーナーは更新できる (200)
+    ├── POST /api/posts/:id/images
+    │   ├── 未認証は 401 を返す
+    │   ├── 非オーナーは 403 を返す
+    │   └── オーナーは画像をアップロードできる (201)
+    ├── DELETE /api/posts/:id/images/:imageId
+    │   ├── 未認証は 401 を返す
+    │   ├── 非オーナーは 403 を返す
+    │   └── オーナーは画像を削除できる (200)
+    ├── DELETE /api/posts/:id
+    │   ├── 未認証は 401 を返す
+    │   ├── 非オーナーは 403 を返す
+    │   ├── オーナーは削除できる (200)
+    │   └── 存在しない投稿は 404 を返す
+    ├── POST /api/auth/refresh
+    │   ├── 有効な refreshToken で新しい accessToken を返す (200)
+    │   └── Cookie なしは 401 を返す
+    └── POST /api/auth/logout
+        └── ログアウトで Cookie が削除される (200)
 ```
