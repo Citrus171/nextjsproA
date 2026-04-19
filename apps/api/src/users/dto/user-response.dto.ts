@@ -7,8 +7,8 @@ export class UserResponseDto {
   @ApiProperty()
   email: string;
 
-  @ApiProperty({ required: false, nullable: true })
-  name: string | null;
+  @ApiProperty()
+  nickname: string;
 
   @ApiProperty()
   createdAt: Date;

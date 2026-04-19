@@ -1,14 +1,24 @@
-import { BadRequestException, ForbiddenException, HttpException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  HttpException,
+  NotFoundException,
+} from "@nestjs/common";
 import { PostsController, imageFileFilter } from "./post.controller";
 import { PostsService } from "./post.service";
 
 const makePost = (overrides = {}) => ({
   id: "post1",
   title: "Title",
-  content: "Content",
-  authorId: "user1",
-  image: null,
+  description: "Content",
+  userId: "user1",
+  status: "lost",
+  lostDate: new Date("2024-01-01"),
   createdAt: new Date("2024-01-01"),
+  updatedAt: new Date("2024-01-01"),
+  petDetail: null,
+  location: null,
+  images: [],
   ...overrides,
 });
 
@@ -18,13 +28,17 @@ const mockPostsService = {
   findById: jest.fn(),
   update: jest.fn(),
   remove: jest.fn(),
+  addImages: jest.fn(),
+  removeImage: jest.fn(),
 };
 
 describe("PostsController", () => {
   let controller: PostsController;
 
   beforeEach(() => {
-    controller = new PostsController(mockPostsService as unknown as PostsService);
+    controller = new PostsController(
+      mockPostsService as unknown as PostsService
+    );
     jest.clearAllMocks();
   });
 
@@ -79,41 +93,96 @@ describe("PostsController", () => {
 
   // ─── create ──────────────────────────────────────────────────
   describe("create", () => {
-    it("req.user.id を authorId として投稿を作成する", async () => {
+    it("dto と files をサービスに渡す", async () => {
       const post = makePost();
       mockPostsService.create.mockResolvedValue(post);
       const req = { user: { id: "user1" } };
-      const dto = { title: "Title", content: "Content" };
+      const dto = { title: "Title", description: "Content" };
 
-      const result = await controller.create(req, dto as any, undefined as any);
+      const result = await controller.create(req, dto as any, []);
 
-      expect(mockPostsService.create).toHaveBeenCalledWith("user1", "Title", "Content", undefined);
+      expect(mockPostsService.create).toHaveBeenCalledWith("user1", dto, []);
       expect(result).toEqual(post);
     });
 
     it("ファイル付きで作成できる", async () => {
-      const post = makePost({ image: "uploads/uuid.png" });
+      const post = makePost();
       mockPostsService.create.mockResolvedValue(post);
       const req = { user: { id: "user1" } };
-      const dto = { title: "Title", content: "Content" };
-      const file = { originalname: "img.png", mimetype: "image/png", buffer: Buffer.from("") } as any;
+      const dto = { title: "Title", description: "Content" };
+      const files = [
+        {
+          originalname: "img.png",
+          mimetype: "image/png",
+          buffer: Buffer.from(""),
+        } as any,
+      ];
 
-      await controller.create(req, dto as any, file);
+      await controller.create(req, dto as any, files);
 
-      expect(mockPostsService.create).toHaveBeenCalledWith("user1", "Title", "Content", file);
+      expect(mockPostsService.create).toHaveBeenCalledWith("user1", dto, files);
+    });
+
+    it("files が undefined の時は空配列を渡す", async () => {
+      const post = makePost();
+      mockPostsService.create.mockResolvedValue(post);
+      const req = { user: { id: "user1" } };
+
+      await controller.create(
+        req,
+        { description: "C" } as any,
+        undefined as any
+      );
+
+      expect(mockPostsService.create).toHaveBeenCalledWith(
+        "user1",
+        { description: "C" },
+        []
+      );
+    });
+
+    it("petDetail と location を含む dto をサービスに渡す", async () => {
+      const post = makePost();
+      mockPostsService.create.mockResolvedValue(post);
+      const req = { user: { id: "user1" } };
+      const dto = {
+        title: "Title",
+        description: "Content",
+        petDetail: {
+          name: "Mimi",
+          color: "white",
+          age: "2歳",
+          features: "人懐こい",
+        },
+        location: {
+          prefecture: "saitama",
+          city: "さいたま市",
+          address: "南区",
+          lat: 35.0,
+          lng: 139.0,
+        },
+      };
+
+      await controller.create(req, dto as any, []);
+
+      expect(mockPostsService.create).toHaveBeenCalledWith("user1", dto, []);
     });
   });
 
-  // ─── update ──────────────────────────────────────────────────
+  // ─── update (PATCH) ──────────────────────────────────────────
   describe("update", () => {
     it("オーナーが更新できる", async () => {
       const updated = makePost({ title: "New" });
       mockPostsService.update.mockResolvedValue(updated);
       const req = { user: { id: "user1" } };
 
-      const result = await controller.update(req, "post1", { title: "New" } as any, undefined as any);
+      const result = await controller.update(req, "post1", {
+        title: "New",
+      } as any);
 
-      expect(mockPostsService.update).toHaveBeenCalledWith("post1", "user1", { title: "New" }, undefined);
+      expect(mockPostsService.update).toHaveBeenCalledWith("post1", "user1", {
+        title: "New",
+      });
       expect(result).toEqual(updated);
     });
 
@@ -122,17 +191,142 @@ describe("PostsController", () => {
       const req = { user: { id: "other" } };
 
       await expect(
-        controller.update(req, "post1", { title: "X" } as any, undefined as any),
+        controller.update(req, "post1", { title: "X" } as any)
       ).rejects.toThrow(ForbiddenException);
     });
 
     it("存在しない投稿は HttpException を伝播する", async () => {
-      mockPostsService.update.mockRejectedValue(new HttpException("Not found", 404));
+      mockPostsService.update.mockRejectedValue(
+        new HttpException("Not found", 404)
+      );
       const req = { user: { id: "user1" } };
 
       await expect(
-        controller.update(req, "no-such", {} as any, undefined as any),
+        controller.update(req, "no-such", {} as any)
       ).rejects.toThrow(HttpException);
+    });
+
+    it("petDetail と location を含む dto をサービスに渡す", async () => {
+      const updated = makePost();
+      mockPostsService.update.mockResolvedValue(updated);
+      const req = { user: { id: "user1" } };
+      const dto = {
+        petDetail: {
+          name: "New",
+          color: "black",
+          age: "1歳",
+          features: "元気",
+        },
+        location: { city: "川口市" },
+      };
+
+      const result = await controller.update(req, "post1", dto as any);
+
+      expect(mockPostsService.update).toHaveBeenCalledWith(
+        "post1",
+        "user1",
+        dto
+      );
+      expect(result).toEqual(updated);
+    });
+  });
+
+  // ─── addImages ───────────────────────────────────────────────
+  describe("addImages", () => {
+    it("画像を追加できる", async () => {
+      const response = {
+        remainingSlots: 4,
+        images: [
+          { id: "img1", url: "uploads/post1/a.png", createdAt: new Date() },
+        ],
+      };
+      mockPostsService.addImages.mockResolvedValue(response);
+      const req = { user: { id: "user1" } };
+      const files = [{ originalname: "a.png", buffer: Buffer.from("") } as any];
+
+      const result = await controller.addImages(req, "post1", files);
+
+      expect(mockPostsService.addImages).toHaveBeenCalledWith(
+        "post1",
+        "user1",
+        files
+      );
+      expect(result).toEqual(response);
+    });
+
+    it("files が undefined の時は空配列を渡す", async () => {
+      mockPostsService.addImages.mockResolvedValue({
+        remainingSlots: 5,
+        images: [],
+      });
+      const req = { user: { id: "user1" } };
+
+      await controller.addImages(req, "post1", undefined as any);
+
+      expect(mockPostsService.addImages).toHaveBeenCalledWith(
+        "post1",
+        "user1",
+        []
+      );
+    });
+
+    it("オーナー以外は ForbiddenException を伝播する", async () => {
+      mockPostsService.addImages.mockRejectedValue(new ForbiddenException());
+      const req = { user: { id: "other" } };
+
+      await expect(controller.addImages(req, "post1", [])).rejects.toThrow(
+        ForbiddenException
+      );
+    });
+
+    it("枚数超過は BadRequestException を伝播する", async () => {
+      mockPostsService.addImages.mockRejectedValue(new BadRequestException());
+      const req = { user: { id: "user1" } };
+
+      await expect(controller.addImages(req, "post1", [])).rejects.toThrow(
+        BadRequestException
+      );
+    });
+  });
+
+  // ─── removeImage ─────────────────────────────────────────────
+  describe("removeImage", () => {
+    it("オーナーが画像を削除できる", async () => {
+      const image = {
+        id: "img1",
+        url: "uploads/post1/a.png",
+        postId: "post1",
+        createdAt: new Date(),
+      };
+      mockPostsService.removeImage.mockResolvedValue(image);
+      const req = { user: { id: "user1" } };
+
+      const result = await controller.removeImage(req, "post1", "img1");
+
+      expect(mockPostsService.removeImage).toHaveBeenCalledWith(
+        "post1",
+        "img1",
+        "user1"
+      );
+      expect(result).toEqual(image);
+    });
+
+    it("オーナー以外は ForbiddenException を伝播する", async () => {
+      mockPostsService.removeImage.mockRejectedValue(new ForbiddenException());
+      const req = { user: { id: "other" } };
+
+      await expect(
+        controller.removeImage(req, "post1", "img1")
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it("存在しない画像は NotFoundException を伝播する", async () => {
+      mockPostsService.removeImage.mockRejectedValue(new NotFoundException());
+      const req = { user: { id: "user1" } };
+
+      await expect(
+        controller.removeImage(req, "post1", "no-img")
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -152,13 +346,21 @@ describe("PostsController", () => {
 
     it("許可されたMIMEタイプの時、cb(null, true)を呼ぶこと", () => {
       const cb = jest.fn();
-      imageFileFilter({}, { originalname: "photo.png", mimetype: "image/png" } as any, cb);
+      imageFileFilter(
+        {},
+        { originalname: "photo.png", mimetype: "image/png" } as any,
+        cb
+      );
       expect(cb).toHaveBeenCalledWith(null, true);
     });
 
     it("許可されていないMIMEタイプの時、BadRequestExceptionを渡すこと", () => {
       const cb = jest.fn();
-      imageFileFilter({}, { originalname: "doc.pdf", mimetype: "application/pdf" } as any, cb);
+      imageFileFilter(
+        {},
+        { originalname: "doc.pdf", mimetype: "application/pdf" } as any,
+        cb
+      );
       expect(cb).toHaveBeenCalledWith(expect.any(BadRequestException), false);
     });
   });
@@ -180,14 +382,20 @@ describe("PostsController", () => {
       mockPostsService.remove.mockRejectedValue(new ForbiddenException());
       const req = { user: { id: "other" } };
 
-      await expect(controller.remove(req, "post1")).rejects.toThrow(ForbiddenException);
+      await expect(controller.remove(req, "post1")).rejects.toThrow(
+        ForbiddenException
+      );
     });
 
     it("存在しない投稿は HttpException を伝播する", async () => {
-      mockPostsService.remove.mockRejectedValue(new HttpException("Not found", 404));
+      mockPostsService.remove.mockRejectedValue(
+        new HttpException("Not found", 404)
+      );
       const req = { user: { id: "user1" } };
 
-      await expect(controller.remove(req, "no-such")).rejects.toThrow(HttpException);
+      await expect(controller.remove(req, "no-such")).rejects.toThrow(
+        HttpException
+      );
     });
   });
 });

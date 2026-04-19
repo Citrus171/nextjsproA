@@ -5,15 +5,15 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post as HttpPost,
-  Put,
   Query,
   Req,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
+import { FilesInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
 import {
   ApiTags,
@@ -22,7 +22,12 @@ import {
   ApiBody,
   ApiResponse,
 } from "@nestjs/swagger";
-import { PostResponseDto, PostListResponseDto } from "./dto/post-response.dto";
+import {
+  PostResponseDto,
+  PostListResponseDto,
+  AddImagesResponseDto,
+  ImageResponseDto,
+} from "./dto/post-response.dto";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./post.service";
@@ -43,7 +48,10 @@ export function imageFileFilter(_req: any, file: Express.Multer.File, cb: any) {
   if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new BadRequestException(`Unsupported file type: ${file.mimetype}`), false);
+    cb(
+      new BadRequestException(`Unsupported file type: ${file.mimetype}`),
+      false
+    );
   }
 }
 
@@ -61,7 +69,7 @@ export class PostsController {
 
   @HttpPost()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor("image", imageUploadOptions))
+  @UseInterceptors(FilesInterceptor("images", 5, imageUploadOptions))
   @ApiConsumes("multipart/form-data")
   @ApiResponse({ status: 201, type: PostResponseDto })
   @ApiBody({
@@ -69,18 +77,20 @@ export class PostsController {
       type: "object",
       properties: {
         title: { type: "string" },
-        content: { type: "string" },
-        image: { type: "string", format: "binary" },
+        description: { type: "string" },
+        lostDate: { type: "string" },
+        petDetail: { type: "string", description: "JSON string" },
+        location: { type: "string", description: "JSON string" },
+        images: { type: "array", items: { type: "string", format: "binary" } },
       },
     },
   })
   async create(
     @Req() req: any,
     @Body() dto: CreatePostDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[]
   ) {
-    const authorId = req.user.id;
-    return this.posts.create(authorId, dto.title, dto.content, file);
+    return this.posts.create(req.user.id, dto, files ?? []);
   }
 
   @Get()
@@ -97,29 +107,16 @@ export class PostsController {
     return this.posts.findById(id);
   }
 
-  @Put(":id")
+  @Patch(":id")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor("image", imageUploadOptions))
-  @ApiConsumes("multipart/form-data")
   @ApiResponse({ status: 200, type: PostResponseDto })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
-  @ApiBody({
-    schema: {
-      type: "object",
-      properties: {
-        title: { type: "string" },
-        content: { type: "string" },
-        image: { type: "string", format: "binary" },
-      },
-    },
-  })
   async update(
     @Req() req: any,
     @Param("id") id: string,
-    @Body() body: UpdatePostDto,
-    @UploadedFile() file: Express.Multer.File,
+    @Body() body: UpdatePostDto
   ) {
-    return this.posts.update(id, req.user.id, body, file);
+    return this.posts.update(id, req.user.id, body);
   }
 
   @Delete(":id")
@@ -128,5 +125,41 @@ export class PostsController {
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
   async remove(@Req() req: any, @Param("id") id: string) {
     return this.posts.remove(id, req.user.id);
+  }
+
+  @HttpPost(":id/images")
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FilesInterceptor("images", 5, imageUploadOptions))
+  @ApiConsumes("multipart/form-data")
+  @ApiResponse({ status: 201, type: AddImagesResponseDto })
+  @ApiResponse({ status: 400, description: "画像枚数上限超過" })
+  @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        images: { type: "array", items: { type: "string", format: "binary" } },
+      },
+    },
+  })
+  async addImages(
+    @Req() req: any,
+    @Param("id") id: string,
+    @UploadedFiles() files: Express.Multer.File[]
+  ) {
+    return this.posts.addImages(id, req.user.id, files ?? []);
+  }
+
+  @Delete(":id/images/:imageId")
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ status: 200, type: ImageResponseDto })
+  @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
+  @ApiResponse({ status: 404, description: "Image not found" })
+  async removeImage(
+    @Req() req: any,
+    @Param("id") id: string,
+    @Param("imageId") imageId: string
+  ) {
+    return this.posts.removeImage(id, imageId, req.user.id);
   }
 }

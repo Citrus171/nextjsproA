@@ -20,7 +20,13 @@ describe("UsersService", () => {
   // ─── createUser ──────────────────────────────────────────────
   describe("createUser", () => {
     it("パスワードをハッシュ化して保存する", async () => {
-      const created = { id: "u1", email: "a@b.com", name: "Alice", password: "hashed", createdAt: new Date() };
+      const created = {
+        id: "u1",
+        email: "a@b.com",
+        nickname: "Alice",
+        password: "hashed",
+        createdAt: new Date(),
+      };
       mockPrisma.user.create.mockResolvedValue(created);
 
       await service.createUser("a@b.com", "plainpass", "Alice");
@@ -33,20 +39,28 @@ describe("UsersService", () => {
     it("平文パスワードを DB に保存しない", async () => {
       mockPrisma.user.create.mockResolvedValue({ id: "u1", email: "a@b.com" });
 
-      await service.createUser("a@b.com", "secret");
+      await service.createUser("a@b.com", "secret", "Bob");
 
       const call = mockPrisma.user.create.mock.calls[0][0];
       expect(call.data.password).not.toBe("secret");
     });
 
-    it("name なしで作成できる", async () => {
-      const created = { id: "u1", email: "a@b.com", name: null, password: "hashed", createdAt: new Date() };
+    it("nickname を DB に保存する", async () => {
+      const created = {
+        id: "u1",
+        email: "a@b.com",
+        nickname: "Alice",
+        password: "hashed",
+        createdAt: new Date(),
+      };
       mockPrisma.user.create.mockResolvedValue(created);
 
-      const result = await service.createUser("a@b.com", "pass");
+      const result = await service.createUser("a@b.com", "pass12345", "Alice");
 
       expect(mockPrisma.user.create).toHaveBeenCalledWith(
-        expect.objectContaining({ data: expect.objectContaining({ name: undefined }) }),
+        expect.objectContaining({
+          data: expect.objectContaining({ nickname: "Alice" }),
+        })
       );
       expect(result).toEqual(created);
     });
@@ -54,7 +68,9 @@ describe("UsersService", () => {
     it("Prisma がエラーを投げたら再スローする", async () => {
       mockPrisma.user.create.mockRejectedValue(new Error("DB error"));
 
-      await expect(service.createUser("a@b.com", "pass")).rejects.toThrow("DB error");
+      await expect(
+        service.createUser("a@b.com", "pass12345", "Alice")
+      ).rejects.toThrow("DB error");
     });
   });
 
@@ -66,7 +82,9 @@ describe("UsersService", () => {
 
       const result = await service.findByEmail("a@b.com");
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { email: "a@b.com" } });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { email: "a@b.com" },
+      });
       expect(result).toEqual(user);
     });
 
@@ -87,7 +105,9 @@ describe("UsersService", () => {
 
       const result = await service.findById("u1");
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({ where: { id: "u1" } });
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: "u1" },
+      });
       expect(result).toEqual(user);
     });
 
@@ -104,15 +124,20 @@ describe("UsersService", () => {
   describe("findAll", () => {
     it("パスワードを含まないユーザー一覧を返す", async () => {
       const users = [
-        { id: "u1", email: "a@b.com", name: "Alice", createdAt: new Date() },
-        { id: "u2", email: "b@b.com", name: "Bob", createdAt: new Date() },
+        {
+          id: "u1",
+          email: "a@b.com",
+          nickname: "Alice",
+          createdAt: new Date(),
+        },
+        { id: "u2", email: "b@b.com", nickname: "Bob", createdAt: new Date() },
       ];
       mockPrisma.user.findMany.mockResolvedValue(users);
 
       const result = await service.findAll();
 
       expect(mockPrisma.user.findMany).toHaveBeenCalledWith({
-        select: { id: true, email: true, name: true, createdAt: true },
+        select: { id: true, email: true, nickname: true, createdAt: true },
       });
       expect(result).toEqual(users);
     });
