@@ -48,60 +48,72 @@ export class PostsService {
     }
 
     const lostDate = dto.lostDate ? new Date(dto.lostDate) : new Date();
+    const savedUrls: string[] = [];
 
-    return this.prisma.$transaction(async (tx) => {
-      const post = await tx.post.create({
-        data: {
-          title: dto.title,
-          description: dto.description,
-          userId,
-          lostDate,
-        },
-      });
-
-      if (dto.petDetail) {
-        const pd = dto.petDetail;
-        await tx.petDetail.create({
+    // トランザクション失敗時に保存済みファイルを削除する
+    return this.prisma
+      .$transaction(async (tx) => {
+        const post = await tx.post.create({
           data: {
-            postId: post.id,
-            name: pd.name,
-            color: pd.color,
-            age: pd.age,
-            features: pd.features,
-            ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
-            ...(pd.breed !== undefined && { breed: pd.breed }),
-            ...(pd.size !== undefined && { size: pd.size }),
-            ...(pd.collar !== undefined && { collar: pd.collar }),
-            ...(pd.microchip !== undefined && { microchip: pd.microchip }),
-            ...(pd.neutered !== undefined && { neutered: pd.neutered }),
+            title: dto.title,
+            description: dto.description,
+            userId,
+            lostDate,
           },
         });
-      }
 
-      if (dto.location) {
-        const loc = dto.location;
-        await tx.location.create({
-          data: {
-            postId: post.id,
-            prefecture: loc.prefecture as Prefecture,
-            city: loc.city,
-            address: loc.address,
-            lat: loc.lat,
-            lng: loc.lng,
-          },
+        if (dto.petDetail) {
+          const pd = dto.petDetail;
+          await tx.petDetail.create({
+            data: {
+              postId: post.id,
+              name: pd.name,
+              color: pd.color,
+              age: pd.age,
+              features: pd.features,
+              ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
+              ...(pd.breed !== undefined && { breed: pd.breed }),
+              ...(pd.size !== undefined && { size: pd.size }),
+              ...(pd.collar !== undefined && { collar: pd.collar }),
+              ...(pd.microchip !== undefined && { microchip: pd.microchip }),
+              ...(pd.neutered !== undefined && { neutered: pd.neutered }),
+            },
+          });
+        }
+
+        if (dto.location) {
+          const loc = dto.location;
+          await tx.location.create({
+            data: {
+              postId: post.id,
+              prefecture: loc.prefecture as Prefecture,
+              city: loc.city,
+              address: loc.address,
+              lat: loc.lat,
+              lng: loc.lng,
+            },
+          });
+        }
+
+        for (const file of files) {
+          const url = this.saveFile(post.id, file);
+          savedUrls.push(url);
+          await tx.image.create({ data: { postId: post.id, url } });
+        }
+
+        return tx.post.findUnique({
+          where: { id: post.id },
+          include: { petDetail: true, location: true, images: true },
         });
-      }
-
-      for (const file of files) {
-        const url = this.saveFile(post.id, file);
-        await tx.image.create({ data: { postId: post.id, url } });
-      }
-
-      return tx.post.findUnique({
-        where: { id: post.id },
-        include: { petDetail: true, location: true, images: true },
+      })
+      .catch((e) => {
+        for (const url of savedUrls) {
+          try {
+            this.deleteFile(url);
+          } catch {}
+        }
+        throw e;
       });
-    });
   }
 
   async findAll(page = 1, perPage = 10) {
@@ -119,10 +131,12 @@ export class PostsService {
   }
 
   async findById(id: string) {
-    return this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { id },
       include: { petDetail: true, location: true, images: true },
     });
+    if (!post) throw new NotFoundException("Post not found");
+    return post;
   }
 
   async addImages(
@@ -145,17 +159,32 @@ export class PostsService {
       );
     }
 
-    const newImages = await Promise.all(
-      files.map(async (file) => {
+    // ファイルを先に保存し、DB作成失敗時はクリーンアップする
+    const savedUrls: string[] = [];
+    try {
+      for (const file of files) {
         const url = this.saveFile(postId, file);
-        return this.prisma.image.create({ data: { postId, url } });
-      })
-    );
+        savedUrls.push(url);
+      }
 
-    return {
-      remainingSlots: MAX_IMAGES - currentCount - files.length,
-      images: newImages,
-    };
+      const newImages = await this.prisma.$transaction(async (tx) => {
+        return Promise.all(
+          savedUrls.map((url) => tx.image.create({ data: { postId, url } }))
+        );
+      });
+
+      return {
+        remainingSlots: MAX_IMAGES - currentCount - files.length,
+        images: newImages,
+      };
+    } catch (error) {
+      for (const url of savedUrls) {
+        try {
+          this.deleteFile(url);
+        } catch {}
+      }
+      throw error;
+    }
   }
 
   async removeImage(postId: string, imageId: string, userId: string) {
@@ -186,7 +215,7 @@ export class PostsService {
     return this.prisma.$transaction(async (tx) => {
       const { petDetail, location, lostDate, status, title, description } = dto;
 
-      const updated = await tx.post.update({
+      await tx.post.update({
         where: { id },
         data: {
           ...(title !== undefined && { title }),
@@ -252,7 +281,11 @@ export class PostsService {
         });
       }
 
-      return updated;
+      // すべての更新後に include 付きで再取得してレスポンス形状を統一する
+      return tx.post.findUnique({
+        where: { id },
+        include: { petDetail: true, location: true, images: true },
+      });
     });
   }
 

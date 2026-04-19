@@ -121,6 +121,14 @@ describe("PostsService", () => {
       });
       expect(result).toEqual(post);
     });
+
+    it("存在しない投稿は NotFoundException", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(null);
+
+      await expect(service.findById("no-such")).rejects.toThrow(
+        NotFoundException
+      );
+    });
   });
 
   // ─── create ─────────────────────────────────────────────────
@@ -290,6 +298,28 @@ describe("PostsService", () => {
         data: expect.objectContaining({ lostDate: new Date("2024-06-15") }),
       });
     });
+
+    it("トランザクション失敗時に保存済みファイルを削除する", async () => {
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      // 1枚目は保存成功、2枚目でエラー
+      mockFs.writeFileSync
+        .mockReturnValueOnce(undefined)
+        .mockImplementationOnce(() => {
+          throw new Error("disk full");
+        });
+      mockPrisma.image.create.mockResolvedValue({});
+
+      const files = [
+        { originalname: "a.png", buffer: Buffer.from("") } as any,
+        { originalname: "b.png", buffer: Buffer.from("") } as any,
+      ];
+
+      await expect(
+        service.create("u1", { title: "T", description: "C" }, files)
+      ).rejects.toThrow("disk full");
+      // 1枚目の保存済みファイルがクリーンアップされること
+      expect(mockFs.unlinkSync).toHaveBeenCalledTimes(1);
+    });
   });
 
   // ─── addImages ──────────────────────────────────────────────
@@ -353,6 +383,18 @@ describe("PostsService", () => {
       await expect(service.addImages("post1", "user1", files)).rejects.toThrow(
         BadRequestException
       );
+    });
+
+    it("DB作成失敗時に保存済みファイルを削除する", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+      mockPrisma.image.create.mockRejectedValue(new Error("DB error"));
+
+      const files = [{ originalname: "a.png", buffer: Buffer.from("") } as any];
+
+      await expect(service.addImages("post1", "user1", files)).rejects.toThrow(
+        "DB error"
+      );
+      expect(mockFs.unlinkSync).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -436,10 +478,18 @@ describe("PostsService", () => {
       updatedAt: new Date(),
     };
 
-    it("オーナーが更新できる", async () => {
-      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
-      const updated = { ...existingPost, title: "New" };
-      mockPrisma.post.update.mockResolvedValue(updated);
+    it("オーナーが更新でき、petDetail/location/images を含むレスポンスを返す", async () => {
+      const updatedWithIncludes = {
+        ...existingPost,
+        title: "New",
+        petDetail: null,
+        location: null,
+        images: [],
+      };
+      mockPrisma.post.findUnique
+        .mockResolvedValueOnce(existingPost) // オーナー確認
+        .mockResolvedValueOnce(updatedWithIncludes); // トランザクション内の再取得
+      mockPrisma.post.update.mockResolvedValue({});
 
       const result = await service.update("post1", "user1", { title: "New" });
 
@@ -447,7 +497,10 @@ describe("PostsService", () => {
         where: { id: "post1" },
         data: { title: "New" },
       });
-      expect(result.title).toBe("New");
+      expect(result?.title).toBe("New");
+      expect(result).toHaveProperty("petDetail");
+      expect(result).toHaveProperty("location");
+      expect(result).toHaveProperty("images");
     });
 
     it("オーナー以外は ForbiddenException", async () => {
@@ -467,11 +520,16 @@ describe("PostsService", () => {
     });
 
     it("lostDate を更新できる", async () => {
-      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
-      mockPrisma.post.update.mockResolvedValue({
-        ...existingPost,
-        lostDate: new Date("2024-06-15"),
-      });
+      mockPrisma.post.findUnique
+        .mockResolvedValueOnce(existingPost)
+        .mockResolvedValueOnce({
+          ...existingPost,
+          lostDate: new Date("2024-06-15"),
+          petDetail: null,
+          location: null,
+          images: [],
+        });
+      mockPrisma.post.update.mockResolvedValue({});
 
       await service.update("post1", "user1", { lostDate: "2024-06-15" });
 
@@ -483,11 +541,16 @@ describe("PostsService", () => {
     });
 
     it("status を更新できる", async () => {
-      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
-      mockPrisma.post.update.mockResolvedValue({
-        ...existingPost,
-        status: "resolved",
-      });
+      mockPrisma.post.findUnique
+        .mockResolvedValueOnce(existingPost)
+        .mockResolvedValueOnce({
+          ...existingPost,
+          status: "resolved",
+          petDetail: null,
+          location: null,
+          images: [],
+        });
+      mockPrisma.post.update.mockResolvedValue({});
 
       await service.update("post1", "user1", { status: "resolved" });
 
@@ -499,8 +562,15 @@ describe("PostsService", () => {
     });
 
     it("petDetail を upsert できる", async () => {
-      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
-      mockPrisma.post.update.mockResolvedValue(existingPost);
+      mockPrisma.post.findUnique
+        .mockResolvedValueOnce(existingPost)
+        .mockResolvedValueOnce({
+          ...existingPost,
+          petDetail: { name: "Mimi" },
+          location: null,
+          images: [],
+        });
+      mockPrisma.post.update.mockResolvedValue({});
       mockPrisma.petDetail.upsert.mockResolvedValue({});
 
       const petDetail = {
@@ -520,8 +590,15 @@ describe("PostsService", () => {
     });
 
     it("location を upsert できる", async () => {
-      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
-      mockPrisma.post.update.mockResolvedValue(existingPost);
+      mockPrisma.post.findUnique
+        .mockResolvedValueOnce(existingPost)
+        .mockResolvedValueOnce({
+          ...existingPost,
+          petDetail: null,
+          location: { city: "さいたま市" },
+          images: [],
+        });
+      mockPrisma.post.update.mockResolvedValue({});
       mockPrisma.location.upsert.mockResolvedValue({});
 
       const location = {
