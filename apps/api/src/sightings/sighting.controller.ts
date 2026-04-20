@@ -29,11 +29,9 @@ export class SightingsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: "目撃情報を作成する" })
-  create(
-    @Request() req: { user: { userId: string } },
-    @Body() dto: CreateSightingDto
-  ) {
-    return this.sightingsService.create(req.user.userId, dto);
+  create(@Request() req: any, @Body() dto: CreateSightingDto) {
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.sightingsService.create(userId, dto);
   }
 
   @Get()
@@ -46,13 +44,11 @@ export class SightingsController {
   @Delete(":id")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: "目撃情報を削除する（本人のみ）" })
+  @ApiOperation({ summary: "目撃情報を削除する（本人または管理者）" })
   @ApiResponse({ status: 204 })
-  remove(
-    @Request() req: { user: { userId: string } },
-    @Param("id") id: string
-  ) {
-    return this.sightingsService.remove(req.user.userId, id);
+  remove(@Request() req: any, @Param("id") id: string) {
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.sightingsService.remove(userId, id);
   }
 
   @Post(":id/favorite")
@@ -65,10 +61,8 @@ export class SightingsController {
   })
   @ApiResponse({ status: 400, description: "お気に入り上限超過" })
   @ApiResponse({ status: 404, description: "Sighting not found" })
-  async toggleFavorite(
-    @Request() req: { user: { id: string } },
-    @Param("id") id: string
-  ) {
-    return this.sightingsService.toggleFavorite(req.user.id, id);
+  async toggleFavorite(@Request() req: any, @Param("id") id: string) {
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.sightingsService.toggleFavorite(userId, id);
   }
 }

@@ -22,11 +22,18 @@ enum Prefecture {
   saitama
 }
 
+enum Role {
+  user
+  admin
+}
+
 model User {
   id            String         @id @default(cuid())
-  email         String         @unique
+  emailEncrypted String
+  emailHash      String         @unique
   password      String
   nickname      String
+  role          Role           @default(user)
   posts         Post[]
   sightings     Sighting[]
   refreshTokens RefreshToken[]
@@ -169,7 +176,7 @@ model SightingFavorite {
 model RefreshToken {
   id        String   @id @default(cuid())
   token     String   @unique
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   createdAt DateTime @default(now())
   expiresAt DateTime

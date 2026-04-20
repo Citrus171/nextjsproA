@@ -3,19 +3,20 @@ import { UsersService } from "../users/user.service";
 import * as bcrypt from "bcrypt";
 import { PrismaService } from "../prisma.service";
 import * as crypto from "crypto";
+import { decryptEmail } from "../utils/crypto";
 
 @Injectable()
 export class AuthService {
   constructor(
     private users: UsersService,
-    private prisma: PrismaService,
+    private prisma: PrismaService
   ) {}
 
   async validateUser(email: string, pass: string) {
     const user = await this.users.findByEmail(email);
     if (!user) return null;
     const match = await bcrypt.compare(pass, user.password);
-    if (match) return { id: user.id, email: user.email };
+    if (match) return { id: user.id, email: user.email, role: user.role };
     return null;
   }
 
@@ -29,9 +30,9 @@ export class AuthService {
   }
 
   async rotateRefreshToken(oldToken: string) {
-    const rec = await this.prisma.refreshToken.findUnique({
+    const rec = await (this.prisma.refreshToken as any).findUnique({
       where: { token: oldToken },
-      include: { user: { select: { email: true } } },
+      include: { user: { select: { emailEncrypted: true, role: true } } },
     });
     if (!rec || rec.expiresAt <= new Date()) return null;
     await this.prisma.refreshToken.delete({ where: { token: oldToken } });
@@ -40,7 +41,15 @@ export class AuthService {
     await this.prisma.refreshToken.create({
       data: { token: newToken, userId: rec.userId, expiresAt },
     });
-    return { newToken, userId: rec.userId, email: rec.user.email };
+    const email = rec.user.emailEncrypted
+      ? decryptEmail(rec.user.emailEncrypted)
+      : (rec.user.email ?? null);
+    return {
+      newToken,
+      userId: rec.userId,
+      email,
+      role: rec.user.role,
+    };
   }
 
   async revokeRefreshToken(token: string) {
