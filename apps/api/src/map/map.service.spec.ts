@@ -151,6 +151,31 @@ describe("MapService", () => {
       expect(sightingCall.where.lng).toMatchObject({ gte: 0, lte: 0 });
     });
 
+    it("空白文字列と非有限数はbboxフィルタに含めないこと", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.sighting.findMany.mockResolvedValue([]);
+
+      await service.getMarkers({
+        minLat: "   ",
+        maxLat: Number.NaN,
+        minLng: Number.POSITIVE_INFINITY,
+        maxLng: "  140.5  ",
+      } as never);
+
+      const postCall = mockPrisma.post.findMany.mock.calls[0][0];
+      const sightingCall = mockPrisma.sighting.findMany.mock.calls[0][0];
+
+      expect(postCall.where.location).toMatchObject({
+        is: {
+          lng: { lte: 140.5 },
+        },
+      });
+      expect(sightingCall.where).toMatchObject({
+        lng: { lte: 140.5 },
+      });
+      expect(sightingCall.where.lat).toBeUndefined();
+    });
+
     it("フィルタなしで全マーカー（Post+Sighting）が返ること", async () => {
       mockPrisma.post.findMany.mockResolvedValue([
         { id: "post-1", status: "lost", location: { lat: 35.9, lng: 139.6 } },

@@ -252,6 +252,7 @@
 - [x] bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
 - [x] bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
 - [x] bboxクエリが文字列でも数値フィルタとして渡ること
+- [x] 空白文字列と非有限数はbboxフィルタに含めないこと
 - [x] フィルタなしで全マーカー（Post+Sighting）が返ること
 
 ---

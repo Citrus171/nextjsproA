@@ -109,6 +109,7 @@ apps/api/src/
 │           ├── bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
 │           ├── bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
 │           ├── bboxクエリが文字列でも数値フィルタとして渡ること
+│           ├── 空白文字列と非有限数はbboxフィルタに含めないこと
 │           └── フィルタなしで全マーカー（Post+Sighting）が返ること
 ├── conversations/
 │   ├── conversation.service.spec.ts
