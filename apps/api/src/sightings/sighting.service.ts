@@ -46,6 +46,8 @@ export class SightingsService {
       where: { id: sightingId },
     });
     if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
+    if (sighting.userId === userId)
+      throw new ForbiddenException("自分の目撃情報はお気に入りできません");
 
     const existing = await this.prisma.sightingFavorite.findUnique({
       where: { userId_sightingId: { userId, sightingId } },

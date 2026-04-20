@@ -173,6 +173,17 @@ describe("SightingsService", () => {
       });
     });
 
+    it("自分の目撃情報をお気に入りしようとすると ForbiddenException", async () => {
+      mockPrisma.sighting.findUnique.mockResolvedValue({
+        id: sightingId,
+        userId,
+      });
+
+      await expect(service.toggleFavorite(userId, sightingId)).rejects.toThrow(
+        ForbiddenException
+      );
+    });
+
     it("お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException", async () => {
       mockPrisma.sighting.findUnique.mockResolvedValue(existingSighting);
       mockPrisma.sightingFavorite.findUnique.mockResolvedValue(null);
