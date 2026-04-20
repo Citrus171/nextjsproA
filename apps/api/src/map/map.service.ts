@@ -7,8 +7,25 @@ import { MapMarkerDto } from "./dto/marker-response.dto";
 export class MapService {
   constructor(private prisma: PrismaService) {}
 
+  private toOptionalNumber(value: unknown): number | undefined {
+    if (value === undefined || value === null || value === "") return undefined;
+    if (typeof value === "number")
+      return Number.isFinite(value) ? value : undefined;
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed === "") return undefined;
+      const parsed = Number(trimmed);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return undefined;
+  }
+
   async getMarkers(query: GetMarkersQueryDto): Promise<MapMarkerDto[]> {
-    const { minLat, maxLat, minLng, maxLng, status } = query;
+    const { status } = query;
+    const minLat = this.toOptionalNumber(query.minLat);
+    const maxLat = this.toOptionalNumber(query.maxLat);
+    const minLng = this.toOptionalNumber(query.minLng);
+    const maxLng = this.toOptionalNumber(query.maxLng);
 
     const bboxFilter = (latField: string, lngField: string) => {
       const filter: Record<string, unknown> = {};
@@ -35,8 +52,13 @@ export class MapService {
       return filter;
     };
 
+    const locationFilter = bboxFilter("lat", "lng");
+    const hasLocationRangeFilter = Object.keys(locationFilter).length > 0;
+
     const postWhere: Record<string, unknown> = {
-      location: { isNot: null, ...bboxFilter("lat", "lng") },
+      location: hasLocationRangeFilter
+        ? { is: locationFilter }
+        : { isNot: null },
     };
     if (status) postWhere.status = status;
 

@@ -104,8 +104,10 @@ describe("MapService", () => {
 
       const postCall = mockPrisma.post.findMany.mock.calls[0][0];
       expect(postCall.where.location).toMatchObject({
-        lat: { gte: 35.0, lte: 36.0 },
-        lng: { gte: 139.0, lte: 140.0 },
+        is: {
+          lat: { gte: 35.0, lte: 36.0 },
+          lng: { gte: 139.0, lte: 140.0 },
+        },
       });
     });
 
@@ -123,6 +125,55 @@ describe("MapService", () => {
       const sightingCall = mockPrisma.sighting.findMany.mock.calls[0][0];
       expect(sightingCall.where.lat).toMatchObject({ gte: 35.0, lte: 36.0 });
       expect(sightingCall.where.lng).toMatchObject({ gte: 139.0, lte: 140.0 });
+    });
+
+    it("bboxクエリが文字列でも数値フィルタとして渡ること", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.sighting.findMany.mockResolvedValue([]);
+
+      await service.getMarkers({
+        minLat: "0",
+        maxLat: "0",
+        minLng: "0",
+        maxLng: "0",
+      } as never);
+
+      const postCall = mockPrisma.post.findMany.mock.calls[0][0];
+      const sightingCall = mockPrisma.sighting.findMany.mock.calls[0][0];
+
+      expect(postCall.where.location).toMatchObject({
+        is: {
+          lat: { gte: 0, lte: 0 },
+          lng: { gte: 0, lte: 0 },
+        },
+      });
+      expect(sightingCall.where.lat).toMatchObject({ gte: 0, lte: 0 });
+      expect(sightingCall.where.lng).toMatchObject({ gte: 0, lte: 0 });
+    });
+
+    it("空白文字列と非有限数はbboxフィルタに含めないこと", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.sighting.findMany.mockResolvedValue([]);
+
+      await service.getMarkers({
+        minLat: "   ",
+        maxLat: Number.NaN,
+        minLng: Number.POSITIVE_INFINITY,
+        maxLng: "  140.5  ",
+      } as never);
+
+      const postCall = mockPrisma.post.findMany.mock.calls[0][0];
+      const sightingCall = mockPrisma.sighting.findMany.mock.calls[0][0];
+
+      expect(postCall.where.location).toMatchObject({
+        is: {
+          lng: { lte: 140.5 },
+        },
+      });
+      expect(sightingCall.where).toMatchObject({
+        lng: { lte: 140.5 },
+      });
+      expect(sightingCall.where.lat).toBeUndefined();
     });
 
     it("フィルタなしで全マーカー（Post+Sighting）が返ること", async () => {
