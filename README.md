@@ -51,8 +51,20 @@ npm run test:ci
 
 Schemathesis は重いため、通常は nightly または手動実行を推奨します。
 
+注意:
+
+- Schemathesis v4 の CLI は `--url` を使用します（`--base-url` は使用不可）。
+- コマンドを更新する際は `README.md` と `.github/workflows/ci.yml` の両方を同時に更新してください。
+
 ```bash
 # 例: ローカルで Schemathesis を直接実行
-python -m pip install schemathesis
-schemathesis run http://localhost:3000/api-json --base-url http://localhost:3000 --checks not_a_server_error
+# Debian/Ubuntu で pip が無い場合
+sudo apt install -y python3-pip
+
+python3 -m pip install schemathesis
+schemathesis run http://localhost:3000/api-json --url http://localhost:3000 --checks not_a_server_error --max-examples 25 --continue-on-failure
+
+# 認証が必要なAPIも検証したい場合（JWTを付与）
+ACCESS_TOKEN="<JWT_ACCESS_TOKEN>"
+schemathesis run http://localhost:3000/api-json --url http://localhost:3000 --checks not_a_server_error --max-examples 25 --continue-on-failure -H "Authorization: Bearer ${ACCESS_TOKEN}"
 ```

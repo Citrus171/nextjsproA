@@ -108,6 +108,7 @@ apps/api/src/
 │           ├── statusフィルタ指定時にSightingクエリのwhereにpost.statusが含まれること
 │           ├── bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
 │           ├── bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
+│           ├── bboxクエリが文字列でも数値フィルタとして渡ること
 │           └── フィルタなしで全マーカー（Post+Sighting）が返ること
 ├── conversations/
 │   ├── conversation.service.spec.ts

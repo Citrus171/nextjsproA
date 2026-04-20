@@ -251,6 +251,7 @@
 - [x] statusフィルタ指定時にSightingクエリのwhereにpost.statusが含まれること
 - [x] bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
 - [x] bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
+- [x] bboxクエリが文字列でも数値フィルタとして渡ること
 - [x] フィルタなしで全マーカー（Post+Sighting）が返ること
 
 ---
