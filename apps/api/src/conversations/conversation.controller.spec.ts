@@ -12,7 +12,7 @@ const mockGateway = {
   broadcastMessage: jest.fn(),
 };
 
-const req = { user: { userId: "user-1" } };
+const req = { user: { id: "user-1" } };
 
 describe("ConversationsController", () => {
   let controller: ConversationsController;
