@@ -35,7 +35,11 @@ export class AuthController {
         "認証情報が正しくありません",
         HttpStatus.UNAUTHORIZED
       );
-    const payload: JwtPayload = { sub: user.id, email: user.email };
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
     const accessToken = this.jwt.sign(payload);
     const refresh = await this.auth.createRefreshToken(user.id);
     this.setRefreshCookie(res, refresh);
@@ -53,7 +57,11 @@ export class AuthController {
     const rot = await this.auth.rotateRefreshToken(token);
     if (!rot)
       return res.status(401).json({ error: "無効なリフレッシュトークンです" });
-    const payload: JwtPayload = { sub: rot.userId, email: rot.email };
+    const payload: JwtPayload = {
+      sub: rot.userId,
+      email: rot.email,
+      role: rot.role,
+    };
     const accessToken = this.jwt.sign(payload);
     this.setRefreshCookie(res, rot.newToken);
     return res.status(200).json({ accessToken });

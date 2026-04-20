@@ -361,7 +361,7 @@ export class PostsService {
     return { favorited: true };
   }
 
-  async remove(id: string, userId: string) {
+  async remove(id: string, userId: string, isAdmin = false) {
     const post = await this.prisma.post.findUnique({
       where: { id },
       include: { images: true },
@@ -369,7 +369,7 @@ export class PostsService {
     if (!post) {
       throw new HttpException("投稿が見つかりません", HttpStatus.NOT_FOUND);
     }
-    if (post.userId !== userId) {
+    if (post.userId !== userId && !isAdmin) {
       throw new ForbiddenException("投稿のオーナーではありません");
     }
 

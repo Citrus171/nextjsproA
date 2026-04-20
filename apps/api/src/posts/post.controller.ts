@@ -130,7 +130,8 @@ export class PostsController {
   })
   async remove(@Req() req: any, @Param("id") id: string) {
     const userId = req.user?.id ?? req.user?.userId;
-    return this.posts.remove(id, userId);
+    const isAdmin = req.user?.role === "admin";
+    return this.posts.remove(id, userId, isAdmin);
   }
 
   @HttpPost(":id/images")

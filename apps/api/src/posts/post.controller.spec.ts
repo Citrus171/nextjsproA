@@ -413,7 +413,11 @@ describe("PostsController", () => {
 
       const result = await controller.remove(req, "post1");
 
-      expect(mockPostsService.remove).toHaveBeenCalledWith("post1", "user1");
+      expect(mockPostsService.remove).toHaveBeenCalledWith(
+        "post1",
+        "user1",
+        false
+      );
       expect(result).toEqual(post);
     });
 

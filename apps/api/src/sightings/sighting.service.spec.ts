@@ -138,6 +138,19 @@ describe("SightingsService", () => {
         NotFoundException
       );
     });
+
+    it("管理者は他者のSightingを削除できること", async () => {
+      mockPrisma.sighting.findUnique.mockResolvedValue({
+        id: "s-1",
+        userId: "user-1",
+      });
+
+      await service.remove("admin-user", "s-1", true);
+
+      expect(mockPrisma.sighting.delete).toHaveBeenCalledWith({
+        where: { id: "s-1" },
+      });
+    });
   });
 
   // ─── toggleFavorite ─────────────────────────────────────────

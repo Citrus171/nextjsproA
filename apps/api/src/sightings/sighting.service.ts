@@ -69,10 +69,10 @@ export class SightingsService {
     return { favorited: true };
   }
 
-  async remove(userId: string, id: string) {
+  async remove(userId: string, id: string, isAdmin = false) {
     const sighting = await this.prisma.sighting.findUnique({ where: { id } });
     if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
-    if (sighting.userId !== userId)
+    if (sighting.userId !== userId && !isAdmin)
       throw new ForbiddenException("削除できるのは本人のみです");
 
     await this.prisma.sighting.delete({ where: { id } });

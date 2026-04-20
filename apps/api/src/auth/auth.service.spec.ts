@@ -32,18 +32,29 @@ describe("AuthService", () => {
 
   // ─── validateUser ────────────────────────────────────────────
   describe("validateUser", () => {
-    it("正しいパスワードで id と email を返す", async () => {
+    it("正しいパスワードで id と email と role を返す", async () => {
       const hashed = await bcrypt.hash("password123", 10);
-      mockUsersService.findByEmail.mockResolvedValue(makeUser({ password: hashed }));
+      mockUsersService.findByEmail.mockResolvedValue(
+        makeUser({ password: hashed, role: "user" })
+      );
 
-      const result = await service.validateUser("test@example.com", "password123");
+      const result = await service.validateUser(
+        "test@example.com",
+        "password123"
+      );
 
-      expect(result).toEqual({ id: "user1", email: "test@example.com" });
+      expect(result).toEqual({
+        id: "user1",
+        email: "test@example.com",
+        role: "user",
+      });
     });
 
     it("パスワード不一致は null を返す", async () => {
       const hashed = await bcrypt.hash("correct", 10);
-      mockUsersService.findByEmail.mockResolvedValue(makeUser({ password: hashed }));
+      mockUsersService.findByEmail.mockResolvedValue(
+        makeUser({ password: hashed })
+      );
 
       const result = await service.validateUser("test@example.com", "wrong");
 
@@ -100,7 +111,9 @@ describe("AuthService", () => {
       expect(result!.userId).toBe("user1");
       expect(result!.email).toBe("test@example.com");
       expect(result!.newToken).toHaveLength(96);
-      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { token: "old" } });
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({
+        where: { token: "old" },
+      });
     });
 
     it("存在しないトークンは null を返す", async () => {
@@ -120,7 +133,9 @@ describe("AuthService", () => {
 
       await service.revokeRefreshToken("sometoken");
 
-      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({ where: { token: "sometoken" } });
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({
+        where: { token: "sometoken" },
+      });
     });
 
     it("存在しないトークンでもエラーを投げない", async () => {
@@ -133,7 +148,11 @@ describe("AuthService", () => {
   // ─── findRefreshToken ────────────────────────────────────────
   describe("findRefreshToken", () => {
     it("トークンレコードを返す", async () => {
-      const rec = { token: "t", userId: "user1", expiresAt: new Date(Date.now() + 60 * 60 * 1000) };
+      const rec = {
+        token: "t",
+        userId: "user1",
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      };
       mockPrisma.refreshToken.findUnique.mockResolvedValue(rec);
 
       const result = await service.findRefreshToken("t");
@@ -150,7 +169,11 @@ describe("AuthService", () => {
     });
 
     it("期限切れトークンは null を返す", async () => {
-      const expired = { token: "t", userId: "user1", expiresAt: new Date(Date.now() - 1000) };
+      const expired = {
+        token: "t",
+        userId: "user1",
+        expiresAt: new Date(Date.now() - 1000),
+      };
       mockPrisma.refreshToken.findUnique.mockResolvedValue(expired);
 
       const result = await service.findRefreshToken("t");

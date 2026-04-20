@@ -3,8 +3,14 @@
 ```
 apps/api/src/
 ├── auth/
-│   └── auth.service.spec.ts
-│       └── AuthService（既存）
+│   ├── auth.service.spec.ts
+│   │   └── AuthService（既存 + validateUser で role を返すことを検証）
+│   └── roles.guard.spec.ts
+│       └── RolesGuard
+│           ├── @Roles デコレータがない場合は通す
+│           ├── ロールが一致する場合は通す
+│           ├── ロールが一致しない場合は ForbiddenException をスローする
+│           └── ユーザーが未設定の場合は ForbiddenException をスローする
 ├── posts/
 │   ├── post.service.spec.ts
 │   │   ├── findAll
@@ -45,7 +51,8 @@ apps/api/src/
 │   │       ├── オーナーが削除できる
 │   │       ├── 画像ファイルも削除する
 │   │       ├── オーナー以外は ForbiddenException
-│   │       └── 存在しない投稿は HttpException (404)
+│   │       ├── 存在しない投稿は HttpException (404)
+│   │       └── 管理者は他人の投稿を削除できる
 │   │   └── toggleFavorite
 │   │       ├── お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す
 │   │       ├── 既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す
@@ -150,7 +157,8 @@ apps/api/src/
 │   │   ├── remove
 │   │   │   ├── 本人がSightingを削除できること
 │   │   │   ├── 他者が削除しようとすると ForbiddenException
-│   │   │   └── 存在しないSightingを削除しようとすると NotFoundException
+│   │   │   ├── 存在しないSightingを削除しようとすると NotFoundException
+│   │   │   └── 管理者は他者のSightingを削除できること
 │   │   └── toggleFavorite
 │   │       ├── お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す
 │   │       ├── 既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す
@@ -164,7 +172,11 @@ apps/api/src/
 │           └── NotFoundException を伝播する
 └── users/
     └── user.service.spec.ts
-        └── UserService（既存）
+        └── UserService
+            ├── （既存テスト省略）
+            └── deleteUser
+                ├── 指定IDのユーザーを削除する
+                └── 存在しないIDは Prisma エラーを再スローする
 
 apps/api/test/
 └── app.e2e.ts
