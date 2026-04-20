@@ -19,6 +19,7 @@ const mockPrisma = {
     create: jest.fn(),
     delete: jest.fn(),
   },
+  $transaction: jest.fn(),
 };
 
 describe("SightingsService", () => {
@@ -28,6 +29,9 @@ describe("SightingsService", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     service = new SightingsService(mockPrisma as any);
     jest.clearAllMocks();
+    mockPrisma.$transaction.mockImplementation(
+      async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => fn(mockPrisma)
+    );
   });
 
   // ─── create ────────────────────────────────────────────────

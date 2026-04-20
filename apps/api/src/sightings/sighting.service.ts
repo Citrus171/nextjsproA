@@ -7,6 +7,8 @@ import {
 import { PrismaService } from "../prisma.service";
 import { CreateSightingDto } from "./dto/create-sighting.dto";
 
+const MAX_FAVORITES_LIMIT = 20;
+
 @Injectable()
 export class SightingsService {
   constructor(private prisma: PrismaService) {}
@@ -56,12 +58,12 @@ export class SightingsService {
       return { favorited: false };
     }
 
-    const count = await this.prisma.sightingFavorite.count({
-      where: { userId },
+    await this.prisma.$transaction(async (tx) => {
+      const count = await tx.sightingFavorite.count({ where: { userId } });
+      if (count >= MAX_FAVORITES_LIMIT)
+        throw new BadRequestException("Favorites limit reached");
+      await tx.sightingFavorite.create({ data: { userId, sightingId } });
     });
-    if (count >= 20) throw new BadRequestException("お気に入りは20件までです");
-
-    await this.prisma.sightingFavorite.create({ data: { userId, sightingId } });
     return { favorited: true };
   }
 

@@ -16,6 +16,7 @@ import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 
 const MAX_IMAGES = 5;
+const MAX_FAVORITES_LIMIT = 20;
 
 @Injectable()
 export class PostsService {
@@ -338,7 +339,7 @@ export class PostsService {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw new NotFoundException("Post not found");
     if (post.userId === userId)
-      throw new ForbiddenException("自分の投稿はお気に入りできません");
+      throw new ForbiddenException("Cannot favorite your own post");
 
     const existing = await this.prisma.postFavorite.findUnique({
       where: { userId_postId: { userId, postId } },
@@ -351,10 +352,12 @@ export class PostsService {
       return { favorited: false };
     }
 
-    const count = await this.prisma.postFavorite.count({ where: { userId } });
-    if (count >= 20) throw new BadRequestException("お気に入りは20件までです");
-
-    await this.prisma.postFavorite.create({ data: { userId, postId } });
+    await this.prisma.$transaction(async (tx) => {
+      const count = await tx.postFavorite.count({ where: { userId } });
+      if (count >= MAX_FAVORITES_LIMIT)
+        throw new BadRequestException("Favorites limit reached");
+      await tx.postFavorite.create({ data: { userId, postId } });
+    });
     return { favorited: true };
   }
 

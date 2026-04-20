@@ -165,6 +165,7 @@ export class PostsController {
 
   @HttpPost(":id/favorite")
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiResponse({
     status: 201,
     schema: { properties: { favorited: { type: "boolean" } } },

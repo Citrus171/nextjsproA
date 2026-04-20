@@ -65,7 +65,7 @@ export class SightingsController {
   })
   @ApiResponse({ status: 400, description: "お気に入り上限超過" })
   @ApiResponse({ status: 404, description: "Sighting not found" })
-  toggleFavorite(
+  async toggleFavorite(
     @Request() req: { user: { id: string } },
     @Param("id") id: string
   ) {
