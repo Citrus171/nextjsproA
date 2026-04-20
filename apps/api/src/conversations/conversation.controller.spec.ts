@@ -25,6 +25,36 @@ describe("ConversationsController", () => {
     jest.clearAllMocks();
   });
 
+  // ─── create ─────────────────────────────────────────────────
+  describe("create", () => {
+    it("会話を作成してサービスの結果を返すこと", async () => {
+      const conversation = {
+        id: "conv-1",
+        participantIds: ["user-1", "user-2"],
+      };
+      mockService.create.mockResolvedValue(conversation);
+
+      const dto = { postId: "p-1", sightingId: "s-1" };
+      const result = await controller.create(req, dto);
+
+      expect(mockService.create).toHaveBeenCalledWith("user-1", dto);
+      expect(result).toBe(conversation);
+    });
+  });
+
+  // ─── findAll ─────────────────────────────────────────────────
+  describe("findAll", () => {
+    it("自分が参加する会話一覧を返すこと", async () => {
+      const conversations = [{ id: "conv-1" }, { id: "conv-2" }];
+      mockService.findAllForUser.mockResolvedValue(conversations);
+
+      const result = await controller.findAll(req);
+
+      expect(mockService.findAllForUser).toHaveBeenCalledWith("user-1");
+      expect(result).toBe(conversations);
+    });
+  });
+
   // ─── createMessage ──────────────────────────────────────────
   describe("createMessage", () => {
     it("メッセージ作成後にbroadcastMessageを呼び出すこと", async () => {
@@ -62,6 +92,19 @@ describe("ConversationsController", () => {
       ).rejects.toThrow("forbidden");
 
       expect(mockGateway.broadcastMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── findMessages ───────────────────────────────────────────
+  describe("findMessages", () => {
+    it("会話内のメッセージ一覧を返すこと", async () => {
+      const messages = [{ id: "msg-1", body: "hello" }];
+      mockService.findMessages.mockResolvedValue(messages);
+
+      const result = await controller.findMessages(req, "conv-1");
+
+      expect(mockService.findMessages).toHaveBeenCalledWith("user-1", "conv-1");
+      expect(result).toBe(messages);
     });
   });
 

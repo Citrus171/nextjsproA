@@ -23,6 +23,56 @@ describe("SightingsController", () => {
     jest.clearAllMocks();
   });
 
+  // ─── create ─────────────────────────────────────────────────
+  describe("create", () => {
+    it("目撃情報を作成してサービスの結果を返すこと", async () => {
+      const sighting = { id: "s-1", postId: "p-1", userId: "user-1" };
+      mockSightingsService.create.mockResolvedValue(sighting);
+      const req = { user: { userId: "user-1" } };
+      const dto = { postId: "p-1", lat: 35.0, lng: 139.0, note: "test" };
+
+      const result = await controller.create(req as any, dto as any);
+
+      expect(mockSightingsService.create).toHaveBeenCalledWith("user-1", dto);
+      expect(result).toBe(sighting);
+    });
+  });
+
+  // ─── findByPost ───────────────────────────────────────────────
+  describe("findByPost", () => {
+    it("postIdに紐づく目撃情報一覧を返すこと", async () => {
+      const sightings = [{ id: "s-1" }, { id: "s-2" }];
+      mockSightingsService.findByPost.mockResolvedValue(sightings);
+
+      const result = await controller.findByPost("p-1");
+
+      expect(mockSightingsService.findByPost).toHaveBeenCalledWith("p-1");
+      expect(result).toBe(sightings);
+    });
+  });
+
+  // ─── remove ──────────────────────────────────────────────────
+  describe("remove", () => {
+    it("目撃情報を削除してサービスの結果を返すこと", async () => {
+      mockSightingsService.remove.mockResolvedValue({ id: "s-1" });
+      const req = { user: { userId: "user-1" } };
+
+      const result = await controller.remove(req as any, "s-1");
+
+      expect(mockSightingsService.remove).toHaveBeenCalledWith("user-1", "s-1");
+      expect(result).toEqual({ id: "s-1" });
+    });
+
+    it("ForbiddenException を伝播する", async () => {
+      mockSightingsService.remove.mockRejectedValue(new ForbiddenException());
+      const req = { user: { userId: "user-1" } };
+
+      await expect(controller.remove(req as any, "s-1")).rejects.toThrow(
+        ForbiddenException
+      );
+    });
+  });
+
   // ─── toggleFavorite ──────────────────────────────────────────
   describe("toggleFavorite", () => {
     it("{ favorited: true } を返す", async () => {
