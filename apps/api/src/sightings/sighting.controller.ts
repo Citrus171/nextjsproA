@@ -48,7 +48,8 @@ export class SightingsController {
   @ApiResponse({ status: 204 })
   remove(@Request() req: any, @Param("id") id: string) {
     const userId = req.user?.id ?? req.user?.userId;
-    return this.sightingsService.remove(userId, id);
+    const isAdmin = req.user?.role === "admin";
+    return this.sightingsService.remove(userId, id, isAdmin);
   }
 
   @Post(":id/favorite")

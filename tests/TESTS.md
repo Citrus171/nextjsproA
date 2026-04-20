@@ -60,6 +60,7 @@
 - [x] 画像ファイルも削除する
 - [x] オーナー以外は ForbiddenException
 - [x] 存在しない投稿は HttpException (404)
+- [x] 管理者は他人の投稿を削除できる
 
 ---
 
@@ -155,6 +156,7 @@
 - [x] 本人がSightingを削除できること
 - [x] 他者が削除しようとすると ForbiddenException
 - [x] 存在しないSightingを削除しようとすると NotFoundException
+- [x] 管理者は他者のSightingを削除できること
 
 #### toggleFavorite
 
@@ -253,13 +255,31 @@
 
 ---
 
+### RolesGuard (`src/auth/roles.guard.spec.ts`)
+
+- [x] @Roles デコレータがない場合は通す
+- [x] ロールが一致する場合は通す
+- [x] ロールが一致しない場合は ForbiddenException をスローする
+- [x] ユーザーが未設定の場合は ForbiddenException をスローする
+
+---
+
 ### AuthService (`src/auth/auth.service.spec.ts`)
 
-（既存テスト・詳細省略）
+#### validateUser
+
+- [x] 正しいパスワードで id と email と role を返す
+
+（その他既存テスト省略）
 
 ### UserService (`src/users/user.service.spec.ts`)
 
-（既存テスト・詳細省略）
+#### deleteUser
+
+- [x] 指定IDのユーザーを削除する
+- [x] 存在しないIDは Prisma エラーを再スローする
+
+（その他既存テスト省略）
 
 ---
 

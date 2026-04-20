@@ -778,6 +778,18 @@ describe("PostsService", () => {
       );
     });
 
+    it("管理者は他人の投稿を削除できる", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+      mockPrisma.post.delete.mockResolvedValue(existingPost);
+
+      const result = await service.remove("post1", "admin-user", true);
+
+      expect(mockPrisma.post.delete).toHaveBeenCalledWith({
+        where: { id: "post1" },
+      });
+      expect(result).toEqual(existingPost);
+    });
+
     it("画像処理でSharpエラーが発生した場合 BadRequestException をスローする", async () => {
       const sharpMock = jest.requireMock("sharp") as jest.Mock;
       sharpMock.mockImplementation(() => {

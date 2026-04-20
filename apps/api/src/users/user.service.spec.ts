@@ -6,6 +6,7 @@ const mockPrisma = {
     create: jest.fn(),
     findUnique: jest.fn(),
     findMany: jest.fn(),
+    delete: jest.fn(),
   },
 };
 
@@ -152,6 +153,28 @@ describe("UsersService", () => {
         },
       });
       expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  // ─── deleteUser ───────────────────────────────────────────────
+  describe("deleteUser", () => {
+    it("指定IDのユーザーを削除する", async () => {
+      const deleted = { id: "u1", nickname: "Alice" };
+      mockPrisma.user.delete.mockResolvedValue(deleted);
+
+      const result = await service.deleteUser("u1");
+
+      expect(mockPrisma.user.delete).toHaveBeenCalledWith({
+        where: { id: "u1" },
+      });
+      expect(result).toEqual(deleted);
+    });
+
+    it("存在しないIDは Prisma エラーを再スローする", async () => {
+      const err = Object.assign(new Error("Not found"), { code: "P2025" });
+      mockPrisma.user.delete.mockRejectedValue(err);
+
+      await expect(service.deleteUser("no-such")).rejects.toThrow("Not found");
     });
   });
 });

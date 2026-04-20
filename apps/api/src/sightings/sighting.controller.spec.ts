@@ -59,7 +59,11 @@ describe("SightingsController", () => {
 
       const result = await controller.remove(req as any, "s-1");
 
-      expect(mockSightingsService.remove).toHaveBeenCalledWith("user-1", "s-1");
+      expect(mockSightingsService.remove).toHaveBeenCalledWith(
+        "user-1",
+        "s-1",
+        false
+      );
       expect(result).toEqual({ id: "s-1" });
     });
 
