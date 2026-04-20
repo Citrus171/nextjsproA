@@ -17,3 +17,4 @@ docs/
 .playwright-mcp/
 .claude/
 CLAUDE.md
+apps/web/test-results/

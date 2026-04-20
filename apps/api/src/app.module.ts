@@ -6,6 +6,7 @@ import { PostsModule } from "./posts/post.module";
 import { AuthModule } from "./auth/auth.module";
 import { MapModule } from "./map/map.module";
 import { SightingsModule } from "./sightings/sighting.module";
+import { ConversationsModule } from "./conversations/conversation.module";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { SightingsModule } from "./sightings/sighting.module";
     AuthModule,
     MapModule,
     SightingsModule,
+    ConversationsModule,
   ],
   providers: [PrismaService],
 })

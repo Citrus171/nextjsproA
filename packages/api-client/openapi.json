@@ -416,6 +416,89 @@
         "tags": ["sightings"],
         "security": [{ "bearer": [] }]
       }
+    },
+    "/api/conversations": {
+      "post": {
+        "operationId": "ConversationsController_create",
+        "summary": "会話を作成する",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateConversationDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "" } },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "ConversationsController_findAll",
+        "summary": "自分が参加する会話一覧を取得する",
+        "parameters": [],
+        "responses": { "200": { "description": "" } },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/conversations/{id}/messages": {
+      "post": {
+        "operationId": "ConversationsController_createMessage",
+        "summary": "メッセージを送信する",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateMessageDto" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "" } },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "ConversationsController_findMessages",
+        "summary": "メッセージ一覧を取得する",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/conversations/{id}/messages/read": {
+      "patch": {
+        "operationId": "ConversationsController_markAsRead",
+        "summary": "会話内の未読メッセージを既読にする",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      }
     }
   },
   "info": {
@@ -635,6 +718,19 @@
           "comment": { "type": "string" }
         },
         "required": ["postId", "lat", "lng", "sightedAt"]
+      },
+      "CreateConversationDto": {
+        "type": "object",
+        "properties": {
+          "postId": { "type": "string" },
+          "sightingId": { "type": "string" }
+        },
+        "required": ["postId", "sightingId"]
+      },
+      "CreateMessageDto": {
+        "type": "object",
+        "properties": { "body": { "type": "string", "maxLength": 1000 } },
+        "required": ["body"]
       }
     }
   }

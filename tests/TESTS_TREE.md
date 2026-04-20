@@ -92,6 +92,43 @@ apps/api/src/
 │           ├── bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
 │           ├── bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
 │           └── フィルタなしで全マーカー（Post+Sighting）が返ること
+├── conversations/
+│   ├── conversation.service.spec.ts
+│   │   ├── create
+│   │   │   ├── 有効なデータで会話を作成できること
+│   │   │   ├── 同一postId+sightingIdの会話はConflictException
+│   │   │   ├── 存在しないpostIdはNotFoundException
+│   │   │   ├── 存在しないsightingIdはNotFoundException
+│   │   │   └── 会話参加者以外（無関係なユーザー）はForbiddenException
+│   │   ├── findAllForUser
+│   │   │   └── 自分がownerまたはsighterとして参加する会話一覧を返すこと
+│   │   ├── createMessage
+│   │   │   ├── 会話参加者がメッセージを送信できること
+│   │   │   ├── bodyが1000文字超過はBadRequestException
+│   │   │   ├── 会話参加者以外のメッセージ送信はForbiddenException
+│   │   │   └── 存在しない会話へのメッセージはNotFoundException
+│   │   ├── findMessages
+│   │   │   ├── 会話参加者がメッセージ一覧を取得できること
+│   │   │   ├── 会話参加者以外のメッセージ一覧取得はForbiddenException
+│   │   │   └── 存在しない会話のメッセージ一覧はNotFoundException
+│   │   └── markAsRead
+│   │       ├── 相手が送ったunreadメッセージをすべて既読にすること
+│   │       ├── 会話参加者以外はForbiddenException
+│   │       └── 存在しない会話はNotFoundException
+│   ├── conversations.gateway.spec.ts
+│   │   ├── handleConnection
+│   │   │   ├── トークンなしで接続した場合は切断される
+│   │   │   ├── 無効なトークンで接続した場合は切断される
+│   │   │   ├── 有効なトークンで接続した場合はsocket.data.userIdが設定される
+│   │   │   └── Authorizationヘッダー（Bearer形式）でも認証できる
+│   │   └── broadcastMessage
+│   │       └── 最小化されたペイロードのみemitする（readAtを含まない）
+│   └── conversation.controller.spec.ts
+│       ├── createMessage
+│       │   ├── メッセージ作成後にbroadcastMessageを呼び出すこと
+│       │   └── サービスが例外を投げた場合はbroadcastMessageを呼ばないこと
+│       └── markAsRead
+│           └── 既読更新結果を返すこと
 ├── sightings/
 │   └── sighting.service.spec.ts
 │       ├── create

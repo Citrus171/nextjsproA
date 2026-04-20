@@ -43,6 +43,16 @@ export type PostsControllerCreateBody = {
   title?: string;
 };
 
+export interface CreateMessageDto {
+  /** @maxLength 1000 */
+  body: string;
+}
+
+export interface CreateConversationDto {
+  postId: string;
+  sightingId: string;
+}
+
 export interface CreateSightingDto {
   address?: string;
   comment?: string;
@@ -401,6 +411,68 @@ export const sightingsControllerRemove = <TData = AxiosResponse<void>>(
   return axios.delete(`/api/sightings/${id}`, options);
 };
 
+/**
+ * @summary 会話を作成する
+ */
+export const conversationsControllerCreate = <TData = AxiosResponse<void>>(
+  createConversationDto: CreateConversationDto,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/conversations`, createConversationDto, options);
+};
+
+/**
+ * @summary 自分が参加する会話一覧を取得する
+ */
+export const conversationsControllerFindAll = <TData = AxiosResponse<void>>(
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/conversations`, options);
+};
+
+/**
+ * @summary メッセージを送信する
+ */
+export const conversationsControllerCreateMessage = <
+  TData = AxiosResponse<void>,
+>(
+  id: string,
+  createMessageDto: CreateMessageDto,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(
+    `/api/conversations/${id}/messages`,
+    createMessageDto,
+    options
+  );
+};
+
+/**
+ * @summary メッセージ一覧を取得する
+ */
+export const conversationsControllerFindMessages = <
+  TData = AxiosResponse<void>,
+>(
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/conversations/${id}/messages`, options);
+};
+
+/**
+ * @summary 会話内の未読メッセージを既読にする
+ */
+export const conversationsControllerMarkAsRead = <TData = AxiosResponse<void>>(
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.patch(
+    `/api/conversations/${id}/messages/read`,
+    undefined,
+    options
+  );
+};
+
 export type UsersControllerFindAllResult = AxiosResponse<void>;
 export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>;
 export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>;
@@ -418,3 +490,8 @@ export type MapControllerGetMarkersResult = AxiosResponse<MapMarkerDto[]>;
 export type SightingsControllerCreateResult = AxiosResponse<void>;
 export type SightingsControllerFindByPostResult = AxiosResponse<void>;
 export type SightingsControllerRemoveResult = AxiosResponse<void>;
+export type ConversationsControllerCreateResult = AxiosResponse<void>;
+export type ConversationsControllerFindAllResult = AxiosResponse<void>;
+export type ConversationsControllerCreateMessageResult = AxiosResponse<void>;
+export type ConversationsControllerFindMessagesResult = AxiosResponse<void>;
+export type ConversationsControllerMarkAsReadResult = AxiosResponse<void>;
