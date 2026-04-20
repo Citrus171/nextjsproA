@@ -159,13 +159,19 @@ describe("UsersService", () => {
   // ─── deleteUser ───────────────────────────────────────────────
   describe("deleteUser", () => {
     it("指定IDのユーザーを削除する", async () => {
-      const deleted = { id: "u1", nickname: "Alice" };
+      const deleted = {
+        id: "u1",
+        nickname: "Alice",
+        role: "USER",
+        createdAt: new Date("2024-01-01"),
+      };
       mockPrisma.user.delete.mockResolvedValue(deleted);
 
       const result = await service.deleteUser("u1");
 
       expect(mockPrisma.user.delete).toHaveBeenCalledWith({
         where: { id: "u1" },
+        select: { id: true, nickname: true, role: true, createdAt: true },
       });
       expect(result).toEqual(deleted);
     });

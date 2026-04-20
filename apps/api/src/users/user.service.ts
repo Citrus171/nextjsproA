@@ -91,6 +91,9 @@ export class UsersService {
   }
 
   async deleteUser(id: string) {
-    return this.prisma.user.delete({ where: { id } });
+    return this.prisma.user.delete({
+      where: { id },
+      select: { id: true, nickname: true, role: true, createdAt: true },
+    });
   }
 }

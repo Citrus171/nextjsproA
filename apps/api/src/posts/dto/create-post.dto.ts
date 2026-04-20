@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Type, Transform } from "class-transformer";
+import { Type, Transform, plainToInstance } from "class-transformer";
 import {
   IsString,
   MinLength,
@@ -11,7 +11,6 @@ import {
   IsBoolean,
   IsEnum,
 } from "class-validator";
-import { parseJsonField } from "../../utils/transform";
 
 export class CreatePetDetailDto {
   @ApiProperty() @IsString() name: string;
@@ -61,14 +60,42 @@ export class CreatePostDto {
 
   @ApiProperty({ required: false, type: CreatePetDetailDto })
   @IsOptional()
-  @Transform(parseJsonField)
+  @Transform(({ value }) => {
+    const parsed =
+      typeof value === "string"
+        ? (() => {
+            try {
+              return JSON.parse(value);
+            } catch {
+              return value;
+            }
+          })()
+        : value;
+    return parsed && typeof parsed === "object"
+      ? plainToInstance(CreatePetDetailDto, parsed)
+      : parsed;
+  })
   @ValidateNested()
   @Type(() => CreatePetDetailDto)
   petDetail?: CreatePetDetailDto;
 
   @ApiProperty({ required: false, type: CreateLocationDto })
   @IsOptional()
-  @Transform(parseJsonField)
+  @Transform(({ value }) => {
+    const parsed =
+      typeof value === "string"
+        ? (() => {
+            try {
+              return JSON.parse(value);
+            } catch {
+              return value;
+            }
+          })()
+        : value;
+    return parsed && typeof parsed === "object"
+      ? plainToInstance(CreateLocationDto, parsed)
+      : parsed;
+  })
   @ValidateNested()
   @Type(() => CreateLocationDto)
   location?: CreateLocationDto;

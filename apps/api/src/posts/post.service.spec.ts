@@ -634,7 +634,32 @@ describe("PostsService", () => {
 
       expect(mockPrisma.post.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ status: "resolved" }),
+          data: expect.objectContaining({
+            status: "resolved",
+            resolvedAt: expect.any(Date),
+          }),
+        })
+      );
+    });
+
+    it("status を lost に戻すと resolvedAt が null になる", async () => {
+      mockPrisma.post.findUnique
+        .mockResolvedValueOnce({ ...existingPost, status: "resolved" })
+        .mockResolvedValueOnce({
+          ...existingPost,
+          status: "lost",
+          resolvedAt: null,
+          petDetail: null,
+          location: null,
+          images: [],
+        });
+      mockPrisma.post.update.mockResolvedValue({});
+
+      await service.update("post1", "user1", { status: "lost" });
+
+      expect(mockPrisma.post.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ status: "lost", resolvedAt: null }),
         })
       );
     });

@@ -29,6 +29,7 @@ export class UsersController {
   @Roles(Role.admin)
   @ApiBearerAuth()
   @ApiResponse({ status: 200, type: [UserResponseDto] })
+  @ApiResponse({ status: 401, description: "認証が必要です" })
   @ApiResponse({ status: 403, description: "管理者のみ" })
   async findAll() {
     return this.users.findAll();
@@ -40,6 +41,7 @@ export class UsersController {
   @ApiBearerAuth()
   @HttpCode(200)
   @ApiResponse({ status: 200, description: "ユーザー削除成功" })
+  @ApiResponse({ status: 401, description: "認証が必要です" })
   @ApiResponse({ status: 403, description: "管理者のみ" })
   @ApiResponse({ status: 404, description: "ユーザーが見つかりません" })
   async remove(@Param("id") id: string) {
