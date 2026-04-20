@@ -49,6 +49,7 @@
 - [x] 存在しない投稿は HttpException (404)
 - [x] lostDate を更新できる
 - [x] status を更新できる
+- [x] status を lost に戻すと resolvedAt が null になる
 - [x] petDetail を upsert できる
 - [x] petDetail 未存在かつ必須フィールドなしは BadRequestException
 - [x] location を upsert できる
@@ -162,12 +163,26 @@
 
 - [x] お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す
 - [x] 既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す
+- [x] 自分の目撃情報をお気に入りしようとすると ForbiddenException
 - [x] お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException
 - [x] 存在しないSightingをお気に入りしようとすると NotFoundException
 
 ---
 
 ### SightingsController (`src/sightings/sighting.controller.spec.ts`)
+
+#### create
+
+- [x] 目撃情報を作成してサービスの結果を返すこと
+
+#### findByPost
+
+- [x] postIdに紐づく目撃情報一覧を返すこと
+
+#### remove
+
+- [x] 目撃情報を削除してサービスの結果を返すこと
+- [x] ForbiddenException を伝播する
 
 #### toggleFavorite
 
@@ -285,6 +300,8 @@
 
 ---
 
+---
+
 ## E2E (`test/app.e2e.ts`)
 
 ### POST /api/users/register
@@ -347,3 +364,9 @@
 ### POST /api/auth/logout
 
 - [x] ログアウトで Cookie が削除される (200)
+
+---
+
+## Web E2E (`apps/web/tests/playwright/e2e.spec.ts`)
+
+- [x] 新規登録 → ログイン → 投稿作成 → 投稿一覧表示 → ログアウト

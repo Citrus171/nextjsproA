@@ -166,6 +166,7 @@ describe("UsersService", () => {
 
       expect(mockPrisma.user.delete).toHaveBeenCalledWith({
         where: { id: "u1" },
+        select: { id: true, nickname: true, role: true, createdAt: true },
       });
       expect(result).toEqual(deleted);
     });

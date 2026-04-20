@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Type, Transform } from "class-transformer";
+import { Type, Transform, plainToInstance } from "class-transformer";
 import {
   IsString,
   MinLength,
@@ -11,7 +11,6 @@ import {
   IsBoolean,
   IsEnum,
 } from "class-validator";
-import { parseJsonField } from "../../utils/transform";
 
 export class UpdatePetDetailDto {
   @ApiProperty({ required: false }) @IsOptional() @IsString() name?: string;
@@ -72,14 +71,42 @@ export class UpdatePostDto {
 
   @ApiProperty({ required: false, type: UpdatePetDetailDto })
   @IsOptional()
-  @Transform(parseJsonField)
+  @Transform(({ value }) => {
+    const parsed =
+      typeof value === "string"
+        ? (() => {
+            try {
+              return JSON.parse(value);
+            } catch {
+              return value;
+            }
+          })()
+        : value;
+    return parsed && typeof parsed === "object"
+      ? plainToInstance(UpdatePetDetailDto, parsed)
+      : parsed;
+  })
   @ValidateNested()
   @Type(() => UpdatePetDetailDto)
   petDetail?: UpdatePetDetailDto;
 
   @ApiProperty({ required: false, type: UpdateLocationDto })
   @IsOptional()
-  @Transform(parseJsonField)
+  @Transform(({ value }) => {
+    const parsed =
+      typeof value === "string"
+        ? (() => {
+            try {
+              return JSON.parse(value);
+            } catch {
+              return value;
+            }
+          })()
+        : value;
+    return parsed && typeof parsed === "object"
+      ? plainToInstance(UpdateLocationDto, parsed)
+      : parsed;
+  })
   @ValidateNested()
   @Type(() => UpdateLocationDto)
   location?: UpdateLocationDto;

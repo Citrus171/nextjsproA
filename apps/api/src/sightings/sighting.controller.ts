@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Query,
@@ -44,6 +45,7 @@ export class SightingsController {
   @Delete(":id")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @HttpCode(204)
   @ApiOperation({ summary: "目撃情報を削除する（本人または管理者）" })
   @ApiResponse({ status: 204 })
   remove(@Request() req: any, @Param("id") id: string) {

@@ -246,6 +246,8 @@ export class PostsService {
           ...(description !== undefined && { description }),
           ...(lostDate !== undefined && { lostDate: new Date(lostDate) }),
           ...(status !== undefined && { status: status as PostStatus }),
+          ...(status === "resolved" && { resolvedAt: new Date() }),
+          ...(status === "lost" && { resolvedAt: null }),
         },
       });
 
