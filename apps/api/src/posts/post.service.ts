@@ -334,6 +334,30 @@ export class PostsService {
     });
   }
 
+  async toggleFavorite(userId: string, postId: string) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new NotFoundException("Post not found");
+    if (post.userId === userId)
+      throw new ForbiddenException("自分の投稿はお気に入りできません");
+
+    const existing = await this.prisma.postFavorite.findUnique({
+      where: { userId_postId: { userId, postId } },
+    });
+
+    if (existing) {
+      await this.prisma.postFavorite.delete({
+        where: { userId_postId: { userId, postId } },
+      });
+      return { favorited: false };
+    }
+
+    const count = await this.prisma.postFavorite.count({ where: { userId } });
+    if (count >= 20) throw new BadRequestException("お気に入りは20件までです");
+
+    await this.prisma.postFavorite.create({ data: { userId, postId } });
+    return { favorited: true };
+  }
+
   async remove(id: string, userId: string) {
     const post = await this.prisma.post.findUnique({
       where: { id },

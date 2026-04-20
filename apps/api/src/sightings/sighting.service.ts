@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -36,6 +37,32 @@ export class SightingsService {
       where: { postId },
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  async toggleFavorite(userId: string, sightingId: string) {
+    const sighting = await this.prisma.sighting.findUnique({
+      where: { id: sightingId },
+    });
+    if (!sighting) throw new NotFoundException("Sighting not found");
+
+    const existing = await this.prisma.sightingFavorite.findUnique({
+      where: { userId_sightingId: { userId, sightingId } },
+    });
+
+    if (existing) {
+      await this.prisma.sightingFavorite.delete({
+        where: { userId_sightingId: { userId, sightingId } },
+      });
+      return { favorited: false };
+    }
+
+    const count = await this.prisma.sightingFavorite.count({
+      where: { userId },
+    });
+    if (count >= 20) throw new BadRequestException("お気に入りは20件までです");
+
+    await this.prisma.sightingFavorite.create({ data: { userId, sightingId } });
+    return { favorited: true };
   }
 
   async remove(userId: string, id: string) {

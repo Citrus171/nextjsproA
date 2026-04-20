@@ -40,6 +40,12 @@ const mockPrisma = {
     findUnique: jest.fn(),
     delete: jest.fn(),
   },
+  postFavorite: {
+    findUnique: jest.fn(),
+    count: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+  },
   $transaction: jest.fn(),
 };
 
@@ -788,6 +794,67 @@ describe("PostsService", () => {
           files
         )
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  // ─── toggleFavorite ─────────────────────────────────────────
+  describe("toggleFavorite", () => {
+    const postOwner = "owner-1";
+    const otherUser = "other-user";
+    const postId = "post-1";
+    const existingPost = { id: postId, userId: postOwner };
+
+    it("お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+      mockPrisma.postFavorite.findUnique.mockResolvedValue(null);
+      mockPrisma.postFavorite.count.mockResolvedValue(0);
+      mockPrisma.postFavorite.create.mockResolvedValue({ id: "fav-1" });
+
+      const result = await service.toggleFavorite(otherUser, postId);
+
+      expect(result).toEqual({ favorited: true });
+      expect(mockPrisma.postFavorite.create).toHaveBeenCalledWith({
+        data: { userId: otherUser, postId },
+      });
+    });
+
+    it("既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+      mockPrisma.postFavorite.findUnique.mockResolvedValue({ id: "fav-1" });
+      mockPrisma.postFavorite.delete.mockResolvedValue({ id: "fav-1" });
+
+      const result = await service.toggleFavorite(otherUser, postId);
+
+      expect(result).toEqual({ favorited: false });
+      expect(mockPrisma.postFavorite.delete).toHaveBeenCalledWith({
+        where: { userId_postId: { userId: otherUser, postId } },
+      });
+    });
+
+    it("自分の投稿をお気に入りしようとすると ForbiddenException", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+
+      await expect(service.toggleFavorite(postOwner, postId)).rejects.toThrow(
+        ForbiddenException
+      );
+    });
+
+    it("お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+      mockPrisma.postFavorite.findUnique.mockResolvedValue(null);
+      mockPrisma.postFavorite.count.mockResolvedValue(20);
+
+      await expect(service.toggleFavorite(otherUser, postId)).rejects.toThrow(
+        BadRequestException
+      );
+    });
+
+    it("存在しない投稿をお気に入りしようとすると NotFoundException", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(null);
+
+      await expect(service.toggleFavorite(otherUser, postId)).rejects.toThrow(
+        NotFoundException
+      );
     });
   });
 });

@@ -46,6 +46,12 @@ apps/api/src/
 │   │       ├── 画像ファイルも削除する
 │   │       ├── オーナー以外は ForbiddenException
 │   │       └── 存在しない投稿は HttpException (404)
+│   │   └── toggleFavorite
+│   │       ├── お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す
+│   │       ├── 既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す
+│   │       ├── 自分の投稿をお気に入りしようとすると ForbiddenException
+│   │       ├── お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException
+│   │       └── 存在しない投稿をお気に入りしようとすると NotFoundException
 │   └── post.controller.spec.ts
 │       ├── list
 │       │   ├── デフォルト（page=1, perPage=10）で findAll を呼ぶ
@@ -78,6 +84,10 @@ apps/api/src/
 │       │   ├── originalnameがない時、cb(null, false)を呼ぶこと
 │       │   ├── 許可されたMIMEタイプの時、cb(null, true)を呼ぶこと
 │       │   └── 許可されていないMIMEタイプの時、BadRequestExceptionを渡すこと
+│       ├── toggleFavorite
+│       │   ├── { favorited: true } を返す
+│       │   ├── ForbiddenException を伝播する
+│       │   └── BadRequestException を伝播する
 │       └── remove
 │           ├── オーナーが削除できる
 │           ├── オーナー以外は ForbiddenException を伝播する
@@ -130,17 +140,28 @@ apps/api/src/
 │       └── markAsRead
 │           └── 既読更新結果を返すこと
 ├── sightings/
-│   └── sighting.service.spec.ts
-│       ├── create
-│       │   ├── 有効なデータでSightingを作成できること
-│       │   ├── 投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException
-│       │   └── 存在しないPostにSightingを作成しようとすると NotFoundException
-│       ├── findByPost
-│       │   └── postIdに紐づくSighting一覧をcreatedAt降順で返すこと
-│       └── remove
-│           ├── 本人がSightingを削除できること
-│           ├── 他者が削除しようとすると ForbiddenException
-│           └── 存在しないSightingを削除しようとすると NotFoundException
+│   ├── sighting.service.spec.ts
+│   │   ├── create
+│   │   │   ├── 有効なデータでSightingを作成できること
+│   │   │   ├── 投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException
+│   │   │   └── 存在しないPostにSightingを作成しようとすると NotFoundException
+│   │   ├── findByPost
+│   │   │   └── postIdに紐づくSighting一覧をcreatedAt降順で返すこと
+│   │   ├── remove
+│   │   │   ├── 本人がSightingを削除できること
+│   │   │   ├── 他者が削除しようとすると ForbiddenException
+│   │   │   └── 存在しないSightingを削除しようとすると NotFoundException
+│   │   └── toggleFavorite
+│   │       ├── お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す
+│   │       ├── 既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す
+│   │       ├── お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException
+│   │       └── 存在しないSightingをお気に入りしようとすると NotFoundException
+│   └── sighting.controller.spec.ts
+│       └── toggleFavorite
+│           ├── { favorited: true } を返す
+│           ├── { favorited: false } を返す（解除）
+│           ├── BadRequestException を伝播する
+│           └── NotFoundException を伝播する
 └── users/
     └── user.service.spec.ts
         └── UserService（既存）
