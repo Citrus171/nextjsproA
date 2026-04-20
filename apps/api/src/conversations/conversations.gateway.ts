@@ -9,6 +9,7 @@ import {
 import { Server, Socket } from "socket.io";
 import { JwtService } from "@nestjs/jwt";
 import { Message } from "@prisma/client";
+import { JwtPayload } from "../auth/interfaces/jwt-payload.interface";
 
 @WebSocketGateway({
   cors: { origin: process.env.WEB_ORIGIN || "http://localhost:5173" },
@@ -32,7 +33,8 @@ export class ConversationsGateway implements OnGatewayConnection {
 
     try {
       const token = raw.startsWith("Bearer ") ? raw.slice(7) : raw;
-      this.jwtService.verify(token);
+      const payload = this.jwtService.verify<JwtPayload>(token);
+      client.data.userId = payload.sub;
     } catch {
       client.disconnect();
     }
@@ -55,8 +57,9 @@ export class ConversationsGateway implements OnGatewayConnection {
   }
 
   broadcastMessage(conversationId: string, message: Message) {
+    const { id, senderId, body, createdAt } = message;
     this.server
       .to(`conversation:${conversationId}`)
-      .emit("newMessage", message);
+      .emit("newMessage", { id, conversationId, senderId, body, createdAt });
   }
 }

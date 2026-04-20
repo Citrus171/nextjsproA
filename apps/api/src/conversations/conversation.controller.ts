@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Param,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -25,6 +27,7 @@ export class ConversationsController {
   ) {}
 
   @Post()
+  @HttpCode(201)
   @ApiOperation({ summary: "会話を作成する" })
   create(
     @Request() req: { user: { userId: string } },
@@ -62,5 +65,15 @@ export class ConversationsController {
     @Param("id") id: string
   ) {
     return this.conversationsService.findMessages(req.user.userId, id);
+  }
+
+  @Patch(":id/messages/read")
+  @HttpCode(200)
+  @ApiOperation({ summary: "会話内の未読メッセージを既読にする" })
+  markAsRead(
+    @Request() req: { user: { userId: string } },
+    @Param("id") id: string
+  ) {
+    return this.conversationsService.markAsRead(req.user.userId, id);
   }
 }

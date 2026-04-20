@@ -165,6 +165,40 @@
 - [x] 会話参加者以外のメッセージ一覧取得はForbiddenException
 - [x] 存在しない会話のメッセージ一覧はNotFoundException
 
+#### markAsRead
+
+- [x] 相手が送ったunreadメッセージをすべて既読にすること
+- [x] 会話参加者以外はForbiddenException
+- [x] 存在しない会話はNotFoundException
+
+---
+
+### ConversationsGateway (`src/conversations/conversations.gateway.spec.ts`)
+
+#### handleConnection
+
+- [x] トークンなしで接続した場合は切断される
+- [x] 無効なトークンで接続した場合は切断される
+- [x] 有効なトークンで接続した場合はsocket.data.userIdが設定される
+- [x] Authorizationヘッダー（Bearer形式）でも認証できる
+
+#### broadcastMessage
+
+- [x] 最小化されたペイロードのみemitする（readAtを含まない）
+
+---
+
+### ConversationsController (`src/conversations/conversation.controller.spec.ts`)
+
+#### createMessage
+
+- [x] メッセージ作成後にbroadcastMessageを呼び出すこと
+- [x] サービスが例外を投げた場合はbroadcastMessageを呼ばないこと
+
+#### markAsRead
+
+- [x] 既読更新結果を返すこと
+
 ---
 
 ### MapService (`src/map/map.service.spec.ts`)

@@ -106,4 +106,24 @@ export class ConversationsService {
       orderBy: { createdAt: "asc" },
     });
   }
+
+  async markAsRead(userId: string, conversationId: string) {
+    const conversation = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+    });
+    if (!conversation) throw new NotFoundException("Conversation not found");
+
+    if (conversation.ownerId !== userId && conversation.sighterId !== userId) {
+      throw new ForbiddenException("この会話を閲覧する権限がありません");
+    }
+
+    return this.prisma.message.updateMany({
+      where: {
+        conversationId,
+        senderId: { not: userId },
+        readAt: null,
+      },
+      data: { readAt: new Date() },
+    });
+  }
 }

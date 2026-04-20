@@ -240,4 +240,46 @@ describe("ConversationsService", () => {
       );
     });
   });
+
+  // ─── markAsRead ─────────────────────────────────────────────
+  describe("markAsRead", () => {
+    const conversation = {
+      id: "conv-1",
+      ownerId: "user-1",
+      sighterId: "sighter-1",
+    };
+
+    it("相手が送ったunreadメッセージをすべて既読にすること", async () => {
+      mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
+      mockPrisma.message.updateMany.mockResolvedValue({ count: 3 });
+
+      const result = await service.markAsRead("user-1", "conv-1");
+
+      expect(mockPrisma.message.updateMany).toHaveBeenCalledWith({
+        where: {
+          conversationId: "conv-1",
+          senderId: { not: "user-1" },
+          readAt: null,
+        },
+        data: { readAt: expect.any(Date) },
+      });
+      expect(result).toEqual({ count: 3 });
+    });
+
+    it("会話参加者以外はForbiddenException", async () => {
+      mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
+
+      await expect(service.markAsRead("stranger", "conv-1")).rejects.toThrow(
+        ForbiddenException
+      );
+    });
+
+    it("存在しない会話はNotFoundException", async () => {
+      mockPrisma.conversation.findUnique.mockResolvedValue(null);
+
+      await expect(service.markAsRead("user-1", "conv-999")).rejects.toThrow(
+        NotFoundException
+      );
+    });
+  });
 });
