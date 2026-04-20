@@ -18,12 +18,12 @@ export class ConversationsService {
     const post = await this.prisma.post.findUnique({
       where: { id: dto.postId },
     });
-    if (!post) throw new NotFoundException("Post not found");
+    if (!post) throw new NotFoundException("投稿が見つかりません");
 
     const sighting = await this.prisma.sighting.findUnique({
       where: { id: dto.sightingId },
     });
-    if (!sighting) throw new NotFoundException("Sighting not found");
+    if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
 
     if (post.userId !== userId && sighting.userId !== userId) {
       throw new ForbiddenException(
@@ -74,7 +74,7 @@ export class ConversationsService {
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
     });
-    if (!conversation) throw new NotFoundException("Conversation not found");
+    if (!conversation) throw new NotFoundException("会話が見つかりません");
 
     if (conversation.ownerId !== userId && conversation.sighterId !== userId) {
       throw new ForbiddenException(
@@ -95,7 +95,7 @@ export class ConversationsService {
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
     });
-    if (!conversation) throw new NotFoundException("Conversation not found");
+    if (!conversation) throw new NotFoundException("会話が見つかりません");
 
     if (conversation.ownerId !== userId && conversation.sighterId !== userId) {
       throw new ForbiddenException("この会話を閲覧する権限がありません");
@@ -111,7 +111,7 @@ export class ConversationsService {
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
     });
-    if (!conversation) throw new NotFoundException("Conversation not found");
+    if (!conversation) throw new NotFoundException("会話が見つかりません");
 
     if (conversation.ownerId !== userId && conversation.sighterId !== userId) {
       throw new ForbiddenException("この会話を閲覧する権限がありません");

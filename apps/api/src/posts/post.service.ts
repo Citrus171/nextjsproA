@@ -156,7 +156,7 @@ export class PostsService {
       where: { id },
       include: { petDetail: true, location: true, images: true },
     });
-    if (!post) throw new NotFoundException("Post not found");
+    if (!post) throw new NotFoundException("投稿が見つかりません");
     return post;
   }
 
@@ -169,9 +169,9 @@ export class PostsService {
       where: { id: postId },
       include: { images: true },
     });
-    if (!post) throw new NotFoundException("Post not found");
+    if (!post) throw new NotFoundException("投稿が見つかりません");
     if (post.userId !== userId)
-      throw new ForbiddenException("You are not the owner of this post");
+      throw new ForbiddenException("投稿のオーナーではありません");
 
     const currentCount = post.images.length;
     if (currentCount + files.length > MAX_IMAGES) {
@@ -210,15 +210,15 @@ export class PostsService {
 
   async removeImage(postId: string, imageId: string, userId: string) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
-    if (!post) throw new NotFoundException("Post not found");
+    if (!post) throw new NotFoundException("投稿が見つかりません");
     if (post.userId !== userId)
-      throw new ForbiddenException("You are not the owner of this post");
+      throw new ForbiddenException("投稿のオーナーではありません");
 
     const image = await this.prisma.image.findUnique({
       where: { id: imageId },
     });
     if (!image || image.postId !== postId)
-      throw new NotFoundException("Image not found");
+      throw new NotFoundException("画像が見つかりません");
 
     this.deleteFile(image.url);
     return this.prisma.image.delete({ where: { id: imageId } });
@@ -230,10 +230,10 @@ export class PostsService {
       include: { petDetail: true, location: true },
     });
     if (!post) {
-      throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
+      throw new HttpException("投稿が見つかりません", HttpStatus.NOT_FOUND);
     }
     if (post.userId !== userId) {
-      throw new ForbiddenException("You are not the owner of this post");
+      throw new ForbiddenException("投稿のオーナーではありません");
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -337,9 +337,9 @@ export class PostsService {
 
   async toggleFavorite(userId: string, postId: string) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
-    if (!post) throw new NotFoundException("Post not found");
+    if (!post) throw new NotFoundException("投稿が見つかりません");
     if (post.userId === userId)
-      throw new ForbiddenException("Cannot favorite your own post");
+      throw new ForbiddenException("自分の投稿はお気に入りできません");
 
     const existing = await this.prisma.postFavorite.findUnique({
       where: { userId_postId: { userId, postId } },
@@ -355,7 +355,7 @@ export class PostsService {
     await this.prisma.$transaction(async (tx) => {
       const count = await tx.postFavorite.count({ where: { userId } });
       if (count >= MAX_FAVORITES_LIMIT)
-        throw new BadRequestException("Favorites limit reached");
+        throw new BadRequestException("お気に入りは20件までです");
       await tx.postFavorite.create({ data: { userId, postId } });
     });
     return { favorited: true };
@@ -367,10 +367,10 @@ export class PostsService {
       include: { images: true },
     });
     if (!post) {
-      throw new HttpException("Post not found", HttpStatus.NOT_FOUND);
+      throw new HttpException("投稿が見つかりません", HttpStatus.NOT_FOUND);
     }
     if (post.userId !== userId) {
-      throw new ForbiddenException("You are not the owner of this post");
+      throw new ForbiddenException("投稿のオーナーではありません");
     }
 
     for (const image of post.images) {

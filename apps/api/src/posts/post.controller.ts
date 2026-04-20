@@ -49,7 +49,7 @@ export function imageFileFilter(_req: any, file: Express.Multer.File, cb: any) {
     cb(null, true);
   } else {
     cb(
-      new BadRequestException(`Unsupported file type: ${file.mimetype}`),
+      new BadRequestException(`未対応のファイル形式です: ${file.mimetype}`),
       false
     );
   }

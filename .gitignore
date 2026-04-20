@@ -16,5 +16,6 @@ memo/
 docs/
 .playwright-mcp/
 .claude/
+.kilo/
 CLAUDE.md
 apps/web/test-results/
