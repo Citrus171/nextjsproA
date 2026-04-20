@@ -1,4 +1,8 @@
-import { ForbiddenException, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from "@nestjs/common";
 import { SightingsService } from "./sighting.service";
 
 const mockPrisma = {
@@ -9,6 +13,13 @@ const mockPrisma = {
     findUnique: jest.fn(),
     delete: jest.fn(),
   },
+  sightingFavorite: {
+    findUnique: jest.fn(),
+    count: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+  },
+  $transaction: jest.fn(),
 };
 
 describe("SightingsService", () => {
@@ -18,6 +29,9 @@ describe("SightingsService", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     service = new SightingsService(mockPrisma as any);
     jest.clearAllMocks();
+    mockPrisma.$transaction.mockImplementation(
+      async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => fn(mockPrisma)
+    );
   });
 
   // ─── create ────────────────────────────────────────────────
@@ -121,6 +135,58 @@ describe("SightingsService", () => {
       mockPrisma.sighting.findUnique.mockResolvedValue(null);
 
       await expect(service.remove("user-1", "s-1")).rejects.toThrow(
+        NotFoundException
+      );
+    });
+  });
+
+  // ─── toggleFavorite ─────────────────────────────────────────
+  describe("toggleFavorite", () => {
+    const userId = "user-1";
+    const sightingId = "s-1";
+    const existingSighting = { id: sightingId, userId: "other-user" };
+
+    it("お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す", async () => {
+      mockPrisma.sighting.findUnique.mockResolvedValue(existingSighting);
+      mockPrisma.sightingFavorite.findUnique.mockResolvedValue(null);
+      mockPrisma.sightingFavorite.count.mockResolvedValue(0);
+      mockPrisma.sightingFavorite.create.mockResolvedValue({ id: "fav-1" });
+
+      const result = await service.toggleFavorite(userId, sightingId);
+
+      expect(result).toEqual({ favorited: true });
+      expect(mockPrisma.sightingFavorite.create).toHaveBeenCalledWith({
+        data: { userId, sightingId },
+      });
+    });
+
+    it("既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す", async () => {
+      mockPrisma.sighting.findUnique.mockResolvedValue(existingSighting);
+      mockPrisma.sightingFavorite.findUnique.mockResolvedValue({ id: "fav-1" });
+      mockPrisma.sightingFavorite.delete.mockResolvedValue({ id: "fav-1" });
+
+      const result = await service.toggleFavorite(userId, sightingId);
+
+      expect(result).toEqual({ favorited: false });
+      expect(mockPrisma.sightingFavorite.delete).toHaveBeenCalledWith({
+        where: { userId_sightingId: { userId, sightingId } },
+      });
+    });
+
+    it("お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException", async () => {
+      mockPrisma.sighting.findUnique.mockResolvedValue(existingSighting);
+      mockPrisma.sightingFavorite.findUnique.mockResolvedValue(null);
+      mockPrisma.sightingFavorite.count.mockResolvedValue(20);
+
+      await expect(service.toggleFavorite(userId, sightingId)).rejects.toThrow(
+        BadRequestException
+      );
+    });
+
+    it("存在しないSightingをお気に入りしようとすると NotFoundException", async () => {
+      mockPrisma.sighting.findUnique.mockResolvedValue(null);
+
+      await expect(service.toggleFavorite(userId, sightingId)).rejects.toThrow(
         NotFoundException
       );
     });

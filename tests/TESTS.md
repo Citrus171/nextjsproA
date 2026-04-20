@@ -118,6 +118,26 @@
 
 ---
 
+#### toggleFavorite
+
+- [x] お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す
+- [x] 既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す
+- [x] 自分の投稿をお気に入りしようとすると ForbiddenException
+- [x] お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException
+- [x] 存在しない投稿をお気に入りしようとすると NotFoundException
+
+---
+
+### PostsController (`src/posts/post.controller.spec.ts`) - toggleFavorite
+
+#### toggleFavorite
+
+- [x] { favorited: true } を返す
+- [x] ForbiddenException を伝播する
+- [x] BadRequestException を伝播する
+
+---
+
 ### SightingsService (`src/sightings/sighting.service.spec.ts`)
 
 #### create
@@ -135,6 +155,24 @@
 - [x] 本人がSightingを削除できること
 - [x] 他者が削除しようとすると ForbiddenException
 - [x] 存在しないSightingを削除しようとすると NotFoundException
+
+#### toggleFavorite
+
+- [x] お気に入りしていない状態でtoggleFavoriteを呼ぶと { favorited: true } を返す
+- [x] 既にお気に入り済みの状態でtoggleFavoriteを呼ぶと { favorited: false } を返す
+- [x] お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException
+- [x] 存在しないSightingをお気に入りしようとすると NotFoundException
+
+---
+
+### SightingsController (`src/sightings/sighting.controller.spec.ts`)
+
+#### toggleFavorite
+
+- [x] { favorited: true } を返す
+- [x] { favorited: false } を返す（解除）
+- [x] BadRequestException を伝播する
+- [x] NotFoundException を伝播する
 
 ---
 

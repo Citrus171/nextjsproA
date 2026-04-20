@@ -38,12 +38,12 @@ export class UsersController {
       // Handle unique constraint (Prisma P2002) as bad request
       if (e?.code === "P2002" || (e?.meta && /unique/i.test(String(e.meta)))) {
         throw new HttpException(
-          { error: "Email already exists" },
+          { error: "このメールアドレスはすでに使用されています" },
           HttpStatus.BAD_REQUEST
         );
       }
       throw new HttpException(
-        { error: "Internal server error" },
+        { error: "内部サーバーエラーが発生しました" },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }

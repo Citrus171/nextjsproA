@@ -30,6 +30,7 @@ const mockPostsService = {
   remove: jest.fn(),
   addImages: jest.fn(),
   removeImage: jest.fn(),
+  toggleFavorite: jest.fn(),
 };
 
 describe("PostsController", () => {
@@ -327,6 +328,44 @@ describe("PostsController", () => {
       await expect(
         controller.removeImage(req, "post1", "no-img")
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ─── toggleFavorite ──────────────────────────────────────────
+  describe("toggleFavorite", () => {
+    it("{ favorited: true } を返す", async () => {
+      mockPostsService.toggleFavorite.mockResolvedValue({ favorited: true });
+      const req = { user: { id: "user1" } };
+
+      const result = await controller.toggleFavorite(req, "post1");
+
+      expect(mockPostsService.toggleFavorite).toHaveBeenCalledWith(
+        "user1",
+        "post1"
+      );
+      expect(result).toEqual({ favorited: true });
+    });
+
+    it("ForbiddenException を伝播する", async () => {
+      mockPostsService.toggleFavorite.mockRejectedValue(
+        new ForbiddenException()
+      );
+      const req = { user: { id: "owner" } };
+
+      await expect(controller.toggleFavorite(req, "post1")).rejects.toThrow(
+        ForbiddenException
+      );
+    });
+
+    it("BadRequestException を伝播する", async () => {
+      mockPostsService.toggleFavorite.mockRejectedValue(
+        new BadRequestException()
+      );
+      const req = { user: { id: "user1" } };
+
+      await expect(controller.toggleFavorite(req, "post1")).rejects.toThrow(
+        BadRequestException
+      );
     });
   });
 

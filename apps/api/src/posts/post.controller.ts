@@ -49,7 +49,7 @@ export function imageFileFilter(_req: any, file: Express.Multer.File, cb: any) {
     cb(null, true);
   } else {
     cb(
-      new BadRequestException(`Unsupported file type: ${file.mimetype}`),
+      new BadRequestException(`未対応のファイル形式です: ${file.mimetype}`),
       false
     );
   }
@@ -161,5 +161,19 @@ export class PostsController {
     @Param("imageId") imageId: string
   ) {
     return this.posts.removeImage(id, imageId, req.user.id);
+  }
+
+  @HttpPost(":id/favorite")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({
+    status: 201,
+    schema: { properties: { favorited: { type: "boolean" } } },
+  })
+  @ApiResponse({ status: 400, description: "お気に入り上限超過" })
+  @ApiResponse({ status: 403, description: "自分の投稿はお気に入り不可" })
+  @ApiResponse({ status: 404, description: "Post not found" })
+  async toggleFavorite(@Req() req: any, @Param("id") id: string) {
+    return this.posts.toggleFavorite(req.user.id, id);
   }
 }

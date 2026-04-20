@@ -54,4 +54,21 @@ export class SightingsController {
   ) {
     return this.sightingsService.remove(req.user.userId, id);
   }
+
+  @Post(":id/favorite")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "目撃情報のお気に入りをトグルする" })
+  @ApiResponse({
+    status: 201,
+    schema: { properties: { favorited: { type: "boolean" } } },
+  })
+  @ApiResponse({ status: 400, description: "お気に入り上限超過" })
+  @ApiResponse({ status: 404, description: "Sighting not found" })
+  async toggleFavorite(
+    @Request() req: { user: { id: string } },
+    @Param("id") id: string
+  ) {
+    return this.sightingsService.toggleFavorite(req.user.id, id);
+  }
 }
