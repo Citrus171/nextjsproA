@@ -673,12 +673,14 @@ hooks.beforeEach(function (transaction, done) {
 
   // ── DELETE /api/sightings/{id} ────────────────────────────────────────────
   if (method === "DELETE" && /^\/api\/sightings\/[^/]+$/.test(rawUri)) {
-    fixUri(
-      replaceIn(rawUri, PLACEHOLDER, state.deleteSightingId || PLACEHOLDER)
-    );
-    setToken(state.secondaryToken);
-    // Spec says 204 but controller has no @HttpCode(204), server returns 200
-    transaction.expected.statusCode = 200;
+    if (status !== "401") {
+      fixUri(
+        replaceIn(rawUri, PLACEHOLDER, state.deleteSightingId || PLACEHOLDER)
+      );
+      setToken(state.secondaryToken);
+      // Spec says 204 but controller has no @HttpCode(204), server returns 200
+      transaction.expected.statusCode = 200;
+    }
   }
 
   // ── POST /api/sightings/{id}/favorite ─────────────────────────────────────
@@ -713,10 +715,12 @@ hooks.beforeEach(function (transaction, done) {
     method === "POST" &&
     /^\/api\/conversations\/[^/]+\/messages$/.test(rawUri)
   ) {
-    if (!state.conversationId) {
+    if (!state.conversationId && status !== "401") {
       skipTx("conversationId is not ready");
     } else {
-      fixUri(replaceIn(rawUri, PLACEHOLDER, state.conversationId));
+      fixUri(
+        replaceIn(rawUri, PLACEHOLDER, state.conversationId || PLACEHOLDER)
+      );
       setToken(state.primaryToken);
       setJsonBody({ body: "Dredd message" });
     }
@@ -727,10 +731,12 @@ hooks.beforeEach(function (transaction, done) {
     method === "GET" &&
     /^\/api\/conversations\/[^/]+\/messages$/.test(rawUri)
   ) {
-    if (!state.conversationId) {
+    if (!state.conversationId && status !== "401") {
       skipTx("conversationId is not ready");
     } else {
-      fixUri(replaceIn(rawUri, PLACEHOLDER, state.conversationId));
+      fixUri(
+        replaceIn(rawUri, PLACEHOLDER, state.conversationId || PLACEHOLDER)
+      );
       setToken(state.primaryToken);
     }
   }
@@ -741,10 +747,12 @@ hooks.beforeEach(function (transaction, done) {
     rawUri.includes("/conversations/") &&
     rawUri.includes("/messages/read")
   ) {
-    if (!state.conversationId) {
+    if (!state.conversationId && status !== "401") {
       skipTx("conversationId is not ready");
     } else {
-      fixUri(replaceIn(rawUri, PLACEHOLDER, state.conversationId));
+      fixUri(
+        replaceIn(rawUri, PLACEHOLDER, state.conversationId || PLACEHOLDER)
+      );
       setToken(state.primaryToken);
     }
   }
@@ -752,6 +760,11 @@ hooks.beforeEach(function (transaction, done) {
   // ── GET /api/users (admin only) ───────────────────────────────────────────
   if (method === "GET" && rawUri === "/api/users") {
     setToken(state.adminToken);
+  }
+
+  // ── 401: strip Authorization so server responds with 401 ─────────────────
+  if (status === "401") {
+    delete transaction.request.headers["Authorization"];
   }
 
   done();
