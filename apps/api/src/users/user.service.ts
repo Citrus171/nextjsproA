@@ -1,6 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import * as bcrypt from "bcrypt";
+import {
+  normalizeEmail,
+  hmacEmail,
+  encryptEmail,
+  decryptEmail,
+  sha256Hex,
+} from "../utils/crypto";
 
 @Injectable()
 export class UsersService {
@@ -8,25 +15,82 @@ export class UsersService {
 
   async createUser(email: string, password: string, name?: string) {
     const hashed = await bcrypt.hash(password, 10);
-    return this.prisma.user.create({
-      data: { email, password: hashed, nickname: name ?? "" },
+    const normalized = normalizeEmail(email);
+    const emailHash = hmacEmail(normalized);
+    const emailEncrypted = encryptEmail(normalized);
+    const user = await (this.prisma.user as any).create({
+      data: {
+        emailEncrypted,
+        emailHash,
+        password: hashed,
+        nickname: name ?? "",
+      },
     });
+    // return user-like object including decrypted email for API responses
+    return {
+      ...user,
+      email: normalized,
+    };
   }
 
   async findByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email } });
+    const normalized = normalizeEmail(email);
+    const hmac = hmacEmail(normalized);
+    const sha = sha256Hex(normalized);
+    // Try HMAC first, fallback to SHA256 (transitional for existing rows)
+    let user = await (this.prisma.user as any).findUnique({
+      where: { emailHash: hmac },
+    });
+    if (!user) {
+      user = await (this.prisma.user as any).findUnique({
+        where: { emailHash: sha },
+      });
+    }
+    if (!user) return null;
+    // attach decrypted email if possible
+    let emailDec = null;
+    try {
+      emailDec = user.emailEncrypted ? decryptEmail(user.emailEncrypted) : null;
+    } catch (e) {
+      emailDec = null;
+    }
+    return { ...user, email: emailDec ?? normalizeEmail(email) };
   }
 
   async findById(id: string) {
-    return this.prisma.user.findUnique({ where: { id } });
+    const user = await (this.prisma.user as any).findUnique({ where: { id } });
+    if (!user) return null;
+    let emailDec = null;
+    try {
+      emailDec = user.emailEncrypted ? decryptEmail(user.emailEncrypted) : null;
+    } catch (e) {
+      emailDec = null;
+    }
+    return { ...user, email: emailDec };
   }
-
   // TanStack Start との対比用: DB から全ユーザーを取得（パスワード除外）
   // TanStack Start: export const getUsers = createServerFn(async () => db.user.findMany())
   // NestJS:  この1行が「サーバー関数の中身」に相当する
   async findAll() {
-    return this.prisma.user.findMany({
-      select: { id: true, email: true, nickname: true, createdAt: true },
+    const users = await (this.prisma.user as any).findMany({
+      select: {
+        id: true,
+        emailEncrypted: true,
+        nickname: true,
+        role: true,
+        createdAt: true,
+      },
     });
+    return users.map((u) => ({
+      id: u.id,
+      email: u.emailEncrypted ? decryptEmail(u.emailEncrypted) : null,
+      nickname: u.nickname,
+      role: u.role,
+      createdAt: u.createdAt,
+    }));
+  }
+
+  async deleteUser(id: string) {
+    return this.prisma.user.delete({ where: { id } });
   }
 }

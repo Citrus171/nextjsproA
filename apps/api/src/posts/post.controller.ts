@@ -90,7 +90,8 @@ export class PostsController {
     @Body() dto: CreatePostDto,
     @UploadedFiles() files: Express.Multer.File[]
   ) {
-    return this.posts.create(req.user.id, dto, files ?? []);
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.posts.create(userId, dto, files ?? []);
   }
 
   @Get()
@@ -116,15 +117,20 @@ export class PostsController {
     @Param("id") id: string,
     @Body() body: UpdatePostDto
   ) {
-    return this.posts.update(id, req.user.id, body);
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.posts.update(id, userId, body);
   }
 
   @Delete(":id")
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, type: PostResponseDto })
-  @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden: not the post owner or admin",
+  })
   async remove(@Req() req: any, @Param("id") id: string) {
-    return this.posts.remove(id, req.user.id);
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.posts.remove(id, userId);
   }
 
   @HttpPost(":id/images")
@@ -147,20 +153,25 @@ export class PostsController {
     @Param("id") id: string,
     @UploadedFiles() files: Express.Multer.File[]
   ) {
-    return this.posts.addImages(id, req.user.id, files ?? []);
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.posts.addImages(id, userId, files ?? []);
   }
 
   @Delete(":id/images/:imageId")
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 200, type: ImageResponseDto })
-  @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden: not the post owner or admin",
+  })
   @ApiResponse({ status: 404, description: "Image not found" })
   async removeImage(
     @Req() req: any,
     @Param("id") id: string,
     @Param("imageId") imageId: string
   ) {
-    return this.posts.removeImage(id, imageId, req.user.id);
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.posts.removeImage(id, imageId, userId);
   }
 
   @HttpPost(":id/favorite")
@@ -174,6 +185,7 @@ export class PostsController {
   @ApiResponse({ status: 403, description: "自分の投稿はお気に入り不可" })
   @ApiResponse({ status: 404, description: "Post not found" })
   async toggleFavorite(@Req() req: any, @Param("id") id: string) {
-    return this.posts.toggleFavorite(req.user.id, id);
+    const userId = req.user?.id ?? req.user?.userId;
+    return this.posts.toggleFavorite(userId, id);
   }
 }
