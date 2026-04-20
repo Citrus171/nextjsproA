@@ -373,6 +373,8 @@ describe("API E2E", () => {
         .set("Authorization", `Bearer ${ownerToken}`)
         .field("description", "会話テスト用の迷子投稿")
         .field("lostDate", "2024-01-01");
+      expect(postRes.status).toBe(201);
+      expect(postRes.body?.id).toBeDefined();
       convPostId = postRes.body.id;
 
       // 目撃情報を作成 (other)
@@ -386,6 +388,8 @@ describe("API E2E", () => {
           sightedAt: "2024-01-10",
           comment: "公園で目撃しました",
         });
+      expect(sightingRes.status).toBe(201);
+      expect(sightingRes.body?.id).toBeDefined();
       convSightingId = sightingRes.body.id;
 
       // 第三者ユーザーを登録してトークン取得
@@ -397,11 +401,15 @@ describe("API E2E", () => {
           password: PASSWORD,
           nickname: "Outsider",
         });
+      expect(regRes.status).toBe(201);
+      expect(regRes.body?.id).toBeDefined();
       outsiderId = regRes.body.id;
 
       const loginRes = await request(app.getHttpServer())
         .post("/api/auth/login")
         .send({ email: outsiderEmail, password: PASSWORD });
+      expect(loginRes.status).toBe(200);
+      expect(loginRes.body?.accessToken).toBeDefined();
       outsiderToken = loginRes.body.accessToken;
     });
 
@@ -610,9 +618,10 @@ describe("API E2E", () => {
           .set("Authorization", `Bearer ${ownerToken}`);
 
         expect(res.status).toBe(200);
-        // other が送ったメッセージは readAt が設定されている
+        // other が送ったメッセージ（senderId !== ownerId）は readAt が設定されている
         const otherMessages = res.body.filter(
-          (m: { readAt: string | null; senderId: string }) => m.readAt !== null
+          (m: { readAt: string | null; senderId: string }) =>
+            m.senderId !== ownerId && m.readAt !== null
         );
         expect(otherMessages.length).toBeGreaterThanOrEqual(1);
       });
@@ -623,15 +632,18 @@ describe("API E2E", () => {
           .set("Authorization", `Bearer ${ownerToken}`);
 
         expect(res.status).toBe(200);
-        // owner 自身が送ったメッセージは readAt が null のまま
-        const ownMessages = res.body.filter(
-          (m: { readAt: string | null; senderId: string }, _: number) => {
-            // senderId が一致するものを取得 (ownerIdの取得は res.body から)
-            // readAtがnullのものが1件以上ある (=自分が送ったメッセージ)
-            return m.readAt === null;
-          }
+        // owner 自身が送ったメッセージだけが readAt null のまま残る
+        const ownUnreadMessages = res.body.filter(
+          (m: { readAt: string | null; senderId: string }) =>
+            m.senderId === ownerId && m.readAt === null
         );
-        expect(ownMessages.length).toBeGreaterThanOrEqual(1);
+        const othersUnreadMessages = res.body.filter(
+          (m: { readAt: string | null; senderId: string }) =>
+            m.senderId !== ownerId && m.readAt === null
+        );
+
+        expect(ownUnreadMessages.length).toBeGreaterThanOrEqual(1);
+        expect(othersUnreadMessages.length).toBe(0);
       });
 
       it("再度 PATCH しても count: 0 を返す (既読済みは対象外)", async () => {
