@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class ImageResponseDto {
   @ApiProperty() id: string;
+  @ApiProperty() postId: string;
   @ApiProperty() url: string;
   @ApiProperty() createdAt: Date;
 }
