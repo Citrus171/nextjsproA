@@ -15,18 +15,39 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await page.fill('input[placeholder="email"]', email);
   await page.fill('input[placeholder="password"]', password);
   await page.fill('input[placeholder="name"]', "E2E User");
+  const registerResponsePromise = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/users/register") &&
+      res.request().method() === "POST"
+  );
   await page.click('button:has-text("Register")');
 
+  const registerResponse = await registerResponsePromise;
+  expect(
+    registerResponse.ok(),
+    `register failed: ${registerResponse.status()} ${registerResponse.statusText()}`
+  ).toBeTruthy();
+
   // Wait for redirect to login (Register component navigates on success)
-  await page.waitForURL(`${baseUrl}/login`);
+  await expect(page).toHaveURL(`${baseUrl}/login`, { timeout: 15000 });
 
   // 2. Login
   await page.fill('input[placeholder="email"]', email);
   await page.fill('input[placeholder="password"]', password);
+  const loginResponsePromise = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/auth/login") && res.request().method() === "POST"
+  );
   await page.click('button:has-text("Login")');
 
+  const loginResponse = await loginResponsePromise;
+  expect(
+    loginResponse.ok(),
+    `login failed: ${loginResponse.status()} ${loginResponse.statusText()}`
+  ).toBeTruthy();
+
   // Should navigate to posts page
-  await page.waitForURL(`${baseUrl}/`);
+  await expect(page).toHaveURL(`${baseUrl}/`, { timeout: 15000 });
   await expect(page.locator("nav")).toContainText("Logout");
 
   // 3. Create post (use link click to preserve in-memory auth token)
