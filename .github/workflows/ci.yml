@@ -53,8 +53,8 @@ jobs:
         working-directory: apps/api
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
-          HMAC_SECRET: ${{ secrets.HMAC_SECRET }}
-          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          HMAC_SECRET: ${{ secrets.HMAC_SECRET || 'ci-hmac-secret' }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef' }}
 
       - name: Web unit tests
         run: npm test -- --run
@@ -125,8 +125,8 @@ jobs:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
           NODE_ENV: test
           JWT_SECRET: ci-test-secret
-          HMAC_SECRET: ${{ secrets.HMAC_SECRET }}
-          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          HMAC_SECRET: ${{ secrets.HMAC_SECRET || 'ci-hmac-secret' }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef' }}
 
       - name: Wait for API
         run: npx wait-on -t 60000 http://localhost:3000/api-json || (cat /tmp/api.log && exit 1)
