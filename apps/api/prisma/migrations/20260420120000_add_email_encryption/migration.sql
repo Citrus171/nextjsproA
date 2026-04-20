@@ -1,3 +1,6 @@
+-- Enable pgcrypto for digest()
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 -- Add emailEncrypted and emailHash columns
 ALTER TABLE "User" ADD COLUMN "emailEncrypted" TEXT;
 ALTER TABLE "User" ADD COLUMN "emailHash" TEXT;
