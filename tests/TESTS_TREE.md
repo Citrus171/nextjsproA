@@ -28,8 +28,10 @@ apps/api/src/
 │   │   │   ├── 画像処理でSharpエラーが発生した場合 BadRequestException をスローする
 │   │   │   ├── 画像が5枚超の場合 BadRequestException をスローする
 │   │   │   ├── petDetail と location を含む時、トランザクションで一括作成する
-│   │   │   └── lostDate を指定して作成できる
+│   │   │   ├── lostDate を指定して作成できる
 │   │   │   ├── 無料プランの月間投稿数が3件に達している時は ForbiddenException をスローする
+│   │   │   ├── 月間投稿数の集計は UTC 境界で判定する
+│   │   │   ├── トランザクション競合時は再試行して投稿を作成する
 │   │   │   ├── 翌月になると無料プランの投稿数はリセットされる
 │   │   │   └── premium ユーザーは月間投稿数の制限を受けない
 │   │   ├── addImages

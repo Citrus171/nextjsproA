@@ -4,6 +4,7 @@ import {
   HttpException,
   NotFoundException,
 } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import * as fs from "fs";
 import { PostsService } from "./post.service";
 
@@ -450,8 +451,12 @@ describe("PostsService", () => {
       jest.setSystemTime(now);
       mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
       mockPrisma.post.count.mockResolvedValue(3);
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const monthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+      );
+      const nextMonthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
+      );
 
       await expect(
         service.create("u1", {
@@ -484,8 +489,12 @@ describe("PostsService", () => {
         location: null,
         images: [],
       });
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-      const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const monthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+      );
+      const nextMonthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
+      );
 
       await service.create("u1", {
         description: "C",
@@ -500,6 +509,57 @@ describe("PostsService", () => {
             lt: nextMonthStart,
           },
         },
+      });
+    });
+
+    it("トランザクション競合時は再試行して投稿を作成する", async () => {
+      const conflictError = Object.assign(new Error("Transaction conflict"), {
+        code: "P2034",
+      });
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
+      mockPrisma.post.count.mockResolvedValue(2);
+      const created = {
+        id: "post1",
+        title: "T",
+        description: "C",
+        userId: "u1",
+        status: "lost",
+        lostDate: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrisma.post.create.mockResolvedValue(created);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        ...created,
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      mockPrisma.$transaction
+        .mockRejectedValueOnce(conflictError)
+        .mockImplementationOnce(
+          async (fn: (tx: typeof mockPrisma) => Promise<unknown>) =>
+            fn(mockPrisma)
+        );
+
+      const result = await service.create("u1", {
+        title: "T",
+        description: "C",
+        lostDate: "2026-04-21",
+      });
+
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(2);
+      expect(mockPrisma.$transaction).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        })
+      );
+      expect(result).toEqual({
+        ...created,
+        petDetail: null,
+        location: null,
+        images: [],
       });
     });
 

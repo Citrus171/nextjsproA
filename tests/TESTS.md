@@ -73,6 +73,9 @@
 - [x] 存在しない投稿は HttpException (404)
 - [x] 管理者は他人の投稿を削除できる
 
+- [x] 月間投稿数の集計は UTC 境界で判定する
+- [x] トランザクション競合時は再試行して投稿を作成する
+
 ---
 
 ### PostsController (`src/posts/post.controller.spec.ts`)
