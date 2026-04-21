@@ -14,16 +14,18 @@ export class SightingsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateSightingDto) {
-    const post = await this.prisma.post.findUnique({
-      where: { id: dto.postId },
-    });
-    if (!post) throw new NotFoundException("投稿が見つかりません");
-    if (post.userId === userId)
-      throw new ForbiddenException("投稿者本人はSightingを作成できません");
+    if (dto.postId != null) {
+      const post = await this.prisma.post.findUnique({
+        where: { id: dto.postId },
+      });
+      if (!post) throw new NotFoundException("投稿が見つかりません");
+      if (post.userId === userId)
+        throw new ForbiddenException("投稿者本人はSightingを作成できません");
+    }
 
     return this.prisma.sighting.create({
       data: {
-        postId: dto.postId,
+        postId: dto.postId ?? null,
         userId,
         lat: dto.lat,
         lng: dto.lng,

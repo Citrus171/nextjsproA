@@ -71,6 +71,31 @@ describe("MapService", () => {
         status: "lost",
       });
     });
+
+    it("standalone Sighting は statusなしで lost として返ること", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.sighting.findMany.mockResolvedValue([
+        {
+          id: "s-standalone",
+          postId: null,
+          lat: 35.8,
+          lng: 139.52,
+          post: null,
+        },
+      ]);
+
+      const result = await service.getMarkers({});
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        type: "sighting",
+        id: "s-standalone",
+        postId: undefined,
+        lat: 35.8,
+        lng: 139.52,
+        status: "lost",
+      });
+    });
     it("statusフィルタ指定時にPostクエリのwhereにstatusが含まれること", async () => {
       mockPrisma.post.findMany.mockResolvedValue([]);
       mockPrisma.sighting.findMany.mockResolvedValue([]);

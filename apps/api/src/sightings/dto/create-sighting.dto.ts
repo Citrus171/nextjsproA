@@ -1,8 +1,18 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsNumber, IsOptional, IsString } from "class-validator";
+import {
+  IsDateString,
+  IsNumber,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from "class-validator";
 
 export class CreateSightingDto {
-  @ApiProperty() @IsString() postId: string;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  postId?: string;
   @ApiProperty() @IsNumber() lat: number;
   @ApiProperty() @IsNumber() lng: number;
   @ApiProperty({ required: false }) @IsOptional() @IsString() address?: string;

@@ -24,6 +24,9 @@ export class ConversationsService {
       where: { id: dto.sightingId },
     });
     if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
+    if (sighting.postId == null || sighting.postId !== dto.postId) {
+      throw new NotFoundException("目撃情報が見つかりません");
+    }
 
     if (post.userId !== userId && sighting.userId !== userId) {
       throw new ForbiddenException(
