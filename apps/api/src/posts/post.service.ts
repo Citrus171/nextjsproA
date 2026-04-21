@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
-import type { PostStatus, Gender, Prefecture } from "@prisma/client";
+import { PostType, type PostStatus, type Gender, type Prefecture } from "@prisma/client";
 import * as fs from "fs";
 import * as path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -79,7 +79,7 @@ export class PostsService {
             title: dto.title,
             description: dto.description,
             userId,
-            postType: dto.postType ?? "cat",
+            postType: dto.postType ?? PostType.cat,
             lostDate,
           },
         });
