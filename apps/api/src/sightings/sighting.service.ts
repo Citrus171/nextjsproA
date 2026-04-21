@@ -14,7 +14,7 @@ export class SightingsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateSightingDto) {
-    if (dto.postId) {
+    if (dto.postId != null) {
       const post = await this.prisma.post.findUnique({
         where: { id: dto.postId },
       });

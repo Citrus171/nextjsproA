@@ -179,6 +179,13 @@
 ### CreateSightingDto (`src/sightings/dto/create-sighting.dto.spec.ts`)
 
 - [x] postId がなくてもバリデーションエラーにならないこと
+- [x] postId が空文字のときはバリデーションエラーになること
+
+### SightingsService (`src/sightings/sighting.service.spec.ts`)
+
+#### create
+
+- [x] postId が空文字の時は Post チェックを行って NotFoundException になること
 
 #### findByPost
 

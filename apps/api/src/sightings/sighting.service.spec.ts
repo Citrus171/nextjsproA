@@ -99,6 +99,25 @@ describe("SightingsService", () => {
       expect(result).toMatchObject({ id: "s-standalone", postId: null });
     });
 
+    it("postId が空文字の時は Post チェックを行って NotFoundException になること", async () => {
+      const dtoWithEmptyPostId = {
+        postId: "",
+        lat: 35.9,
+        lng: 139.6,
+        sightedAt: "2026-04-19T10:00:00.000Z",
+      };
+
+      mockPrisma.post.findUnique.mockResolvedValue(null);
+
+      await expect(
+        service.create("other-user", dtoWithEmptyPostId as never)
+      ).rejects.toThrow(NotFoundException);
+
+      expect(mockPrisma.post.findUnique).toHaveBeenCalledWith({
+        where: { id: "" },
+      });
+    });
+
     it("投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue({
         id: "post-1",

@@ -155,11 +155,13 @@ apps/api/src/
 │   ├── dto/
 │   │   └── create-sighting.dto.spec.ts
 │   │       └── CreateSightingDto
-│   │           └── postId がなくてもバリデーションエラーにならないこと
+│   │           ├── postId がなくてもバリデーションエラーにならないこと
+│   │           └── postId が空文字のときはバリデーションエラーになること
 │   ├── sighting.service.spec.ts
 │   │   ├── create
 │   │   │   ├── 有効なデータでSightingを作成できること
 │   │   │   ├── postId がない時は Post チェックをスキップして Sighting を作成できること
+│   │   │   ├── postId が空文字の時は Post チェックを行って NotFoundException になること
 │   │   │   ├── 投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException
 │   │   │   └── 存在しないPostにSightingを作成しようとすると NotFoundException
 │   │   ├── findByPost
