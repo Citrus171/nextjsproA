@@ -16,7 +16,7 @@ WITH "ranked_nicknames" AS (
   WHERE "nickname" IS NOT NULL
 )
 UPDATE "User" AS u
-SET "nickname" = "nickname" || '__dup__' || "id"
+SET "nickname" = u."nickname" || '__dup__' || u."id"
 FROM "ranked_nicknames" AS rn
 WHERE u."id" = rn."id"
   AND rn."row_num" > 1;

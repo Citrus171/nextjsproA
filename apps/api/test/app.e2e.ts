@@ -85,6 +85,18 @@ describe("API E2E", () => {
       expect(res.status).toBe(400);
     });
 
+    it("name が空文字のとき 400 を返す", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/users/register")
+        .send({
+          email: "empty-name@test.example",
+          password: PASSWORD,
+          name: "",
+        });
+
+      expect(res.status).toBe(400);
+    });
+
     it("重複メールは 400 を返す", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/users/register")

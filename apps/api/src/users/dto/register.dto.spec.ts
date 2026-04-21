@@ -12,4 +12,16 @@ describe("RegisterDto", () => {
     expect(errors.length).toBeGreaterThan(0);
     expect(errors.some((err) => err.property === "name")).toBe(true);
   });
+
+  it("name が空文字のとき、バリデーションエラーになる", async () => {
+    const dto = new RegisterDto();
+    dto.email = "user@example.com";
+    dto.password = "password123";
+    dto.name = "";
+
+    const errors = await validate(dto);
+
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors.some((err) => err.property === "name")).toBe(true);
+  });
 });

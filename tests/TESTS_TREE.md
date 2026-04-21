@@ -180,6 +180,7 @@ apps/api/src/
     │   └── register.dto.spec.ts
     │       └── RegisterDto
     │           └── name が未指定のとき、バリデーションエラーになる
+    │           └── name が空文字のとき、バリデーションエラーになる
     └── user.service.spec.ts
         └── UserService
             ├── nickname の重複時に ConflictException をスローする
@@ -194,6 +195,7 @@ apps/api/test/
     │   ├── オーナーユーザーを登録できる (201)
     │   ├── 非オーナーユーザーを登録できる (201)
     │   ├── name が未指定のとき 400 を返す
+    │   ├── name が空文字のとき 400 を返す
     │   ├── 重複メールは 400 を返す
     │   ├── 重複 nickname で 409 を返す
     │   └── 短すぎるパスワードは 400 を返す
