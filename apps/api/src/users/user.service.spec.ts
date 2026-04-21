@@ -69,6 +69,18 @@ describe("UsersService", () => {
       expect(result).toMatchObject({ id: "u1", nickname: "Alice" });
     });
 
+    it("nickname の重複時に ConflictException をスローする", async () => {
+      const error = Object.assign(new Error("Unique constraint failed"), {
+        code: "P2002",
+        meta: { target: ["nickname"] },
+      });
+      mockPrisma.user.create.mockRejectedValue(error);
+
+      await expect(
+        service.createUser("a@b.com", "pass12345", "Alice")
+      ).rejects.toThrow("このニックネームはすでに使用されています");
+    });
+
     it("Prisma がエラーを投げたら再スローする", async () => {
       mockPrisma.user.create.mockRejectedValue(new Error("DB error"));
 

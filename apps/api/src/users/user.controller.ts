@@ -61,25 +61,7 @@ export class UsersController {
   @Post("register")
   @ApiResponse({ status: 201, type: UserResponseDto })
   async register(@Body() dto: RegisterDto) {
-    try {
-      const user = await this.users.createUser(
-        dto.email,
-        dto.password,
-        dto.name
-      );
-      return { id: user.id, email: user.email, nickname: user.nickname };
-    } catch (e: any) {
-      // Handle unique constraint (Prisma P2002) as bad request
-      if (e?.code === "P2002" || (e?.meta && /unique/i.test(String(e.meta)))) {
-        throw new HttpException(
-          { error: "このメールアドレスはすでに使用されています" },
-          HttpStatus.BAD_REQUEST
-        );
-      }
-      throw new HttpException(
-        { error: "内部サーバーエラーが発生しました" },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
+    const user = await this.users.createUser(dto.email, dto.password, dto.name);
+    return { id: user.id, email: user.email, nickname: user.nickname };
   }
 }
