@@ -327,6 +327,108 @@ describe("PostsService", () => {
       );
     });
 
+    it("保存ファイル名が UUID v4 + .jpg 形式になること", async () => {
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post1",
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      mockPrisma.image.create.mockResolvedValue({});
+      const files = [
+        { originalname: "photo.png", buffer: Buffer.from("") } as any,
+      ];
+
+      await service.create(
+        "u1",
+        { description: "C", lostDate: "2024-01-01" },
+        files
+      );
+
+      const calledPath = mockFs.writeFileSync.mock.calls[0][0] as string;
+      const savedFileName = calledPath.split("/").pop()!;
+      expect(savedFileName).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.jpg$/i
+      );
+    });
+
+    it("元のファイル名（originalname）が保存パスに含まれないこと", async () => {
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post1",
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      mockPrisma.image.create.mockResolvedValue({});
+      const files = [
+        { originalname: "my-photo.png", buffer: Buffer.from("") } as any,
+      ];
+
+      await service.create(
+        "u1",
+        { description: "C", lostDate: "2024-01-01" },
+        files
+      );
+
+      const calledPath = mockFs.writeFileSync.mock.calls[0][0] as string;
+      expect(calledPath).not.toContain("my-photo");
+    });
+
+    it("日本語ファイル名でも UUID v4 + .jpg で保存されること", async () => {
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post1",
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      mockPrisma.image.create.mockResolvedValue({});
+      const files = [
+        { originalname: "写真_2024年夏.png", buffer: Buffer.from("") } as any,
+      ];
+
+      await service.create(
+        "u1",
+        { description: "C", lostDate: "2024-01-01" },
+        files
+      );
+
+      const calledPath = mockFs.writeFileSync.mock.calls[0][0] as string;
+      const savedFileName = calledPath.split("/").pop()!;
+      expect(savedFileName).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.jpg$/i
+      );
+      expect(calledPath).not.toContain("写真");
+    });
+
+    it("元のファイルの拡張子に関わらず保存拡張子が .jpg になること", async () => {
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post1",
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      mockPrisma.image.create.mockResolvedValue({});
+      const files = [
+        { originalname: "image.jpeg", buffer: Buffer.from("") } as any,
+        { originalname: "image.gif", buffer: Buffer.from("") } as any,
+      ];
+
+      await service.create(
+        "u1",
+        { description: "C", lostDate: "2024-01-01" },
+        files
+      );
+
+      for (const call of mockFs.writeFileSync.mock.calls) {
+        const savedPath = call[0] as string;
+        expect(savedPath).toMatch(/\.jpg$/);
+      }
+    });
+
     it("無料プランの画像が3枚を超えると ForbiddenException をスローする", async () => {
       mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
       mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
