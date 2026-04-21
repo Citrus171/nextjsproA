@@ -79,6 +79,7 @@ export class PostsService {
             title: dto.title,
             description: dto.description,
             userId,
+            postType: dto.postType ?? "cat",
             lostDate,
           },
         });

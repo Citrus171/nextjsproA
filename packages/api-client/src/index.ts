@@ -7,6 +7,10 @@
  */
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
+export type SightingsControllerToggleFavorite201 = {
+  favorited?: boolean;
+};
+
 export type SightingsControllerFindByPostParams = {
   postId: string;
 };
@@ -28,9 +32,21 @@ export type MapControllerGetMarkersParams = {
   status?: MapControllerGetMarkersStatus;
 };
 
+export type PostsControllerToggleFavorite201 = {
+  favorited?: boolean;
+};
+
 export type PostsControllerAddImagesBody = {
   images?: Blob[];
 };
+
+export type PostsControllerCreateBodyPostType =
+  (typeof PostsControllerCreateBodyPostType)[keyof typeof PostsControllerCreateBodyPostType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostsControllerCreateBodyPostType = {
+  cat: "cat",
+} as const;
 
 export type PostsControllerCreateBody = {
   description?: string;
@@ -40,6 +56,7 @@ export type PostsControllerCreateBody = {
   lostDate?: string;
   /** JSON string */
   petDetail?: string;
+  postType?: PostsControllerCreateBodyPostType;
   title?: string;
 };
 
@@ -165,10 +182,13 @@ export interface UpdatePetDetailDto {
   size?: string;
 }
 
-export interface PostListResponseDto {
-  items: PostResponseDto[];
-  total: number;
-}
+export type PostResponseDtoPostType =
+  (typeof PostResponseDtoPostType)[keyof typeof PostResponseDtoPostType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostResponseDtoPostType = {
+  cat: "cat",
+} as const;
 
 /**
  * @nullable
@@ -183,6 +203,7 @@ export type PostResponseDtoLocation = LocationResponseDto | null;
 export interface ImageResponseDto {
   createdAt: string;
   id: string;
+  postId: string;
   url: string;
 }
 
@@ -196,6 +217,7 @@ export interface PostResponseDto {
   lostDate: string;
   /** @nullable */
   petDetail?: PostResponseDtoPetDetail;
+  postType: PostResponseDtoPostType;
   /** @nullable */
   resolvedAt?: string | null;
   status: string;
@@ -203,6 +225,11 @@ export interface PostResponseDto {
   title?: string | null;
   updatedAt: string;
   userId: string;
+}
+
+export interface PostListResponseDto {
+  items: PostResponseDto[];
+  total: number;
 }
 
 export interface LocationResponseDto {
@@ -234,13 +261,6 @@ export interface PetDetailResponseDto {
   size?: string | null;
 }
 
-export interface UserResponseDto {
-  createdAt: string;
-  email: string;
-  id: string;
-  nickname: string;
-}
-
 export interface RegisterDto {
   email: string;
   name?: string;
@@ -248,10 +268,26 @@ export interface RegisterDto {
   password: string;
 }
 
-export const usersControllerFindAll = <TData = AxiosResponse<void>>(
+export interface UserResponseDto {
+  createdAt: string;
+  email: string;
+  id: string;
+  nickname: string;
+}
+
+export const usersControllerFindAll = <
+  TData = AxiosResponse<UserResponseDto[]>,
+>(
   options?: AxiosRequestConfig
 ): Promise<TData> => {
   return axios.get(`/api/users`, options);
+};
+
+export const usersControllerRemove = <TData = AxiosResponse<void>>(
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.delete(`/api/users/${id}`, options);
 };
 
 export const usersControllerRegister = <TData = AxiosResponse<UserResponseDto>>(
@@ -266,6 +302,9 @@ export const postsControllerCreate = <TData = AxiosResponse<PostResponseDto>>(
   options?: AxiosRequestConfig
 ): Promise<TData> => {
   const formData = new FormData();
+  if (postsControllerCreateBody.postType !== undefined) {
+    formData.append("postType", postsControllerCreateBody.postType);
+  }
   if (postsControllerCreateBody.title !== undefined) {
     formData.append("title", postsControllerCreateBody.title);
   }
@@ -345,6 +384,15 @@ export const postsControllerRemoveImage = <
   return axios.delete(`/api/posts/${id}/images/${imageId}`, options);
 };
 
+export const postsControllerToggleFavorite = <
+  TData = AxiosResponse<PostsControllerToggleFavorite201>,
+>(
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/posts/${id}/favorite`, undefined, options);
+};
+
 export const authControllerLogin = <
   TData = AxiosResponse<AccessTokenResponseDto>,
 >(
@@ -402,13 +450,25 @@ export const sightingsControllerFindByPost = <TData = AxiosResponse<void>>(
 };
 
 /**
- * @summary 目撃情報を削除する（本人のみ）
+ * @summary 目撃情報を削除する（本人または管理者）
  */
 export const sightingsControllerRemove = <TData = AxiosResponse<void>>(
   id: string,
   options?: AxiosRequestConfig
 ): Promise<TData> => {
   return axios.delete(`/api/sightings/${id}`, options);
+};
+
+/**
+ * @summary 目撃情報のお気に入りをトグルする
+ */
+export const sightingsControllerToggleFavorite = <
+  TData = AxiosResponse<SightingsControllerToggleFavorite201>,
+>(
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/sightings/${id}/favorite`, undefined, options);
 };
 
 /**
@@ -473,7 +533,8 @@ export const conversationsControllerMarkAsRead = <TData = AxiosResponse<void>>(
   );
 };
 
-export type UsersControllerFindAllResult = AxiosResponse<void>;
+export type UsersControllerFindAllResult = AxiosResponse<UserResponseDto[]>;
+export type UsersControllerRemoveResult = AxiosResponse<void>;
 export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>;
 export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>;
 export type PostsControllerListResult = AxiosResponse<PostListResponseDto>;
@@ -483,6 +544,8 @@ export type PostsControllerRemoveResult = AxiosResponse<PostResponseDto>;
 export type PostsControllerAddImagesResult =
   AxiosResponse<AddImagesResponseDto>;
 export type PostsControllerRemoveImageResult = AxiosResponse<ImageResponseDto>;
+export type PostsControllerToggleFavoriteResult =
+  AxiosResponse<PostsControllerToggleFavorite201>;
 export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>;
 export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>;
 export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>;
@@ -490,6 +553,8 @@ export type MapControllerGetMarkersResult = AxiosResponse<MapMarkerDto[]>;
 export type SightingsControllerCreateResult = AxiosResponse<void>;
 export type SightingsControllerFindByPostResult = AxiosResponse<void>;
 export type SightingsControllerRemoveResult = AxiosResponse<void>;
+export type SightingsControllerToggleFavoriteResult =
+  AxiosResponse<SightingsControllerToggleFavorite201>;
 export type ConversationsControllerCreateResult = AxiosResponse<void>;
 export type ConversationsControllerFindAllResult = AxiosResponse<void>;
 export type ConversationsControllerCreateMessageResult = AxiosResponse<void>;

@@ -7,13 +7,42 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserResponseDto" }
+                }
+              }
+            }
           },
-          "401": {
-            "description": "認証が必要です"
-          }
+          "401": { "description": "認証が必要です" },
+          "403": { "description": "管理者のみ" }
         },
-        "tags": ["users"]
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/users/{id}": {
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "ユーザー削除成功" },
+          "401": { "description": "認証が必要です" },
+          "403": { "description": "管理者のみ" },
+          "404": { "description": "ユーザーが見つかりません" }
+        },
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
       }
     },
     "/api/users/register": {
@@ -24,9 +53,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterDto"
-              }
+              "schema": { "$ref": "#/components/schemas/RegisterDto" }
             }
           }
         },
@@ -35,9 +62,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponseDto"
-                }
+                "schema": { "$ref": "#/components/schemas/UserResponseDto" }
               }
             }
           }
@@ -56,15 +81,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "title": {
-                    "type": "string"
+                  "postType": {
+                    "type": "string",
+                    "enum": ["cat"],
+                    "default": "cat"
                   },
-                  "description": {
-                    "type": "string"
-                  },
-                  "lostDate": {
-                    "type": "string"
-                  },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "lostDate": { "type": "string" },
                   "petDetail": {
                     "type": "string",
                     "description": "JSON string"
@@ -75,10 +99,7 @@
                   },
                   "images": {
                     "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "binary"
-                    }
+                    "items": { "type": "string", "format": "binary" }
                   }
                 }
               }
@@ -90,22 +111,13 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostResponseDto"
-                }
+                "schema": { "$ref": "#/components/schemas/PostResponseDto" }
               }
             }
-          },
-          "401": {
-            "description": "認証が必要です"
           }
         },
         "tags": ["posts"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       },
       "get": {
         "operationId": "PostsController_list",
@@ -115,19 +127,13 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostListResponseDto"
-                }
+                "schema": { "$ref": "#/components/schemas/PostListResponseDto" }
               }
             }
           }
         },
         "tags": ["posts"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       }
     },
     "/api/posts/{id}": {
@@ -138,10 +144,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -149,19 +152,13 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostResponseDto"
-                }
+                "schema": { "$ref": "#/components/schemas/PostResponseDto" }
               }
             }
           }
         },
         "tags": ["posts"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       },
       "patch": {
         "operationId": "PostsController_update",
@@ -170,19 +167,14 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdatePostDto"
-              }
+              "schema": { "$ref": "#/components/schemas/UpdatePostDto" }
             }
           }
         },
@@ -191,25 +183,14 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostResponseDto"
-                }
+                "schema": { "$ref": "#/components/schemas/PostResponseDto" }
               }
             }
           },
-          "403": {
-            "description": "Forbidden: not the post owner"
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
+          "403": { "description": "Forbidden: not the post owner" }
         },
         "tags": ["posts"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       },
       "delete": {
         "operationId": "PostsController_remove",
@@ -218,10 +199,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -229,25 +207,14 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostResponseDto"
-                }
+                "schema": { "$ref": "#/components/schemas/PostResponseDto" }
               }
             }
           },
-          "403": {
-            "description": "Forbidden: not the post owner"
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
+          "403": { "description": "Forbidden: not the post owner or admin" }
         },
         "tags": ["posts"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       }
     },
     "/api/posts/{id}/images": {
@@ -258,10 +225,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "requestBody": {
@@ -273,10 +237,7 @@
                 "properties": {
                   "images": {
                     "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "binary"
-                    }
+                    "items": { "type": "string", "format": "binary" }
                   }
                 }
               }
@@ -294,22 +255,11 @@
               }
             }
           },
-          "400": {
-            "description": "画像枚数上限超過"
-          },
-          "403": {
-            "description": "Forbidden: not the post owner"
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
+          "400": { "description": "画像枚数上限超過" },
+          "403": { "description": "Forbidden: not the post owner" }
         },
         "tags": ["posts"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       }
     },
     "/api/posts/{id}/images/{imageId}": {
@@ -320,19 +270,13 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           },
           {
             "name": "imageId",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -340,28 +284,45 @@
             "description": "",
             "content": {
               "application/json": {
+                "schema": { "$ref": "#/components/schemas/ImageResponseDto" }
+              }
+            }
+          },
+          "403": { "description": "Forbidden: not the post owner or admin" },
+          "404": { "description": "Image not found" }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/posts/{id}/favorite": {
+      "post": {
+        "operationId": "PostsController_toggleFavorite",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ImageResponseDto"
+                  "properties": { "favorited": { "type": "boolean" } }
                 }
               }
             }
           },
-          "403": {
-            "description": "Forbidden: not the post owner"
-          },
-          "404": {
-            "description": "Image not found"
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
+          "400": { "description": "お気に入り上限超過" },
+          "403": { "description": "自分の投稿はお気に入り不可" },
+          "404": { "description": "Post not found" }
         },
         "tags": ["posts"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }, { "bearer": [] }]
       }
     },
     "/api/auth/login": {
@@ -372,9 +333,7 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginDto"
-              }
+              "schema": { "$ref": "#/components/schemas/LoginDto" }
             }
           }
         },
@@ -421,9 +380,7 @@
             "description": "",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LogoutResponseDto"
-                }
+                "schema": { "$ref": "#/components/schemas/LogoutResponseDto" }
               }
             }
           }
@@ -439,42 +396,31 @@
             "name": "minLat",
             "required": false,
             "in": "query",
-            "schema": {
-              "type": "number"
-            }
+            "schema": { "type": "number" }
           },
           {
             "name": "maxLat",
             "required": false,
             "in": "query",
-            "schema": {
-              "type": "number"
-            }
+            "schema": { "type": "number" }
           },
           {
             "name": "minLng",
             "required": false,
             "in": "query",
-            "schema": {
-              "type": "number"
-            }
+            "schema": { "type": "number" }
           },
           {
             "name": "maxLng",
             "required": false,
             "in": "query",
-            "schema": {
-              "type": "number"
-            }
+            "schema": { "type": "number" }
           },
           {
             "name": "status",
             "required": false,
             "in": "query",
-            "schema": {
-              "enum": ["lost", "resolved"],
-              "type": "string"
-            }
+            "schema": { "enum": ["lost", "resolved"], "type": "string" }
           }
         ],
         "responses": {
@@ -484,9 +430,7 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MapMarkerDto"
-                  }
+                  "items": { "$ref": "#/components/schemas/MapMarkerDto" }
                 }
               }
             }
@@ -504,26 +448,13 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSightingDto"
-              }
+              "schema": { "$ref": "#/components/schemas/CreateSightingDto" }
             }
           }
         },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
-        },
+        "responses": { "201": { "description": "" } },
         "tags": ["sightings"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       },
       "get": {
         "operationId": "SightingsController_findByPost",
@@ -533,49 +464,58 @@
             "name": "postId",
             "required": true,
             "in": "query",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
+        "responses": { "200": { "description": "" } },
         "tags": ["sightings"]
       }
     },
     "/api/sightings/{id}": {
       "delete": {
         "operationId": "SightingsController_remove",
-        "summary": "目撃情報を削除する（本人のみ）",
+        "summary": "目撃情報を削除する（本人または管理者）",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "204": { "description": "" } },
+        "tags": ["sightings"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/sightings/{id}/favorite": {
+      "post": {
+        "operationId": "SightingsController_toggleFavorite",
+        "summary": "目撃情報のお気に入りをトグルする",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
-          "204": {
-            "description": ""
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": { "favorited": { "type": "boolean" } }
+                }
+              }
+            }
           },
-          "401": {
-            "description": "認証が必要です"
-          }
+          "400": { "description": "お気に入り上限超過" },
+          "404": { "description": "Sighting not found" }
         },
         "tags": ["sightings"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       }
     },
     "/api/conversations": {
@@ -587,45 +527,21 @@
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateConversationDto"
-              }
+              "schema": { "$ref": "#/components/schemas/CreateConversationDto" }
             }
           }
         },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
-        },
+        "responses": { "201": { "description": "" } },
         "tags": ["conversations"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       },
       "get": {
         "operationId": "ConversationsController_findAll",
         "summary": "自分が参加する会話一覧を取得する",
         "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
-        },
+        "responses": { "200": { "description": "" } },
         "tags": ["conversations"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       }
     },
     "/api/conversations/{id}/messages": {
@@ -637,36 +553,20 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMessageDto"
-              }
+              "schema": { "$ref": "#/components/schemas/CreateMessageDto" }
             }
           }
         },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
-        },
+        "responses": { "201": { "description": "" } },
         "tags": ["conversations"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       },
       "get": {
         "operationId": "ConversationsController_findMessages",
@@ -676,26 +576,12 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
-        },
+        "responses": { "200": { "description": "" } },
         "tags": ["conversations"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       }
     },
     "/api/conversations/{id}/messages/read": {
@@ -707,26 +593,12 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "example": "00000000-0000-0000-0000-000000000000",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "401": {
-            "description": "認証が必要です"
-          }
-        },
+        "responses": { "200": { "description": "" } },
         "tags": ["conversations"],
-        "security": [
-          {
-            "bearer": []
-          }
-        ]
+        "security": [{ "bearer": [] }]
       }
     }
   },
@@ -740,159 +612,81 @@
   "servers": [],
   "components": {
     "securitySchemes": {
-      "bearer": {
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "type": "http"
-      }
+      "bearer": { "scheme": "bearer", "bearerFormat": "JWT", "type": "http" }
     },
     "schemas": {
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "email": { "type": "string" },
+          "nickname": { "type": "string" },
+          "createdAt": { "format": "date-time", "type": "string" }
+        },
+        "required": ["id", "email", "nickname", "createdAt"]
+      },
       "RegisterDto": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string",
-            "example": "user@example.com"
-          },
+          "email": { "type": "string", "example": "user@example.com" },
           "password": {
             "type": "string",
             "example": "password123",
             "minLength": 8
           },
-          "name": {
-            "type": "string",
-            "example": "Alice"
-          }
+          "name": { "type": "string", "example": "Alice" }
         },
         "required": ["email", "password"]
-      },
-      "UserResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "nickname": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          }
-        },
-        "required": ["id", "email", "nickname", "createdAt"]
       },
       "PetDetailResponseDto": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "color": {
-            "type": "string"
-          },
-          "age": {
-            "type": "string"
-          },
-          "features": {
-            "type": "string"
-          },
-          "gender": {
-            "type": "string",
-            "nullable": true
-          },
-          "breed": {
-            "type": "string",
-            "nullable": true
-          },
-          "size": {
-            "type": "string",
-            "nullable": true
-          },
-          "collar": {
-            "type": "string",
-            "nullable": true
-          },
-          "microchip": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "neutered": {
-            "type": "boolean",
-            "nullable": true
-          }
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "color": { "type": "string" },
+          "age": { "type": "string" },
+          "features": { "type": "string" },
+          "gender": { "type": "string", "nullable": true },
+          "breed": { "type": "string", "nullable": true },
+          "size": { "type": "string", "nullable": true },
+          "collar": { "type": "string", "nullable": true },
+          "microchip": { "type": "boolean", "nullable": true },
+          "neutered": { "type": "boolean", "nullable": true }
         },
         "required": ["id", "name", "color", "age", "features"]
       },
       "LocationResponseDto": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "prefecture": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "lat": {
-            "type": "number"
-          },
-          "lng": {
-            "type": "number"
-          }
+          "id": { "type": "string" },
+          "prefecture": { "type": "string" },
+          "city": { "type": "string" },
+          "address": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" }
         },
         "required": ["id", "prefecture", "city", "address", "lat", "lng"]
       },
       "ImageResponseDto": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          }
+          "id": { "type": "string" },
+          "postId": { "type": "string" },
+          "url": { "type": "string" },
+          "createdAt": { "format": "date-time", "type": "string" }
         },
-        "required": ["id", "url", "createdAt"]
+        "required": ["id", "postId", "url", "createdAt"]
       },
       "PostResponseDto": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "lostDate": {
-            "format": "date-time",
-            "type": "string"
-          },
+          "id": { "type": "string" },
+          "postType": { "type": "string", "enum": ["cat"] },
+          "title": { "type": "string", "nullable": true },
+          "description": { "type": "string" },
+          "userId": { "type": "string" },
+          "status": { "type": "string" },
+          "lostDate": { "format": "date-time", "type": "string" },
           "resolvedAt": {
             "format": "date-time",
             "type": "string",
@@ -900,37 +694,22 @@
           },
           "petDetail": {
             "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PetDetailResponseDto"
-              }
-            ]
+            "allOf": [{ "$ref": "#/components/schemas/PetDetailResponseDto" }]
           },
           "location": {
             "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/LocationResponseDto"
-              }
-            ]
+            "allOf": [{ "$ref": "#/components/schemas/LocationResponseDto" }]
           },
           "images": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ImageResponseDto"
-            }
+            "items": { "$ref": "#/components/schemas/ImageResponseDto" }
           },
-          "createdAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          }
+          "createdAt": { "format": "date-time", "type": "string" },
+          "updatedAt": { "format": "date-time", "type": "string" }
         },
         "required": [
           "id",
+          "postType",
           "description",
           "userId",
           "status",
@@ -945,109 +724,55 @@
         "properties": {
           "items": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PostResponseDto"
-            }
+            "items": { "$ref": "#/components/schemas/PostResponseDto" }
           },
-          "total": {
-            "type": "number"
-          }
+          "total": { "type": "number" }
         },
         "required": ["items", "total"]
       },
       "UpdatePetDetailDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "color": {
-            "type": "string"
-          },
-          "age": {
-            "type": "string"
-          },
-          "features": {
-            "type": "string"
-          },
-          "gender": {
-            "type": "string",
-            "enum": ["male", "female", "unknown"]
-          },
-          "breed": {
-            "type": "string"
-          },
-          "size": {
-            "type": "string"
-          },
-          "collar": {
-            "type": "string"
-          },
-          "microchip": {
-            "type": "boolean"
-          },
-          "neutered": {
-            "type": "boolean"
-          }
+          "name": { "type": "string" },
+          "color": { "type": "string" },
+          "age": { "type": "string" },
+          "features": { "type": "string" },
+          "gender": { "type": "string", "enum": ["male", "female", "unknown"] },
+          "breed": { "type": "string" },
+          "size": { "type": "string" },
+          "collar": { "type": "string" },
+          "microchip": { "type": "boolean" },
+          "neutered": { "type": "boolean" }
         }
       },
       "UpdateLocationDto": {
         "type": "object",
         "properties": {
-          "prefecture": {
-            "type": "string",
-            "enum": ["saitama"]
-          },
-          "city": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "lat": {
-            "type": "number"
-          },
-          "lng": {
-            "type": "number"
-          }
+          "prefecture": { "type": "string", "enum": ["saitama"] },
+          "city": { "type": "string" },
+          "address": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" }
         }
       },
       "UpdatePostDto": {
         "type": "object",
         "properties": {
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "lostDate": {
-            "type": "string",
-            "example": "2024-01-01"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["lost", "resolved"]
-          },
-          "petDetail": {
-            "$ref": "#/components/schemas/UpdatePetDetailDto"
-          },
-          "location": {
-            "$ref": "#/components/schemas/UpdateLocationDto"
-          }
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "lostDate": { "type": "string", "example": "2024-01-01" },
+          "status": { "type": "string", "enum": ["lost", "resolved"] },
+          "petDetail": { "$ref": "#/components/schemas/UpdatePetDetailDto" },
+          "location": { "$ref": "#/components/schemas/UpdateLocationDto" }
         }
       },
       "AddImagesResponseDto": {
         "type": "object",
         "properties": {
-          "remainingSlots": {
-            "type": "number"
-          },
+          "remainingSlots": { "type": "number" },
           "images": {
             "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ImageResponseDto"
-            }
+            "items": { "$ref": "#/components/schemas/ImageResponseDto" }
           }
         },
         "required": ["remainingSlots", "images"]
@@ -1055,10 +780,7 @@
       "LoginDto": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string",
-            "example": "user@example.com"
-          },
+          "email": { "type": "string", "example": "user@example.com" },
           "password": {
             "type": "string",
             "example": "password123",
@@ -1069,92 +791,49 @@
       },
       "AccessTokenResponseDto": {
         "type": "object",
-        "properties": {
-          "accessToken": {
-            "type": "string"
-          }
-        },
+        "properties": { "accessToken": { "type": "string" } },
         "required": ["accessToken"]
       },
       "LogoutResponseDto": {
         "type": "object",
-        "properties": {
-          "ok": {
-            "type": "boolean"
-          }
-        },
+        "properties": { "ok": { "type": "boolean" } },
         "required": ["ok"]
       },
       "MapMarkerDto": {
         "type": "object",
         "properties": {
-          "type": {
-            "type": "string",
-            "enum": ["post", "sighting"]
-          },
-          "id": {
-            "type": "string"
-          },
-          "postId": {
-            "type": "string"
-          },
-          "lat": {
-            "type": "number"
-          },
-          "lng": {
-            "type": "number"
-          },
-          "status": {
-            "type": "string",
-            "enum": ["lost", "resolved"]
-          }
+          "type": { "type": "string", "enum": ["post", "sighting"] },
+          "id": { "type": "string" },
+          "postId": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "status": { "type": "string", "enum": ["lost", "resolved"] }
         },
         "required": ["type", "id", "lat", "lng", "status"]
       },
       "CreateSightingDto": {
         "type": "object",
         "properties": {
-          "postId": {
-            "type": "string"
-          },
-          "lat": {
-            "type": "number"
-          },
-          "lng": {
-            "type": "number"
-          },
-          "address": {
-            "type": "string"
-          },
-          "sightedAt": {
-            "type": "string"
-          },
-          "comment": {
-            "type": "string"
-          }
+          "postId": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "address": { "type": "string" },
+          "sightedAt": { "type": "string" },
+          "comment": { "type": "string" }
         },
         "required": ["postId", "lat", "lng", "sightedAt"]
       },
       "CreateConversationDto": {
         "type": "object",
         "properties": {
-          "postId": {
-            "type": "string"
-          },
-          "sightingId": {
-            "type": "string"
-          }
+          "postId": { "type": "string" },
+          "sightingId": { "type": "string" }
         },
         "required": ["postId", "sightingId"]
       },
       "CreateMessageDto": {
         "type": "object",
-        "properties": {
-          "body": {
-            "type": "string",
-            "maxLength": 1000
-          }
-        },
+        "properties": { "body": { "type": "string", "maxLength": 1000 } },
         "required": ["body"]
       }
     }

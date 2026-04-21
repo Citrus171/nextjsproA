@@ -12,6 +12,10 @@ enum PostStatus {
   resolved
 }
 
+enum PostType {
+  cat
+}
+
 enum Gender {
   male
   female
@@ -50,6 +54,7 @@ model Post {
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
   status      PostStatus @default(lost)
+  postType    PostType   @default(cat)
   title       String?
   description String
   lostDate    DateTime

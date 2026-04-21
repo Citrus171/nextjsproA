@@ -76,6 +76,7 @@ export class PostsController {
     schema: {
       type: "object",
       properties: {
+        postType: { type: "string", enum: ["cat"], default: "cat" },
         title: { type: "string" },
         description: { type: "string" },
         lostDate: { type: "string" },

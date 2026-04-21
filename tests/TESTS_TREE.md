@@ -21,6 +21,7 @@ apps/api/src/
 │   │   │   └── petDetail と location と images を include して取得する
 │   │   ├── create
 │   │   │   ├── ファイルなしで投稿を作成する
+│   │   │   ├── postType 未指定の時、cat で保存して返す
 │   │   │   ├── ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 │   │   │   ├── アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
 │   │   │   ├── 画像が sharp でリサイズ・JPEG変換されること

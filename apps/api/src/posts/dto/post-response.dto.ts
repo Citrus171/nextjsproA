@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { PostType } from "@prisma/client";
 
 export class ImageResponseDto {
   @ApiProperty() id: string;
@@ -33,6 +34,9 @@ export class LocationResponseDto {
 export class PostResponseDto {
   @ApiProperty()
   id: string;
+
+  @ApiProperty({ enum: PostType })
+  postType: PostType;
 
   @ApiProperty({ required: false, nullable: true })
   title: string | null;

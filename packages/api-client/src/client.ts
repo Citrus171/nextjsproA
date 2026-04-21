@@ -4,6 +4,7 @@ import {
   authControllerLogin,
   authControllerRefresh,
   authControllerLogout,
+  type PostsControllerCreateBody,
   postsControllerList,
   postsControllerCreate,
   postsControllerUpdate,
@@ -114,12 +115,8 @@ export function createClient(options: ClientOptions) {
       const r = await postsControllerList({ params: { page, perPage } });
       return r.data;
     },
-    createPost: async (
-      title: string,
-      description: string,
-      lostDate: string
-    ) => {
-      const r = await postsControllerCreate({ title, description, lostDate });
+    createPost: async (data: PostsControllerCreateBody) => {
+      const r = await postsControllerCreate(data);
       return r.data;
     },
     getPost: async (id: string) => {
