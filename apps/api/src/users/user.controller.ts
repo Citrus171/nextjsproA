@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  BadRequestException,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -61,7 +62,25 @@ export class UsersController {
   @Post("register")
   @ApiResponse({ status: 201, type: UserResponseDto })
   async register(@Body() dto: RegisterDto) {
-    const user = await this.users.createUser(dto.email, dto.password, dto.name);
-    return { id: user.id, email: user.email, nickname: user.nickname };
+    const nickname = dto.nickname ?? dto.name;
+    if (!nickname) {
+      throw new BadRequestException({ error: "ニックネームは必須です" });
+    }
+    try {
+      const user = await this.users.createUser(
+        dto.email,
+        dto.password,
+        nickname
+      );
+      return { id: user.id, email: user.email, nickname: user.nickname };
+    } catch (e: any) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
+      throw new HttpException(
+        { error: "内部サーバーエラーが発生しました" },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }

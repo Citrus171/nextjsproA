@@ -17,6 +17,7 @@
 #### create
 
 - [x] ファイルなしで投稿を作成する
+- [x] postType 未指定の時、cat で保存して返す
 - [x] ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 - [x] アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
 - [x] 画像が sharp でリサイズ・JPEG変換されること
@@ -299,6 +300,19 @@
 
 - [x] 指定IDのユーザーを削除する
 - [x] 存在しないIDは Prisma エラーを再スローする
+
+### UsersController (`src/users/user.controller.spec.ts`)
+
+- [x] nickname と name がないと BadRequestException を返す
+- [x] ConflictException はそのまま伝播する
+- [x] nickname があれば service に渡す
+- [x] nickname がなくても name を後方互換で使う
+
+### RegisterDto (`src/users/dto/register.dto.spec.ts`)
+
+- [x] name が未指定でもバリデーションは通る
+- [x] nickname が未指定でもバリデーションは通る
+- [x] name と nickname があればバリデーションは通る
 
 （その他既存テスト省略）
 

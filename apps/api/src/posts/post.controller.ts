@@ -76,6 +76,7 @@ export class PostsController {
     schema: {
       type: "object",
       properties: {
+        postType: { type: "string", enum: ["cat"], default: "cat" },
         title: { type: "string" },
         description: { type: "string" },
         lostDate: { type: "string" },
@@ -177,7 +178,6 @@ export class PostsController {
 
   @HttpPost(":id/favorite")
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiResponse({
     status: 201,
     schema: { properties: { favorited: { type: "boolean" } } },

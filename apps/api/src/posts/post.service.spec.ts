@@ -183,6 +183,44 @@ describe("PostsService", () => {
       expect(result).toEqual(withIncludes);
     });
 
+    it("postType 未指定の時、cat で保存して返す", async () => {
+      const created = {
+        id: "post1",
+        title: "T",
+        description: "C",
+        userId: "u1",
+        status: "lost",
+        postType: "cat",
+        lostDate: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const withIncludes = {
+        ...created,
+        petDetail: null,
+        location: null,
+        images: [],
+      };
+      mockPrisma.post.create.mockResolvedValue(created);
+      mockPrisma.post.findUnique.mockResolvedValue(withIncludes);
+
+      const result = await service.create("u1", {
+        title: "T",
+        description: "C",
+        lostDate: "2024-01-01",
+      });
+
+      expect(mockPrisma.post.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          title: "T",
+          description: "C",
+          userId: "u1",
+          postType: "cat",
+        }),
+      });
+      expect(result).toEqual(withIncludes);
+    });
+
     it("ファイルありで投稿を作成する時、writeFileSyncが呼ばれること", async () => {
       const created = {
         id: "post1",

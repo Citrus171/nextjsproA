@@ -12,7 +12,7 @@ export default function CreatePost() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.createPost(title, description, lostDate);
+      await api.createPost({ title, description, lostDate });
       navigate("/");
     } catch (err) {
       alert("Failed to create post");

@@ -5,32 +5,51 @@
  * API description
  * OpenAPI spec version: 1.0
  */
-import axios from "axios";
-import type { AxiosRequestConfig, AxiosResponse } from "axios";
-export type SightingsControllerFindByPostParams = {
-  postId: string;
+import axios from 'axios'
+import type {
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios'
+export type SightingsControllerToggleFavorite201 = {
+  favorited?: boolean;
 };
 
-export type MapControllerGetMarkersStatus =
-  (typeof MapControllerGetMarkersStatus)[keyof typeof MapControllerGetMarkersStatus];
+export type SightingsControllerFindByPostParams = {
+postId: string;
+};
+
+export type MapControllerGetMarkersStatus = typeof MapControllerGetMarkersStatus[keyof typeof MapControllerGetMarkersStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const MapControllerGetMarkersStatus = {
-  lost: "lost",
-  resolved: "resolved",
+  lost: 'lost',
+  resolved: 'resolved',
 } as const;
 
 export type MapControllerGetMarkersParams = {
-  minLat?: number;
-  maxLat?: number;
-  minLng?: number;
-  maxLng?: number;
-  status?: MapControllerGetMarkersStatus;
+minLat?: number;
+maxLat?: number;
+minLng?: number;
+maxLng?: number;
+status?: MapControllerGetMarkersStatus;
+};
+
+export type PostsControllerToggleFavorite201 = {
+  favorited?: boolean;
 };
 
 export type PostsControllerAddImagesBody = {
   images?: Blob[];
 };
+
+export type PostsControllerCreateBodyPostType = typeof PostsControllerCreateBodyPostType[keyof typeof PostsControllerCreateBodyPostType];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostsControllerCreateBodyPostType = {
+  cat: 'cat',
+} as const;
 
 export type PostsControllerCreateBody = {
   description?: string;
@@ -40,6 +59,7 @@ export type PostsControllerCreateBody = {
   lostDate?: string;
   /** JSON string */
   petDetail?: string;
+  postType?: PostsControllerCreateBodyPostType;
   title?: string;
 };
 
@@ -62,22 +82,22 @@ export interface CreateSightingDto {
   sightedAt: string;
 }
 
-export type MapMarkerDtoType =
-  (typeof MapMarkerDtoType)[keyof typeof MapMarkerDtoType];
+export type MapMarkerDtoType = typeof MapMarkerDtoType[keyof typeof MapMarkerDtoType];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const MapMarkerDtoType = {
-  post: "post",
-  sighting: "sighting",
+  post: 'post',
+  sighting: 'sighting',
 } as const;
 
-export type MapMarkerDtoStatus =
-  (typeof MapMarkerDtoStatus)[keyof typeof MapMarkerDtoStatus];
+export type MapMarkerDtoStatus = typeof MapMarkerDtoStatus[keyof typeof MapMarkerDtoStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const MapMarkerDtoStatus = {
-  lost: "lost",
-  resolved: "resolved",
+  lost: 'lost',
+  resolved: 'resolved',
 } as const;
 
 export interface MapMarkerDto {
@@ -108,13 +128,13 @@ export interface AddImagesResponseDto {
   remainingSlots: number;
 }
 
-export type UpdatePostDtoStatus =
-  (typeof UpdatePostDtoStatus)[keyof typeof UpdatePostDtoStatus];
+export type UpdatePostDtoStatus = typeof UpdatePostDtoStatus[keyof typeof UpdatePostDtoStatus];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdatePostDtoStatus = {
-  lost: "lost",
-  resolved: "resolved",
+  lost: 'lost',
+  resolved: 'resolved',
 } as const;
 
 export interface UpdatePostDto {
@@ -126,12 +146,12 @@ export interface UpdatePostDto {
   title?: string;
 }
 
-export type UpdateLocationDtoPrefecture =
-  (typeof UpdateLocationDtoPrefecture)[keyof typeof UpdateLocationDtoPrefecture];
+export type UpdateLocationDtoPrefecture = typeof UpdateLocationDtoPrefecture[keyof typeof UpdateLocationDtoPrefecture];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdateLocationDtoPrefecture = {
-  saitama: "saitama",
+  saitama: 'saitama',
 } as const;
 
 export interface UpdateLocationDto {
@@ -142,14 +162,14 @@ export interface UpdateLocationDto {
   prefecture?: UpdateLocationDtoPrefecture;
 }
 
-export type UpdatePetDetailDtoGender =
-  (typeof UpdatePetDetailDtoGender)[keyof typeof UpdatePetDetailDtoGender];
+export type UpdatePetDetailDtoGender = typeof UpdatePetDetailDtoGender[keyof typeof UpdatePetDetailDtoGender];
+
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const UpdatePetDetailDtoGender = {
-  male: "male",
-  female: "female",
-  unknown: "unknown",
+  male: 'male',
+  female: 'female',
+  unknown: 'unknown',
 } as const;
 
 export interface UpdatePetDetailDto {
@@ -165,10 +185,13 @@ export interface UpdatePetDetailDto {
   size?: string;
 }
 
-export interface PostListResponseDto {
-  items: PostResponseDto[];
-  total: number;
-}
+export type PostResponseDtoPostType = typeof PostResponseDtoPostType[keyof typeof PostResponseDtoPostType];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostResponseDtoPostType = {
+  cat: 'cat',
+} as const;
 
 /**
  * @nullable
@@ -183,6 +206,7 @@ export type PostResponseDtoLocation = LocationResponseDto | null;
 export interface ImageResponseDto {
   createdAt: string;
   id: string;
+  postId: string;
   url: string;
 }
 
@@ -196,6 +220,7 @@ export interface PostResponseDto {
   lostDate: string;
   /** @nullable */
   petDetail?: PostResponseDtoPetDetail;
+  postType: PostResponseDtoPostType;
   /** @nullable */
   resolvedAt?: string | null;
   status: string;
@@ -203,6 +228,11 @@ export interface PostResponseDto {
   title?: string | null;
   updatedAt: string;
   userId: string;
+}
+
+export interface PostListResponseDto {
+  items: PostResponseDto[];
+  total: number;
 }
 
 export interface LocationResponseDto {
@@ -234,6 +264,14 @@ export interface PetDetailResponseDto {
   size?: string | null;
 }
 
+export interface RegisterDto {
+  email: string;
+  name?: string;
+  nickname?: string;
+  /** @minLength 8 */
+  password: string;
+}
+
 export interface UserResponseDto {
   createdAt: string;
   email: string;
@@ -241,257 +279,292 @@ export interface UserResponseDto {
   nickname: string;
 }
 
-export interface RegisterDto {
-  email: string;
-  name?: string;
-  /** @minLength 8 */
-  password: string;
-}
 
-export const usersControllerFindAll = <TData = AxiosResponse<void>>(
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.get(`/api/users`, options);
-};
+
+
+
+  export const usersControllerFindAll = <TData = AxiosResponse<UserResponseDto[]>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/users`,options
+    );
+  }
+
+export const usersControllerRemove = <TData = AxiosResponse<void>>(
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/users/${id}`,options
+    );
+  }
 
 export const usersControllerRegister = <TData = AxiosResponse<UserResponseDto>>(
-  registerDto: RegisterDto,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/users/register`, registerDto, options);
-};
+    registerDto: RegisterDto, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/users/register`,
+      registerDto,options
+    );
+  }
 
 export const postsControllerCreate = <TData = AxiosResponse<PostResponseDto>>(
-  postsControllerCreateBody: PostsControllerCreateBody,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  const formData = new FormData();
-  if (postsControllerCreateBody.title !== undefined) {
-    formData.append("title", postsControllerCreateBody.title);
-  }
-  if (postsControllerCreateBody.description !== undefined) {
-    formData.append("description", postsControllerCreateBody.description);
-  }
-  if (postsControllerCreateBody.lostDate !== undefined) {
-    formData.append("lostDate", postsControllerCreateBody.lostDate);
-  }
-  if (postsControllerCreateBody.petDetail !== undefined) {
-    formData.append("petDetail", postsControllerCreateBody.petDetail);
-  }
-  if (postsControllerCreateBody.location !== undefined) {
-    formData.append("location", postsControllerCreateBody.location);
-  }
-  if (postsControllerCreateBody.images !== undefined) {
-    postsControllerCreateBody.images.forEach((value) =>
-      formData.append("images", value)
+    postsControllerCreateBody: PostsControllerCreateBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {const formData = new FormData();
+if(postsControllerCreateBody.postType !== undefined) {
+ formData.append('postType', postsControllerCreateBody.postType)
+ }
+if(postsControllerCreateBody.title !== undefined) {
+ formData.append('title', postsControllerCreateBody.title)
+ }
+if(postsControllerCreateBody.description !== undefined) {
+ formData.append('description', postsControllerCreateBody.description)
+ }
+if(postsControllerCreateBody.lostDate !== undefined) {
+ formData.append('lostDate', postsControllerCreateBody.lostDate)
+ }
+if(postsControllerCreateBody.petDetail !== undefined) {
+ formData.append('petDetail', postsControllerCreateBody.petDetail)
+ }
+if(postsControllerCreateBody.location !== undefined) {
+ formData.append('location', postsControllerCreateBody.location)
+ }
+if(postsControllerCreateBody.images !== undefined) {
+ postsControllerCreateBody.images.forEach(value => formData.append('images', value));
+ }
+
+    return axios.post(
+      `/api/posts`,
+      formData,options
     );
   }
-
-  return axios.post(`/api/posts`, formData, options);
-};
 
 export const postsControllerList = <TData = AxiosResponse<PostListResponseDto>>(
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.get(`/api/posts`, options);
-};
-
-export const postsControllerGet = <TData = AxiosResponse<PostResponseDto>>(
-  id: string,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.get(`/api/posts/${id}`, options);
-};
-
-export const postsControllerUpdate = <TData = AxiosResponse<PostResponseDto>>(
-  id: string,
-  updatePostDto: UpdatePostDto,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.patch(`/api/posts/${id}`, updatePostDto, options);
-};
-
-export const postsControllerRemove = <TData = AxiosResponse<PostResponseDto>>(
-  id: string,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.delete(`/api/posts/${id}`, options);
-};
-
-export const postsControllerAddImages = <
-  TData = AxiosResponse<AddImagesResponseDto>,
->(
-  id: string,
-  postsControllerAddImagesBody: PostsControllerAddImagesBody,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  const formData = new FormData();
-  if (postsControllerAddImagesBody.images !== undefined) {
-    postsControllerAddImagesBody.images.forEach((value) =>
-      formData.append("images", value)
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/posts`,options
     );
   }
 
-  return axios.post(`/api/posts/${id}/images`, formData, options);
-};
+export const postsControllerGet = <TData = AxiosResponse<PostResponseDto>>(
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/posts/${id}`,options
+    );
+  }
 
-export const postsControllerRemoveImage = <
-  TData = AxiosResponse<ImageResponseDto>,
->(
-  id: string,
-  imageId: string,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.delete(`/api/posts/${id}/images/${imageId}`, options);
-};
+export const postsControllerUpdate = <TData = AxiosResponse<PostResponseDto>>(
+    id: string,
+    updatePostDto: UpdatePostDto, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.patch(
+      `/api/posts/${id}`,
+      updatePostDto,options
+    );
+  }
 
-export const authControllerLogin = <
-  TData = AxiosResponse<AccessTokenResponseDto>,
->(
-  loginDto: LoginDto,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/auth/login`, loginDto, options);
-};
+export const postsControllerRemove = <TData = AxiosResponse<PostResponseDto>>(
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/posts/${id}`,options
+    );
+  }
 
-export const authControllerRefresh = <
-  TData = AxiosResponse<AccessTokenResponseDto>,
->(
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/auth/refresh`, undefined, options);
-};
+export const postsControllerAddImages = <TData = AxiosResponse<AddImagesResponseDto>>(
+    id: string,
+    postsControllerAddImagesBody: PostsControllerAddImagesBody, options?: AxiosRequestConfig
+ ): Promise<TData> => {const formData = new FormData();
+if(postsControllerAddImagesBody.images !== undefined) {
+ postsControllerAddImagesBody.images.forEach(value => formData.append('images', value));
+ }
+
+    return axios.post(
+      `/api/posts/${id}/images`,
+      formData,options
+    );
+  }
+
+export const postsControllerRemoveImage = <TData = AxiosResponse<ImageResponseDto>>(
+    id: string,
+    imageId: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/posts/${id}/images/${imageId}`,options
+    );
+  }
+
+export const postsControllerToggleFavorite = <TData = AxiosResponse<PostsControllerToggleFavorite201>>(
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/posts/${id}/favorite`,undefined,options
+    );
+  }
+
+export const authControllerLogin = <TData = AxiosResponse<AccessTokenResponseDto>>(
+    loginDto: LoginDto, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/auth/login`,
+      loginDto,options
+    );
+  }
+
+export const authControllerRefresh = <TData = AxiosResponse<AccessTokenResponseDto>>(
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/auth/refresh`,undefined,options
+    );
+  }
 
 export const authControllerLogout = <TData = AxiosResponse<LogoutResponseDto>>(
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/auth/logout`, undefined, options);
-};
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/auth/logout`,undefined,options
+    );
+  }
 
 export const mapControllerGetMarkers = <TData = AxiosResponse<MapMarkerDto[]>>(
-  params?: MapControllerGetMarkersParams,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.get(`/api/map/markers`, {
+    params?: MapControllerGetMarkersParams, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/map/markers`,{
     ...options,
-    params: { ...params, ...options?.params },
-  });
-};
+        params: {...params, ...options?.params},}
+    );
+  }
 
 /**
  * @summary 目撃情報を作成する
  */
 export const sightingsControllerCreate = <TData = AxiosResponse<void>>(
-  createSightingDto: CreateSightingDto,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/sightings`, createSightingDto, options);
-};
+    createSightingDto: CreateSightingDto, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/sightings`,
+      createSightingDto,options
+    );
+  }
 
 /**
  * @summary postId別の目撃情報一覧を取得する
  */
 export const sightingsControllerFindByPost = <TData = AxiosResponse<void>>(
-  params: SightingsControllerFindByPostParams,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.get(`/api/sightings`, {
+    params: SightingsControllerFindByPostParams, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/sightings`,{
     ...options,
-    params: { ...params, ...options?.params },
-  });
-};
+        params: {...params, ...options?.params},}
+    );
+  }
 
 /**
- * @summary 目撃情報を削除する（本人のみ）
+ * @summary 目撃情報を削除する（本人または管理者）
  */
 export const sightingsControllerRemove = <TData = AxiosResponse<void>>(
-  id: string,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.delete(`/api/sightings/${id}`, options);
-};
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.delete(
+      `/api/sightings/${id}`,options
+    );
+  }
+
+/**
+ * @summary 目撃情報のお気に入りをトグルする
+ */
+export const sightingsControllerToggleFavorite = <TData = AxiosResponse<SightingsControllerToggleFavorite201>>(
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/sightings/${id}/favorite`,undefined,options
+    );
+  }
 
 /**
  * @summary 会話を作成する
  */
 export const conversationsControllerCreate = <TData = AxiosResponse<void>>(
-  createConversationDto: CreateConversationDto,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/conversations`, createConversationDto, options);
-};
+    createConversationDto: CreateConversationDto, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/conversations`,
+      createConversationDto,options
+    );
+  }
 
 /**
  * @summary 自分が参加する会話一覧を取得する
  */
 export const conversationsControllerFindAll = <TData = AxiosResponse<void>>(
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.get(`/api/conversations`, options);
-};
+     options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/conversations`,options
+    );
+  }
 
 /**
  * @summary メッセージを送信する
  */
-export const conversationsControllerCreateMessage = <
-  TData = AxiosResponse<void>,
->(
-  id: string,
-  createMessageDto: CreateMessageDto,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(
-    `/api/conversations/${id}/messages`,
-    createMessageDto,
-    options
-  );
-};
+export const conversationsControllerCreateMessage = <TData = AxiosResponse<void>>(
+    id: string,
+    createMessageDto: CreateMessageDto, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.post(
+      `/api/conversations/${id}/messages`,
+      createMessageDto,options
+    );
+  }
 
 /**
  * @summary メッセージ一覧を取得する
  */
-export const conversationsControllerFindMessages = <
-  TData = AxiosResponse<void>,
->(
-  id: string,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.get(`/api/conversations/${id}/messages`, options);
-};
+export const conversationsControllerFindMessages = <TData = AxiosResponse<void>>(
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.get(
+      `/api/conversations/${id}/messages`,options
+    );
+  }
 
 /**
  * @summary 会話内の未読メッセージを既読にする
  */
 export const conversationsControllerMarkAsRead = <TData = AxiosResponse<void>>(
-  id: string,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.patch(
-    `/api/conversations/${id}/messages/read`,
-    undefined,
-    options
-  );
-};
+    id: string, options?: AxiosRequestConfig
+ ): Promise<TData> => {
+    return axios.patch(
+      `/api/conversations/${id}/messages/read`,undefined,options
+    );
+  }
 
-export type UsersControllerFindAllResult = AxiosResponse<void>;
-export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>;
-export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>;
-export type PostsControllerListResult = AxiosResponse<PostListResponseDto>;
-export type PostsControllerGetResult = AxiosResponse<PostResponseDto>;
-export type PostsControllerUpdateResult = AxiosResponse<PostResponseDto>;
-export type PostsControllerRemoveResult = AxiosResponse<PostResponseDto>;
-export type PostsControllerAddImagesResult =
-  AxiosResponse<AddImagesResponseDto>;
-export type PostsControllerRemoveImageResult = AxiosResponse<ImageResponseDto>;
-export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>;
-export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>;
-export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>;
-export type MapControllerGetMarkersResult = AxiosResponse<MapMarkerDto[]>;
-export type SightingsControllerCreateResult = AxiosResponse<void>;
-export type SightingsControllerFindByPostResult = AxiosResponse<void>;
-export type SightingsControllerRemoveResult = AxiosResponse<void>;
-export type ConversationsControllerCreateResult = AxiosResponse<void>;
-export type ConversationsControllerFindAllResult = AxiosResponse<void>;
-export type ConversationsControllerCreateMessageResult = AxiosResponse<void>;
-export type ConversationsControllerFindMessagesResult = AxiosResponse<void>;
-export type ConversationsControllerMarkAsReadResult = AxiosResponse<void>;
+export type UsersControllerFindAllResult = AxiosResponse<UserResponseDto[]>
+export type UsersControllerRemoveResult = AxiosResponse<void>
+export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>
+export type PostsControllerCreateResult = AxiosResponse<PostResponseDto>
+export type PostsControllerListResult = AxiosResponse<PostListResponseDto>
+export type PostsControllerGetResult = AxiosResponse<PostResponseDto>
+export type PostsControllerUpdateResult = AxiosResponse<PostResponseDto>
+export type PostsControllerRemoveResult = AxiosResponse<PostResponseDto>
+export type PostsControllerAddImagesResult = AxiosResponse<AddImagesResponseDto>
+export type PostsControllerRemoveImageResult = AxiosResponse<ImageResponseDto>
+export type PostsControllerToggleFavoriteResult = AxiosResponse<PostsControllerToggleFavorite201>
+export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>
+export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>
+export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>
+export type MapControllerGetMarkersResult = AxiosResponse<MapMarkerDto[]>
+export type SightingsControllerCreateResult = AxiosResponse<void>
+export type SightingsControllerFindByPostResult = AxiosResponse<void>
+export type SightingsControllerRemoveResult = AxiosResponse<void>
+export type SightingsControllerToggleFavoriteResult = AxiosResponse<SightingsControllerToggleFavorite201>
+export type ConversationsControllerCreateResult = AxiosResponse<void>
+export type ConversationsControllerFindAllResult = AxiosResponse<void>
+export type ConversationsControllerCreateMessageResult = AxiosResponse<void>
+export type ConversationsControllerFindMessagesResult = AxiosResponse<void>
+export type ConversationsControllerMarkAsReadResult = AxiosResponse<void>
