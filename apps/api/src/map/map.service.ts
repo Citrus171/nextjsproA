@@ -100,10 +100,10 @@ export class MapService {
     const sightingMarkers: MapMarkerDto[] = sightings.map((s) => ({
       type: "sighting",
       id: s.id,
-      postId: s.postId,
+      postId: s.postId ?? undefined,
       lat: s.lat,
       lng: s.lng,
-      status: s.post.status,
+      status: s.post?.status ?? "lost",
     }));
 
     return [...postMarkers, ...sightingMarkers];

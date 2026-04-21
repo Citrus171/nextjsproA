@@ -176,6 +176,10 @@
 
 - [x] 目撃情報を作成してサービスの結果を返すこと
 
+### CreateSightingDto (`src/sightings/dto/create-sighting.dto.spec.ts`)
+
+- [x] postId がなくてもバリデーションエラーにならないこと
+
 #### findByPost
 
 - [x] postIdに紐づく目撃情報一覧を返すこと
@@ -203,6 +207,7 @@
 - [x] 存在しないpostIdはNotFoundException
 - [x] 存在しないsightingIdはNotFoundException
 - [x] 会話参加者以外（無関係なユーザー）はForbiddenException
+- [x] standalone Sighting は NotFoundException で会話を作成できないこと
 
 #### findAllForUser
 
@@ -263,6 +268,7 @@
 
 - [x] bbox内のPostマーカーが type='post' で返ること
 - [x] bbox内のSightingマーカーが type='sighting' で返ること
+- [x] standalone Sighting は statusなしで lost として返ること
 - [x] statusフィルタ指定時にPostクエリのwhereにstatusが含まれること
 - [x] statusフィルタ指定時にSightingクエリのwhereにpost.statusが含まれること
 - [x] bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること

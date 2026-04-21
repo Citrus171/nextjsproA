@@ -105,6 +105,7 @@ apps/api/src/
 │       └── getMarkers
 │           ├── bbox内のPostマーカーが type='post' で返ること
 │           ├── bbox内のSightingマーカーが type='sighting' で返ること
+│           ├── standalone Sighting は statusなしで lost として返ること
 │           ├── statusフィルタ指定時にPostクエリのwhereにstatusが含まれること
 │           ├── statusフィルタ指定時にSightingクエリのwhereにpost.statusが含まれること
 │           ├── bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
@@ -120,6 +121,7 @@ apps/api/src/
 │   │   │   ├── 存在しないpostIdはNotFoundException
 │   │   │   ├── 存在しないsightingIdはNotFoundException
 │   │   │   └── 会話参加者以外（無関係なユーザー）はForbiddenException
+│   │   │   └── standalone Sighting は NotFoundException で会話を作成できないこと
 │   │   ├── findAllForUser
 │   │   │   └── 自分がownerまたはsighterとして参加する会話一覧を返すこと
 │   │   ├── createMessage
@@ -150,9 +152,14 @@ apps/api/src/
 │       └── markAsRead
 │           └── 既読更新結果を返すこと
 ├── sightings/
+│   ├── dto/
+│   │   └── create-sighting.dto.spec.ts
+│   │       └── CreateSightingDto
+│   │           └── postId がなくてもバリデーションエラーにならないこと
 │   ├── sighting.service.spec.ts
 │   │   ├── create
 │   │   │   ├── 有効なデータでSightingを作成できること
+│   │   │   ├── postId がない時は Post チェックをスキップして Sighting を作成できること
 │   │   │   ├── 投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException
 │   │   │   └── 存在しないPostにSightingを作成しようとすると NotFoundException
 │   │   ├── findByPost

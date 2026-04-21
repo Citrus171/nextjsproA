@@ -66,6 +66,39 @@ describe("SightingsService", () => {
       expect(result).toMatchObject({ id: "s-1" });
     });
 
+    it("postId がない時は Post チェックをスキップして Sighting を作成できること", async () => {
+      const dtoWithoutPostId = {
+        lat: 35.9,
+        lng: 139.6,
+        sightedAt: "2026-04-19T10:00:00.000Z",
+      };
+      mockPrisma.sighting.create.mockResolvedValue({
+        id: "s-standalone",
+        postId: null,
+        userId: "other-user",
+        ...dtoWithoutPostId,
+      });
+
+      const result = await service.create(
+        "other-user",
+        dtoWithoutPostId as never
+      );
+
+      expect(mockPrisma.post.findUnique).not.toHaveBeenCalled();
+      expect(mockPrisma.sighting.create).toHaveBeenCalledWith({
+        data: {
+          postId: null,
+          userId: "other-user",
+          lat: 35.9,
+          lng: 139.6,
+          address: undefined,
+          sightedAt: new Date("2026-04-19T10:00:00.000Z"),
+          comment: undefined,
+        },
+      });
+      expect(result).toMatchObject({ id: "s-standalone", postId: null });
+    });
+
     it("投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue({
         id: "post-1",

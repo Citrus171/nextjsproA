@@ -42,6 +42,7 @@ describe("ConversationsService", () => {
       });
       mockPrisma.sighting.findUnique.mockResolvedValue({
         id: "sighting-1",
+        postId: "post-1",
         userId: "sighter-1",
       });
       mockPrisma.conversation.create.mockResolvedValue({
@@ -72,6 +73,7 @@ describe("ConversationsService", () => {
       });
       mockPrisma.sighting.findUnique.mockResolvedValue({
         id: "sighting-1",
+        postId: "post-1",
         userId: "sighter-1",
       });
       mockPrisma.conversation.create.mockRejectedValue(
@@ -113,11 +115,28 @@ describe("ConversationsService", () => {
       });
       mockPrisma.sighting.findUnique.mockResolvedValue({
         id: "sighting-1",
+        postId: "post-1",
         userId: "sighter-1",
       });
 
       await expect(service.create("stranger", dto)).rejects.toThrow(
         ForbiddenException
+      );
+    });
+
+    it("standalone Sighting は NotFoundException で会話を作成できないこと", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post-1",
+        userId: "owner-1",
+      });
+      mockPrisma.sighting.findUnique.mockResolvedValue({
+        id: "sighting-1",
+        postId: null,
+        userId: "sighter-1",
+      });
+
+      await expect(service.create("owner-1", dto)).rejects.toThrow(
+        NotFoundException
       );
     });
   });
