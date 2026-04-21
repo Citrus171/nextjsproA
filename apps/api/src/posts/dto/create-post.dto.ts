@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type, Transform, plainToInstance } from "class-transformer";
+import { PostType } from "@prisma/client";
 import {
   IsString,
   MinLength,
@@ -43,6 +44,11 @@ export class CreateLocationDto {
 }
 
 export class CreatePostDto {
+  @ApiProperty({ required: false, enum: PostType, default: PostType.cat })
+  @IsOptional()
+  @IsEnum(PostType)
+  postType?: PostType;
+
   @ApiProperty({ required: false, example: "白猫のミケを探しています" })
   @IsOptional()
   @IsString()

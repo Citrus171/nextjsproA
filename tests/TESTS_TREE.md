@@ -21,6 +21,7 @@ apps/api/src/
 │   │   │   └── petDetail と location と images を include して取得する
 │   │   ├── create
 │   │   │   ├── ファイルなしで投稿を作成する
+│   │   │   ├── postType 未指定の時、cat で保存して返す
 │   │   │   ├── ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 │   │   │   ├── アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
 │   │   │   ├── 画像が sharp でリサイズ・JPEG変換されること
@@ -175,12 +176,16 @@ apps/api/src/
 └── users/
     ├── user.controller.spec.ts
     │   └── UsersController
-    │       └── ConflictException はそのまま伝播する
+    │       ├── nickname と name がないと BadRequestException を返す
+    │       ├── ConflictException はそのまま伝播する
+    │       ├── nickname があれば service に渡す
+    │       └── nickname がなくても name を後方互換で使う
     ├── dto/
     │   └── register.dto.spec.ts
     │       └── RegisterDto
-    │           └── name が未指定のとき、バリデーションエラーになる
-    │           └── name が空文字のとき、バリデーションエラーになる
+    │           ├── name が未指定でもバリデーションは通る
+    │           ├── nickname が未指定でもバリデーションは通る
+    │           └── name と nickname があればバリデーションは通る
     └── user.service.spec.ts
         └── UserService
             ├── nickname の重複時に ConflictException をスローする
