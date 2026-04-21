@@ -173,8 +173,16 @@ apps/api/src/
 │           ├── BadRequestException を伝播する
 │           └── NotFoundException を伝播する
 └── users/
+    ├── user.controller.spec.ts
+    │   └── UsersController
+    │       └── ConflictException はそのまま伝播する
+    ├── dto/
+    │   └── register.dto.spec.ts
+    │       └── RegisterDto
+    │           └── name が未指定のとき、バリデーションエラーになる
     └── user.service.spec.ts
         └── UserService
+            ├── nickname の重複時に ConflictException をスローする
             ├── （既存テスト省略）
             └── deleteUser
                 ├── 指定IDのユーザーを削除する
@@ -185,7 +193,9 @@ apps/api/test/
     ├── POST /api/users/register
     │   ├── オーナーユーザーを登録できる (201)
     │   ├── 非オーナーユーザーを登録できる (201)
+    │   ├── name が未指定のとき 400 を返す
     │   ├── 重複メールは 400 を返す
+    │   ├── 重複 nickname で 409 を返す
     │   └── 短すぎるパスワードは 400 を返す
     ├── POST /api/auth/login
     │   ├── オーナー: accessToken を返す (200)

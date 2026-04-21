@@ -60,7 +60,7 @@ describe("API E2E", () => {
     it("オーナーユーザーを登録できる (201)", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/users/register")
-        .send({ email: OWNER_EMAIL, password: PASSWORD, nickname: "Owner" });
+        .send({ email: OWNER_EMAIL, password: PASSWORD, name: "Owner" });
 
       expect(res.status).toBe(201);
       expect(res.body.email).toBe(OWNER_EMAIL);
@@ -71,18 +71,42 @@ describe("API E2E", () => {
     it("非オーナーユーザーを登録できる (201)", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/users/register")
-        .send({ email: OTHER_EMAIL, password: PASSWORD, nickname: "Other" });
+        .send({ email: OTHER_EMAIL, password: PASSWORD, name: "Other" });
 
       expect(res.status).toBe(201);
       otherId = res.body.id;
     });
 
+    it("name が未指定のとき 400 を返す", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/users/register")
+        .send({ email: "missing-name@test.example", password: PASSWORD });
+
+      expect(res.status).toBe(400);
+    });
+
     it("重複メールは 400 を返す", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/users/register")
-        .send({ email: OWNER_EMAIL, password: PASSWORD, nickname: "Dup" });
+        .send({ email: OWNER_EMAIL, password: PASSWORD, name: "Dup" });
 
       expect(res.status).toBe(400);
+    });
+
+    it("重複 nickname で 409 を返す", async () => {
+      const duplicateNicknameEmail = `dup-nick-${Date.now()}@test.example`;
+      const res = await request(app.getHttpServer())
+        .post("/api/users/register")
+        .send({
+          email: duplicateNicknameEmail,
+          password: PASSWORD,
+          name: "Owner",
+        });
+
+      expect(res.status).toBe(409);
+      expect(res.body.message || res.body.error).toMatch(
+        /このニックネームはすでに使用されています/
+      );
     });
 
     it("短すぎるパスワードは 400 を返す", async () => {
@@ -91,7 +115,7 @@ describe("API E2E", () => {
         .send({
           email: "short@test.example",
           password: "short",
-          nickname: "S",
+          name: "S",
         });
 
       expect(res.status).toBe(400);
@@ -399,7 +423,7 @@ describe("API E2E", () => {
         .send({
           email: outsiderEmail,
           password: PASSWORD,
-          nickname: "Outsider",
+          name: "Outsider",
         });
       expect(regRes.status).toBe(201);
       expect(regRes.body?.id).toBeDefined();

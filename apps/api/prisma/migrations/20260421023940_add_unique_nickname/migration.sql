@@ -1,0 +1,23 @@
+/*
+  Warnings:
+
+  - A unique constraint covering the columns `[nickname]` on the table `User` will be added. If there are existing duplicate values, this will fail.
+  - Made the column `emailEncrypted` on table `User` required. This step will fail if there are existing NULL values in that column.
+  - Made the column `emailHash` on table `User` required. This step will fail if there are existing NULL values in that column.
+
+*/
+-- DropForeignKey
+ALTER TABLE "RefreshToken" DROP CONSTRAINT "RefreshToken_userId_fkey";
+
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "emailEncrypted" SET NOT NULL,
+ALTER COLUMN "emailHash" SET NOT NULL;
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_nickname_key" ON "User"("nickname");
+
+-- AddForeignKey
+ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- RenameIndex
+ALTER INDEX "user_emailhash_unique" RENAME TO "User_emailHash_key";

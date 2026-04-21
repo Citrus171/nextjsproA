@@ -69,6 +69,9 @@ export class UsersController {
       );
       return { id: user.id, email: user.email, nickname: user.nickname };
     } catch (e: any) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
       // Handle unique constraint (Prisma P2002) as bad request
       if (e?.code === "P2002" || (e?.meta && /unique/i.test(String(e.meta)))) {
         throw new HttpException(

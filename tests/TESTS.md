@@ -291,6 +291,10 @@
 
 ### UserService (`src/users/user.service.spec.ts`)
 
+#### createUser
+
+- [x] nickname の重複時に ConflictException をスローする
+
 #### deleteUser
 
 - [x] 指定IDのユーザーを削除する
@@ -308,7 +312,9 @@
 
 - [x] オーナーユーザーを登録できる (201)
 - [x] 非オーナーユーザーを登録できる (201)
+- [x] name が未指定のとき 400 を返す
 - [x] 重複メールは 400 を返す
+- [x] 重複 nickname で 409 を返す
 - [x] 短すぎるパスワードは 400 を返す
 
 ### POST /api/auth/login
