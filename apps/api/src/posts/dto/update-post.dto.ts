@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type, Transform, plainToInstance } from "class-transformer";
+import { PostType } from "@prisma/client";
 import {
   IsString,
   MinLength,
@@ -10,6 +11,7 @@ import {
   IsNumber,
   IsBoolean,
   IsEnum,
+  ValidateIf,
 } from "class-validator";
 
 export class UpdatePetDetailDto {
@@ -46,6 +48,11 @@ export class UpdateLocationDto {
 }
 
 export class UpdatePostDto {
+  @ApiProperty({ required: false, enum: PostType, default: PostType.cat })
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsEnum(PostType)
+  postType?: PostType;
+
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()

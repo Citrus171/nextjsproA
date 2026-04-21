@@ -243,7 +243,15 @@ export class PostsService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      const { petDetail, location, lostDate, status, title, description } = dto;
+      const {
+        petDetail,
+        location,
+        lostDate,
+        status,
+        title,
+        description,
+        postType,
+      } = dto;
 
       await tx.post.update({
         where: { id },
@@ -251,6 +259,7 @@ export class PostsService {
           ...(title !== undefined && { title }),
           ...(description !== undefined && { description }),
           ...(lostDate !== undefined && { lostDate: new Date(lostDate) }),
+          ...(postType !== undefined && { postType: postType as PostType }),
           ...(status !== undefined && { status: status as PostStatus }),
           ...(status === "resolved" && { resolvedAt: new Date() }),
           ...(status === "lost" && { resolvedAt: null }),

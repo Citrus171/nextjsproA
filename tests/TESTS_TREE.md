@@ -46,8 +46,12 @@ apps/api/src/
 │   │   │   ├── 存在しない投稿は HttpException (404)
 │   │   │   ├── lostDate を更新できる
 │   │   │   ├── status を更新できる
+│   │   │   ├── postType を更新できる
 │   │   │   ├── petDetail を upsert できる
 │   │   │   └── location を upsert できる
+│   │   ├── dto
+│   │   │   ├── postType が未指定のときはバリデーションは通ること
+│   │   │   └── postType が null のときはバリデーションエラーになること
 │   │   └── remove
 │   │       ├── オーナーが削除できる
 │   │       ├── 画像ファイルも削除する
@@ -247,4 +251,11 @@ apps/api/test/
     │   └── Cookie なしは 401 を返す
     └── POST /api/auth/logout
         └── ログアウトで Cookie が削除される (200)
+apps/web/src/pages/
+├── CreatePost.test.tsx
+│   └── CreatePost
+│       └── 未選択時は cat を送信する
+└── EditPost.test.tsx
+    └── EditPost
+        └── 取得した postType を表示し、送信時に postType を含める
 ```
