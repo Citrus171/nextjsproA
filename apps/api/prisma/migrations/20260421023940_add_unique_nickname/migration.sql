@@ -1,23 +1,25 @@
 /*
   Warnings:
 
-  - A unique constraint covering the columns `[nickname]` on the table `User` will be added. If there are existing duplicate values, this will fail.
-  - Made the column `emailEncrypted` on table `User` required. This step will fail if there are existing NULL values in that column.
-  - Made the column `emailHash` on table `User` required. This step will fail if there are existing NULL values in that column.
-
+  - A unique constraint covering the columns `[nickname]` on the table `User` will be added.
+  - Existing duplicate nickname values must be resolved before creating the unique index.
 */
--- DropForeignKey
-ALTER TABLE "RefreshToken" DROP CONSTRAINT "RefreshToken_userId_fkey";
 
--- AlterTable
-ALTER TABLE "User" ALTER COLUMN "emailEncrypted" SET NOT NULL,
-ALTER COLUMN "emailHash" SET NOT NULL;
+-- Deduplicate exact duplicate nicknames if any exist.
+-- This avoids migration failure on databases with accidental duplicate entries.
+WITH "ranked_nicknames" AS (
+  SELECT
+    "id",
+    "nickname",
+    ROW_NUMBER() OVER (PARTITION BY "nickname" ORDER BY "id") AS "row_num"
+  FROM "User"
+  WHERE "nickname" IS NOT NULL
+)
+UPDATE "User" AS u
+SET "nickname" = "nickname" || '__dup__' || "id"
+FROM "ranked_nicknames" AS rn
+WHERE u."id" = rn."id"
+  AND rn."row_num" > 1;
 
--- CreateIndex
+-- Create unique index for nickname.
 CREATE UNIQUE INDEX "User_nickname_key" ON "User"("nickname");
-
--- AddForeignKey
-ALTER TABLE "RefreshToken" ADD CONSTRAINT "RefreshToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- RenameIndex
-ALTER INDEX "user_emailhash_unique" RENAME TO "User_emailHash_key";
