@@ -416,6 +416,7 @@ describe("API E2E", () => {
     // 第三者ユーザーはこのブロック専用なので afterAll で削除する
     afterAll(async () => {
       if (outsiderId) {
+        await prisma.refreshToken.deleteMany({ where: { userId: outsiderId } });
         await prisma.user.deleteMany({ where: { id: outsiderId } });
       }
     });
