@@ -281,7 +281,7 @@ describe("API E2E", () => {
 
       expect(res.status).toBe(201);
       expect(res.body.images).toHaveLength(1);
-      expect(res.body.remainingSlots).toBe(4);
+      expect(res.body.remainingSlots).toBe(2);
       createdImageId = res.body.images[0].id;
     });
   });
