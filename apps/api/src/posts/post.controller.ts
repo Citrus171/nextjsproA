@@ -77,6 +77,10 @@ export class PostsController {
   )
   @ApiConsumes("multipart/form-data")
   @ApiResponse({ status: 201, type: PostResponseDto })
+  @ApiResponse({
+    status: 403,
+    description: "プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）",
+  })
   @ApiBody({
     schema: {
       type: "object",
@@ -147,7 +151,14 @@ export class PostsController {
   )
   @ApiConsumes("multipart/form-data")
   @ApiResponse({ status: 201, type: AddImagesResponseDto })
-  @ApiResponse({ status: 400, description: "画像枚数上限超過" })
+  @ApiResponse({
+    status: 400,
+    description: "1リクエストあたりの画像枚数上限超過（最大10枚）",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）",
+  })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
   @ApiBody({
     schema: {

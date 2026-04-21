@@ -108,6 +108,13 @@ export class PostsService {
               throw new NotFoundException("ユーザーが見つかりません");
             }
 
+            const imageUploadLimit = getImageUploadLimit(user.plan);
+            if (files.length > imageUploadLimit) {
+              throw new ForbiddenException(
+                `このプランでは画像は最大${imageUploadLimit}枚までです`
+              );
+            }
+
             const monthlyPostLimit = getMonthlyPostLimit(user.plan);
             if (monthlyPostLimit !== null) {
               const { start, end } = getMonthRange();
@@ -126,13 +133,6 @@ export class PostsService {
                   "無料プランの月間投稿数上限に達しています"
                 );
               }
-            }
-
-            const imageUploadLimit = getImageUploadLimit(user.plan);
-            if (files.length > imageUploadLimit) {
-              throw new ForbiddenException(
-                `このプランでは画像は最大${imageUploadLimit}枚までです`
-              );
             }
 
             const post = await tx.post.create({
