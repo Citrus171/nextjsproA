@@ -4,6 +4,7 @@ import {
   HttpException,
   NotFoundException,
 } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import * as fs from "fs";
 import { PostsService } from "./post.service";
 
@@ -26,6 +27,9 @@ const mockPrisma = {
     findUnique: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+  },
+  user: {
+    findUnique: jest.fn(),
   },
   petDetail: {
     create: jest.fn(),
@@ -59,6 +63,8 @@ describe("PostsService", () => {
     mockFs.writeFileSync.mockReturnValue(undefined);
     mockFs.mkdirSync.mockReturnValue(undefined as any);
     mockFs.unlinkSync.mockReturnValue(undefined);
+    mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
+    mockPrisma.post.count.mockResolvedValue(0);
     mockPrisma.$transaction.mockImplementation(
       async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => fn(mockPrisma)
     );
@@ -147,6 +153,10 @@ describe("PostsService", () => {
 
   // ─── create ─────────────────────────────────────────────────
   describe("create", () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it("ファイルなしで投稿を作成する", async () => {
       const created = {
         id: "post1",
@@ -433,6 +443,154 @@ describe("PostsService", () => {
       ).rejects.toThrow("disk full");
       // 1枚目の保存済みファイルがクリーンアップされること
       expect(mockFs.unlinkSync).toHaveBeenCalledTimes(1);
+    });
+
+    it("無料プランの月間投稿数が3件に達している時は ForbiddenException をスローする", async () => {
+      const now = new Date("2026-04-21T12:00:00.000Z");
+      jest.useFakeTimers();
+      jest.setSystemTime(now);
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
+      mockPrisma.post.count.mockResolvedValue(3);
+      const monthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+      );
+      const nextMonthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
+      );
+
+      await expect(
+        service.create("u1", {
+          description: "C",
+          lostDate: "2026-04-21",
+        })
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockPrisma.post.count).toHaveBeenCalledWith({
+        where: {
+          userId: "u1",
+          createdAt: {
+            gte: monthStart,
+            lt: nextMonthStart,
+          },
+        },
+      });
+    });
+
+    it("翌月になると無料プランの投稿数はリセットされる", async () => {
+      const now = new Date("2026-05-01T01:00:00.000Z");
+      jest.useFakeTimers();
+      jest.setSystemTime(now);
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
+      mockPrisma.post.count.mockResolvedValue(2);
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post1",
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      const monthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+      );
+      const nextMonthStart = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
+      );
+
+      await service.create("u1", {
+        description: "C",
+        lostDate: "2026-05-01",
+      });
+
+      expect(mockPrisma.post.count).toHaveBeenCalledWith({
+        where: {
+          userId: "u1",
+          createdAt: {
+            gte: monthStart,
+            lt: nextMonthStart,
+          },
+        },
+      });
+    });
+
+    it("トランザクション競合時は再試行して投稿を作成する", async () => {
+      const conflictError = Object.assign(new Error("Transaction conflict"), {
+        code: "P2034",
+      });
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
+      mockPrisma.post.count.mockResolvedValue(2);
+      const created = {
+        id: "post1",
+        title: "T",
+        description: "C",
+        userId: "u1",
+        status: "lost",
+        lostDate: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrisma.post.create.mockResolvedValue(created);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        ...created,
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      mockPrisma.$transaction
+        .mockRejectedValueOnce(conflictError)
+        .mockImplementationOnce(
+          async (fn: (tx: typeof mockPrisma) => Promise<unknown>) =>
+            fn(mockPrisma)
+        );
+
+      const result = await service.create("u1", {
+        title: "T",
+        description: "C",
+        lostDate: "2026-04-21",
+      });
+
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(2);
+      expect(mockPrisma.$transaction).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        })
+      );
+      expect(result).toEqual({
+        ...created,
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+    });
+
+    it("premium ユーザーは月間投稿数の制限を受けない", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "premium" });
+      const created = {
+        id: "post1",
+        title: "T",
+        description: "C",
+        userId: "u1",
+        status: "lost",
+        lostDate: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockPrisma.post.create.mockResolvedValue(created);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        ...created,
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+
+      await service.create("u1", {
+        title: "T",
+        description: "C",
+        lostDate: "2026-04-21",
+      });
+
+      expect(mockPrisma.post.count).not.toHaveBeenCalled();
+      expect(mockPrisma.post.create).toHaveBeenCalled();
     });
   });
 

@@ -31,6 +31,11 @@ enum Role {
   admin
 }
 
+enum Plan {
+  free
+  premium
+}
+
 model User {
   id            String         @id @default(cuid())
   emailEncrypted String
@@ -38,6 +43,8 @@ model User {
   password      String
   nickname      String         @unique
   role          Role           @default(user)
+  plan          Plan           @default(free)
+  planExpiresAt DateTime?
   posts         Post[]
   sightings     Sighting[]
   refreshTokens RefreshToken[]

@@ -10,6 +10,7 @@ import { PrismaService } from "../prisma.service";
 import {
   PostType,
   type PostStatus,
+  Prisma,
   type Gender,
   type Prefecture,
 } from "@prisma/client";
@@ -19,9 +20,28 @@ import { v4 as uuidv4 } from "uuid";
 import * as sharp from "sharp";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
+import { getMonthlyPostLimit } from "../common/plan-limits";
 
 const MAX_IMAGES = 5;
 const MAX_FAVORITES_LIMIT = 20;
+const MAX_TRANSACTION_RETRIES = 3;
+
+function getMonthRange(date = new Date()) {
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const start = new Date(Date.UTC(year, month, 1));
+  const end = new Date(Date.UTC(year, month + 1, 1));
+  return { start, end };
+}
+
+function isTransactionConflict(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "P2034"
+  );
+}
 
 @Injectable()
 export class PostsService {
@@ -74,73 +94,120 @@ export class PostsService {
       throw new BadRequestException("lostDateは必須です");
     }
     const lostDate = new Date(dto.lostDate);
-    const savedUrls: string[] = [];
 
-    // トランザクション失敗時に保存済みファイルを削除する
-    return this.prisma
-      .$transaction(async (tx) => {
-        const post = await tx.post.create({
-          data: {
-            title: dto.title,
-            description: dto.description,
-            userId,
-            postType: dto.postType ?? PostType.cat,
-            lostDate,
+    for (let attempt = 0; attempt < MAX_TRANSACTION_RETRIES; attempt += 1) {
+      const savedUrls: string[] = [];
+
+      try {
+        return await this.prisma.$transaction(
+          async (tx) => {
+            const user = await tx.user.findUnique({
+              where: { id: userId },
+              select: { plan: true },
+            });
+
+            if (!user) {
+              throw new NotFoundException("ユーザーが見つかりません");
+            }
+
+            const monthlyPostLimit = getMonthlyPostLimit(user.plan);
+            if (monthlyPostLimit !== null) {
+              const { start, end } = getMonthRange();
+              const postCount = await tx.post.count({
+                where: {
+                  userId,
+                  createdAt: {
+                    gte: start,
+                    lt: end,
+                  },
+                },
+              });
+
+              if (postCount >= monthlyPostLimit) {
+                throw new ForbiddenException(
+                  "無料プランの月間投稿数上限に達しています"
+                );
+              }
+            }
+
+            const post = await tx.post.create({
+              data: {
+                title: dto.title,
+                description: dto.description,
+                userId,
+                postType: dto.postType ?? PostType.cat,
+                lostDate,
+              },
+            });
+
+            if (dto.petDetail) {
+              const pd = dto.petDetail;
+              await tx.petDetail.create({
+                data: {
+                  postId: post.id,
+                  name: pd.name,
+                  color: pd.color,
+                  age: pd.age,
+                  features: pd.features,
+                  ...(pd.gender !== undefined && {
+                    gender: pd.gender as Gender,
+                  }),
+                  ...(pd.breed !== undefined && { breed: pd.breed }),
+                  ...(pd.size !== undefined && { size: pd.size }),
+                  ...(pd.collar !== undefined && { collar: pd.collar }),
+                  ...(pd.microchip !== undefined && {
+                    microchip: pd.microchip,
+                  }),
+                  ...(pd.neutered !== undefined && { neutered: pd.neutered }),
+                },
+              });
+            }
+
+            if (dto.location) {
+              const loc = dto.location;
+              await tx.location.create({
+                data: {
+                  postId: post.id,
+                  prefecture: loc.prefecture as Prefecture,
+                  city: loc.city,
+                  address: loc.address,
+                  lat: loc.lat,
+                  lng: loc.lng,
+                },
+              });
+            }
+
+            for (const file of files) {
+              const url = await this.saveFile(post.id, file);
+              savedUrls.push(url);
+              await tx.image.create({ data: { postId: post.id, url } });
+            }
+
+            return tx.post.findUnique({
+              where: { id: post.id },
+              include: { petDetail: true, location: true, images: true },
+            });
           },
-        });
-
-        if (dto.petDetail) {
-          const pd = dto.petDetail;
-          await tx.petDetail.create({
-            data: {
-              postId: post.id,
-              name: pd.name,
-              color: pd.color,
-              age: pd.age,
-              features: pd.features,
-              ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
-              ...(pd.breed !== undefined && { breed: pd.breed }),
-              ...(pd.size !== undefined && { size: pd.size }),
-              ...(pd.collar !== undefined && { collar: pd.collar }),
-              ...(pd.microchip !== undefined && { microchip: pd.microchip }),
-              ...(pd.neutered !== undefined && { neutered: pd.neutered }),
-            },
-          });
-        }
-
-        if (dto.location) {
-          const loc = dto.location;
-          await tx.location.create({
-            data: {
-              postId: post.id,
-              prefecture: loc.prefecture as Prefecture,
-              city: loc.city,
-              address: loc.address,
-              lat: loc.lat,
-              lng: loc.lng,
-            },
-          });
-        }
-
-        for (const file of files) {
-          const url = await this.saveFile(post.id, file);
-          savedUrls.push(url);
-          await tx.image.create({ data: { postId: post.id, url } });
-        }
-
-        return tx.post.findUnique({
-          where: { id: post.id },
-          include: { petDetail: true, location: true, images: true },
-        });
-      })
-      .catch((e) => {
+          {
+            isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+          }
+        );
+      } catch (e) {
         for (const url of savedUrls) {
           try {
             this.deleteFile(url);
           } catch {}
         }
+
+        if (isTransactionConflict(e) && attempt < MAX_TRANSACTION_RETRIES - 1) {
+          continue;
+        }
+
         throw e;
-      });
+      }
+    }
+
+    throw new Error("投稿作成の再試行に失敗しました");
   }
 
   async findAll(page = 1, perPage = 10) {
