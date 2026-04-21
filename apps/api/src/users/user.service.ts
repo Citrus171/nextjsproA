@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import * as bcrypt from "bcrypt";
 import {
@@ -18,19 +22,39 @@ export class UsersService {
     const normalized = normalizeEmail(email);
     const emailHash = hmacEmail(normalized);
     const emailEncrypted = encryptEmail(normalized);
-    const user = await (this.prisma.user as any).create({
-      data: {
-        emailEncrypted,
-        emailHash,
-        password: hashed,
-        nickname,
-      },
-    });
-    // return user-like object including decrypted email for API responses
-    return {
-      ...user,
-      email: normalized,
-    };
+
+    try {
+      const user = await (this.prisma.user as any).create({
+        data: {
+          emailEncrypted,
+          emailHash,
+          password: hashed,
+          nickname,
+        },
+      });
+      return {
+        ...user,
+        email: normalized,
+      };
+    } catch (e: any) {
+      if (e?.code === "P2002") {
+        const target = Array.isArray(e.meta?.target)
+          ? e.meta.target.map(String).join(" ").toLowerCase()
+          : "";
+        if (target.includes("nickname")) {
+          throw new ConflictException(
+            "このニックネームはすでに使用されています"
+          );
+        }
+        if (target.includes("email") || target.includes("emailhash")) {
+          throw new BadRequestException(
+            "このメールアドレスはすでに使用されています"
+          );
+        }
+        throw new ConflictException("重複したデータが存在します");
+      }
+      throw e;
+    }
   }
 
   async findByEmail(email: string) {

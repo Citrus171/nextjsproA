@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  BadRequestException,
   HttpCode,
   HttpException,
   HttpStatus,
@@ -63,10 +64,7 @@ export class UsersController {
   async register(@Body() dto: RegisterDto) {
     const nickname = dto.nickname ?? dto.name;
     if (!nickname) {
-      throw new HttpException(
-        { error: "ニックネームは必須です" },
-        HttpStatus.BAD_REQUEST
-      );
+      throw new BadRequestException({ error: "ニックネームは必須です" });
     }
     try {
       const user = await this.users.createUser(
@@ -78,13 +76,6 @@ export class UsersController {
     } catch (e: any) {
       if (e instanceof HttpException) {
         throw e;
-      }
-      // Handle unique constraint (Prisma P2002) as bad request
-      if (e?.code === "P2002" || (e?.meta && /unique/i.test(String(e.meta)))) {
-        throw new HttpException(
-          { error: "このメールアドレスはすでに使用されています" },
-          HttpStatus.BAD_REQUEST
-        );
       }
       throw new HttpException(
         { error: "内部サーバーエラーが発生しました" },

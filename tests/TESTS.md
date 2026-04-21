@@ -292,10 +292,27 @@
 
 ### UserService (`src/users/user.service.spec.ts`)
 
+#### createUser
+
+- [x] nickname の重複時に ConflictException をスローする
+
 #### deleteUser
 
 - [x] 指定IDのユーザーを削除する
 - [x] 存在しないIDは Prisma エラーを再スローする
+
+### UsersController (`src/users/user.controller.spec.ts`)
+
+- [x] nickname と name がないと BadRequestException を返す
+- [x] ConflictException はそのまま伝播する
+- [x] nickname があれば service に渡す
+- [x] nickname がなくても name を後方互換で使う
+
+### RegisterDto (`src/users/dto/register.dto.spec.ts`)
+
+- [x] name が未指定でもバリデーションは通る
+- [x] nickname が未指定でもバリデーションは通る
+- [x] name と nickname があればバリデーションは通る
 
 （その他既存テスト省略）
 
@@ -309,7 +326,10 @@
 
 - [x] オーナーユーザーを登録できる (201)
 - [x] 非オーナーユーザーを登録できる (201)
+- [x] name が未指定のとき 400 を返す
+- [x] name が空文字のとき 400 を返す
 - [x] 重複メールは 400 を返す
+- [x] 重複 nickname で 409 を返す
 - [x] 短すぎるパスワードは 400 を返す
 
 ### POST /api/auth/login
