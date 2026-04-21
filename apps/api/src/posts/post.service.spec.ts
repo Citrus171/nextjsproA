@@ -327,15 +327,17 @@ describe("PostsService", () => {
       );
     });
 
-    it("lostDate なしは BadRequestException をスローする", async () => {
-      await expect(
-        service.create("u1", { description: "C" } as any)
-      ).rejects.toThrow(BadRequestException);
-    });
-
-    it("画像が5枚超の場合 BadRequestException をスローする", async () => {
+    it("無料プランの画像が3枚を超えると ForbiddenException をスローする", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post1",
+        petDetail: null,
+        location: null,
+        images: [],
+      });
       const files = Array.from(
-        { length: 6 },
+        { length: 4 },
         () => ({ originalname: "p.png", buffer: Buffer.from("") }) as any
       );
 
@@ -345,7 +347,54 @@ describe("PostsService", () => {
           { description: "C", lostDate: "2024-01-01" },
           files
         )
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it("premium ユーザーは画像を10枚まで添付できる", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "premium" });
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockPrisma.post.findUnique.mockResolvedValue({
+        id: "post1",
+        petDetail: null,
+        location: null,
+        images: [],
+      });
+      mockPrisma.image.create.mockResolvedValue({});
+      const files = Array.from(
+        { length: 10 },
+        (_, index) =>
+          ({ originalname: `p${index}.png`, buffer: Buffer.from("") }) as any
+      );
+
+      await service.create(
+        "u1",
+        { description: "C", lostDate: "2024-01-01" },
+        files
+      );
+
+      expect(mockPrisma.image.create).toHaveBeenCalledTimes(10);
+    });
+
+    it("lostDate なしは BadRequestException をスローする", async () => {
+      await expect(
+        service.create("u1", { description: "C" } as any)
       ).rejects.toThrow(BadRequestException);
+    });
+
+    it("無料プランの画像が4枚を超えると ForbiddenException をスローする", async () => {
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
+      const files = Array.from(
+        { length: 4 },
+        () => ({ originalname: "p.png", buffer: Buffer.from("") }) as any
+      );
+
+      await expect(
+        service.create(
+          "u1",
+          { description: "C", lostDate: "2024-01-01" },
+          files
+        )
+      ).rejects.toThrow(ForbiddenException);
     });
 
     it("petDetail と location を含む時、トランザクションで一括作成する", async () => {
@@ -604,6 +653,7 @@ describe("PostsService", () => {
 
     it("画像を追加できる", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
       const newImage = {
         id: "img1",
         postId: "post1",
@@ -621,7 +671,48 @@ describe("PostsService", () => {
       expect(mockPrisma.image.create).toHaveBeenCalledWith({
         data: expect.objectContaining({ postId: "post1" }),
       });
-      expect(result.remainingSlots).toBe(4);
+      expect(result.remainingSlots).toBe(2);
+      expect(result.images).toHaveLength(1);
+    });
+
+    it("無料プランで追加後の合計が3枚を超えると ForbiddenException", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue({
+        ...existingPost,
+        images: [
+          { id: "img1", url: "u1" },
+          { id: "img2", url: "u2" },
+          { id: "img3", url: "u3" },
+        ],
+      });
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
+      const files = [{ originalname: "a.png", buffer: Buffer.from("") } as any];
+
+      await expect(service.addImages("post1", "user1", files)).rejects.toThrow(
+        ForbiddenException
+      );
+    });
+
+    it("premium ユーザーは10枚まで追加できる", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue({
+        ...existingPost,
+        images: Array.from({ length: 9 }, (_, index) => ({
+          id: `img${index + 1}`,
+          url: `u${index + 1}`,
+        })),
+      });
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "premium" });
+      const newImage = {
+        id: "img10",
+        postId: "post1",
+        url: "uploads/post1/xyz.png",
+        createdAt: new Date(),
+      };
+      mockPrisma.image.create.mockResolvedValue(newImage);
+      const files = [{ originalname: "a.png", buffer: Buffer.from("") } as any];
+
+      const result = await service.addImages("post1", "user1", files);
+
+      expect(result.remainingSlots).toBe(0);
       expect(result.images).toHaveLength(1);
     });
 
@@ -641,11 +732,12 @@ describe("PostsService", () => {
       );
     });
 
-    it("5枚超になる場合は BadRequestException", async () => {
+    it("追加後の合計が上限を超える場合は ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue({
         ...existingPost,
         images: [1, 2, 3],
       });
+      mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
       const files = [
         { originalname: "a.png", buffer: Buffer.from("") } as any,
         { originalname: "b.png", buffer: Buffer.from("") } as any,
@@ -653,7 +745,7 @@ describe("PostsService", () => {
       ];
 
       await expect(service.addImages("post1", "user1", files)).rejects.toThrow(
-        BadRequestException
+        ForbiddenException
       );
     });
 

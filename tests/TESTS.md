@@ -21,9 +21,11 @@
 - [x] ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 - [x] アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
 - [x] 画像が sharp でリサイズ・JPEG変換されること
+- [x] 無料プランの画像が3枚を超えると ForbiddenException をスローする
+- [x] premium ユーザーは画像を10枚まで添付できる
 - [x] 画像処理でSharpエラーが発生した場合 BadRequestException をスローする
 - [x] lostDate なしは BadRequestException をスローする
-- [x] 画像が5枚超の場合 BadRequestException をスローする
+- [x] 無料プランの画像が4枚を超えると ForbiddenException をスローする
 - [x] petDetail と location を含む時、トランザクションで一括作成する
 - [x] lostDate を指定して作成できる
 - [x] トランザクション失敗時に保存済みファイルを削除する
@@ -34,9 +36,11 @@
 #### addImages
 
 - [x] 画像を追加できる
+- [x] 無料プランで追加後の合計が3枚を超えると ForbiddenException
+- [x] premium ユーザーは10枚まで追加できる
 - [x] オーナー以外は ForbiddenException
 - [x] 存在しない投稿は NotFoundException
-- [x] 5枚超になる場合は BadRequestException
+- [x] DB作成失敗時に保存済みファイルを削除する
 
 #### removeImage
 
