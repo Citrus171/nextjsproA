@@ -264,6 +264,7 @@ export interface PetDetailResponseDto {
 export interface RegisterDto {
   email: string;
   name?: string;
+  nickname?: string;
   /** @minLength 8 */
   password: string;
 }

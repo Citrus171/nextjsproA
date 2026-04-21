@@ -23,4 +23,10 @@ export class RegisterDto {
   @IsString()
   @MaxLength(50)
   name?: string;
+
+  @ApiProperty({ example: "Alice", required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  nickname?: string;
 }

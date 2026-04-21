@@ -634,7 +634,8 @@
             "example": "password123",
             "minLength": 8
           },
-          "name": { "type": "string", "example": "Alice" }
+          "name": { "type": "string", "example": "Alice" },
+          "nickname": { "type": "string", "example": "Alice" }
         },
         "required": ["email", "password"]
       },

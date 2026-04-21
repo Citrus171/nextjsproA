@@ -36,7 +36,7 @@ model User {
   emailEncrypted String
   emailHash      String         @unique
   password      String
-  nickname      String
+  nickname      String         @unique
   role          Role           @default(user)
   posts         Post[]
   sightings     Sighting[]

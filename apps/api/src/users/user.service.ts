@@ -13,7 +13,7 @@ import {
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async createUser(email: string, password: string, name?: string) {
+  async createUser(email: string, password: string, nickname: string) {
     const hashed = await bcrypt.hash(password, 10);
     const normalized = normalizeEmail(email);
     const emailHash = hmacEmail(normalized);
@@ -23,7 +23,7 @@ export class UsersService {
         emailEncrypted,
         emailHash,
         password: hashed,
-        nickname: name ?? "",
+        nickname,
       },
     });
     // return user-like object including decrypted email for API responses

@@ -61,14 +61,24 @@ export class UsersController {
   @Post("register")
   @ApiResponse({ status: 201, type: UserResponseDto })
   async register(@Body() dto: RegisterDto) {
+    const nickname = dto.nickname ?? dto.name;
+    if (!nickname) {
+      throw new HttpException(
+        { error: "ニックネームは必須です" },
+        HttpStatus.BAD_REQUEST
+      );
+    }
     try {
       const user = await this.users.createUser(
         dto.email,
         dto.password,
-        dto.name
+        nickname
       );
       return { id: user.id, email: user.email, nickname: user.nickname };
     } catch (e: any) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
       // Handle unique constraint (Prisma P2002) as bad request
       if (e?.code === "P2002" || (e?.meta && /unique/i.test(String(e.meta)))) {
         throw new HttpException(
