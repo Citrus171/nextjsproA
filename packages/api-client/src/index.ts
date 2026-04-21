@@ -139,6 +139,7 @@ export interface UpdatePostDto {
   location?: UpdateLocationDto;
   lostDate?: string;
   petDetail?: UpdatePetDetailDto;
+  postType?: PostsControllerCreateBodyPostType;
   status?: UpdatePostDtoStatus;
   title?: string;
 }

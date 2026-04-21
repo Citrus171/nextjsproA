@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import type { PostsControllerCreateBodyPostType } from "../../../../packages/api-client/src/index";
 import { useApiClient } from "../api/orvalClient";
 
 export default function EditPost() {
@@ -7,6 +8,8 @@ export default function EditPost() {
   const { id } = useParams<{ id: string }>();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [postType, setPostType] =
+    useState<PostsControllerCreateBodyPostType>("cat");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,6 +19,7 @@ export default function EditPost() {
         const data = await api.getPost(id);
         setTitle(data.title || "");
         setDescription(data.description || "");
+        setPostType(data.postType);
       } catch (err) {
         alert("Failed to load post");
       }
@@ -26,7 +30,7 @@ export default function EditPost() {
     e.preventDefault();
     if (!id) return;
     try {
-      await api.updatePost(id, { title, description });
+      await api.updatePost(id, { title, description, postType });
       navigate("/");
     } catch (err) {
       alert("Failed to update post");
@@ -47,6 +51,16 @@ export default function EditPost() {
   return (
     <form onSubmit={submit}>
       <h2>Edit Post</h2>
+      <div>
+        <select
+          value={postType}
+          onChange={(e) =>
+            setPostType(e.target.value as PostsControllerCreateBodyPostType)
+          }
+        >
+          <option value="cat">猫</option>
+        </select>
+      </div>
       <div>
         <input
           placeholder="title"

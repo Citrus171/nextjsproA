@@ -619,6 +619,27 @@ describe("PostsService", () => {
       expect(result).toHaveProperty("images");
     });
 
+    it("postType を更新できる", async () => {
+      mockPrisma.post.findUnique
+        .mockResolvedValueOnce(existingPost)
+        .mockResolvedValueOnce({
+          ...existingPost,
+          postType: "cat",
+          petDetail: null,
+          location: null,
+          images: [],
+        });
+      mockPrisma.post.update.mockResolvedValue({});
+
+      await service.update("post1", "user1", { postType: "cat" });
+
+      expect(mockPrisma.post.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ postType: "cat" }),
+        })
+      );
+    });
+
     it("オーナー以外は ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
 

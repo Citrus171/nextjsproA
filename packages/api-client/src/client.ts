@@ -5,6 +5,7 @@ import {
   authControllerRefresh,
   authControllerLogout,
   type PostsControllerCreateBody,
+  type PostsControllerCreateBodyPostType,
   postsControllerList,
   postsControllerCreate,
   postsControllerUpdate,
@@ -125,7 +126,11 @@ export function createClient(options: ClientOptions) {
     },
     updatePost: async (
       id: string,
-      data: { title?: string; description?: string }
+      data: {
+        title?: string;
+        description?: string;
+        postType?: PostsControllerCreateBodyPostType;
+      }
     ) => {
       const r = await postsControllerUpdate(id, data);
       return r.data;

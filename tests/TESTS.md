@@ -50,6 +50,7 @@
 - [x] 存在しない投稿は HttpException (404)
 - [x] lostDate を更新できる
 - [x] status を更新できる
+- [x] postType を更新できる
 - [x] status を lost に戻すと resolvedAt が null になる
 - [x] petDetail を upsert できる
 - [x] petDetail 未存在かつ必須フィールドなしは BadRequestException
@@ -398,6 +399,13 @@
 ### POST /api/auth/logout
 
 - [x] ログアウトで Cookie が削除される (200)
+
+---
+
+## Web Unit (`apps/web/src/pages/*.test.tsx`)
+
+- [x] CreatePost で未選択時は cat を送信する
+- [x] EditPost で取得した postType を表示し、送信時に postType を含める
 
 ---
 

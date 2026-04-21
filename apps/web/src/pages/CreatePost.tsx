@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { PostsControllerCreateBodyPostType } from "../../../../packages/api-client/src/index";
 import { useApiClient } from "../api/orvalClient";
 
 export default function CreatePost() {
@@ -7,12 +8,14 @@ export default function CreatePost() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [lostDate, setLostDate] = useState("");
+  const [postType, setPostType] =
+    useState<PostsControllerCreateBodyPostType>("cat");
   const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.createPost({ title, description, lostDate });
+      await api.createPost({ title, description, lostDate, postType });
       navigate("/");
     } catch (err) {
       alert("Failed to create post");
@@ -22,6 +25,16 @@ export default function CreatePost() {
   return (
     <form onSubmit={submit}>
       <h2>Create Post</h2>
+      <div>
+        <select
+          value={postType}
+          onChange={(e) =>
+            setPostType(e.target.value as PostsControllerCreateBodyPostType)
+          }
+        >
+          <option value="cat">猫</option>
+        </select>
+      </div>
       <div>
         <input
           placeholder="title"
