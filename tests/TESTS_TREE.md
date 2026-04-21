@@ -29,6 +29,9 @@ apps/api/src/
 │   │   │   ├── 画像が5枚超の場合 BadRequestException をスローする
 │   │   │   ├── petDetail と location を含む時、トランザクションで一括作成する
 │   │   │   └── lostDate を指定して作成できる
+│   │   │   ├── 無料プランの月間投稿数が3件に達している時は ForbiddenException をスローする
+│   │   │   ├── 翌月になると無料プランの投稿数はリセットされる
+│   │   │   └── premium ユーザーは月間投稿数の制限を受けない
 │   │   ├── addImages
 │   │   │   ├── 画像を追加できる
 │   │   │   ├── オーナー以外は ForbiddenException

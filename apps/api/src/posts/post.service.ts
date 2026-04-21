@@ -10,6 +10,7 @@ import { PrismaService } from "../prisma.service";
 import {
   PostType,
   type PostStatus,
+  Plan,
   type Gender,
   type Prefecture,
 } from "@prisma/client";
@@ -19,9 +20,16 @@ import { v4 as uuidv4 } from "uuid";
 import * as sharp from "sharp";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
+import { getMonthlyPostLimit } from "../common/plan-limits";
 
 const MAX_IMAGES = 5;
 const MAX_FAVORITES_LIMIT = 20;
+
+function getMonthRange(date = new Date()) {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1);
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  return { start, end };
+}
 
 @Injectable()
 export class PostsService {
@@ -75,6 +83,34 @@ export class PostsService {
     }
     const lostDate = new Date(dto.lostDate);
     const savedUrls: string[] = [];
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException("ユーザーが見つかりません");
+    }
+
+    const monthlyPostLimit = getMonthlyPostLimit(user.plan as Plan);
+    if (monthlyPostLimit !== null) {
+      const { start, end } = getMonthRange();
+      const postCount = await this.prisma.post.count({
+        where: {
+          userId,
+          createdAt: {
+            gte: start,
+            lt: end,
+          },
+        },
+      });
+
+      if (postCount >= monthlyPostLimit) {
+        throw new ForbiddenException(
+          "無料プランの月間投稿数上限に達しています"
+        );
+      }
+    }
 
     // トランザクション失敗時に保存済みファイルを削除する
     return this.prisma
