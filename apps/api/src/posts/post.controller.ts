@@ -32,6 +32,8 @@ import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./post.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { Plan } from "@prisma/client";
+import { PLAN_LIMITS } from "../common/plan-limits";
 
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
@@ -40,6 +42,7 @@ const ALLOWED_MIME_TYPES = [
   "image/webp",
 ];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGES_PER_POST = PLAN_LIMITS[Plan.premium].imageUploadLimit;
 
 export function imageFileFilter(_req: any, file: Express.Multer.File, cb: any) {
   if (!file || !file.originalname || !file.mimetype) {
@@ -69,9 +72,15 @@ export class PostsController {
 
   @HttpPost()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FilesInterceptor("images", 5, imageUploadOptions))
+  @UseInterceptors(
+    FilesInterceptor("images", MAX_IMAGES_PER_POST, imageUploadOptions)
+  )
   @ApiConsumes("multipart/form-data")
   @ApiResponse({ status: 201, type: PostResponseDto })
+  @ApiResponse({
+    status: 403,
+    description: "プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）",
+  })
   @ApiBody({
     schema: {
       type: "object",
@@ -137,10 +146,19 @@ export class PostsController {
 
   @HttpPost(":id/images")
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FilesInterceptor("images", 5, imageUploadOptions))
+  @UseInterceptors(
+    FilesInterceptor("images", MAX_IMAGES_PER_POST, imageUploadOptions)
+  )
   @ApiConsumes("multipart/form-data")
   @ApiResponse({ status: 201, type: AddImagesResponseDto })
-  @ApiResponse({ status: 400, description: "画像枚数上限超過" })
+  @ApiResponse({
+    status: 400,
+    description: "1リクエストあたりの画像枚数上限超過（最大10枚）",
+  })
+  @ApiResponse({
+    status: 403,
+    description: "プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）",
+  })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
   @ApiBody({
     schema: {

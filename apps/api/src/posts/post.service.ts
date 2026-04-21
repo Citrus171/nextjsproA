@@ -20,9 +20,11 @@ import { v4 as uuidv4 } from "uuid";
 import * as sharp from "sharp";
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
-import { getMonthlyPostLimit } from "../common/plan-limits";
+import {
+  getImageUploadLimit,
+  getMonthlyPostLimit,
+} from "../common/plan-limits";
 
-const MAX_IMAGES = 5;
 const MAX_FAVORITES_LIMIT = 20;
 const MAX_TRANSACTION_RETRIES = 3;
 
@@ -86,10 +88,6 @@ export class PostsService {
     dto: CreatePostDto,
     files: Express.Multer.File[] = []
   ) {
-    if (files.length > MAX_IMAGES) {
-      throw new BadRequestException(`最大${MAX_IMAGES}枚まで添付できます`);
-    }
-
     if (!dto.lostDate) {
       throw new BadRequestException("lostDateは必須です");
     }
@@ -108,6 +106,13 @@ export class PostsService {
 
             if (!user) {
               throw new NotFoundException("ユーザーが見つかりません");
+            }
+
+            const imageUploadLimit = getImageUploadLimit(user.plan);
+            if (files.length > imageUploadLimit) {
+              throw new ForbiddenException(
+                `このプランでは画像は最大${imageUploadLimit}枚までです`
+              );
             }
 
             const monthlyPostLimit = getMonthlyPostLimit(user.plan);
@@ -246,10 +251,17 @@ export class PostsService {
     if (post.userId !== userId)
       throw new ForbiddenException("投稿のオーナーではありません");
 
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true },
+    });
+    if (!user) throw new NotFoundException("ユーザーが見つかりません");
+
     const currentCount = post.images.length;
-    if (currentCount + files.length > MAX_IMAGES) {
-      throw new BadRequestException(
-        `画像は最大${MAX_IMAGES}枚です（現在${currentCount}枚、追加可能: ${MAX_IMAGES - currentCount}枚）`
+    const imageUploadLimit = getImageUploadLimit(user.plan);
+    if (currentCount + files.length > imageUploadLimit) {
+      throw new ForbiddenException(
+        `画像は最大${imageUploadLimit}枚です（現在${currentCount}枚、追加可能: ${imageUploadLimit - currentCount}枚）`
       );
     }
 
@@ -268,7 +280,7 @@ export class PostsService {
       });
 
       return {
-        remainingSlots: MAX_IMAGES - currentCount - files.length,
+        remainingSlots: imageUploadLimit - currentCount - files.length,
         images: newImages,
       };
     } catch (error) {

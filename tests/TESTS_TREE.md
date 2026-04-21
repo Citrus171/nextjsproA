@@ -25,10 +25,12 @@ apps/api/src/
 │   │   │   ├── ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 │   │   │   ├── アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
 │   │   │   ├── 画像が sharp でリサイズ・JPEG変換されること
+│   │   │   ├── 無料プランの画像が3枚を超えると ForbiddenException をスローする
+│   │   │   ├── premium ユーザーは画像を10枚まで添付できる
 │   │   │   ├── 画像処理でSharpエラーが発生した場合 BadRequestException をスローする
-│   │   │   ├── 画像が5枚超の場合 BadRequestException をスローする
 │   │   │   ├── petDetail と location を含む時、トランザクションで一括作成する
 │   │   │   ├── lostDate を指定して作成できる
+│   │   │   ├── 無料プランの画像が4枚を超えると ForbiddenException をスローする
 │   │   │   ├── 無料プランの月間投稿数が3件に達している時は ForbiddenException をスローする
 │   │   │   ├── 月間投稿数の集計は UTC 境界で判定する
 │   │   │   ├── トランザクション競合時は再試行して投稿を作成する
@@ -36,9 +38,11 @@ apps/api/src/
 │   │   │   └── premium ユーザーは月間投稿数の制限を受けない
 │   │   ├── addImages
 │   │   │   ├── 画像を追加できる
+│   │   │   ├── 無料プランで追加後の合計が3枚を超えると ForbiddenException
+│   │   │   ├── premium ユーザーは10枚まで追加できる
 │   │   │   ├── オーナー以外は ForbiddenException
 │   │   │   ├── 存在しない投稿は NotFoundException
-│   │   │   └── 5枚超になる場合は BadRequestException
+│   │   │   └── DB作成失敗時に保存済みファイルを削除する
 │   │   ├── removeImage
 │   │   │   ├── オーナーが画像を削除できる
 │   │   │   ├── ファイルが存在しない場合 unlinkSync を呼ばない
