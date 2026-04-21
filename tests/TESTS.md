@@ -21,6 +21,10 @@
 - [x] ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
 - [x] アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
 - [x] 画像が sharp でリサイズ・JPEG変換されること
+- [x] 保存ファイル名が UUID v4 + .jpg 形式になること
+- [x] 元のファイル名（originalname）が保存パスに含まれないこと
+- [x] 日本語ファイル名でも UUID v4 + .jpg で保存されること
+- [x] 元のファイルの拡張子に関わらず保存拡張子が .jpg になること
 - [x] 無料プランの画像が3枚を超えると ForbiddenException をスローする
 - [x] premium ユーザーは画像を10枚まで添付できる
 - [x] 画像処理でSharpエラーが発生した場合 BadRequestException をスローする
