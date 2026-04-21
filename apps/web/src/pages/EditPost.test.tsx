@@ -39,7 +39,7 @@ describe("EditPost", () => {
     render(<EditPost />);
 
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("cat");
+      expect(screen.getByLabelText("投稿種別")).toHaveValue("cat");
     });
 
     expect(screen.getByPlaceholderText("title")).toHaveValue("迷い猫の投稿");

@@ -49,6 +49,9 @@ apps/api/src/
 │   │   │   ├── postType を更新できる
 │   │   │   ├── petDetail を upsert できる
 │   │   │   └── location を upsert できる
+│   │   ├── dto
+│   │   │   ├── postType が未指定のときはバリデーションは通ること
+│   │   │   └── postType が null のときはバリデーションエラーになること
 │   │   └── remove
 │   │       ├── オーナーが削除できる
 │   │       ├── 画像ファイルも削除する

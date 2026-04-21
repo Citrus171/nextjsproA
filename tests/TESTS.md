@@ -57,6 +57,11 @@
 - [x] location を upsert できる
 - [x] location 未存在かつ必須フィールドなしは BadRequestException
 
+#### dto
+
+- [x] postType が未指定のときはバリデーションは通ること
+- [x] postType が null のときはバリデーションエラーになること
+
 #### remove
 
 - [x] オーナーが削除できる

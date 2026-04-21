@@ -2,14 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { PostsControllerCreateBodyPostType } from "../../../../packages/api-client/src/index";
 import { useApiClient } from "../api/orvalClient";
+import {
+  POST_TYPE_OPTIONS,
+  POST_TYPE_SELECT_ID,
+} from "../constants/postTypeOptions";
 
 export default function CreatePost() {
   const api = useApiClient();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [lostDate, setLostDate] = useState("");
-  const [postType, setPostType] =
-    useState<PostsControllerCreateBodyPostType>("cat");
+  const [postType, setPostType] = useState<PostsControllerCreateBodyPostType>(
+    POST_TYPE_OPTIONS[0].value
+  );
   const navigate = useNavigate();
 
   const submit = async (e: React.FormEvent) => {
@@ -26,13 +31,19 @@ export default function CreatePost() {
     <form onSubmit={submit}>
       <h2>Create Post</h2>
       <div>
+        <label htmlFor={POST_TYPE_SELECT_ID}>投稿種別</label>
         <select
+          id={POST_TYPE_SELECT_ID}
           value={postType}
           onChange={(e) =>
             setPostType(e.target.value as PostsControllerCreateBodyPostType)
           }
         >
-          <option value="cat">猫</option>
+          {POST_TYPE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
       <div>

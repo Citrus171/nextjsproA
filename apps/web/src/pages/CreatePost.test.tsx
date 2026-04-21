@@ -30,7 +30,7 @@ describe("CreatePost", () => {
     const user = userEvent.setup();
     render(<CreatePost />);
 
-    expect(screen.getByRole("combobox")).toHaveValue("cat");
+    expect(screen.getByLabelText("投稿種別")).toHaveValue("cat");
 
     await user.type(screen.getByPlaceholderText("title"), "迷い猫の投稿");
     await user.type(screen.getByPlaceholderText("description"), "白い猫です");
