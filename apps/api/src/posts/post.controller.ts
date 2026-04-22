@@ -192,9 +192,9 @@ export class PostsController {
   })
   @ApiResponse({
     status: 403,
-    description: "プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）",
+    description:
+      "Forbidden: not the post owner or プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）",
   })
-  @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
   @ApiBody({
     schema: {
       type: "object",

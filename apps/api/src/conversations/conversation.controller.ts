@@ -103,7 +103,11 @@ export class ConversationsController {
         body: "こんにちは、見つかりましたか？",
       },
       properties: {
-        body: { type: "string", maxLength: 1000, example: "こんにちは、見つかりましたか？" },
+        body: {
+          type: "string",
+          maxLength: 1000,
+          example: "こんにちは、見つかりましたか？",
+        },
       },
     },
   })

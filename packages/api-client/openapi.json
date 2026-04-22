@@ -1,1 +1,1033 @@
-{"openapi":"3.0.0","paths":{"/api/users":{"get":{"operationId":"UsersController_findAll","parameters":[],"responses":{"200":{"description":"","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/UserResponseDto"}}}}},"401":{"description":"認証が必要です"},"403":{"description":"管理者のみ"}},"tags":["users"],"security":[{"bearer":[]}]}},"/api/users/{id}":{"delete":{"operationId":"UsersController_remove","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000000","type":"string"}}],"responses":{"200":{"description":"ユーザー削除成功"},"401":{"description":"認証が必要です"},"403":{"description":"管理者のみ"},"404":{"description":"ユーザーが見つかりません"}},"tags":["users"],"security":[{"bearer":[]}]}},"/api/users/register":{"post":{"operationId":"UsersController_register","parameters":[],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/RegisterDto"}}}},"responses":{"201":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserResponseDto"}}}}},"tags":["users"]}},"/api/posts":{"post":{"operationId":"PostsController_create","parameters":[],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"type":"object","example":{"postType":"cat","title":"白猫のミケを探しています","description":"首輪なし、人懐こい性格","lostDate":"2024-01-01","petDetail":"{\"name\":\"ミケ\",\"color\":\"white\",\"age\":\"2 years\",\"features\":\"Pink nose, blue collar\",\"gender\":\"female\",\"breed\":\"Mixed\",\"size\":\"medium\",\"collar\":\"blue collar\",\"microchip\":true,\"neutered\":true}","location":"{\"prefecture\":\"saitama\",\"city\":\"Saitama City\",\"address\":\"Urawa-ku 1-1-1\",\"lat\":35.8617,\"lng\":139.6455}","images":["<binary>"]},"properties":{"postType":{"type":"string","enum":["cat"],"default":"cat"},"title":{"type":"string"},"description":{"type":"string"},"lostDate":{"type":"string"},"petDetail":{"type":"string","description":"JSON string"},"location":{"type":"string","description":"JSON string"},"images":{"type":"array","items":{"type":"string","format":"binary"}}}}}}},"responses":{"201":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PostResponseDto"}}}},"403":{"description":"プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）"}},"tags":["posts"],"security":[{"bearer":[]}]},"get":{"operationId":"PostsController_list","parameters":[],"responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PostListResponseDto"}}}}},"tags":["posts"],"security":[{"bearer":[]}]}},"/api/posts/{id}":{"get":{"operationId":"PostsController_get","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000000","type":"string"}}],"responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PostResponseDto"}}}}},"tags":["posts"],"security":[{"bearer":[]}]},"patch":{"operationId":"PostsController_update","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000000","type":"string"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/UpdatePostDto"}}}},"responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PostResponseDto"}}}},"403":{"description":"Forbidden: not the post owner"}},"tags":["posts"],"security":[{"bearer":[]}]},"delete":{"operationId":"PostsController_remove","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000000","type":"string"}}],"responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PostResponseDto"}}}},"403":{"description":"Forbidden: not the post owner or admin"}},"tags":["posts"],"security":[{"bearer":[]}]}},"/api/posts/{id}/images":{"post":{"operationId":"PostsController_addImages","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000000","type":"string"}}],"requestBody":{"required":true,"content":{"multipart/form-data":{"schema":{"type":"object","example":{"images":["<binary>"]},"properties":{"images":{"type":"array","items":{"type":"string","format":"binary"}}}}}}},"responses":{"201":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/AddImagesResponseDto"}}}},"400":{"description":"1リクエストあたりの画像枚数上限超過（最大10枚）"},"403":{"description":"プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）"}},"tags":["posts"],"security":[{"bearer":[]}]}},"/api/posts/{id}/images/{imageId}":{"delete":{"operationId":"PostsController_removeImage","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000000","type":"string"}},{"name":"imageId","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000001","type":"string"}}],"responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ImageResponseDto"}}}},"403":{"description":"Forbidden: not the post owner or admin"},"404":{"description":"Image not found"}},"tags":["posts"],"security":[{"bearer":[]}]}},"/api/posts/{id}/favorite":{"post":{"operationId":"PostsController_toggleFavorite","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000000","type":"string"}}],"responses":{"201":{"description":"","content":{"application/json":{"schema":{"properties":{"favorited":{"type":"boolean"}}}}}},"400":{"description":"お気に入り上限超過"},"403":{"description":"自分の投稿はお気に入り不可"},"404":{"description":"Post not found"}},"tags":["posts"],"security":[{"bearer":[]}]}},"/api/auth/login":{"post":{"operationId":"AuthController_login","parameters":[],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/LoginDto"}}}},"responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/AccessTokenResponseDto"}}}}},"tags":["auth"]}},"/api/auth/refresh":{"post":{"operationId":"AuthController_refresh","parameters":[],"responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/AccessTokenResponseDto"}}}}},"tags":["auth"]}},"/api/auth/logout":{"post":{"operationId":"AuthController_logout","parameters":[],"responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/LogoutResponseDto"}}}}},"tags":["auth"]}},"/api/map/markers":{"get":{"operationId":"MapController_getMarkers","parameters":[{"name":"minLat","required":false,"in":"query","schema":{"type":"number"}},{"name":"maxLat","required":false,"in":"query","schema":{"type":"number"}},{"name":"minLng","required":false,"in":"query","schema":{"type":"number"}},{"name":"maxLng","required":false,"in":"query","schema":{"type":"number"}},{"name":"status","required":false,"in":"query","schema":{"enum":["lost","resolved"],"type":"string"}}],"responses":{"200":{"description":"","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/MapMarkerDto"}}}}}},"tags":["map"]}},"/api/sightings":{"post":{"operationId":"SightingsController_create","summary":"目撃情報を作成する","parameters":[],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","example":{"postId":"00000000-0000-0000-0000-000000000000","lat":35.8617,"lng":139.6455,"address":"Saitama City, Urawa-ku","sightedAt":"2024-01-02T00:00:00.000Z","comment":"Seed sighting"}}}}},"responses":{"201":{"description":""}},"tags":["sightings"],"security":[{"bearer":[]}]},"get":{"operationId":"SightingsController_findByPost","summary":"postId別の目撃情報一覧を取得する","parameters":[{"name":"postId","required":true,"in":"query","schema":{"example":"00000000-0000-0000-0000-000000000000","type":"string"}}],"responses":{"200":{"description":""}},"tags":["sightings"]}},"/api/sightings/{id}":{"delete":{"operationId":"SightingsController_remove","summary":"目撃情報を削除する（本人または管理者）","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000002","type":"string"}}],"responses":{"204":{"description":""}},"tags":["sightings"],"security":[{"bearer":[]}]}},"/api/sightings/{id}/favorite":{"post":{"operationId":"SightingsController_toggleFavorite","summary":"目撃情報のお気に入りをトグルする","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000002","type":"string"}}],"responses":{"201":{"description":"","content":{"application/json":{"schema":{"properties":{"favorited":{"type":"boolean"}}}}}},"400":{"description":"お気に入り上限超過"},"404":{"description":"Sighting not found"}},"tags":["sightings"],"security":[{"bearer":[]}]}},"/api/conversations":{"post":{"operationId":"ConversationsController_create","summary":"会話を作成する","parameters":[],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","example":{"postId":"00000000-0000-0000-0000-000000000000","sightingId":"00000000-0000-0000-0000-000000000002"}}}}},"responses":{"201":{"description":""}},"tags":["conversations"],"security":[{"bearer":[]}]},"get":{"operationId":"ConversationsController_findAll","summary":"自分が参加する会話一覧を取得する","parameters":[],"responses":{"200":{"description":""}},"tags":["conversations"],"security":[{"bearer":[]}]}},"/api/conversations/{id}/messages":{"post":{"operationId":"ConversationsController_createMessage","summary":"メッセージを送信する","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000003","type":"string"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"type":"object","example":{"body":"こんにちは、見つかりましたか？"}}}}},"responses":{"201":{"description":""}},"tags":["conversations"],"security":[{"bearer":[]}]},"get":{"operationId":"ConversationsController_findMessages","summary":"メッセージ一覧を取得する","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000003","type":"string"}}],"responses":{"200":{"description":""}},"tags":["conversations"],"security":[{"bearer":[]}]}},"/api/conversations/{id}/messages/read":{"patch":{"operationId":"ConversationsController_markAsRead","summary":"会話内の未読メッセージを既読にする","parameters":[{"name":"id","required":true,"in":"path","schema":{"example":"00000000-0000-0000-0000-000000000003","type":"string"}}],"responses":{"200":{"description":""}},"tags":["conversations"],"security":[{"bearer":[]}]}}},"info":{"title":"API","description":"API description","version":"1.0","contact":{}},"tags":[],"servers":[],"components":{"securitySchemes":{"bearer":{"scheme":"bearer","bearerFormat":"JWT","type":"http"}},"schemas":{"UserResponseDto":{"type":"object","properties":{"id":{"type":"string"},"email":{"type":"string"},"nickname":{"type":"string"},"createdAt":{"format":"date-time","type":"string"}},"required":["id","email","nickname","createdAt"]},"RegisterDto":{"type":"object","properties":{"email":{"type":"string","example":"user@example.com"},"password":{"type":"string","example":"password123","minLength":8},"name":{"type":"string","example":"Alice"},"nickname":{"type":"string","example":"Alice"}},"required":["email","password"]},"PetDetailResponseDto":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"color":{"type":"string"},"age":{"type":"string"},"features":{"type":"string"},"gender":{"type":"string","nullable":true},"breed":{"type":"string","nullable":true},"size":{"type":"string","nullable":true},"collar":{"type":"string","nullable":true},"microchip":{"type":"boolean","nullable":true},"neutered":{"type":"boolean","nullable":true}},"required":["id","name","color","age","features"]},"LocationResponseDto":{"type":"object","properties":{"id":{"type":"string"},"prefecture":{"type":"string"},"city":{"type":"string"},"address":{"type":"string"},"lat":{"type":"number"},"lng":{"type":"number"}},"required":["id","prefecture","city","address","lat","lng"]},"ImageResponseDto":{"type":"object","properties":{"id":{"type":"string"},"postId":{"type":"string"},"url":{"type":"string"},"createdAt":{"format":"date-time","type":"string"}},"required":["id","postId","url","createdAt"]},"PostResponseDto":{"type":"object","properties":{"id":{"type":"string"},"postType":{"type":"string","enum":["cat"]},"title":{"type":"string","nullable":true},"description":{"type":"string"},"userId":{"type":"string"},"status":{"type":"string"},"lostDate":{"format":"date-time","type":"string"},"resolvedAt":{"format":"date-time","type":"string","nullable":true},"petDetail":{"nullable":true,"allOf":[{"$ref":"#/components/schemas/PetDetailResponseDto"}]},"location":{"nullable":true,"allOf":[{"$ref":"#/components/schemas/LocationResponseDto"}]},"images":{"type":"array","items":{"$ref":"#/components/schemas/ImageResponseDto"}},"createdAt":{"format":"date-time","type":"string"},"updatedAt":{"format":"date-time","type":"string"}},"required":["id","postType","description","userId","status","lostDate","images","createdAt","updatedAt"]},"PostListResponseDto":{"type":"object","properties":{"items":{"type":"array","items":{"$ref":"#/components/schemas/PostResponseDto"}},"total":{"type":"number"}},"required":["items","total"]},"UpdatePetDetailDto":{"type":"object","properties":{"name":{"type":"string"},"color":{"type":"string"},"age":{"type":"string"},"features":{"type":"string"},"gender":{"type":"string","enum":["male","female","unknown"]},"breed":{"type":"string"},"size":{"type":"string"},"collar":{"type":"string"},"microchip":{"type":"boolean"},"neutered":{"type":"boolean"}}},"UpdateLocationDto":{"type":"object","properties":{"prefecture":{"type":"string","enum":["saitama"]},"city":{"type":"string"},"address":{"type":"string"},"lat":{"type":"number"},"lng":{"type":"number"}}},"UpdatePostDto":{"type":"object","properties":{"postType":{"type":"string","enum":["cat"],"default":"cat"},"title":{"type":"string"},"description":{"type":"string"},"lostDate":{"type":"string","example":"2024-01-01"},"status":{"type":"string","enum":["lost","resolved"]},"petDetail":{"$ref":"#/components/schemas/UpdatePetDetailDto"},"location":{"$ref":"#/components/schemas/UpdateLocationDto"}}},"AddImagesResponseDto":{"type":"object","properties":{"remainingSlots":{"type":"number"},"images":{"type":"array","items":{"$ref":"#/components/schemas/ImageResponseDto"}}},"required":["remainingSlots","images"]},"LoginDto":{"type":"object","properties":{"email":{"type":"string","example":"seed-owner@finder.miyaoo.test"},"password":{"type":"string","example":"Password123!","minLength":8}},"required":["email","password"]},"AccessTokenResponseDto":{"type":"object","properties":{"accessToken":{"type":"string"}},"required":["accessToken"]},"LogoutResponseDto":{"type":"object","properties":{"ok":{"type":"boolean"}},"required":["ok"]},"MapMarkerDto":{"type":"object","properties":{"type":{"type":"string","enum":["post","sighting"]},"id":{"type":"string"},"postId":{"type":"string"},"lat":{"type":"number"},"lng":{"type":"number"},"status":{"type":"string","enum":["lost","resolved"],"default":"lost"}},"required":["type","id","lat","lng","status"]}}}}
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserResponseDto" }
+                }
+              }
+            }
+          },
+          "401": { "description": "認証が必要です" },
+          "403": { "description": "管理者のみ" }
+        },
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/users/{id}": {
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "10000000-0000-0000-0000-000000000002",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": { "description": "ユーザー削除成功" },
+          "401": { "description": "認証が必要です" },
+          "403": { "description": "管理者のみ" },
+          "404": { "description": "ユーザーが見つかりません" }
+        },
+        "tags": ["users"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/users/register": {
+      "post": {
+        "operationId": "UsersController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "anyOf": [
+                  { "required": ["nickname"] },
+                  { "required": ["name"] }
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8,
+                    "maxLength": 100,
+                    "example": "password123"
+                  },
+                  "nickname": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "example": "Alice"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 50,
+                    "example": "Alice"
+                  }
+                },
+                "example": {
+                  "email": "user@example.com",
+                  "password": "password123",
+                  "nickname": "Alice"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponseDto" }
+              }
+            }
+          }
+        },
+        "tags": ["users"]
+      }
+    },
+    "/api/posts": {
+      "post": {
+        "operationId": "PostsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "postType": "cat",
+                  "title": "白猫のミケを探しています",
+                  "description": "首輪なし、人懐こい性格",
+                  "lostDate": "2024-01-01",
+                  "petDetail": "{\"name\":\"ミケ\",\"color\":\"white\",\"age\":\"2 years\",\"features\":\"Pink nose, blue collar\",\"gender\":\"female\",\"breed\":\"Mixed\",\"size\":\"medium\",\"collar\":\"blue collar\",\"microchip\":true,\"neutered\":true}",
+                  "location": "{\"prefecture\":\"saitama\",\"city\":\"Saitama City\",\"address\":\"Urawa-ku 1-1-1\",\"lat\":35.8617,\"lng\":139.6455}",
+                  "images": ["<binary>"]
+                },
+                "properties": {
+                  "postType": {
+                    "type": "string",
+                    "enum": ["cat"],
+                    "default": "cat"
+                  },
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "lostDate": { "type": "string" },
+                  "petDetail": {
+                    "type": "string",
+                    "description": "JSON string"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "JSON string"
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostResponseDto" }
+              }
+            }
+          },
+          "403": {
+            "description": "プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）"
+          }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "PostsController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostListResponseDto" }
+              }
+            }
+          }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/posts/{id}": {
+      "get": {
+        "operationId": "PostsController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostResponseDto" }
+              }
+            }
+          }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      },
+      "patch": {
+        "operationId": "PostsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdatePostDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostResponseDto" }
+              }
+            }
+          },
+          "403": { "description": "Forbidden: not the post owner" }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      },
+      "delete": {
+        "operationId": "PostsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostResponseDto" }
+              }
+            }
+          },
+          "403": { "description": "Forbidden: not the post owner or admin" }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/posts/{id}/images": {
+      "post": {
+        "operationId": "PostsController_addImages",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "example": { "images": ["<binary>"] },
+                "properties": {
+                  "images": {
+                    "type": "array",
+                    "items": { "type": "string", "format": "binary" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddImagesResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "1リクエストあたりの画像枚数上限超過（最大10枚）"
+          },
+          "403": {
+            "description": "Forbidden: not the post owner or プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）"
+          }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/posts/{id}/images/{imageId}": {
+      "delete": {
+        "operationId": "PostsController_removeImage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "imageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000001",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ImageResponseDto" }
+              }
+            }
+          },
+          "403": { "description": "Forbidden: not the post owner or admin" },
+          "404": { "description": "Image not found" }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/posts/{id}/favorite": {
+      "post": {
+        "operationId": "PostsController_toggleFavorite",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": { "favorited": { "type": "boolean" } }
+                }
+              }
+            }
+          },
+          "400": { "description": "お気に入り上限超過" },
+          "403": { "description": "自分の投稿はお気に入り不可" },
+          "404": { "description": "Post not found" }
+        },
+        "tags": ["posts"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessTokenResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LogoutResponseDto" }
+              }
+            }
+          }
+        },
+        "tags": ["auth"]
+      }
+    },
+    "/api/map/markers": {
+      "get": {
+        "operationId": "MapController_getMarkers",
+        "parameters": [
+          {
+            "name": "minLat",
+            "required": false,
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "maxLat",
+            "required": false,
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "minLng",
+            "required": false,
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "maxLng",
+            "required": false,
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": { "enum": ["lost", "resolved"], "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MapMarkerDto" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["map"]
+      }
+    },
+    "/api/sightings": {
+      "post": {
+        "operationId": "SightingsController_create",
+        "summary": "目撃情報を作成する",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "example": {
+                  "postId": "00000000-0000-0000-0000-000000000000",
+                  "lat": 35.8617,
+                  "lng": 139.6455,
+                  "address": "Saitama City, Urawa-ku",
+                  "sightedAt": "2024-01-02T00:00:00.000Z",
+                  "comment": "Seed sighting"
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "" } },
+        "tags": ["sightings"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "SightingsController_findByPost",
+        "summary": "postId別の目撃情報一覧を取得する",
+        "parameters": [
+          {
+            "name": "postId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["sightings"]
+      }
+    },
+    "/api/sightings/{id}": {
+      "delete": {
+        "operationId": "SightingsController_remove",
+        "summary": "目撃情報を削除する（本人または管理者）",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000002",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": { "204": { "description": "" } },
+        "tags": ["sightings"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/sightings/{id}/favorite": {
+      "post": {
+        "operationId": "SightingsController_toggleFavorite",
+        "summary": "目撃情報のお気に入りをトグルする",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000002",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": { "favorited": { "type": "boolean" } }
+                }
+              }
+            }
+          },
+          "400": { "description": "お気に入り上限超過" },
+          "404": { "description": "Sighting not found" }
+        },
+        "tags": ["sightings"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/conversations": {
+      "post": {
+        "operationId": "ConversationsController_create",
+        "summary": "会話を作成する",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["postId", "sightingId"],
+                "example": {
+                  "postId": "00000000-0000-0000-0000-000000000000",
+                  "sightingId": "00000000-0000-0000-0000-000000000002"
+                },
+                "properties": {
+                  "postId": {
+                    "type": "string",
+                    "example": "00000000-0000-0000-0000-000000000000"
+                  },
+                  "sightingId": {
+                    "type": "string",
+                    "example": "00000000-0000-0000-0000-000000000002"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "ConversationsController_findAll",
+        "summary": "自分が参加する会話一覧を取得する",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/conversations/{id}/messages": {
+      "post": {
+        "operationId": "ConversationsController_createMessage",
+        "summary": "メッセージを送信する",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000003",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["body"],
+                "example": { "body": "こんにちは、見つかりましたか？" },
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "example": "こんにちは、見つかりましたか？"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponseDto" }
+              }
+            }
+          }
+        },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      },
+      "get": {
+        "operationId": "ConversationsController_findMessages",
+        "summary": "メッセージ一覧を取得する",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000003",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MessageResponseDto" }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      }
+    },
+    "/api/conversations/{id}/messages/read": {
+      "patch": {
+        "operationId": "ConversationsController_markAsRead",
+        "summary": "会話内の未読メッセージを既読にする",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000003",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": { "200": { "description": "" } },
+        "tags": ["conversations"],
+        "security": [{ "bearer": [] }]
+      }
+    }
+  },
+  "info": {
+    "title": "API",
+    "description": "API description",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": { "scheme": "bearer", "bearerFormat": "JWT", "type": "http" }
+    },
+    "schemas": {
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "email": { "type": "string" },
+          "nickname": { "type": "string" },
+          "createdAt": { "format": "date-time", "type": "string" }
+        },
+        "required": ["id", "email", "nickname", "createdAt"]
+      },
+      "PetDetailResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "color": { "type": "string" },
+          "age": { "type": "string" },
+          "features": { "type": "string" },
+          "gender": { "type": "string", "nullable": true },
+          "breed": { "type": "string", "nullable": true },
+          "size": { "type": "string", "nullable": true },
+          "collar": { "type": "string", "nullable": true },
+          "microchip": { "type": "boolean", "nullable": true },
+          "neutered": { "type": "boolean", "nullable": true }
+        },
+        "required": ["id", "name", "color", "age", "features"]
+      },
+      "LocationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "prefecture": { "type": "string" },
+          "city": { "type": "string" },
+          "address": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" }
+        },
+        "required": ["id", "prefecture", "city", "address", "lat", "lng"]
+      },
+      "ImageResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "postId": { "type": "string" },
+          "url": { "type": "string" },
+          "createdAt": { "format": "date-time", "type": "string" }
+        },
+        "required": ["id", "postId", "url", "createdAt"]
+      },
+      "PostResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "postType": { "type": "string", "enum": ["cat"] },
+          "title": { "type": "string", "nullable": true },
+          "description": { "type": "string" },
+          "userId": { "type": "string" },
+          "status": { "type": "string" },
+          "lostDate": { "format": "date-time", "type": "string" },
+          "resolvedAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "petDetail": {
+            "nullable": true,
+            "allOf": [{ "$ref": "#/components/schemas/PetDetailResponseDto" }]
+          },
+          "location": {
+            "nullable": true,
+            "allOf": [{ "$ref": "#/components/schemas/LocationResponseDto" }]
+          },
+          "images": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ImageResponseDto" }
+          },
+          "createdAt": { "format": "date-time", "type": "string" },
+          "updatedAt": { "format": "date-time", "type": "string" }
+        },
+        "required": [
+          "id",
+          "postType",
+          "description",
+          "userId",
+          "status",
+          "lostDate",
+          "images",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PostListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/PostResponseDto" }
+          },
+          "total": { "type": "number" }
+        },
+        "required": ["items", "total"]
+      },
+      "UpdatePetDetailDto": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "color": { "type": "string" },
+          "age": { "type": "string" },
+          "features": { "type": "string" },
+          "gender": { "type": "string", "enum": ["male", "female", "unknown"] },
+          "breed": { "type": "string" },
+          "size": { "type": "string" },
+          "collar": { "type": "string" },
+          "microchip": { "type": "boolean" },
+          "neutered": { "type": "boolean" }
+        }
+      },
+      "UpdateLocationDto": {
+        "type": "object",
+        "properties": {
+          "prefecture": { "type": "string", "enum": ["saitama"] },
+          "city": { "type": "string" },
+          "address": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" }
+        }
+      },
+      "UpdatePostDto": {
+        "type": "object",
+        "properties": {
+          "postType": { "type": "string", "enum": ["cat"], "default": "cat" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "lostDate": { "type": "string", "example": "2024-01-01" },
+          "status": { "type": "string", "enum": ["lost", "resolved"] },
+          "petDetail": { "$ref": "#/components/schemas/UpdatePetDetailDto" },
+          "location": { "$ref": "#/components/schemas/UpdateLocationDto" }
+        }
+      },
+      "AddImagesResponseDto": {
+        "type": "object",
+        "properties": {
+          "remainingSlots": { "type": "number" },
+          "images": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ImageResponseDto" }
+          }
+        },
+        "required": ["remainingSlots", "images"]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "seed-owner@finder.miyaoo.test"
+          },
+          "password": {
+            "type": "string",
+            "example": "Password123!",
+            "minLength": 8
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "AccessTokenResponseDto": {
+        "type": "object",
+        "properties": { "accessToken": { "type": "string" } },
+        "required": ["accessToken"]
+      },
+      "LogoutResponseDto": {
+        "type": "object",
+        "properties": { "ok": { "type": "boolean" } },
+        "required": ["ok"]
+      },
+      "MapMarkerDto": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string", "enum": ["post", "sighting"] },
+          "id": { "type": "string" },
+          "postId": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "status": {
+            "type": "string",
+            "enum": ["lost", "resolved"],
+            "default": "lost"
+          }
+        },
+        "required": ["type", "id", "lat", "lng", "status"]
+      },
+      "ConversationResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "postId": { "type": "string" },
+          "sightingId": { "type": "string" },
+          "ownerId": { "type": "string" },
+          "sighterId": { "type": "string" },
+          "createdAt": { "format": "date-time", "type": "string" }
+        },
+        "required": [
+          "id",
+          "postId",
+          "sightingId",
+          "ownerId",
+          "sighterId",
+          "createdAt"
+        ]
+      },
+      "MessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "conversationId": { "type": "string" },
+          "senderId": { "type": "string" },
+          "body": { "type": "string" },
+          "readAt": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time"
+          },
+          "createdAt": { "format": "date-time", "type": "string" }
+        },
+        "required": [
+          "id",
+          "conversationId",
+          "senderId",
+          "body",
+          "readAt",
+          "createdAt"
+        ]
+      }
+    }
+  }
+}

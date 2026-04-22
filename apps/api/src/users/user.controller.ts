@@ -75,8 +75,18 @@ export class UsersController {
       anyOf: [{ required: ["nickname"] }, { required: ["name"] }],
       properties: {
         email: { type: "string", format: "email", example: "user@example.com" },
-        password: { type: "string", minLength: 8, maxLength: 100, example: "password123" },
-        nickname: { type: "string", minLength: 1, maxLength: 50, example: "Alice" },
+        password: {
+          type: "string",
+          minLength: 8,
+          maxLength: 100,
+          example: "password123",
+        },
+        nickname: {
+          type: "string",
+          minLength: 1,
+          maxLength: 50,
+          example: "Alice",
+        },
         name: { type: "string", minLength: 1, maxLength: 50, example: "Alice" },
       },
       example: {

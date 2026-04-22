@@ -2,8 +2,7 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "rootDir": "..",
-    "types": ["node"],
     "moduleResolution": "node"
   },
-  "include": ["seed.ts", "global.d.ts", "../src/**/*.ts"]
+  "include": ["seed.ts", "../src/**/*.ts"]
 }
