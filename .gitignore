@@ -19,3 +19,4 @@ docs/
 .kilo/
 CLAUDE.md
 apps/web/test-results/
+schema-coverage.html

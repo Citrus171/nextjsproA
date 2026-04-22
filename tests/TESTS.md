@@ -2,6 +2,11 @@
 
 ## apps/api
 
+### openapi-examples (`src/common/openapi-examples.spec.ts`)
+
+- [x] 用途別の OpenAPI 例示 ID が重複しないこと
+- [x] 汎用 ID 例示は投稿 ID 例示と一致すること
+
 ### PostsService (`src/posts/post.service.spec.ts`)
 
 #### findAll
@@ -340,6 +345,10 @@
 - [x] ConflictException はそのまま伝播する
 - [x] nickname があれば service に渡す
 - [x] nickname がなくても name を後方互換で使う
+
+### Dredd 契約テスト
+
+- [x] `packages/api-client/openapi.json` に対して `dredd-hooks-jemini.js` を使って API 契約を検証する
 
 ### RegisterDto (`src/users/dto/register.dto.spec.ts`)
 
