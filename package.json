@@ -18,6 +18,7 @@
     "test:e2e:api": "npm run test:e2e --workspace=apps/api",
     "prisma:migrate": "npm run prisma:migrate --workspace=apps/api",
     "prisma:generate": "npm run prisma:generate --workspace=apps/api",
+    "seed": "npm run seed --workspace=apps/api",
     "openapi": "npm run openapi --workspace=apps/api",
     "generate": "npm run generate --workspace=packages/api-client",
     "lint:api": "eslint \"apps/api/{src,test}/**/*.ts\" --config apps/api/eslint.config.js",

@@ -38,10 +38,12 @@ describe("UsersController", () => {
   });
 
   it("nickname があれば service に渡す", async () => {
+    const createdAt = new Date("2026-01-01T00:00:00.000Z");
     mockUsersService.createUser.mockResolvedValue({
       id: "user1",
       email: "a@b.com",
       nickname: "Alice",
+      createdAt,
     });
 
     const result = await controller.register({
@@ -59,6 +61,7 @@ describe("UsersController", () => {
       id: "user1",
       email: "a@b.com",
       nickname: "Alice",
+      createdAt,
     });
   });
 

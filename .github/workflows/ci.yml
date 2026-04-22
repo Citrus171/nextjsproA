@@ -262,6 +262,14 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
 
+      - name: Seed test data
+        run: npm run seed
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          HMAC_SECRET: ${{ secrets.HMAC_SECRET || 'ci-hmac-secret' }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef' }}
+
       - name: Build API
         run: npm run build --workspace=apps-api
 

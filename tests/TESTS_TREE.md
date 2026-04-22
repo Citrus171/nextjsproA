@@ -2,6 +2,11 @@
 
 ```
 apps/api/src/
+├── common/
+│   └── openapi-examples.spec.ts
+│       └── OpenAPI example IDs
+│           ├── 用途別の OpenAPI 例示 ID が重複しないこと
+│           └── 汎用 ID 例示は投稿 ID 例示と一致すること
 ├── auth/
 │   ├── auth.service.spec.ts
 │   │   └── AuthService（既存 + validateUser で role を返すことを検証）
@@ -219,6 +224,10 @@ apps/api/src/
             └── deleteUser
                 ├── 指定IDのユーザーを削除する
                 └── 存在しないIDは Prisma エラーを再スローする
+
+apps/api/
+└── Dredd 契約テスト
+    └── packages/api-client/openapi.json と API 実装の契約を hook 経由で検証する
 
 apps/api/test/
 └── app.e2e.ts

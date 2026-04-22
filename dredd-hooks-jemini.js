@@ -19,6 +19,7 @@ const state = {
   jpegBuf: null, // valid JPEG for multipart uploads
   postId: null,
   deletePostId: null,
+  deleteUserId: null,
   maxImagePostId: null,
   imageId: null,
   deleteImageId: null,
@@ -119,12 +120,21 @@ function jsonReq(method, path, body, token, cookies) {
 function multipartReq(method, path, fields, token) {
   return new Promise((resolve, reject) => {
     const form = new FormData();
-    for (const [key, val] of Object.entries(fields)) {
+    const appendField = (key, val) => {
+      if (Array.isArray(val)) {
+        for (const item of val) {
+          appendField(key, item);
+        }
+        return;
+      }
       if (val && typeof val === "object" && val.value !== undefined) {
         form.append(key, val.value, val.options || {});
-      } else {
-        form.append(key, val);
+        return;
       }
+      form.append(key, val);
+    };
+    for (const [key, val] of Object.entries(fields)) {
+      appendField(key, val);
     }
     const headers = form.getHeaders();
     if (token) headers["Authorization"] = "Bearer " + token;
@@ -163,12 +173,21 @@ function multipartReq(method, path, fields, token) {
 // ── build a valid multipart body buffer synchronously ─────────────────────────
 function buildMultipartBody(fields) {
   const form = new FormData();
-  for (const [key, val] of Object.entries(fields)) {
+  const appendField = (key, val) => {
+    if (Array.isArray(val)) {
+      for (const item of val) {
+        appendField(key, item);
+      }
+      return;
+    }
     if (val && typeof val === "object" && val.value !== undefined) {
       form.append(key, val.value, val.options || {});
-    } else {
-      form.append(key, val);
+      return;
     }
+    form.append(key, val);
+  };
+  for (const [key, val] of Object.entries(fields)) {
+    appendField(key, val);
   }
   return {
     body: form.getBuffer(),
@@ -181,6 +200,10 @@ function buildMultipartBody(fields) {
 hooks.beforeAll(async function (transactions, done) {
   try {
     const ts = Date.now();
+    const nicknameA = "DreddUserA-" + ts;
+    const nicknameB = "DreddUserB-" + ts;
+    const nicknameC = "DreddUserC-" + ts;
+    const registerNickname = "DreddRegTest-" + ts;
 
     // generate a valid 10×10 JPEG for image tests
     state.jpegBuf = await sharp({
@@ -200,7 +223,7 @@ hooks.beforeAll(async function (transactions, done) {
     await jsonReq("POST", "/api/users/register", {
       email: emailA,
       password: "Password123!",
-      name: "DreddUserA",
+      name: nicknameA,
     });
     const loginA = await jsonReq("POST", "/api/auth/login", {
       email: emailA,
@@ -238,7 +261,7 @@ hooks.beforeAll(async function (transactions, done) {
     await jsonReq("POST", "/api/users/register", {
       email: emailB,
       password: "Password123!",
-      name: "DreddUserB",
+      name: nicknameB,
     });
     const loginB = await jsonReq("POST", "/api/auth/login", {
       email: emailB,
@@ -250,6 +273,23 @@ hooks.beforeAll(async function (transactions, done) {
       return done();
     }
     hooks.log("[jemini] user B OK");
+
+    // user C: dedicated delete target so the admin delete test does not
+    // consume either fixture user needed by later transactions.
+    const emailC = "dredd-c-" + ts + "@example.com";
+    const deleteUserRes = await jsonReq("POST", "/api/users/register", {
+      email: emailC,
+      password: "Password123!",
+      name: nicknameC,
+    });
+    state.deleteUserId = deleteUserRes.body && deleteUserRes.body.id;
+    if (!state.deleteUserId) {
+      hooks.log(
+        "[jemini] delete user failed: " + JSON.stringify(deleteUserRes.body)
+      );
+      return done();
+    }
+    hooks.log("[jemini] deleteUserId: " + state.deleteUserId);
 
     // main post (user A)
     const postRes = await multipartReq(
@@ -286,35 +326,6 @@ hooks.beforeAll(async function (transactions, done) {
     );
     state.deletePostId = delPostRes.body && delPostRes.body.id;
     hooks.log("[jemini] delete post: " + state.deletePostId);
-
-    // max-image post (user A) — consumed by POST /posts/{id}/images > 400
-    const maxPostRes = await multipartReq(
-      "POST",
-      "/api/posts",
-      {
-        description: "画像上限テスト用投稿",
-        lostDate: "2024-01-01",
-      },
-      state.primaryToken
-    );
-    state.maxImagePostId = maxPostRes.body && maxPostRes.body.id;
-    for (let i = 0; i < 5 && state.maxImagePostId; i += 1) {
-      await multipartReq(
-        "POST",
-        "/api/posts/" + state.maxImagePostId + "/images",
-        {
-          images: {
-            value: state.jpegBuf,
-            options: {
-              filename: "max-" + i + ".jpg",
-              contentType: "image/jpeg",
-            },
-          },
-        },
-        state.primaryToken
-      );
-    }
-    hooks.log("[jemini] maxImagePostId: " + state.maxImagePostId);
 
     // upload image #1 → imageId (kept for 403 tests)
     const imgRes1 = await multipartReq(
@@ -505,10 +516,11 @@ hooks.beforeEach(function (transaction, done) {
   if (method === "POST" && rawUri === "/api/users/register") {
     // Use unique email to avoid duplicate key errors from repeated runs
     const uniq = "dredd-reg-" + Date.now() + "@example.com";
+    const registerNickname = "DreddRegTest-" + Date.now();
     setJsonBody({
       email: uniq,
       password: "Password123!",
-      name: "DreddRegTest",
+      name: registerNickname,
     });
     clearExpectedBody(); // spec requires createdAt but server doesn't return it
   }
@@ -576,18 +588,18 @@ hooks.beforeEach(function (transaction, done) {
 
   // ── POST /api/posts/{id}/images ───────────────────────────────────────────
   if (method === "POST" && /^\/api\/posts\/[^/]+\/images$/.test(rawUri)) {
-    const targetPostId =
-      status === "400"
-        ? state.maxImagePostId || state.postId || PLACEHOLDER
-        : state.postId || PLACEHOLDER;
+    const targetPostId = state.postId || PLACEHOLDER;
     fixUri(replaceIn(rawUri, PLACEHOLDER, targetPostId));
     if (status === "400") {
       setToken(state.primaryToken);
       setMultipartBody({
-        images: {
+        images: Array.from({ length: 11 }, (_, index) => ({
           value: state.jpegBuf,
-          options: { filename: "overflow.jpg", contentType: "image/jpeg" },
-        },
+          options: {
+            filename: "overflow-" + index + ".jpg",
+            contentType: "image/jpeg",
+          },
+        })),
       });
     } else if (status === "403") {
       setToken(state.secondaryToken);
@@ -678,8 +690,6 @@ hooks.beforeEach(function (transaction, done) {
         replaceIn(rawUri, PLACEHOLDER, state.deleteSightingId || PLACEHOLDER)
       );
       setToken(state.secondaryToken);
-      // Spec says 204 but controller has no @HttpCode(204), server returns 200
-      transaction.expected.statusCode = 200;
     }
   }
 
@@ -759,7 +769,21 @@ hooks.beforeEach(function (transaction, done) {
 
   // ── GET /api/users (admin only) ───────────────────────────────────────────
   if (method === "GET" && rawUri === "/api/users") {
-    setToken(state.adminToken);
+    setToken(status === "403" ? state.secondaryToken : state.adminToken);
+  }
+
+  // ── DELETE /api/users/{id} ───────────────────────────────────────────────
+  if (method === "DELETE" && /^\/api\/users\/[^/]+$/.test(rawUri)) {
+    if (status === "403") {
+      fixUri(replaceIn(rawUri, PLACEHOLDER, state.deleteUserId || PLACEHOLDER));
+      setToken(state.secondaryToken);
+    } else if (status === "404") {
+      fixUri(replaceIn(rawUri, PLACEHOLDER, FAKE_ID));
+      setToken(state.adminToken);
+    } else {
+      fixUri(replaceIn(rawUri, PLACEHOLDER, state.deleteUserId || PLACEHOLDER));
+      setToken(state.adminToken);
+    }
   }
 
   // ── 401: strip Authorization so server responds with 401 ─────────────────

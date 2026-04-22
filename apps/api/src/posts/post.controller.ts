@@ -20,6 +20,7 @@ import {
   ApiBearerAuth,
   ApiConsumes,
   ApiBody,
+  ApiParam,
   ApiResponse,
 } from "@nestjs/swagger";
 import {
@@ -34,6 +35,10 @@ import { PostsService } from "./post.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { Plan } from "@prisma/client";
 import { PLAN_LIMITS } from "../common/plan-limits";
+import {
+  OPENAPI_IMAGE_ID_EXAMPLE,
+  OPENAPI_POST_ID_EXAMPLE,
+} from "../common/openapi-examples";
 
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
@@ -84,6 +89,32 @@ export class PostsController {
   @ApiBody({
     schema: {
       type: "object",
+      example: {
+        postType: "cat",
+        title: "白猫のミケを探しています",
+        description: "首輪なし、人懐こい性格",
+        lostDate: "2024-01-01",
+        petDetail: JSON.stringify({
+          name: "ミケ",
+          color: "white",
+          age: "2 years",
+          features: "Pink nose, blue collar",
+          gender: "female",
+          breed: "Mixed",
+          size: "medium",
+          collar: "blue collar",
+          microchip: true,
+          neutered: true,
+        }),
+        location: JSON.stringify({
+          prefecture: "saitama",
+          city: "Saitama City",
+          address: "Urawa-ku 1-1-1",
+          lat: 35.8617,
+          lng: 139.6455,
+        }),
+        images: ["<binary>"],
+      },
       properties: {
         postType: { type: "string", enum: ["cat"], default: "cat" },
         title: { type: "string" },
@@ -113,6 +144,7 @@ export class PostsController {
   }
 
   @Get(":id")
+  @ApiParam({ name: "id", example: OPENAPI_POST_ID_EXAMPLE })
   @ApiResponse({ status: 200, type: PostResponseDto })
   async get(@Param("id") id: string) {
     return this.posts.findById(id);
@@ -120,6 +152,7 @@ export class PostsController {
 
   @Patch(":id")
   @UseGuards(JwtAuthGuard)
+  @ApiParam({ name: "id", example: OPENAPI_POST_ID_EXAMPLE })
   @ApiResponse({ status: 200, type: PostResponseDto })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
   async update(
@@ -133,6 +166,7 @@ export class PostsController {
 
   @Delete(":id")
   @UseGuards(JwtAuthGuard)
+  @ApiParam({ name: "id", example: OPENAPI_POST_ID_EXAMPLE })
   @ApiResponse({ status: 200, type: PostResponseDto })
   @ApiResponse({
     status: 403,
@@ -150,6 +184,7 @@ export class PostsController {
     FilesInterceptor("images", MAX_IMAGES_PER_POST, imageUploadOptions)
   )
   @ApiConsumes("multipart/form-data")
+  @ApiParam({ name: "id", example: OPENAPI_POST_ID_EXAMPLE })
   @ApiResponse({ status: 201, type: AddImagesResponseDto })
   @ApiResponse({
     status: 400,
@@ -163,6 +198,9 @@ export class PostsController {
   @ApiBody({
     schema: {
       type: "object",
+      example: {
+        images: ["<binary>"],
+      },
       properties: {
         images: { type: "array", items: { type: "string", format: "binary" } },
       },
@@ -179,6 +217,8 @@ export class PostsController {
 
   @Delete(":id/images/:imageId")
   @UseGuards(JwtAuthGuard)
+  @ApiParam({ name: "id", example: OPENAPI_POST_ID_EXAMPLE })
+  @ApiParam({ name: "imageId", example: OPENAPI_IMAGE_ID_EXAMPLE })
   @ApiResponse({ status: 200, type: ImageResponseDto })
   @ApiResponse({
     status: 403,
@@ -196,6 +236,7 @@ export class PostsController {
 
   @HttpPost(":id/favorite")
   @UseGuards(JwtAuthGuard)
+  @ApiParam({ name: "id", example: OPENAPI_POST_ID_EXAMPLE })
   @ApiResponse({
     status: 201,
     schema: { properties: { favorited: { type: "boolean" } } },

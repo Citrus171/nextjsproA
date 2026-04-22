@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "seed": "prisma db seed",
     "openapi": "curl -s http://localhost:3000/api-json > ../../packages/api-client/openapi.json",
     "typecheck": "tsc --noEmit",
     "lint": "node ../../node_modules/eslint/bin/eslint.js \"{src,apps,libs,test}/**/*.ts\"",
@@ -78,6 +79,9 @@
     "cookie-parser": {
       "optional": false
     }
+  },
+  "prisma": {
+    "seed": "ts-node --project prisma/tsconfig.json prisma/seed.ts"
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.19",
