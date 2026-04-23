@@ -114,10 +114,174 @@ async function createUser({
   });
 }
 
+// ── デモ用マップデータ ────────────────────────────────────────────────
+const DEMO_MAP_USER_ID = "20000000-0000-0000-0000-000000000001";
+const OMIYA_LAT = 35.9062;
+const OMIYA_LNG = 139.6237;
+
+/** 黄金角分布で50点を大宮駅周辺に散布する */
+function demoCoords(
+  count: number,
+  maxRadiusLat: number,
+  maxRadiusLng: number
+): { lat: number; lng: number }[] {
+  return Array.from({ length: count }, (_, i) => {
+    const angle = i * 137.508 * (Math.PI / 180);
+    const r = Math.sqrt((i + 1) / count);
+    return {
+      lat: parseFloat(
+        (OMIYA_LAT + r * maxRadiusLat * Math.cos(angle)).toFixed(6)
+      ),
+      lng: parseFloat(
+        (OMIYA_LNG + r * maxRadiusLng * Math.sin(angle)).toFixed(6)
+      ),
+    };
+  });
+}
+
+const CAT_NAMES = [
+  "ミケ",
+  "レオ",
+  "シロ",
+  "クロ",
+  "モモ",
+  "ハナ",
+  "ソラ",
+  "ムギ",
+  "コテツ",
+  "チャチャ",
+  "ルナ",
+  "ノア",
+  "キナコ",
+  "マロン",
+  "ユキ",
+  "ゴマ",
+  "あんず",
+  "きなこ",
+  "こむぎ",
+  "もち",
+];
+const COLORS = [
+  "白",
+  "黒",
+  "茶トラ",
+  "サバトラ",
+  "三毛",
+  "キジトラ",
+  "白黒",
+  "茶白",
+  "グレー",
+  "クリーム",
+];
+const BREEDS = [
+  "雑種",
+  "アメショ",
+  "スコティッシュ",
+  "ロシアンブルー",
+  "マンチカン",
+  "ノルウェー",
+  "ラグドール",
+  "メインクーン",
+  "ペルシャ",
+  "シャム",
+];
+const GENDERS: Gender[] = [Gender.male, Gender.female, Gender.unknown];
+
+async function deleteDemoMapData() {
+  await prisma.sighting.deleteMany({ where: { userId: DEMO_MAP_USER_ID } });
+  const posts = await prisma.post.findMany({
+    where: { userId: DEMO_MAP_USER_ID },
+    select: { id: true },
+  });
+  const postIds = posts.map((p) => p.id);
+  if (postIds.length > 0) {
+    await prisma.location.deleteMany({ where: { postId: { in: postIds } } });
+    await prisma.petDetail.deleteMany({ where: { postId: { in: postIds } } });
+    await prisma.post.deleteMany({ where: { id: { in: postIds } } });
+  }
+  await prisma.user.deleteMany({ where: { id: DEMO_MAP_USER_ID } });
+}
+
+async function createDemoMapData() {
+  const normalized = normalizeEmail("demo-map@finder.miyaoo.test");
+  const password = await bcrypt.hash(seedPassword, 10);
+  const demoUser = await prisma.user.create({
+    data: {
+      id: DEMO_MAP_USER_ID,
+      emailEncrypted: encryptEmail(normalized),
+      emailHash: hmacEmail(normalized),
+      password,
+      nickname: "demo-map-user",
+      role: Role.user,
+      plan: Plan.free,
+    },
+  });
+
+  // 迷い猫 50件
+  const lostCoords = demoCoords(50, 0.014, 0.018);
+  for (let i = 0; i < 50; i++) {
+    const { lat, lng } = lostCoords[i];
+    const name =
+      CAT_NAMES[i % CAT_NAMES.length] +
+      (i >= CAT_NAMES.length
+        ? String(Math.floor(i / CAT_NAMES.length) + 1)
+        : "");
+    await prisma.post.create({
+      data: {
+        userId: demoUser.id,
+        postType: PostType.cat,
+        status: PostStatus.lost,
+        title: `${name}を探しています`,
+        description: `${name}がいなくなりました。見かけた方はご連絡ください。`,
+        lostDate: new Date(Date.now() - (i + 1) * 24 * 60 * 60 * 1000),
+        petDetail: {
+          create: {
+            name,
+            color: COLORS[i % COLORS.length],
+            age: `${(i % 10) + 1}歳`,
+            features: `${COLORS[i % COLORS.length]}の猫`,
+            gender: GENDERS[i % 3],
+            breed: BREEDS[i % BREEDS.length],
+          },
+        },
+        location: {
+          create: {
+            prefecture: Prefecture.saitama,
+            city: "さいたま市大宮区",
+            address: `大宮区周辺 ${i + 1}`,
+            lat,
+            lng,
+          },
+        },
+      },
+    });
+  }
+
+  // 目撃 50件
+  const sightingCoords = demoCoords(50, 0.013, 0.017);
+  for (let i = 0; i < 50; i++) {
+    const { lat, lng } = sightingCoords[i];
+    await prisma.sighting.create({
+      data: {
+        userId: demoUser.id,
+        lat,
+        lng,
+        address: `さいたま市大宮区周辺 目撃${i + 1}`,
+        sightedAt: new Date(Date.now() - i * 12 * 60 * 60 * 1000),
+        comment: `猫を目撃しました（目撃 ${i + 1}）`,
+      },
+    });
+  }
+
+  console.log(`デモマップデータ作成完了: 迷い猫 50件, 目撃 50件`);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function main() {
   loadEnvFile();
 
   await deleteSeedData();
+  await deleteDemoMapData();
 
   const admin = await createUser({
     id: ids.adminUser,
@@ -231,6 +395,8 @@ async function main() {
       2
     )
   );
+
+  await createDemoMapData();
 }
 
 main()

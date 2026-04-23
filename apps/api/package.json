@@ -9,7 +9,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "prisma db seed",
-    "openapi": "curl -s http://localhost:3000/api-json > ../../packages/api-client/openapi.json && npx prettier --write ../../packages/api-client/openapi.json",
+    "openapi": "ts-node src/swagger.ts",
     "typecheck": "tsc --noEmit",
     "lint": "node ../../node_modules/eslint/bin/eslint.js \"{src,apps,libs,test}/**/*.ts\"",
     "lint:fix": "node ../../node_modules/eslint/bin/eslint.js \"{src,apps,libs,test}/**/*.ts\" --fix",
