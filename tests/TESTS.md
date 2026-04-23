@@ -13,11 +13,11 @@
 
 - [x] ページ1・perPage5 で skip=0 / take=5 を渡す
 - [x] ページ3・perPage5 で skip=10 を渡す
-- [x] items と total を返す
+- [x] items と total を返し、投稿者名を authorNickname に詰める
 
 #### findById
 
-- [x] petDetail と location と images を include して取得する
+- [x] petDetail/location/images と user.nickname を取得し authorNickname を返す
 
 #### create
 
@@ -434,6 +434,9 @@
 
 - [x] CreatePost で未選択時は cat を送信する
 - [x] EditPost で取得した postType を表示し、送信時に postType を含める
+- [x] Map で検索バーと種別フィルターを表示する
+- [x] Map で迷子マーカーを押すと詳細シートが開き投稿者名を表示する
+- [x] Map で迷子フィルターを押すと迷子マーカーだけが表示される
 
 ---
 

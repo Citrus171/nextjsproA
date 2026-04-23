@@ -222,20 +222,42 @@ export class PostsService {
         skip,
         take: perPage,
         orderBy: { createdAt: "desc" },
-        include: { petDetail: true, location: true, images: true },
+        include: {
+          petDetail: true,
+          location: true,
+          images: true,
+          user: { select: { nickname: true } },
+        },
       }),
       this.prisma.post.count(),
     ]);
-    return { items, total };
+
+    return {
+      items: items.map(({ user, ...rest }) => ({
+        ...rest,
+        authorNickname: user?.nickname ?? null,
+      })),
+      total,
+    };
   }
 
   async findById(id: string) {
     const post = await this.prisma.post.findUnique({
       where: { id },
-      include: { petDetail: true, location: true, images: true },
+      include: {
+        petDetail: true,
+        location: true,
+        images: true,
+        user: { select: { nickname: true } },
+      },
     });
     if (!post) throw new NotFoundException("投稿が見つかりません");
-    return post;
+
+    const { user, ...rest } = post;
+    return {
+      ...rest,
+      authorNickname: user?.nickname ?? null,
+    };
   }
 
   async addImages(

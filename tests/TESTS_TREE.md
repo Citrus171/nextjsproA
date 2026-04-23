@@ -21,9 +21,9 @@ apps/api/src/
 │   │   ├── findAll
 │   │   │   ├── ページ1・perPage5 で skip=0 / take=5 を渡す
 │   │   │   ├── ページ3・perPage5 で skip=10 を渡す
-│   │   │   └── items と total を返す
+│   │   │   └── items と total を返し、投稿者名を authorNickname に詰める
 │   │   ├── findById
-│   │   │   └── petDetail と location と images を include して取得する
+│   │   │   └── petDetail/location/images と user.nickname を取得し authorNickname を返す
 │   │   ├── create
 │   │   │   ├── ファイルなしで投稿を作成する
 │   │   │   ├── postType 未指定の時、cat で保存して返す
@@ -277,6 +277,11 @@ apps/web/src/pages/
 ├── CreatePost.test.tsx
 │   └── CreatePost
 │       └── 未選択時は cat を送信する
+├── Map.test.tsx
+│   └── Map
+│       ├── 地図ページを開いた時、検索バーと種別フィルターが表示されること
+│       ├── 迷子マーカーを押した時、詳細シートが開き投稿者名が表示されること
+│       └── 迷子フィルターを押した時、迷子マーカーだけが表示されること
 └── EditPost.test.tsx
     └── EditPost
         └── 取得した postType を表示し、送信時に postType を含める
