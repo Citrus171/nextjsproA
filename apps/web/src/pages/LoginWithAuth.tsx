@@ -18,7 +18,7 @@ export default function LoginWithAuth() {
       const res = await api.login(email, password);
       if (res?.accessToken) {
         setToken(res.accessToken);
-        navigate("/");
+        navigate("/posts");
       } else {
         setError("ログインに失敗しました");
       }
@@ -27,7 +27,7 @@ export default function LoginWithAuth() {
       setError(
         msg === "Unauthorized"
           ? "認証に失敗しました（メール／パスワードを確認してください）"
-          : `エラー: ${msg}`,
+          : `エラー: ${msg}`
       );
     }
   };

@@ -82,7 +82,12 @@ describe("PostsService", () => {
         skip: 0,
         take: 5,
         orderBy: { createdAt: "desc" },
-        include: { petDetail: true, location: true, images: true },
+        include: {
+          petDetail: true,
+          location: true,
+          images: true,
+          user: { select: { nickname: true } },
+        },
       });
     });
 
@@ -97,7 +102,7 @@ describe("PostsService", () => {
       );
     });
 
-    it("items と total を返す", async () => {
+    it("items と total を返し、投稿者名を authorNickname に詰める", async () => {
       const posts = [
         {
           id: "1",
@@ -111,6 +116,7 @@ describe("PostsService", () => {
           petDetail: null,
           location: null,
           images: [],
+          user: { nickname: "Alice" },
         },
       ];
       mockPrisma.post.findMany.mockResolvedValue(posts);
@@ -118,7 +124,25 @@ describe("PostsService", () => {
 
       const result = await service.findAll(1, 10);
 
-      expect(result).toEqual({ items: posts, total: 1 });
+      expect(result).toEqual({
+        items: [
+          {
+            id: "1",
+            title: "T",
+            description: "C",
+            userId: "u1",
+            status: "lost",
+            lostDate: posts[0].lostDate,
+            createdAt: posts[0].createdAt,
+            updatedAt: posts[0].updatedAt,
+            petDetail: null,
+            location: null,
+            images: [],
+            authorNickname: "Alice",
+          },
+        ],
+        total: 1,
+      });
     });
   });
 
@@ -130,6 +154,7 @@ describe("PostsService", () => {
         petDetail: { name: "Mimi" },
         location: { city: "さいたま市" },
         images: [],
+        user: { nickname: "Alice" },
       };
       mockPrisma.post.findUnique.mockResolvedValue(post);
 
@@ -137,9 +162,20 @@ describe("PostsService", () => {
 
       expect(mockPrisma.post.findUnique).toHaveBeenCalledWith({
         where: { id: "post1" },
-        include: { petDetail: true, location: true, images: true },
+        include: {
+          petDetail: true,
+          location: true,
+          images: true,
+          user: { select: { nickname: true } },
+        },
       });
-      expect(result).toEqual(post);
+      expect(result).toEqual({
+        id: "post1",
+        petDetail: { name: "Mimi" },
+        location: { city: "さいたま市" },
+        images: [],
+        authorNickname: "Alice",
+      });
     });
 
     it("存在しない投稿は NotFoundException", async () => {

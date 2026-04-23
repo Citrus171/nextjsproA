@@ -21,7 +21,7 @@ export default function CreatePost() {
     e.preventDefault();
     try {
       await api.createPost({ title, description, lostDate, postType });
-      navigate("/");
+      navigate("/posts");
     } catch (err) {
       alert("Failed to create post");
     }

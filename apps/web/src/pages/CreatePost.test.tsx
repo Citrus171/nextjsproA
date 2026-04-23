@@ -46,6 +46,6 @@ describe("CreatePost", () => {
       });
     });
 
-    expect(mockNavigate).toHaveBeenCalledWith("/");
+    expect(mockNavigate).toHaveBeenCalledWith("/posts");
   });
 });

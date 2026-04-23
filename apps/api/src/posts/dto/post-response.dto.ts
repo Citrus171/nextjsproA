@@ -47,6 +47,9 @@ export class PostResponseDto {
   @ApiProperty()
   userId: string;
 
+  @ApiProperty({ required: false, nullable: true })
+  authorNickname?: string | null;
+
   @ApiProperty()
   status: string;
 

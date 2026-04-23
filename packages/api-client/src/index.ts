@@ -209,6 +209,8 @@ export interface ImageResponseDto {
 }
 
 export interface PostResponseDto {
+  /** @nullable */
+  authorNickname?: string | null;
   createdAt: string;
   description: string;
   id: string;

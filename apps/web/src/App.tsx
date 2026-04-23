@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Login from "./pages/LoginWithAuth";
 import Register from "./pages/Register";
 import Posts from "./pages/Posts";
@@ -7,6 +7,7 @@ import CreatePost from "./pages/CreatePost";
 import EditPost from "./pages/EditPost";
 import Map from "./pages/Map";
 import { useAuth } from "./auth/AuthProvider";
+import Header from "./components/Header";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token } = useAuth();
@@ -15,26 +16,33 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const { token, clearToken } = useAuth();
+  const location = useLocation();
+  const isMapPage = location.pathname === "/";
 
   return (
     <>
-      <nav>
-        <Link to="/">Posts</Link> | <Link to="/create">New Post</Link> |{" "}
-        {!token ? (
-          <Link to="/login">Login</Link>
-        ) : (
-          <button onClick={clearToken}>Logout</button>
-        )}{" "}
-        | <Link to="/register">Register</Link>{" "}
-        | <Link to="/saitama-map">Map</Link>
-      </nav>
+      {!isMapPage && <Header token={token} onLogout={clearToken} />}
       <Routes>
-        <Route path="/" element={<Posts />} />
-        <Route path="/create" element={<PrivateRoute><CreatePost /></PrivateRoute>} />
-        <Route path="/edit/:id" element={<PrivateRoute><EditPost /></PrivateRoute>} />
+        <Route path="/" element={<Map />} />
+        <Route path="/posts" element={<Posts />} />
+        <Route
+          path="/create"
+          element={
+            <PrivateRoute>
+              <CreatePost />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/edit/:id"
+          element={
+            <PrivateRoute>
+              <EditPost />
+            </PrivateRoute>
+          }
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/saitama-map" element={<PrivateRoute><Map /></PrivateRoute>} />
       </Routes>
     </>
   );
