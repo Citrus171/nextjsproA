@@ -628,20 +628,26 @@ hooks.beforeEach(function (transaction, done) {
     rawUri.includes("/images/")
   ) {
     if (status === "200") {
-      let uri = replaceIn(rawUri, PLACEHOLDER, state.postId || PLACEHOLDER);
-      uri = replaceIn(uri, PLACEHOLDER, state.deleteImageId || PLACEHOLDER);
-      fixUri(uri);
+      fixUri(
+        "/api/posts/" +
+          (state.postId || PLACEHOLDER) +
+          "/images/" +
+          (state.deleteImageId || PLACEHOLDER)
+      );
       setToken(state.primaryToken);
     } else if (status === "403") {
-      let uri = replaceIn(rawUri, PLACEHOLDER, state.postId || PLACEHOLDER);
-      uri = replaceIn(uri, PLACEHOLDER, state.imageId || PLACEHOLDER);
-      fixUri(uri);
+      fixUri(
+        "/api/posts/" +
+          (state.postId || PLACEHOLDER) +
+          "/images/" +
+          (state.imageId || PLACEHOLDER)
+      );
       setToken(state.secondaryToken);
     } else {
       // 404: valid postId + non-existent imageId
-      let uri = replaceIn(rawUri, PLACEHOLDER, state.postId || PLACEHOLDER);
-      uri = replaceIn(uri, PLACEHOLDER, FAKE_ID);
-      fixUri(uri);
+      fixUri(
+        "/api/posts/" + (state.postId || PLACEHOLDER) + "/images/" + FAKE_ID
+      );
       setToken(state.primaryToken);
     }
   }
@@ -683,12 +689,15 @@ hooks.beforeEach(function (transaction, done) {
     fixUri("/api/sightings?postId=" + (state.postId || "unknown"));
   }
 
+  // ── GET /api/map/markers ─────────────────────────────────────────────────
+  if (method === "GET" && rawUri.startsWith("/api/map/markers")) {
+    skipTx("map markers response depends on seeded marker data");
+  }
+
   // ── DELETE /api/sightings/{id} ────────────────────────────────────────────
   if (method === "DELETE" && /^\/api\/sightings\/[^/]+$/.test(rawUri)) {
     if (status !== "401") {
-      fixUri(
-        replaceIn(rawUri, PLACEHOLDER, state.deleteSightingId || PLACEHOLDER)
-      );
+      fixUri("/api/sightings/" + (state.deleteSightingId || PLACEHOLDER));
       setToken(state.secondaryToken);
     }
   }
@@ -698,10 +707,12 @@ hooks.beforeEach(function (transaction, done) {
     if (status === "400") {
       skipTx("400 for sighting favorite requires 20+ existing favorites");
     } else if (status === "404") {
-      fixUri(replaceIn(rawUri, PLACEHOLDER, FAKE_ID));
+      fixUri("/api/sightings/" + FAKE_ID + "/favorite");
       setToken(state.primaryToken);
     } else {
-      fixUri(replaceIn(rawUri, PLACEHOLDER, state.sightingId || PLACEHOLDER));
+      fixUri(
+        "/api/sightings/" + (state.sightingId || PLACEHOLDER) + "/favorite"
+      );
       setToken(state.primaryToken); // user A favorites user B's sighting
     }
   }
@@ -729,7 +740,9 @@ hooks.beforeEach(function (transaction, done) {
       skipTx("conversationId is not ready");
     } else {
       fixUri(
-        replaceIn(rawUri, PLACEHOLDER, state.conversationId || PLACEHOLDER)
+        "/api/conversations/" +
+          (state.conversationId || PLACEHOLDER) +
+          "/messages"
       );
       setToken(state.primaryToken);
       setJsonBody({ body: "Dredd message" });
@@ -745,7 +758,9 @@ hooks.beforeEach(function (transaction, done) {
       skipTx("conversationId is not ready");
     } else {
       fixUri(
-        replaceIn(rawUri, PLACEHOLDER, state.conversationId || PLACEHOLDER)
+        "/api/conversations/" +
+          (state.conversationId || PLACEHOLDER) +
+          "/messages"
       );
       setToken(state.primaryToken);
     }
@@ -761,7 +776,9 @@ hooks.beforeEach(function (transaction, done) {
       skipTx("conversationId is not ready");
     } else {
       fixUri(
-        replaceIn(rawUri, PLACEHOLDER, state.conversationId || PLACEHOLDER)
+        "/api/conversations/" +
+          (state.conversationId || PLACEHOLDER) +
+          "/messages/read"
       );
       setToken(state.primaryToken);
     }
@@ -775,13 +792,13 @@ hooks.beforeEach(function (transaction, done) {
   // ── DELETE /api/users/{id} ───────────────────────────────────────────────
   if (method === "DELETE" && /^\/api\/users\/[^/]+$/.test(rawUri)) {
     if (status === "403") {
-      fixUri(replaceIn(rawUri, PLACEHOLDER, state.deleteUserId || PLACEHOLDER));
+      fixUri("/api/users/" + (state.deleteUserId || PLACEHOLDER));
       setToken(state.secondaryToken);
     } else if (status === "404") {
-      fixUri(replaceIn(rawUri, PLACEHOLDER, FAKE_ID));
+      fixUri("/api/users/" + FAKE_ID);
       setToken(state.adminToken);
     } else {
-      fixUri(replaceIn(rawUri, PLACEHOLDER, state.deleteUserId || PLACEHOLDER));
+      fixUri("/api/users/" + (state.deleteUserId || PLACEHOLDER));
       setToken(state.adminToken);
     }
   }
