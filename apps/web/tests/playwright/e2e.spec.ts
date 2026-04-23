@@ -1,20 +1,23 @@
 import { test, expect } from "@playwright/test";
 
-const baseUrl = process.env.VITE_API_BASE_URL
-  ? "http://localhost:5173"
-  : "http://localhost:5175";
+const baseUrl = "http://localhost:5173";
 
 test("basic E2E flow: register → login → create post → view posts", async ({
   page,
 }) => {
-  const email = `e2e-${Date.now()}@test.com`;
+  const email = `e2e-${crypto.randomUUID()}@test.com`;
+  const postTitle = `E2E Test Post ${crypto.randomUUID()}`;
+  const postDescription = "This is a test post content";
   const password = "password123";
 
   // 1. Register
   await page.goto(`${baseUrl}/register`);
   await page.fill('input[placeholder="email"]', email);
   await page.fill('input[placeholder="password"]', password);
-  await page.fill('input[placeholder="name"]', "E2E User");
+  await page.fill(
+    'input[placeholder="name"]',
+    `E2E User ${crypto.randomUUID()}`
+  );
   const registerResponsePromise = page.waitForResponse(
     (res) =>
       res.url().includes("/api/users/register") &&
@@ -46,29 +49,34 @@ test("basic E2E flow: register → login → create post → view posts", async 
     `login failed: ${loginResponse.status()} ${loginResponse.statusText()}`
   ).toBeTruthy();
 
-  // Should navigate to posts page
-  await expect(page).toHaveURL(`${baseUrl}/`, { timeout: 15000 });
-  await expect(page.locator("nav")).toContainText("Logout");
+  // Login now returns to the posts page so the shared header remains available.
+  await expect(page).toHaveURL(`${baseUrl}/posts`, { timeout: 15000 });
+  await expect(page.getByRole("button", { name: "Logout" })).toBeVisible();
 
-  // 3. Create post (use link click to preserve in-memory auth token)
+  // 3. Create post from the posts page so the shared header is available.
   await page.click('a[href="/create"]');
   await page.waitForURL(`${baseUrl}/create`);
-  await page.fill('input[placeholder="title"]', "E2E Test Post");
-  await page.fill(
-    'textarea[placeholder="description"]',
-    "This is a test post content"
-  );
+  await page.fill('input[placeholder="title"]', postTitle);
+  await page.fill('textarea[placeholder="description"]', postDescription);
   await page.fill('input[type="date"]', "2024-01-01");
+  const createResponsePromise = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/posts") && res.request().method() === "POST"
+  );
   await page.click('button:has-text("Create")');
+  const createResponse = await createResponsePromise;
+  expect(
+    createResponse.ok(),
+    `create post failed: ${createResponse.status()} ${createResponse.statusText()}`
+  ).toBeTruthy();
 
-  // Should navigate back to posts page
-  await page.waitForURL(`${baseUrl}/`);
+  // The create form returns to the posts page, where the new item should appear.
+  await page.waitForURL(`${baseUrl}/posts`);
 
   // 4. Verify post appears in list
-  await expect(page.locator("h3")).toContainText("E2E Test Post");
-  await expect(page.locator("p")).toContainText("This is a test post content"); // description
+  await expect(page.getByRole("heading", { name: postTitle })).toBeVisible();
 
   // 5. Logout
   await page.click('button:has-text("Logout")');
-  await expect(page.locator("nav")).toContainText("Login");
+  await expect(page.getByRole("link", { name: "Login" })).toBeVisible();
 });

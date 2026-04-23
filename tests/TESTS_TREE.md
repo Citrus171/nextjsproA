@@ -273,16 +273,21 @@ apps/api/test/
     │   └── Cookie なしは 401 を返す
     └── POST /api/auth/logout
         └── ログアウトで Cookie が削除される (200)
-apps/web/src/pages/
-├── CreatePost.test.tsx
-│   └── CreatePost
-│       └── 未選択時は cat を送信する
-├── Map.test.tsx
-│   └── Map
-│       ├── 地図ページを開いた時、検索バーと種別フィルターが表示されること
-│       ├── 迷子マーカーを押した時、詳細シートが開き投稿者名が表示されること
-│       └── 迷子フィルターを押した時、迷子マーカーだけが表示されること
-└── EditPost.test.tsx
-    └── EditPost
-        └── 取得した postType を表示し、送信時に postType を含める
+apps/web/src/
+├── App.test.tsx
+│   └── App
+│       ├── /posts を開いた時、共通ナビの Posts / New Post / Login / Register が表示されること
+│       └── /posts を開いて認証済みの時、Logout が表示され Login が表示されないこと
+└── pages/
+    ├── CreatePost.test.tsx
+    │   └── CreatePost
+    │       └── 未選択時は cat を送信し、作成後に /posts へ戻る
+    ├── Map.test.tsx
+    │   └── Map
+    │       ├── 地図ページを開いた時、検索バーと種別フィルターが表示されること
+    │       ├── 迷子マーカーを押した時、詳細シートが開き投稿者名が表示されること
+    │       └── 迷子フィルターを押した時、迷子マーカーだけが表示されること
+    └── EditPost.test.tsx
+        └── EditPost
+            └── 取得した postType を表示し、送信時に postType を含める
 ```
