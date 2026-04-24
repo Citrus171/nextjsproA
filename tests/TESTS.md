@@ -439,8 +439,22 @@
 - [x] Map で検索バーと種別フィルターを表示する
 - [x] Map で迷い猫投稿を押すと /create に遷移する
 - [x] Map で迷子マーカーを押すと詳細シートが開き投稿者名を表示する
+- [x] Map で目撃マーカーを押すと目撃情報シートが開くこと
 - [x] Map で迷子フィルターを押すと迷子マーカーだけが表示される
 - [x] Map で現在地ボタンを押すと現在地へ移動する
+- [x] PostDetailSheet で isOpen=true の時、ダイアログが表示されること
+- [x] PostDetailSheet で isLoading=true の時、ローディングが表示されること
+- [x] PostDetailSheet で status=lost の時、迷子バッジが表示されること
+- [x] PostDetailSheet で status=resolved の時、解決済みバッジが表示されること
+- [x] PostDetailSheet で markerType=post の時、迷い猫投稿タイトルが表示されること
+- [x] PostDetailSheet で markerType=sighting の時、目撃情報タイトルが表示されること
+- [x] PostDetailSheet で petDetail がある時、詳細情報が表示されること
+- [x] PostDetailSheet で petDetail が null の時、特徴セクションが表示されないこと
+- [x] PostDetailSheet で location がある時、住所が表示されること
+- [x] PostDetailSheet で location が null の時、場所セクションが表示されないこと
+- [x] PostDetailSheet で画像がある時、1枚目の画像が表示されること
+- [x] PostDetailSheet で画像がない時、プレースホルダーが表示されること
+- [x] PostDetailSheet で閉じるボタンを押した時、onClose が呼ばれること
 
 ---
 
