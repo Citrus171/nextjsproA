@@ -123,6 +123,18 @@ describe("Conversations", () => {
 
       expect(screen.getByText("会話はまだありません")).toBeInTheDocument();
     });
+
+    it("取得エラーの時、エラーメッセージが表示されること", () => {
+      vi.mocked(useQuery).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error("Network Error"),
+      } as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      expect(screen.getByText("会話の取得に失敗しました")).toBeInTheDocument();
+    });
   });
 
   describe("未読バッジ", () => {

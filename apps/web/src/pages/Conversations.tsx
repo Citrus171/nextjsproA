@@ -7,7 +7,11 @@ export default function Conversations() {
   const client = useApiClient();
   const navigate = useNavigate();
 
-  const { data: conversations, isLoading } = useQuery({
+  const {
+    data: conversations,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["conversations"],
     queryFn: () => client.listConversations(),
     refetchInterval: 5000,
@@ -15,6 +19,10 @@ export default function Conversations() {
 
   if (isLoading) {
     return <p>読み込み中...</p>;
+  }
+
+  if (error) {
+    return <p>会話の取得に失敗しました</p>;
   }
 
   if (!conversations || conversations.length === 0) {

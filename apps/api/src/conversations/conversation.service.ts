@@ -86,7 +86,9 @@ export class ConversationsService {
       createdAt: conv.createdAt,
       postTitle: conv.post.title ?? null,
       partnerNickname:
-        conv.ownerId === userId ? conv.sighter.nickname : conv.owner.nickname,
+        conv.ownerId === userId
+          ? (conv.sighter?.nickname ?? "Unknown")
+          : (conv.owner?.nickname ?? "Unknown"),
       lastMessage: conv.messages[0] ?? null,
       unreadCount: conv._count.messages,
     }));

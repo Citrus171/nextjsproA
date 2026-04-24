@@ -471,6 +471,7 @@
 - [x] Conversations で lastMessageがない時、メッセージなし文言が表示されること
 - [x] Conversations でローディング中はスピナー表示されること
 - [x] Conversations で会話がない時は空メッセージが表示されること
+- [x] Conversations で取得エラーの時、エラーメッセージが表示されること
 - [x] Conversations でunreadCountが1以上の時、未読バッジが表示されること
 - [x] Conversations でunreadCountが0の時、未読バッジが表示されないこと
 - [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
