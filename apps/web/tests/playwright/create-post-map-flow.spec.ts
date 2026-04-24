@@ -93,6 +93,9 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
     await page.locator(".map-marker-icon").nth(i).dispatchEvent("click");
     const detailDialog = page.getByRole("dialog");
     await expect(detailDialog).toBeVisible();
+    await expect(detailDialog.locator("text=読み込み中")).not.toBeVisible({
+      timeout: 5000,
+    });
 
     const titleEl = detailDialog.locator(`text=${uniqueToken}`);
     if ((await titleEl.count()) > 0) {
