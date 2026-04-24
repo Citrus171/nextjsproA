@@ -159,7 +159,17 @@ export default function Map() {
       return;
     }
 
-    const postId = selectedMarker.postId ?? selectedMarker.id;
+    const postId =
+      selectedMarker.type === "post"
+        ? (selectedMarker.postId ?? selectedMarker.id)
+        : selectedMarker.postId;
+
+    if (!postId) {
+      setSelectedPost(null);
+      setIsLoadingPost(false);
+      return;
+    }
+
     let isActive = true;
 
     setIsLoadingPost(true);

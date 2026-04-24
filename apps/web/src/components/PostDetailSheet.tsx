@@ -110,8 +110,17 @@ export default function PostDetailSheet({
                         去勢 / チップ
                       </span>
                       <p className="text-sm font-bold text-slate-800 mt-0.5">
-                        {post.petDetail.neutered ? "済み" : "未"} /{" "}
-                        {post.petDetail.microchip ? "有り" : "無し"}
+                        {post.petDetail.neutered === true
+                          ? "済み"
+                          : post.petDetail.neutered === false
+                            ? "未"
+                            : "不明"}{" "}
+                        /{" "}
+                        {post.petDetail.microchip === true
+                          ? "有り"
+                          : post.petDetail.microchip === false
+                            ? "無し"
+                            : "不明"}
                       </p>
                     </div>
                   </div>
@@ -146,7 +155,11 @@ export default function PostDetailSheet({
                 </div>
               )}
             </>
-          ) : null}
+          ) : (
+            <p className="text-slate-500 mt-6">
+              詳細情報を取得できませんでした
+            </p>
+          )}
         </div>
       </SheetContent>
     </Sheet>
