@@ -280,7 +280,7 @@ apps/web/src/
 │       └── /posts を開いて認証済みの時、Logout が表示され Login が表示されないこと
     ├── CreatePost.test.tsx
     │   └── CreatePost
-    │       └── 未選択時は cat を送信し、作成後に /posts へ戻る
+    │       └── 必須項目を入力して送信した時、cat投稿として作成して一覧へ遷移すること
     ├── Map.test.tsx
     │   └── Map
     │       ├── 地図ページを開いた時、検索バーと種別フィルターが表示されること
@@ -290,4 +290,7 @@ apps/web/src/
     └── EditPost.test.tsx
         └── EditPost
             └── 取得した postType を表示し、送信時に postType を含める
+apps/web/tests/playwright/
+└── create-post-map-flow.spec.ts
+    └── 画像3枚で迷い猫投稿し、マーカークリックで登録内容が表示されること
 ```

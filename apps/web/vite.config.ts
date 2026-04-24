@@ -8,7 +8,11 @@ export default defineConfig({
   server: {
     port: 5173,
     fs: {
-      allow: [path.resolve(__dirname, ".."), path.resolve(__dirname, "../../packages"), path.resolve(__dirname, "../..")],
+      allow: [
+        path.resolve(__dirname, ".."),
+        path.resolve(__dirname, "../../packages"),
+        path.resolve(__dirname, "../.."),
+      ],
     },
     proxy: {
       // Proxy /api requests to the NestJS API so cookies are same-origin in dev
@@ -27,6 +31,9 @@ export default defineConfig({
   },
   resolve: {
     dedupe: ["react", "react-dom"],
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
   optimizeDeps: {
     include: ["axios", "react-leaflet", "@react-leaflet/core", "leaflet"],
