@@ -7,6 +7,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import { Link } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { Map as LeafletMap } from "leaflet";
@@ -505,13 +506,13 @@ export default function Map() {
       </main>
 
       <nav className="map-bottom-bar" aria-label="投稿アクション">
-        <button
-          type="button"
+        <Link
+          to="/create"
           className="map-bottom-bar__button map-bottom-bar__button--lost"
         >
           <PlusIcon />
           <span>迷い猫投稿</span>
-        </button>
+        </Link>
         <button
           type="button"
           className="map-bottom-bar__button map-bottom-bar__button--sighting"
