@@ -67,6 +67,22 @@ const sampleMarkers = [
   },
 ] as const;
 
+const samplePost = {
+  authorNickname: "テスト投稿者",
+  id: "post-1",
+  createdAt: "2026-04-23T00:00:00.000Z",
+  updatedAt: "2026-04-23T00:00:00.000Z",
+  description: "テスト用の詳細",
+  images: [],
+  lostDate: "2026-04-22T00:00:00.000Z",
+  postType: "cat",
+  status: "lost",
+  title: "迷子の投稿",
+  userId: "user-1",
+  petDetail: null,
+  location: null,
+};
+
 import Map from "./Map";
 
 describe("Map", () => {
@@ -82,18 +98,7 @@ describe("Map", () => {
     mockFlyTo.mockReset();
     mockGetCurrentPosition.mockReset();
     mockGetMapMarkers.mockResolvedValue([]);
-    mockGetPost.mockResolvedValue({
-      authorNickname: "テスト投稿者",
-      id: "post-1",
-      createdAt: "2026-04-23T00:00:00.000Z",
-      description: "テスト用の詳細",
-      images: [],
-      lostDate: "2026-04-22T00:00:00.000Z",
-      postType: "cat",
-      status: "lost",
-      title: "迷子の投稿",
-      userId: "user-1",
-    });
+    mockGetPost.mockResolvedValue(samplePost);
     Object.defineProperty(window.navigator, "geolocation", {
       configurable: true,
       value: {
@@ -126,24 +131,28 @@ describe("Map", () => {
     });
     await user.click(postMarkers[0]);
 
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).toBeInTheDocument();
     expect(
-      await screen.findByRole("dialog", { name: "投稿詳細" })
+      await screen.findByRole("heading", { name: "迷い猫投稿" })
     ).toBeInTheDocument();
+    expect(await screen.findByText("画像なし")).toBeInTheDocument();
+  });
+
+  it("目撃マーカーを押した時、目撃情報シートが開くこと", async () => {
+    const user = userEvent.setup();
+    mockGetMapMarkers.mockResolvedValue(sampleMarkers as unknown as never[]);
+
+    renderMap();
+
+    const sightingMarkers = await screen.findAllByRole("button", {
+      name: "目撃情報",
+    });
+    await user.click(sightingMarkers[0]);
+
     expect(
-      screen.getByRole("tablist", { name: "詳細タブ" })
+      await screen.findByRole("heading", { name: "目撃情報" })
     ).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "スポット" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    );
-    expect(screen.getByRole("tabpanel")).toHaveAttribute(
-      "aria-labelledby",
-      "map-sheet-tab-spots"
-    );
-    expect(
-      screen.getByRole("heading", { name: "迷い猫投稿" })
-    ).toBeInTheDocument();
-    expect(await screen.findByText("テスト投稿者")).toBeInTheDocument();
   });
 
   it("迷子フィルターを押した時、postマーカー（lost/resolved）が表示されること", async () => {

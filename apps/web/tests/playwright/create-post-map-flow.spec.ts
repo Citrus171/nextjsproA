@@ -91,19 +91,19 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
 
   for (let i = 0; i < markerCount; i += 1) {
     await page.locator(".map-marker-icon").nth(i).dispatchEvent("click");
-    const detailDialog = page.getByRole("dialog", { name: "投稿詳細" });
+    const detailDialog = page.getByRole("dialog");
     await expect(detailDialog).toBeVisible();
+    await expect(detailDialog.locator("text=読み込み中")).not.toBeVisible({
+      timeout: 5000,
+    });
 
-    const content = page.locator(".map-sheet__row--stacked .map-sheet__value");
-    if ((await content.count()) > 0) {
-      const text = await content.first().innerText();
-      if (text.includes(uniqueToken)) {
-        found = true;
-        break;
-      }
+    const titleEl = detailDialog.locator(`text=${uniqueToken}`);
+    if ((await titleEl.count()) > 0) {
+      found = true;
+      break;
     }
 
-    await page.getByRole("button", { name: "詳細を閉じる" }).first().click();
+    await page.getByRole("button", { name: "閉じる" }).first().click();
   }
 
   expect(found).toBeTruthy();
