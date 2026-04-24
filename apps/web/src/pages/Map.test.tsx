@@ -112,7 +112,12 @@ describe("Map", () => {
     });
     await user.click(postMarkers[0]);
 
-    expect(await screen.findByText("投稿詳細")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("dialog", { name: "投稿詳細" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "迷い猫投稿" })
+    ).toBeInTheDocument();
     expect(await screen.findByText("テスト投稿者")).toBeInTheDocument();
   });
 
