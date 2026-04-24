@@ -165,6 +165,10 @@ apps/api/src/
 │   │   │   ├── 無効なトークンで接続した場合は切断される
 │   │   │   ├── 有効なトークンで接続した場合はsocket.data.userIdが設定される
 │   │   │   └── Authorizationヘッダー（Bearer形式）でも認証できる
+│   │   ├── handleJoin
+│   │   │   └── 指定した会話ルームにjoinすること
+│   │   ├── handleLeave
+│   │   │   └── 指定した会話ルームからleaveすること
 │   │   └── broadcastMessage
 │   │       └── 最小化されたペイロードのみemitする（readAtを含まない）
 │   └── conversation.controller.spec.ts

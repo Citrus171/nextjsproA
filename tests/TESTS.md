@@ -275,6 +275,14 @@
 - [x] 有効なトークンで接続した場合はsocket.data.userIdが設定される
 - [x] Authorizationヘッダー（Bearer形式）でも認証できる
 
+#### handleJoin
+
+- [x] 指定した会話ルームにjoinすること
+
+#### handleLeave
+
+- [x] 指定した会話ルームからleaveすること
+
 #### broadcastMessage
 
 - [x] 最小化されたペイロードのみemitする（readAtを含まない）
