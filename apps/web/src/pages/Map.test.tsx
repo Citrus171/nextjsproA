@@ -143,8 +143,29 @@ describe("Map", () => {
           altitudeAccuracy: null,
           heading: null,
           speed: null,
+          toJSON: () => ({
+            latitude: 35.92,
+            longitude: 139.62,
+            accuracy: 12,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          }),
         },
         timestamp: Date.now(),
+        toJSON: () => ({
+          coords: {
+            latitude: 35.92,
+            longitude: 139.62,
+            accuracy: 12,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: Date.now(),
+        }),
       });
     });
 
