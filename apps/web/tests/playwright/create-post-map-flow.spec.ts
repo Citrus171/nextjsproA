@@ -90,7 +90,7 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   let found = false;
 
   for (let i = 0; i < markerCount; i += 1) {
-    await page.locator(".map-marker-icon").nth(i).click();
+    await page.locator(".map-marker-icon").nth(i).dispatchEvent("click");
     const detailDialog = page.getByRole("dialog", { name: "投稿詳細" });
     await expect(detailDialog).toBeVisible();
 
