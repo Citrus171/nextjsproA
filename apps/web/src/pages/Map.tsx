@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import type { Map as LeafletMap } from "leaflet";
 import type {
   MapMarkerDto,
   PostResponseDto,
@@ -32,7 +33,55 @@ const FILTER_OPTIONS = [
   { value: "sighting", label: "目撃" },
 ] as const;
 
+const SHEET_PEEK_HEIGHT_RATIO = 0.3;
+const SHEET_PEEK_HEIGHT_MIN = 200;
+const SHEET_PEEK_HEIGHT_MAX = 300;
+const SHEET_EXPANDED_HEIGHT_RATIO = 0.82;
+const SHEET_EXPANDED_HEIGHT_MIN = 400;
+const SHEET_EXPANDED_HEIGHT_MAX = 700;
+
+const SHEET_TABS = [
+  { value: "spots", label: "スポット", icon: "📍" },
+  { value: "saved", label: "保存済み", icon: "🔖" },
+  { value: "post", label: "投稿", icon: "⊕" },
+] as const;
+type SheetTab = (typeof SHEET_TABS)[number]["value"];
+
 type FilterValue = (typeof FILTER_OPTIONS)[number]["value"];
+type SheetSnap = "peek" | "expanded";
+type SheetDragState = {
+  pointerId: number;
+  startY: number;
+  startTranslate: number;
+} | null;
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getViewportHeight() {
+  return window.visualViewport?.height ?? window.innerHeight;
+}
+
+function getSheetMetrics(viewportHeight: number) {
+  const expandedHeight = clamp(
+    viewportHeight * SHEET_EXPANDED_HEIGHT_RATIO,
+    SHEET_EXPANDED_HEIGHT_MIN,
+    SHEET_EXPANDED_HEIGHT_MAX
+  );
+  const peekHeight = clamp(
+    viewportHeight * SHEET_PEEK_HEIGHT_RATIO,
+    SHEET_PEEK_HEIGHT_MIN,
+    SHEET_PEEK_HEIGHT_MAX
+  );
+  // translateY の値。0 = 全表示 (expanded), peekTranslate = peek 状態
+  const peekTranslate = expandedHeight - peekHeight;
+
+  return {
+    height: expandedHeight,
+    peekTranslate,
+  };
+}
 
 function getMarkerLabel(marker: MapMarkerDto) {
   return marker.type === "post" ? "迷子" : "目撃";
@@ -79,6 +128,7 @@ export default function Map() {
   const api = useApiClient();
   const [markers, setMarkers] = useState<MapMarkerDto[]>([]);
   const [filter, setFilter] = useState<FilterValue>("all");
+  const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<MapMarkerDto | null>(
     null
   );
@@ -86,8 +136,45 @@ export default function Map() {
     null
   );
   const [isLoadingPost, setIsLoadingPost] = useState(false);
-  const [isSheetExpanded, setIsSheetExpanded] = useState(false);
+  const [sheetSnap, setSheetSnap] = useState<SheetSnap>("peek");
+  const [sheetDragState, setSheetDragState] = useState<SheetDragState>(null);
+  const [sheetDragTranslate, setSheetDragTranslate] = useState(0);
+  const [activeTab, setActiveTab] = useState<SheetTab>("spots");
+  const [viewportHeight, setViewportHeight] = useState(() =>
+    getViewportHeight()
+  );
   const [error, setError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const handleDraggedRef = useRef(false);
+
+  const sheetMetrics = useMemo(
+    () => getSheetMetrics(viewportHeight),
+    [viewportHeight]
+  );
+  // translateY: 0 = expanded (全表示), peekTranslate = peek (一部表示)
+  const baseTranslate =
+    sheetSnap === "expanded" ? 0 : sheetMetrics.peekTranslate;
+  const currentTranslate = clamp(
+    baseTranslate + sheetDragTranslate,
+    0,
+    sheetMetrics.peekTranslate
+  );
+  const isSheetDragging = sheetDragState !== null;
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(getViewportHeight());
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.visualViewport?.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     api
@@ -108,11 +195,51 @@ export default function Map() {
     return markers.filter((marker) => marker.type === "sighting");
   }, [filter, markers]);
 
+  const handleCurrentLocationClick = () => {
+    if (!mapInstance) {
+      setLocationError("地図の準備ができていません");
+      return;
+    }
+
+    const geolocation = window.navigator.geolocation;
+
+    if (!geolocation) {
+      setLocationError("このブラウザでは現在地を取得できません");
+      return;
+    }
+
+    setIsLocating(true);
+    setLocationError(null);
+
+    geolocation.getCurrentPosition(
+      (position) => {
+        const currentCenter: [number, number] = [
+          position.coords.latitude,
+          position.coords.longitude,
+        ];
+
+        mapInstance.flyTo(currentCenter, 16, { animate: true });
+        setIsLocating(false);
+      },
+      () => {
+        setLocationError("現在地の取得に失敗しました");
+        setIsLocating(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
+
   useEffect(() => {
     if (!selectedMarker) {
       setSelectedPost(null);
       setIsLoadingPost(false);
-      setIsSheetExpanded(false);
+      setSheetSnap("peek");
+      setSheetDragState(null);
+      setSheetDragTranslate(0);
       return;
     }
 
@@ -120,6 +247,10 @@ export default function Map() {
     let isActive = true;
 
     setIsLoadingPost(true);
+    setSheetSnap("peek");
+    setSheetDragState(null);
+    setSheetDragTranslate(0);
+    setActiveTab("spots");
     api
       .getPost(postId)
       .then((post) => {
@@ -142,6 +273,101 @@ export default function Map() {
       isActive = false;
     };
   }, [api, selectedMarker]);
+
+  const finishSheetDrag = (_pointerId: number, currentY: number) => {
+    if (!sheetDragState) {
+      return;
+    }
+
+    const nextTranslate = clamp(
+      sheetDragState.startTranslate + (currentY - sheetDragState.startY),
+      0,
+      sheetMetrics.peekTranslate
+    );
+
+    setSheetSnap(
+      nextTranslate > sheetMetrics.peekTranslate / 2 ? "peek" : "expanded"
+    );
+    setSheetDragState(null);
+    setSheetDragTranslate(0);
+    handleDraggedRef.current = false;
+  };
+
+  const handleSheetPointerDown = (
+    event: React.PointerEvent<HTMLButtonElement>
+  ) => {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    handleDraggedRef.current = false;
+    setSheetDragState({
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startTranslate: currentTranslate,
+    });
+    setSheetDragTranslate(0);
+  };
+
+  const handleSheetPointerMove = (
+    event: React.PointerEvent<HTMLButtonElement>
+  ) => {
+    if (!sheetDragState || event.pointerId !== sheetDragState.pointerId) {
+      return;
+    }
+
+    const deltaY = event.clientY - sheetDragState.startY;
+
+    if (Math.abs(deltaY) > 6) {
+      handleDraggedRef.current = true;
+    }
+
+    const nextTranslate = clamp(
+      sheetDragState.startTranslate + deltaY,
+      0,
+      sheetMetrics.peekTranslate
+    );
+
+    setSheetDragTranslate(nextTranslate - baseTranslate);
+  };
+
+  const handleSheetPointerUp = (
+    event: React.PointerEvent<HTMLButtonElement>
+  ) => {
+    if (!sheetDragState || event.pointerId !== sheetDragState.pointerId) {
+      return;
+    }
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    finishSheetDrag(event.pointerId, event.clientY);
+  };
+
+  const handleSheetPointerCancel = (
+    event: React.PointerEvent<HTMLButtonElement>
+  ) => {
+    if (!sheetDragState || event.pointerId !== sheetDragState.pointerId) {
+      return;
+    }
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    finishSheetDrag(event.pointerId, event.clientY);
+  };
+
+  const handleSheetHandleClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (handleDraggedRef.current) {
+      event.preventDefault();
+      handleDraggedRef.current = false;
+      return;
+    }
+
+    setSheetDragTranslate(0);
+    setSheetSnap((current) => (current === "expanded" ? "peek" : "expanded"));
+  };
 
   return (
     <div className="map-page">
@@ -212,6 +438,15 @@ export default function Map() {
         </p>
       )}
 
+      {locationError && (
+        <p
+          className="map-floating-error map-floating-error--location"
+          role="status"
+        >
+          {locationError}
+        </p>
+      )}
+
       <main className="map-stage">
         <div className="map-stage__frame">
           <MapContainer
@@ -225,6 +460,7 @@ export default function Map() {
             ]}
             className="map-stage__map"
           >
+            <MapInstanceBridge onReady={setMapInstance} />
             <TileLayer
               attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -238,12 +474,25 @@ export default function Map() {
                 eventHandlers={{
                   click: () => {
                     setSelectedMarker(marker);
-                    setIsSheetExpanded(false);
                   },
                 }}
               />
             ))}
           </MapContainer>
+
+          {mapInstance && (
+            <div className="map-stage__controls">
+              <button
+                type="button"
+                className="map-current-location-button"
+                aria-label="現在地へ移動"
+                onClick={handleCurrentLocationClick}
+                disabled={isLocating}
+              >
+                <LocationIcon loading={isLocating} />
+              </button>
+            </div>
+          )}
         </div>
       </main>
 
@@ -278,22 +527,37 @@ export default function Map() {
             onClick={() => setSelectedMarker(null)}
           />
           <section
-            className={`map-sheet__panel ${isSheetExpanded ? "map-sheet__panel--expanded" : ""}`}
+            className={`map-sheet__panel ${isSheetDragging ? "map-sheet__panel--dragging" : ""}`}
+            style={{
+              height: `${sheetMetrics.height}px`,
+              transform: `translateY(${currentTranslate}px)`,
+            }}
           >
+            {/* ドラッグハンドル */}
             <button
               type="button"
               className="map-sheet__handle-button"
-              aria-label={isSheetExpanded ? "シートを縮小" : "シートを展開"}
-              onClick={() => setIsSheetExpanded((current) => !current)}
+              aria-label={
+                sheetSnap === "expanded" ? "シートを縮小" : "シートを展開"
+              }
+              aria-expanded={sheetSnap === "expanded"}
+              onClick={handleSheetHandleClick}
+              onPointerDown={handleSheetPointerDown}
+              onPointerMove={handleSheetPointerMove}
+              onPointerUp={handleSheetPointerUp}
+              onPointerCancel={handleSheetPointerCancel}
             >
               <span className="map-sheet__handle" aria-hidden="true" />
             </button>
+
             <div className="map-sheet__header">
               <div>
-                <p className="map-sheet__eyebrow">投稿詳細</p>
                 <h2 className="map-sheet__title">
                   {selectedMarker.type === "post" ? "迷い猫投稿" : "目撃情報"}
                 </h2>
+                <p className="map-sheet__eyebrow">
+                  {STATUS_LABEL[selectedMarker.status] ?? selectedMarker.status}
+                </p>
               </div>
               <button
                 type="button"
@@ -305,56 +569,94 @@ export default function Map() {
               </button>
             </div>
 
-            <div className="map-sheet__badges">
-              <span className="map-badge map-badge--type">
-                {selectedMarker.type === "post" ? "迷子投稿" : "目撃情報"}
-              </span>
-              <span
-                className={`map-badge map-badge--status map-badge--${selectedMarker.status}`}
-              >
-                {STATUS_LABEL[selectedMarker.status] ?? selectedMarker.status}
-              </span>
-            </div>
+            <nav className="map-sheet__tabs" aria-label="詳細タブ">
+              {SHEET_TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  className={`map-sheet__tab ${activeTab === tab.value ? "map-sheet__tab--active" : ""}`}
+                  aria-selected={activeTab === tab.value}
+                  onClick={() => setActiveTab(tab.value)}
+                >
+                  <span className="map-sheet__tab-icon" aria-hidden="true">
+                    {tab.icon}
+                  </span>
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
 
-            <div className="map-sheet__content">
-              {isLoadingPost ? (
-                <p className="map-sheet__loading">詳細を読み込んでいます…</p>
-              ) : selectedPost ? (
+            <div className="map-sheet__scroll-body">
+              {activeTab === "spots" && (
                 <>
-                  <div className="map-sheet__row">
-                    <span className="map-sheet__label">投稿者</span>
-                    <span className="map-sheet__value">
-                      {selectedPost.authorNickname ?? "（不明）"}
+                  <div className="map-sheet__badges">
+                    <span className="map-badge map-badge--type">
+                      {selectedMarker.type === "post" ? "迷子投稿" : "目撃情報"}
+                    </span>
+                    <span
+                      className={`map-badge map-badge--status map-badge--${selectedMarker.status}`}
+                    >
+                      {STATUS_LABEL[selectedMarker.status] ??
+                        selectedMarker.status}
                     </span>
                   </div>
-                  <div className="map-sheet__row">
-                    <span className="map-sheet__label">投稿日</span>
-                    <span className="map-sheet__value">
-                      {new Date(selectedPost.createdAt).toLocaleString("ja-JP")}
-                    </span>
+
+                  <div className="map-sheet__content">
+                    {isLoadingPost ? (
+                      <p className="map-sheet__loading">
+                        詳細を読み込んでいます…
+                      </p>
+                    ) : selectedPost ? (
+                      <>
+                        <div className="map-sheet__row">
+                          <span className="map-sheet__label">投稿者</span>
+                          <span className="map-sheet__value">
+                            {selectedPost.authorNickname ?? "（不明）"}
+                          </span>
+                        </div>
+                        <div className="map-sheet__row">
+                          <span className="map-sheet__label">投稿日</span>
+                          <span className="map-sheet__value">
+                            {new Date(selectedPost.createdAt).toLocaleString(
+                              "ja-JP"
+                            )}
+                          </span>
+                        </div>
+                        <div className="map-sheet__row map-sheet__row--stacked">
+                          <span className="map-sheet__label">内容</span>
+                          <span className="map-sheet__value">
+                            {selectedPost.description}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="map-sheet__loading">
+                        詳細情報が取得できませんでした。
+                      </p>
+                    )}
                   </div>
-                  <div className="map-sheet__row map-sheet__row--stacked">
-                    <span className="map-sheet__label">内容</span>
-                    <span className="map-sheet__value">
-                      {selectedPost.description}
-                    </span>
-                  </div>
+
+                  <a
+                    className="map-sheet__link map-sheet__link--disabled"
+                    href={`/posts/${selectedPost?.id ?? selectedMarker.postId ?? selectedMarker.id}`}
+                    aria-disabled="true"
+                    onClick={(event) => event.preventDefault()}
+                  >
+                    詳細ページは未実装です
+                  </a>
                 </>
-              ) : (
+              )}
+
+              {activeTab === "saved" && (
                 <p className="map-sheet__loading">
-                  詳細情報が取得できませんでした。
+                  保存済みの情報はありません。
                 </p>
               )}
-            </div>
 
-            <a
-              className="map-sheet__link map-sheet__link--disabled"
-              href={`/posts/${selectedPost?.id ?? selectedMarker.postId ?? selectedMarker.id}`}
-              aria-disabled="true"
-              onClick={(event) => event.preventDefault()}
-            >
-              詳細ページは未実装です
-            </a>
+              {activeTab === "post" && (
+                <p className="map-sheet__loading">投稿機能は準備中です。</p>
+              )}
+            </div>
           </section>
         </div>
       )}
@@ -380,4 +682,46 @@ function PlusIcon() {
 
 function CloseIcon() {
   return <span aria-hidden="true">×</span>;
+}
+
+function LocationIcon({ loading }: { loading: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={`map-current-location-button__icon ${loading ? "map-current-location-button__icon--loading" : ""}`}
+      viewBox="0 0 24 24"
+      role="presentation"
+      focusable="false"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="8.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <circle cx="12" cy="12" r="2.3" fill="currentColor" />
+      <path
+        d="M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function MapInstanceBridge({
+  onReady,
+}: {
+  onReady: (map: LeafletMap) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    onReady(map);
+  }, [map, onReady]);
+
+  return null;
 }

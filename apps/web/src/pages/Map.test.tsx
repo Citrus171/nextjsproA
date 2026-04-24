@@ -4,12 +4,18 @@ import { vi } from "vitest";
 
 const mockGetMapMarkers = vi.fn();
 const mockGetPost = vi.fn();
+const mockFlyTo = vi.fn();
+const mockGetCurrentPosition = vi.fn();
+const mockMapInstance = {
+  flyTo: mockFlyTo,
+};
 
 vi.mock("react-leaflet", () => ({
   MapContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
   TileLayer: () => <div data-testid="tile-layer" />,
+  useMap: () => mockMapInstance,
   Marker: ({
     children,
     title,
@@ -63,6 +69,8 @@ import Map from "./Map";
 
 describe("Map", () => {
   beforeEach(() => {
+    mockFlyTo.mockReset();
+    mockGetCurrentPosition.mockReset();
     mockGetMapMarkers.mockResolvedValue([]);
     mockGetPost.mockResolvedValue({
       authorNickname: "テスト投稿者",
@@ -75,6 +83,12 @@ describe("Map", () => {
       status: "lost",
       title: "迷子の投稿",
       userId: "user-1",
+    });
+    Object.defineProperty(window.navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: mockGetCurrentPosition,
+      },
     });
   });
 
@@ -114,5 +128,35 @@ describe("Map", () => {
     expect(
       screen.queryByRole("button", { name: "目撃情報" })
     ).not.toBeInTheDocument();
+  });
+
+  it("現在地ボタンを押した時、取得した現在地へ移動すること", async () => {
+    const user = userEvent.setup();
+
+    mockGetCurrentPosition.mockImplementation((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 35.92,
+          longitude: 139.62,
+          accuracy: 12,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+        },
+        timestamp: Date.now(),
+      });
+    });
+
+    render(<Map />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "現在地へ移動" })
+    );
+
+    expect(mockGetCurrentPosition).toHaveBeenCalledTimes(1);
+    expect(mockFlyTo).toHaveBeenCalledWith([35.92, 139.62], 16, {
+      animate: true,
+    });
   });
 });

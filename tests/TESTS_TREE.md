@@ -278,7 +278,8 @@ apps/web/src/
 │   └── App
 │       ├── /posts を開いた時、共通ナビの Posts / New Post / Login / Register が表示されること
 │       └── /posts を開いて認証済みの時、Logout が表示され Login が表示されないこと
-└── pages/
+    │       ├── 迷子フィルターを押した時、迷子マーカーだけが表示されること
+    │       └── 現在地ボタンを押すと現在地へ移動すること
     ├── CreatePost.test.tsx
     │   └── CreatePost
     │       └── 未選択時は cat を送信し、作成後に /posts へ戻る
