@@ -55,12 +55,41 @@ export class ConversationsService {
   }
 
   async findAllForUser(userId: string) {
-    return this.prisma.conversation.findMany({
+    const conversations = await this.prisma.conversation.findMany({
       where: {
         OR: [{ ownerId: userId }, { sighterId: userId }],
       },
+      include: {
+        post: { select: { title: true } },
+        owner: { select: { nickname: true } },
+        sighter: { select: { nickname: true } },
+        messages: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+          select: { body: true, createdAt: true },
+        },
+        _count: {
+          select: {
+            messages: { where: { senderId: { not: userId }, readAt: null } },
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
+
+    return conversations.map((conv) => ({
+      id: conv.id,
+      postId: conv.postId,
+      sightingId: conv.sightingId,
+      ownerId: conv.ownerId,
+      sighterId: conv.sighterId,
+      createdAt: conv.createdAt,
+      postTitle: conv.post.title ?? null,
+      partnerNickname:
+        conv.ownerId === userId ? conv.sighter.nickname : conv.owner.nickname,
+      lastMessage: conv.messages[0] ?? null,
+      unreadCount: conv._count.messages,
+    }));
   }
 
   async createMessage(

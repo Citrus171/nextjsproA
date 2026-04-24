@@ -7,6 +7,16 @@
  */
 import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
+export type ConversationsControllerCreateMessageBody = {
+  /** @maxLength 1000 */
+  body: string;
+};
+
+export type ConversationsControllerCreateBody = {
+  postId: string;
+  sightingId: string;
+};
+
 export type SightingsControllerToggleFavorite201 = {
   favorited?: boolean;
 };
@@ -14,6 +24,8 @@ export type SightingsControllerToggleFavorite201 = {
 export type SightingsControllerFindByPostParams = {
   postId: string;
 };
+
+export type SightingsControllerCreateBody = { [key: string]: unknown };
 
 export type MapControllerGetMarkersStatus =
   (typeof MapControllerGetMarkersStatus)[keyof typeof MapControllerGetMarkersStatus];
@@ -60,23 +72,86 @@ export type PostsControllerCreateBody = {
   title?: string;
 };
 
-export interface CreateMessageDto {
-  /** @maxLength 1000 */
+export type UsersControllerRegisterBody =
+  | (unknown & {
+      email: string;
+      /**
+       * @minLength 1
+       * @maxLength 50
+       */
+      name?: string;
+      /**
+       * @minLength 1
+       * @maxLength 50
+       */
+      nickname?: string;
+      /**
+       * @minLength 8
+       * @maxLength 100
+       */
+      password: string;
+    })
+  | (unknown & {
+      email: string;
+      /**
+       * @minLength 1
+       * @maxLength 50
+       */
+      name?: string;
+      /**
+       * @minLength 1
+       * @maxLength 50
+       */
+      nickname?: string;
+      /**
+       * @minLength 8
+       * @maxLength 100
+       */
+      password: string;
+    });
+
+export interface MessageResponseDto {
   body: string;
+  conversationId: string;
+  createdAt: string;
+  id: string;
+  /** @nullable */
+  readAt: string | null;
+  senderId: string;
 }
 
-export interface CreateConversationDto {
+export interface LastMessageDto {
+  body: string;
+  createdAt: string;
+}
+
+/**
+ * @nullable
+ */
+export type ConversationListItemDtoLastMessage = LastMessageDto | null;
+
+export interface ConversationListItemDto {
+  createdAt: string;
+  id: string;
+  /** @nullable */
+  lastMessage: ConversationListItemDtoLastMessage;
+  ownerId: string;
+  partnerNickname: string;
   postId: string;
+  /** @nullable */
+  postTitle: string | null;
+  sighterId: string;
   sightingId: string;
+  unreadCount: number;
 }
 
-export interface CreateSightingDto {
-  address?: string;
-  comment?: string;
-  lat: number;
-  lng: number;
-  postId?: string;
-  sightedAt: string;
+export interface ConversationResponseDto {
+  createdAt: string;
+  id: string;
+  ownerId: string;
+  postId: string;
+  sighterId: string;
+  sightingId: string;
 }
 
 export type MapMarkerDtoType =
@@ -134,15 +209,13 @@ export const UpdatePostDtoStatus = {
   resolved: "resolved",
 } as const;
 
-export interface UpdatePostDto {
-  description?: string;
-  location?: UpdateLocationDto;
-  lostDate?: string;
-  petDetail?: UpdatePetDetailDto;
-  postType?: PostsControllerCreateBodyPostType;
-  status?: UpdatePostDtoStatus;
-  title?: string;
-}
+export type UpdatePostDtoPostType =
+  (typeof UpdatePostDtoPostType)[keyof typeof UpdatePostDtoPostType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdatePostDtoPostType = {
+  cat: "cat",
+} as const;
 
 export type UpdateLocationDtoPrefecture =
   (typeof UpdateLocationDtoPrefecture)[keyof typeof UpdateLocationDtoPrefecture];
@@ -181,6 +254,16 @@ export interface UpdatePetDetailDto {
   name?: string;
   neutered?: boolean;
   size?: string;
+}
+
+export interface UpdatePostDto {
+  description?: string;
+  location?: UpdateLocationDto;
+  lostDate?: string;
+  petDetail?: UpdatePetDetailDto;
+  postType?: UpdatePostDtoPostType;
+  status?: UpdatePostDtoStatus;
+  title?: string;
 }
 
 export type PostResponseDtoPostType =
@@ -264,14 +347,6 @@ export interface PetDetailResponseDto {
   size?: string | null;
 }
 
-export interface RegisterDto {
-  email: string;
-  name?: string;
-  nickname?: string;
-  /** @minLength 8 */
-  password: string;
-}
-
 export interface UserResponseDto {
   createdAt: string;
   email: string;
@@ -295,10 +370,14 @@ export const usersControllerRemove = <TData = AxiosResponse<void>>(
 };
 
 export const usersControllerRegister = <TData = AxiosResponse<UserResponseDto>>(
-  registerDto: RegisterDto,
+  usersControllerRegisterBody: UsersControllerRegisterBody,
   options?: AxiosRequestConfig
 ): Promise<TData> => {
-  return axios.post(`/api/users/register`, registerDto, options);
+  return axios.post(
+    `/api/users/register`,
+    usersControllerRegisterBody,
+    options
+  );
 };
 
 export const postsControllerCreate = <TData = AxiosResponse<PostResponseDto>>(
@@ -434,10 +513,10 @@ export const mapControllerGetMarkers = <TData = AxiosResponse<MapMarkerDto[]>>(
  * @summary 目撃情報を作成する
  */
 export const sightingsControllerCreate = <TData = AxiosResponse<void>>(
-  createSightingDto: CreateSightingDto,
+  sightingsControllerCreateBody: SightingsControllerCreateBody,
   options?: AxiosRequestConfig
 ): Promise<TData> => {
-  return axios.post(`/api/sightings`, createSightingDto, options);
+  return axios.post(`/api/sightings`, sightingsControllerCreateBody, options);
 };
 
 /**
@@ -478,17 +557,25 @@ export const sightingsControllerToggleFavorite = <
 /**
  * @summary 会話を作成する
  */
-export const conversationsControllerCreate = <TData = AxiosResponse<void>>(
-  createConversationDto: CreateConversationDto,
+export const conversationsControllerCreate = <
+  TData = AxiosResponse<ConversationResponseDto>,
+>(
+  conversationsControllerCreateBody: ConversationsControllerCreateBody,
   options?: AxiosRequestConfig
 ): Promise<TData> => {
-  return axios.post(`/api/conversations`, createConversationDto, options);
+  return axios.post(
+    `/api/conversations`,
+    conversationsControllerCreateBody,
+    options
+  );
 };
 
 /**
  * @summary 自分が参加する会話一覧を取得する
  */
-export const conversationsControllerFindAll = <TData = AxiosResponse<void>>(
+export const conversationsControllerFindAll = <
+  TData = AxiosResponse<ConversationListItemDto[]>,
+>(
   options?: AxiosRequestConfig
 ): Promise<TData> => {
   return axios.get(`/api/conversations`, options);
@@ -498,15 +585,15 @@ export const conversationsControllerFindAll = <TData = AxiosResponse<void>>(
  * @summary メッセージを送信する
  */
 export const conversationsControllerCreateMessage = <
-  TData = AxiosResponse<void>,
+  TData = AxiosResponse<MessageResponseDto>,
 >(
   id: string,
-  createMessageDto: CreateMessageDto,
+  conversationsControllerCreateMessageBody: ConversationsControllerCreateMessageBody,
   options?: AxiosRequestConfig
 ): Promise<TData> => {
   return axios.post(
     `/api/conversations/${id}/messages`,
-    createMessageDto,
+    conversationsControllerCreateMessageBody,
     options
   );
 };
@@ -515,7 +602,7 @@ export const conversationsControllerCreateMessage = <
  * @summary メッセージ一覧を取得する
  */
 export const conversationsControllerFindMessages = <
-  TData = AxiosResponse<void>,
+  TData = AxiosResponse<MessageResponseDto[]>,
 >(
   id: string,
   options?: AxiosRequestConfig
@@ -559,8 +646,14 @@ export type SightingsControllerFindByPostResult = AxiosResponse<void>;
 export type SightingsControllerRemoveResult = AxiosResponse<void>;
 export type SightingsControllerToggleFavoriteResult =
   AxiosResponse<SightingsControllerToggleFavorite201>;
-export type ConversationsControllerCreateResult = AxiosResponse<void>;
-export type ConversationsControllerFindAllResult = AxiosResponse<void>;
-export type ConversationsControllerCreateMessageResult = AxiosResponse<void>;
-export type ConversationsControllerFindMessagesResult = AxiosResponse<void>;
+export type ConversationsControllerCreateResult =
+  AxiosResponse<ConversationResponseDto>;
+export type ConversationsControllerFindAllResult = AxiosResponse<
+  ConversationListItemDto[]
+>;
+export type ConversationsControllerCreateMessageResult =
+  AxiosResponse<MessageResponseDto>;
+export type ConversationsControllerFindMessagesResult = AxiosResponse<
+  MessageResponseDto[]
+>;
 export type ConversationsControllerMarkAsReadResult = AxiosResponse<void>;

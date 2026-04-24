@@ -842,7 +842,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ConversationResponseDto"
+                    "$ref": "#/components/schemas/ConversationListItemDto"
                   }
                 }
               }
@@ -1125,6 +1125,10 @@
           "userId": {
             "type": "string"
           },
+          "authorNickname": {
+            "type": "string",
+            "nullable": true
+          },
           "status": {
             "type": "string"
           },
@@ -1387,6 +1391,73 @@
           "ownerId",
           "sighterId",
           "createdAt"
+        ]
+      },
+      "LastMessageDto": {
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": ["body", "createdAt"]
+      },
+      "ConversationListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "postId": {
+            "type": "string"
+          },
+          "sightingId": {
+            "type": "string"
+          },
+          "ownerId": {
+            "type": "string"
+          },
+          "sighterId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "postTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "partnerNickname": {
+            "type": "string"
+          },
+          "lastMessage": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LastMessageDto"
+              }
+            ]
+          },
+          "unreadCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "postId",
+          "sightingId",
+          "ownerId",
+          "sighterId",
+          "createdAt",
+          "postTitle",
+          "partnerNickname",
+          "lastMessage",
+          "unreadCount"
         ]
       },
       "MessageResponseDto": {

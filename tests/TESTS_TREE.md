@@ -145,7 +145,9 @@ apps/api/src/
 │   │   │   └── 会話参加者以外（無関係なユーザー）はForbiddenException
 │   │   │   └── standalone Sighting は NotFoundException で会話を作成できないこと
 │   │   ├── findAllForUser
-│   │   │   └── 自分がownerまたはsighterとして参加する会話一覧を返すこと
+│   │   │   ├── 自分がownerまたはsighterとして参加する会話一覧をinclude付きで取得すること
+│   │   │   ├── ownerの場合は相手（sighter）のニックネームをpartnerNicknameとして返すこと
+│   │   │   └── sighterの場合は相手（owner）のニックネームをpartnerNicknameとして返すこと
 │   │   ├── createMessage
 │   │   │   ├── 会話参加者がメッセージを送信できること
 │   │   │   ├── bodyが1000文字超過はBadRequestException
@@ -281,7 +283,8 @@ apps/web/src/
 ├── App.test.tsx
 │   └── App
 │       ├── /posts を開いた時、共通ナビの Posts / New Post / Login / Register が表示されること
-│       └── /posts を開いて認証済みの時、Logout が表示され Login が表示されないこと
+│       ├── /posts を開いて認証済みの時、Logout が表示され Login が表示されないこと
+│       └── ヘッダーに会話一覧リンクが表示されること
     ├── CreatePost.test.tsx
     │   └── CreatePost
     │       └── 必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し一覧へ遷移すること
@@ -308,9 +311,24 @@ apps/web/src/
     │       ├── 画像がある時、1枚目の画像が表示されること
     │       ├── 画像がない時、プレースホルダーが表示されること
     │       └── 閉じるボタンを押した時、onClose が呼ばれること
-    └── EditPost.test.tsx
-        └── EditPost
-            └── 取得した postType を表示し、送信時に postType を含める
+    ├── EditPost.test.tsx
+    │   └── EditPost
+    │       └── 取得した postType を表示し、送信時に postType を含める
+    └── Conversations.test.tsx
+        └── Conversations
+            ├── 会話一覧の表示
+            │   ├── 会話一覧が表示される時、相手ニックネームと投稿タイトルが表示されること
+            │   ├── lastMessageがある時、最新メッセージ本文が表示されること
+            │   ├── lastMessageがない時、メッセージなし文言が表示されること
+            │   ├── ローディング中はスピナー表示されること
+            │   └── 会話がない時は空メッセージが表示されること
+            ├── 未読バッジ
+            │   ├── unreadCountが1以上の時、未読バッジが表示されること
+            │   └── unreadCountが0の時、未読バッジが表示されないこと
+            ├── ナビゲーション
+            │   └── 会話セルをクリックした時、/conversations/:idへ遷移すること
+            └── ポーリング設定
+                └── 5秒間隔でポーリングするようにuseQueryが呼ばれること
 apps/web/tests/playwright/
 └── create-post-map-flow.spec.ts
     └── 画像3枚で迷い猫投稿し、マーカークリックで登録内容が表示されること

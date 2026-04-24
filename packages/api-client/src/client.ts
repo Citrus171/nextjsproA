@@ -13,6 +13,7 @@ import {
   postsControllerRemove,
   usersControllerRegister,
   mapControllerGetMarkers,
+  conversationsControllerFindAll,
 } from "./index";
 
 export type ClientOptions = {
@@ -137,6 +138,10 @@ export function createClient(options: ClientOptions) {
     },
     getMapMarkers: async () => {
       const r = await mapControllerGetMarkers();
+      return r.data;
+    },
+    listConversations: async () => {
+      const r = await conversationsControllerFindAll();
       return r.data;
     },
   };

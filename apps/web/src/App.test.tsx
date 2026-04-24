@@ -5,6 +5,12 @@ import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import App from "@/App";
 import React, { useEffect } from "react";
 
+vi.mock("@/api/orvalClient", () => ({
+  useApiClient: () => ({
+    listConversations: vi.fn().mockResolvedValue([]),
+  }),
+}));
+
 function SetToken({ token }: { token: string }) {
   const { setToken } = useAuth();
   useEffect(() => {
@@ -58,5 +64,16 @@ describe("App", () => {
 
     expect(await screen.findByText("Logout")).toBeInTheDocument();
     expect(screen.queryByText("Login")).not.toBeInTheDocument();
+  });
+
+  it("ヘッダーに会話一覧リンクが表示されること", () => {
+    const Wrapper = createWrapper();
+    render(
+      <Wrapper>
+        <App />
+      </Wrapper>
+    );
+
+    expect(screen.getByRole("link", { name: /会話/i })).toBeInTheDocument();
   });
 });
