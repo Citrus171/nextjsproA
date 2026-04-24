@@ -6,6 +6,7 @@ import Posts from "./pages/Posts";
 import CreatePost from "./pages/CreatePost";
 import EditPost from "./pages/EditPost";
 import Map from "./pages/Map";
+import Conversations from "./pages/Conversations";
 import { useAuth } from "./auth/AuthProvider";
 import Header from "./components/Header";
 
@@ -38,6 +39,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <EditPost />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/conversations"
+          element={
+            <PrivateRoute>
+              <Conversations />
             </PrivateRoute>
           }
         />

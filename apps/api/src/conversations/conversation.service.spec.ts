@@ -143,22 +143,100 @@ describe("ConversationsService", () => {
 
   // ─── findAllForUser ─────────────────────────────────────────
   describe("findAllForUser", () => {
-    it("自分がownerまたはsighterとして参加する会話一覧を返すこと", async () => {
-      const conversations = [
-        { id: "conv-1", ownerId: "user-1", sighterId: "sighter-1" },
-        { id: "conv-2", ownerId: "owner-2", sighterId: "user-1" },
-      ];
-      mockPrisma.conversation.findMany.mockResolvedValue(conversations);
+    const mockConversations = [
+      {
+        id: "conv-1",
+        postId: "post-1",
+        sightingId: "sighting-1",
+        ownerId: "user-1",
+        sighterId: "sighter-1",
+        createdAt: new Date("2024-01-01"),
+        post: { title: "迷子のネコ" },
+        owner: { nickname: "ownerNick" },
+        sighter: { nickname: "sighterNick" },
+        messages: [
+          { body: "最新メッセージ", createdAt: new Date("2024-01-02") },
+        ],
+        _count: { messages: 2 },
+      },
+      {
+        id: "conv-2",
+        postId: "post-2",
+        sightingId: "sighting-2",
+        ownerId: "owner-2",
+        sighterId: "user-1",
+        createdAt: new Date("2024-01-01"),
+        post: { title: null },
+        owner: { nickname: "owner2Nick" },
+        sighter: { nickname: "user1Nick" },
+        messages: [],
+        _count: { messages: 0 },
+      },
+    ];
 
-      const result = await service.findAllForUser("user-1");
+    it("自分がownerまたはsighterとして参加する会話一覧をinclude付きで取得すること", async () => {
+      mockPrisma.conversation.findMany.mockResolvedValue(mockConversations);
+
+      await service.findAllForUser("user-1");
 
       expect(mockPrisma.conversation.findMany).toHaveBeenCalledWith({
         where: {
           OR: [{ ownerId: "user-1" }, { sighterId: "user-1" }],
         },
+        include: {
+          post: { select: { title: true } },
+          owner: { select: { nickname: true } },
+          sighter: { select: { nickname: true } },
+          messages: {
+            orderBy: { createdAt: "desc" },
+            take: 1,
+            select: { body: true, createdAt: true },
+          },
+          _count: {
+            select: {
+              messages: {
+                where: { senderId: { not: "user-1" }, readAt: null },
+              },
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       });
-      expect(result).toHaveLength(2);
+    });
+
+    it("ownerの場合は相手（sighter）のニックネームをpartnerNicknameとして返すこと", async () => {
+      mockPrisma.conversation.findMany.mockResolvedValue([
+        mockConversations[0],
+      ]);
+
+      const result = await service.findAllForUser("user-1");
+
+      expect(result[0]).toMatchObject({
+        id: "conv-1",
+        partnerNickname: "sighterNick",
+        postTitle: "迷子のネコ",
+        lastMessage: {
+          body: "最新メッセージ",
+          createdAt: new Date("2024-01-02"),
+        },
+        unreadCount: 2,
+      });
+    });
+
+    it("sighterの場合は相手（owner）のニックネームをpartnerNicknameとして返すこと", async () => {
+      mockPrisma.conversation.findMany.mockResolvedValue([
+        mockConversations[1],
+      ]);
+
+      const result = await service.findAllForUser("user-1");
+
+      expect(result[0]).toMatchObject({
+        id: "conv-2",
+        partnerNickname: "owner2Nick",
+        postTitle: null,
+        lastMessage: null,
+        unreadCount: 0,
+      });
     });
   });
 

@@ -243,7 +243,9 @@
 
 #### findAllForUser
 
-- [x] 自分がownerまたはsighterとして参加する会話一覧を返すこと
+- [x] 自分がownerまたはsighterとして参加する会話一覧をinclude付きで取得すること
+- [x] ownerの場合は相手（sighter）のニックネームをpartnerNicknameとして返すこと
+- [x] sighterの場合は相手（owner）のニックネームをpartnerNicknameとして返すこと
 
 #### createMessage
 
@@ -442,6 +444,7 @@
 
 - [x] App で /posts を開いた時、共通ナビの Posts / New Post / Login / Register が表示される
 - [x] App で /posts を開いて認証済みの時、Logout が表示され Login が表示されない
+- [x] App でヘッダーに会話一覧リンクが表示されること
 - [x] CreatePost で必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し /posts へ戻る
 - [x] EditPost で取得した postType を表示し、送信時に postType を含める
 - [x] Map で検索バーと種別フィルターを表示する
@@ -463,6 +466,16 @@
 - [x] PostDetailSheet で画像がある時、1枚目の画像が表示されること
 - [x] PostDetailSheet で画像がない時、プレースホルダーが表示されること
 - [x] PostDetailSheet で閉じるボタンを押した時、onClose が呼ばれること
+- [x] Conversations で会話一覧が表示される時、相手ニックネームと投稿タイトルが表示されること
+- [x] Conversations で lastMessageがある時、最新メッセージ本文が表示されること
+- [x] Conversations で lastMessageがない時、メッセージなし文言が表示されること
+- [x] Conversations でローディング中はスピナー表示されること
+- [x] Conversations で会話がない時は空メッセージが表示されること
+- [x] Conversations で取得エラーの時、エラーメッセージが表示されること
+- [x] Conversations でunreadCountが1以上の時、未読バッジが表示されること
+- [x] Conversations でunreadCountが0の時、未読バッジが表示されないこと
+- [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
+- [x] Conversations で5秒間隔でポーリングするようにuseQueryが呼ばれること
 
 ---
 

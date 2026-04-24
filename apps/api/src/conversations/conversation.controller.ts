@@ -26,7 +26,10 @@ import {
 } from "../common/openapi-examples";
 import { CreateConversationDto } from "./dto/create-conversation.dto";
 import { CreateMessageDto } from "./dto/create-message.dto";
-import { ConversationResponseDto } from "./dto/conversation-response.dto";
+import {
+  ConversationResponseDto,
+  ConversationListItemDto,
+} from "./dto/conversation-response.dto";
 import { MessageResponseDto } from "./dto/message-response.dto";
 import { ConversationsService } from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
@@ -85,7 +88,7 @@ export class ConversationsController {
   }
   @Get()
   @ApiOperation({ summary: "自分が参加する会話一覧を取得する" })
-  @ApiResponse({ status: 200, type: [ConversationResponseDto] })
+  @ApiResponse({ status: 200, type: [ConversationListItemDto] })
   findAll(@Request() req: AuthenticatedRequest) {
     return this.conversationsService.findAllForUser(
       this.getAuthenticatedUserId(req)
