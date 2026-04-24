@@ -56,6 +56,13 @@ export default function PostDetailSheet({
             <p className="text-slate-500 mt-6">読み込み中…</p>
           ) : post ? (
             <>
+              {/* タイトル */}
+              {post.title && (
+                <p className="text-slate-600 text-sm font-medium mb-2">
+                  {post.title}
+                </p>
+              )}
+
               {/* ステータスバッジ */}
               {post.status && (
                 <span
