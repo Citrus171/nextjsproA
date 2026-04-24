@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 
 const mockGetMapMarkers = vi.fn();
 const mockGetPost = vi.fn();
@@ -69,6 +70,14 @@ const sampleMarkers = [
 import Map from "./Map";
 
 describe("Map", () => {
+  function renderMap() {
+    return render(
+      <MemoryRouter>
+        <Map />
+      </MemoryRouter>
+    );
+  }
+
   beforeEach(() => {
     mockFlyTo.mockReset();
     mockGetCurrentPosition.mockReset();
@@ -94,19 +103,23 @@ describe("Map", () => {
   });
 
   it("地図ページを開いた時、検索バーと種別フィルターが表示されること", async () => {
-    render(<Map />);
+    renderMap();
 
     expect(await screen.findByPlaceholderText("検索...")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "すべて" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "迷子" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "目撃" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "迷い猫投稿" })).toHaveAttribute(
+      "href",
+      "/create"
+    );
   });
 
   it("迷子マーカーを押した時、詳細シートが開くこと", async () => {
     const user = userEvent.setup();
     mockGetMapMarkers.mockResolvedValue(sampleMarkers as unknown as never[]);
 
-    render(<Map />);
+    renderMap();
 
     const postMarkers = await screen.findAllByRole("button", {
       name: "迷子投稿",
@@ -137,7 +150,7 @@ describe("Map", () => {
     const user = userEvent.setup();
     mockGetMapMarkers.mockResolvedValue(sampleMarkers as unknown as never[]);
 
-    render(<Map />);
+    renderMap();
 
     await user.click(await screen.findByRole("button", { name: "迷子" }));
 
@@ -186,7 +199,7 @@ describe("Map", () => {
       });
     });
 
-    render(<Map />);
+    renderMap();
 
     await user.click(
       await screen.findByRole("button", { name: "現在地へ移動" })
