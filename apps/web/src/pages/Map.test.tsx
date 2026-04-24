@@ -1,21 +1,28 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { vi } from "vitest";
 
 const mockGetMapMarkers = vi.fn();
 const mockGetPost = vi.fn();
+const mockFlyTo = vi.fn();
+const mockGetCurrentPosition = vi.fn();
+const mockMapInstance = {
+  flyTo: mockFlyTo,
+};
 
 vi.mock("react-leaflet", () => ({
-  MapContainer: ({ children }: { children: React.ReactNode }) => (
+  MapContainer: ({ children }: { children: ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
   TileLayer: () => <div data-testid="tile-layer" />,
+  useMap: () => mockMapInstance,
   Marker: ({
     children,
     title,
     eventHandlers,
   }: {
-    children: React.ReactNode;
+    children: ReactNode;
     title?: string;
     eventHandlers?: { click?: () => void };
   }) => (
@@ -29,7 +36,7 @@ vi.mock("react-leaflet", () => ({
       <span aria-hidden="true">{children}</span>
     </button>
   ),
-  Popup: ({ children }: { children: React.ReactNode }) => (
+  Popup: ({ children }: { children: ReactNode }) => (
     <div data-testid="popup">{children}</div>
   ),
 }));
@@ -63,6 +70,8 @@ import Map from "./Map";
 
 describe("Map", () => {
   beforeEach(() => {
+    mockFlyTo.mockReset();
+    mockGetCurrentPosition.mockReset();
     mockGetMapMarkers.mockResolvedValue([]);
     mockGetPost.mockResolvedValue({
       authorNickname: "テスト投稿者",
@@ -75,6 +84,12 @@ describe("Map", () => {
       status: "lost",
       title: "迷子の投稿",
       userId: "user-1",
+    });
+    Object.defineProperty(window.navigator, "geolocation", {
+      configurable: true,
+      value: {
+        getCurrentPosition: mockGetCurrentPosition,
+      },
     });
   });
 
@@ -98,7 +113,23 @@ describe("Map", () => {
     });
     await user.click(postMarkers[0]);
 
-    expect(await screen.findByText("投稿詳細")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("dialog", { name: "投稿詳細" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("tablist", { name: "詳細タブ" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "スポット" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    expect(screen.getByRole("tabpanel")).toHaveAttribute(
+      "aria-labelledby",
+      "map-sheet-tab-spots"
+    );
+    expect(
+      screen.getByRole("heading", { name: "迷い猫投稿" })
+    ).toBeInTheDocument();
     expect(await screen.findByText("テスト投稿者")).toBeInTheDocument();
   });
 
@@ -114,5 +145,56 @@ describe("Map", () => {
     expect(
       screen.queryByRole("button", { name: "目撃情報" })
     ).not.toBeInTheDocument();
+  });
+
+  it("現在地ボタンを押した時、取得した現在地へ移動すること", async () => {
+    const user = userEvent.setup();
+
+    mockGetCurrentPosition.mockImplementation((success: PositionCallback) => {
+      success({
+        coords: {
+          latitude: 35.92,
+          longitude: 139.62,
+          accuracy: 12,
+          altitude: null,
+          altitudeAccuracy: null,
+          heading: null,
+          speed: null,
+          toJSON: () => ({
+            latitude: 35.92,
+            longitude: 139.62,
+            accuracy: 12,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          }),
+        },
+        timestamp: Date.now(),
+        toJSON: () => ({
+          coords: {
+            latitude: 35.92,
+            longitude: 139.62,
+            accuracy: 12,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: Date.now(),
+        }),
+      });
+    });
+
+    render(<Map />);
+
+    await user.click(
+      await screen.findByRole("button", { name: "現在地へ移動" })
+    );
+
+    expect(mockGetCurrentPosition).toHaveBeenCalledTimes(1);
+    expect(mockFlyTo).toHaveBeenCalledWith([35.92, 139.62], 16, {
+      animate: true,
+    });
   });
 });
