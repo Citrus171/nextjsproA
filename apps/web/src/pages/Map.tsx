@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -46,6 +53,7 @@ const SHEET_TABS = [
   { value: "post", label: "投稿", icon: "⊕" },
 ] as const;
 type SheetTab = (typeof SHEET_TABS)[number]["value"];
+const SHEET_PANEL_ID = "map-sheet-panel";
 
 type FilterValue = (typeof FILTER_OPTIONS)[number]["value"];
 type SheetSnap = "peek" | "expanded";
@@ -294,7 +302,7 @@ export default function Map() {
   };
 
   const handleSheetPointerDown = (
-    event: React.PointerEvent<HTMLButtonElement>
+    event: ReactPointerEvent<HTMLButtonElement>
   ) => {
     event.currentTarget.setPointerCapture(event.pointerId);
     handleDraggedRef.current = false;
@@ -307,7 +315,7 @@ export default function Map() {
   };
 
   const handleSheetPointerMove = (
-    event: React.PointerEvent<HTMLButtonElement>
+    event: ReactPointerEvent<HTMLButtonElement>
   ) => {
     if (!sheetDragState || event.pointerId !== sheetDragState.pointerId) {
       return;
@@ -329,7 +337,7 @@ export default function Map() {
   };
 
   const handleSheetPointerUp = (
-    event: React.PointerEvent<HTMLButtonElement>
+    event: ReactPointerEvent<HTMLButtonElement>
   ) => {
     if (!sheetDragState || event.pointerId !== sheetDragState.pointerId) {
       return;
@@ -343,7 +351,7 @@ export default function Map() {
   };
 
   const handleSheetPointerCancel = (
-    event: React.PointerEvent<HTMLButtonElement>
+    event: ReactPointerEvent<HTMLButtonElement>
   ) => {
     if (!sheetDragState || event.pointerId !== sheetDragState.pointerId) {
       return;
@@ -357,7 +365,7 @@ export default function Map() {
   };
 
   const handleSheetHandleClick = (
-    event: React.MouseEvent<HTMLButtonElement>
+    event: ReactMouseEvent<HTMLButtonElement>
   ) => {
     if (handleDraggedRef.current) {
       event.preventDefault();
@@ -569,13 +577,20 @@ export default function Map() {
               </button>
             </div>
 
-            <nav className="map-sheet__tabs" aria-label="詳細タブ">
+            <nav
+              className="map-sheet__tabs"
+              aria-label="詳細タブ"
+              role="tablist"
+            >
               {SHEET_TABS.map((tab) => (
                 <button
                   key={tab.value}
                   type="button"
+                  id={`map-sheet-tab-${tab.value}`}
                   className={`map-sheet__tab ${activeTab === tab.value ? "map-sheet__tab--active" : ""}`}
+                  role="tab"
                   aria-selected={activeTab === tab.value}
+                  aria-controls={SHEET_PANEL_ID}
                   onClick={() => setActiveTab(tab.value)}
                 >
                   <span className="map-sheet__tab-icon" aria-hidden="true">
@@ -586,7 +601,12 @@ export default function Map() {
               ))}
             </nav>
 
-            <div className="map-sheet__scroll-body">
+            <div
+              id={SHEET_PANEL_ID}
+              className="map-sheet__scroll-body"
+              role="tabpanel"
+              aria-labelledby={`map-sheet-tab-${activeTab}`}
+            >
               {activeTab === "spots" && (
                 <>
                   <div className="map-sheet__badges">

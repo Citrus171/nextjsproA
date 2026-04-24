@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { vi } from "vitest";
 
 const mockGetMapMarkers = vi.fn();
@@ -11,7 +12,7 @@ const mockMapInstance = {
 };
 
 vi.mock("react-leaflet", () => ({
-  MapContainer: ({ children }: { children: React.ReactNode }) => (
+  MapContainer: ({ children }: { children: ReactNode }) => (
     <div data-testid="map-container">{children}</div>
   ),
   TileLayer: () => <div data-testid="tile-layer" />,
@@ -21,7 +22,7 @@ vi.mock("react-leaflet", () => ({
     title,
     eventHandlers,
   }: {
-    children: React.ReactNode;
+    children: ReactNode;
     title?: string;
     eventHandlers?: { click?: () => void };
   }) => (
@@ -35,7 +36,7 @@ vi.mock("react-leaflet", () => ({
       <span aria-hidden="true">{children}</span>
     </button>
   ),
-  Popup: ({ children }: { children: React.ReactNode }) => (
+  Popup: ({ children }: { children: ReactNode }) => (
     <div data-testid="popup">{children}</div>
   ),
 }));
@@ -115,6 +116,17 @@ describe("Map", () => {
     expect(
       await screen.findByRole("dialog", { name: "投稿詳細" })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("tablist", { name: "詳細タブ" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "スポット" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    expect(screen.getByRole("tabpanel")).toHaveAttribute(
+      "aria-labelledby",
+      "map-sheet-tab-spots"
+    );
     expect(
       screen.getByRole("heading", { name: "迷い猫投稿" })
     ).toBeInTheDocument();
