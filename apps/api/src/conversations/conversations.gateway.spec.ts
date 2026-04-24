@@ -58,6 +58,23 @@ describe("ConversationsGateway", () => {
     });
   });
 
+  // ─── handleJoin / handleLeave ──────────────────────────────
+  describe("handleJoin", () => {
+    it("指定した会話ルームにjoinすること", () => {
+      const client = makeSocket();
+      gateway.handleJoin("conv-1", client);
+      expect(client.join).toHaveBeenCalledWith("conversation:conv-1");
+    });
+  });
+
+  describe("handleLeave", () => {
+    it("指定した会話ルームからleaveすること", () => {
+      const client = makeSocket();
+      gateway.handleLeave("conv-1", client);
+      expect(client.leave).toHaveBeenCalledWith("conversation:conv-1");
+    });
+  });
+
   // ─── broadcastMessage ──────────────────────────────────────
   describe("broadcastMessage", () => {
     it("最小化されたペイロードのみemitする", () => {
