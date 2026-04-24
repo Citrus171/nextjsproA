@@ -434,7 +434,7 @@
 
 - [x] App で /posts を開いた時、共通ナビの Posts / New Post / Login / Register が表示される
 - [x] App で /posts を開いて認証済みの時、Logout が表示され Login が表示されない
-- [x] CreatePost で必須項目を入力して送信した時、cat投稿として作成して /posts へ戻る
+- [x] CreatePost で必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し /posts へ戻る
 - [x] EditPost で取得した postType を表示し、送信時に postType を含める
 - [x] Map で検索バーと種別フィルターを表示する
 - [x] Map で迷子マーカーを押すと詳細シートが開き投稿者名を表示する

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { CheckedState } from "@radix-ui/react-checkbox";
 import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
@@ -107,6 +107,12 @@ export default function CreatePost() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      previews.forEach((preview) => URL.revokeObjectURL(preview));
+    };
+  }, [previews]);
+
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = MAX_IMAGES - images.length;
@@ -142,12 +148,14 @@ export default function CreatePost() {
     e.preventDefault();
     if (!validate()) return;
 
+    const normalizedLostDate = new Date(lostDate).toISOString();
+
     setSubmitting(true);
     try {
       await api.createPost({
         title: title.trim() || undefined,
         description: description.trim(),
-        lostDate,
+        lostDate: normalizedLostDate,
         postType: "cat",
         petDetail: JSON.stringify({
           name: name.trim(),
@@ -166,7 +174,7 @@ export default function CreatePost() {
           lat: pinPos!.lat,
           lng: pinPos!.lng,
         }),
-        images: images.length > 0 ? (images as unknown as Blob[]) : undefined,
+        images: images.length > 0 ? images : undefined,
       });
       navigate("/posts");
     } catch {
@@ -215,6 +223,7 @@ export default function CreatePost() {
                     <button
                       type="button"
                       onClick={() => removeImage(i)}
+                      aria-label={`画像${i + 1}を削除`}
                       className="absolute top-1 right-1 bg-black/50 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
                     >
                       ×

@@ -117,6 +117,7 @@ describe("CreatePost", () => {
     expect(payload.title).toBe("迷い猫の投稿");
     expect(payload.description).toBe("首輪なし");
     expect(payload.postType).toBe("cat");
+    expect(payload.lostDate).toBe(new Date("2026-04-21T12:30").toISOString());
 
     const petDetail = JSON.parse(payload.petDetail) as {
       name: string;
