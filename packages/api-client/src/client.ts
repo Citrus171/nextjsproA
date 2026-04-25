@@ -14,6 +14,7 @@ import {
   usersControllerRegister,
   mapControllerGetMarkers,
   conversationsControllerFindAll,
+  conversationsControllerFindOne,
   conversationsControllerFindMessages,
   conversationsControllerCreateMessage,
   conversationsControllerMarkAsRead,
@@ -149,8 +150,8 @@ export function createClient(options: ClientOptions) {
       return r.data;
     },
     getConversation: async (id: string) => {
-      const r = await conversationsControllerFindAll();
-      return r.data.find((c) => c.id === id) ?? null;
+      const r = await conversationsControllerFindOne(id);
+      return r.data;
     },
     getMessages: async (id: string) => {
       const r = await conversationsControllerFindMessages(id);

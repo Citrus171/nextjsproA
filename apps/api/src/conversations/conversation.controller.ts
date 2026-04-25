@@ -95,6 +95,17 @@ export class ConversationsController {
     );
   }
 
+  @Get(":id")
+  @ApiOperation({ summary: "会話を取得する" })
+  @ApiParam({ name: "id", example: OPENAPI_CONVERSATION_ID_EXAMPLE })
+  @ApiResponse({ status: 200, type: ConversationListItemDto })
+  findOne(@Request() req: AuthenticatedRequest, @Param("id") id: string) {
+    return this.conversationsService.findOneForUser(
+      this.getAuthenticatedUserId(req),
+      id
+    );
+  }
+
   @Post(":id/messages")
   @ApiOperation({ summary: "メッセージを送信する" })
   @ApiParam({ name: "id", example: OPENAPI_CONVERSATION_ID_EXAMPLE })

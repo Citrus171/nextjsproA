@@ -5,6 +5,7 @@ import {
   MessageBody,
   ConnectedSocket,
   OnGatewayConnection,
+  OnGatewayDisconnect,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { JwtService } from "@nestjs/jwt";
@@ -15,9 +16,13 @@ import { JwtPayload } from "../auth/interfaces/jwt-payload.interface";
   cors: { origin: process.env.WEB_ORIGIN || "http://localhost:5173" },
   namespace: "/conversations",
 })
-export class ConversationsGateway implements OnGatewayConnection {
+export class ConversationsGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
+
+  private readonly userSocketMap = new Map<string, string>();
 
   constructor(private jwtService: JwtService) {}
 
@@ -35,8 +40,16 @@ export class ConversationsGateway implements OnGatewayConnection {
       const token = raw.startsWith("Bearer ") ? raw.slice(7) : raw;
       const payload = this.jwtService.verify<JwtPayload>(token);
       client.data.userId = payload.sub;
+      this.userSocketMap.set(payload.sub, client.id);
     } catch {
       client.disconnect();
+    }
+  }
+
+  handleDisconnect(client: Socket) {
+    const userId = client.data.userId as string | undefined;
+    if (userId && this.userSocketMap.get(userId) === client.id) {
+      this.userSocketMap.delete(userId);
     }
   }
 
@@ -58,8 +71,16 @@ export class ConversationsGateway implements OnGatewayConnection {
 
   broadcastMessage(conversationId: string, message: Message) {
     const { id, senderId, body, createdAt } = message;
-    this.server
-      .to(`conversation:${conversationId}`)
-      .emit("newMessage", { id, conversationId, senderId, body, createdAt });
+    const senderSocketId = this.userSocketMap.get(senderId);
+    const target = senderSocketId
+      ? this.server.except(senderSocketId).to(`conversation:${conversationId}`)
+      : this.server.to(`conversation:${conversationId}`);
+    target.emit("newMessage", {
+      id,
+      conversationId,
+      senderId,
+      body,
+      createdAt,
+    });
   }
 }
