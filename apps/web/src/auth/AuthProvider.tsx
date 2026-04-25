@@ -3,9 +3,22 @@ import { useNavigate } from "react-router-dom";
 
 type AuthContextValue = {
   token: string | null;
+  userId: string | null;
   setToken: (t: string | null) => void;
   clearToken: () => void;
 };
+
+function decodeUserId(token: string | null): string | null {
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(
+      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    return (payload.sub as string) ?? null;
+  } catch {
+    return null;
+  }
+}
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -21,8 +34,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     navigate("/login");
   };
 
+  const userId = decodeUserId(token);
+
   return (
-    <AuthContext.Provider value={{ token, setToken, clearToken }}>
+    <AuthContext.Provider value={{ token, userId, setToken, clearToken }}>
       {children}
     </AuthContext.Provider>
   );

@@ -857,6 +857,42 @@
         ]
       }
     },
+    "/api/conversations/{id}": {
+      "get": {
+        "operationId": "ConversationsController_findOne",
+        "summary": "会話を取得する",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "00000000-0000-0000-0000-000000000003",
+              "type": "string"
+            },
+            "example": "00000000-0000-0000-0000-000000000003"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationListItemDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["conversations"],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/api/conversations/{id}/messages": {
       "post": {
         "operationId": "ConversationsController_createMessage",
