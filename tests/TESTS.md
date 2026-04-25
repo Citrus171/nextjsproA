@@ -482,6 +482,17 @@
 - [x] Conversations でunreadCountが0の時、未読バッジが表示されないこと
 - [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
 - [x] Conversations で5秒間隔でポーリングするようにuseQueryが呼ばれること
+- [x] ConversationChat でページ開時、相手ニックネームと投稿タイトルが表示されること
+- [x] ConversationChat でメッセージ一覧が表示される時、各bodyが表示されること
+- [x] ConversationChat で自分のメッセージには自分用クラスが付くこと
+- [x] ConversationChat で相手のメッセージには相手用クラスが付くこと
+- [x] ConversationChat でページ開時に joinConversation イベントが送信されること
+- [x] ConversationChat で newMessage イベント受信時、メッセージリストに追加されること
+- [x] ConversationChat で送信ボタンクリック時、mutate が呼ばれること
+- [x] ConversationChat で1000文字超の入力は送信ボタンが無効になること
+- [x] ConversationChat でページを開いた時に markAsRead が呼ばれること
+- [x] ConversationChat でメッセージローディング中は「読み込み中...」が表示されること
+- [x] ConversationChat でメッセージ取得エラー時は「メッセージの取得に失敗しました」が表示されること
 
 ---
 

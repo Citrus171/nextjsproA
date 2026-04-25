@@ -15,6 +15,11 @@ import {
   mapControllerGetMarkers,
   conversationsControllerFindAll,
   conversationsControllerCreate,
+  conversationsControllerFindOne,
+  conversationsControllerFindMessages,
+  conversationsControllerCreateMessage,
+  conversationsControllerMarkAsRead,
+  type ConversationsControllerCreateMessageBody,
 } from "./index";
 
 export type ClientOptions = {
@@ -148,6 +153,24 @@ export function createClient(options: ClientOptions) {
     createConversation: async (postId: string, sightingId: string) => {
       const r = await conversationsControllerCreate({ postId, sightingId });
       return r.data;
+    },
+    getConversation: async (id: string) => {
+      const r = await conversationsControllerFindOne(id);
+      return r.data;
+    },
+    getMessages: async (id: string) => {
+      const r = await conversationsControllerFindMessages(id);
+      return r.data;
+    },
+    sendMessage: async (
+      id: string,
+      body: ConversationsControllerCreateMessageBody
+    ) => {
+      const r = await conversationsControllerCreateMessage(id, body);
+      return r.data;
+    },
+    markAsRead: async (id: string) => {
+      await conversationsControllerMarkAsRead(id);
     },
   };
 }

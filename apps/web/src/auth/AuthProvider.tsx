@@ -8,10 +8,13 @@ type AuthContextValue = {
   clearToken: () => void;
 };
 
-function decodeUserId(token: string): string | null {
+function decodeUserId(token: string | null): string | null {
+  if (!token) return null;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return typeof payload.sub === "string" ? payload.sub : null;
+    const payload = JSON.parse(
+      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    return (payload.sub as string) ?? null;
   } catch {
     return null;
   }
@@ -23,18 +26,15 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const [token, setTokenState] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const setToken = (t: string | null) => {
-    setTokenState(t);
-    setUserId(t ? decodeUserId(t) : null);
-  };
+  const setToken = (t: string | null) => setTokenState(t);
   const clearToken = () => {
     setTokenState(null);
-    setUserId(null);
     navigate("/login");
   };
+
+  const userId = decodeUserId(token);
 
   return (
     <AuthContext.Provider value={{ token, userId, setToken, clearToken }}>

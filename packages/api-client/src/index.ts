@@ -583,6 +583,18 @@ export const conversationsControllerFindAll = <
 };
 
 /**
+ * @summary 会話を取得する
+ */
+export const conversationsControllerFindOne = <
+  TData = AxiosResponse<ConversationListItemDto>,
+>(
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/conversations/${id}`, options);
+};
+
+/**
  * @summary メッセージを送信する
  */
 export const conversationsControllerCreateMessage = <
@@ -652,6 +664,8 @@ export type ConversationsControllerCreateResult =
 export type ConversationsControllerFindAllResult = AxiosResponse<
   ConversationListItemDto[]
 >;
+export type ConversationsControllerFindOneResult =
+  AxiosResponse<ConversationListItemDto>;
 export type ConversationsControllerCreateMessageResult =
   AxiosResponse<MessageResponseDto>;
 export type ConversationsControllerFindMessagesResult = AxiosResponse<
