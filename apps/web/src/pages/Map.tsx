@@ -352,8 +352,12 @@ export default function Map() {
             : undefined
         }
         onSendMessage={async (postId, sightingId) => {
-          const conv = await api.createConversation(postId, sightingId);
-          navigate(`/conversations/${conv.id}`);
+          try {
+            const conv = await api.createConversation(postId, sightingId);
+            navigate(`/conversations/${conv.id}`);
+          } catch {
+            setError("メッセージの送信に失敗しました");
+          }
         }}
       />
     </div>
