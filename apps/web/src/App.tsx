@@ -7,6 +7,7 @@ import CreatePost from "./pages/CreatePost";
 import EditPost from "./pages/EditPost";
 import Map from "./pages/Map";
 import Conversations from "./pages/Conversations";
+import ConversationChat from "./pages/ConversationChat";
 import { useAuth } from "./auth/AuthProvider";
 import Header from "./components/Header";
 
@@ -47,6 +48,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <Conversations />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/conversations/:id"
+          element={
+            <PrivateRoute>
+              <ConversationChat />
             </PrivateRoute>
           }
         />
