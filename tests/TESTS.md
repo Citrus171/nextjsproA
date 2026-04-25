@@ -466,6 +466,12 @@
 - [x] PostDetailSheet で画像がある時、1枚目の画像が表示されること
 - [x] PostDetailSheet で画像がない時、プレースホルダーが表示されること
 - [x] PostDetailSheet で閉じるボタンを押した時、onClose が呼ばれること
+- [x] PostDetailSheet でログイン済みかつ自分がSighting投稿者かつPost投稿者でない時、メッセージボタンが表示されること
+- [x] PostDetailSheet でcurrentUserIdが未指定（未ログイン）の時、メッセージボタンが非表示であること
+- [x] PostDetailSheet で自分がPost投稿者の時、メッセージボタンが非表示であること
+- [x] PostDetailSheet で自分がSighting投稿者でない時、メッセージボタンが非表示であること
+- [x] PostDetailSheet でmarkerType=postの時、メッセージボタンが非表示であること
+- [x] PostDetailSheet でメッセージボタンを押した時、onSendMessageが呼ばれること
 - [x] Conversations で会話一覧が表示される時、相手ニックネームと投稿タイトルが表示されること
 - [x] Conversations で lastMessageがある時、最新メッセージ本文が表示されること
 - [x] Conversations で lastMessageがない時、メッセージなし文言が表示されること

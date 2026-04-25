@@ -177,6 +177,7 @@ export interface MapMarkerDto {
   lat: number;
   lng: number;
   postId?: string;
+  userId?: string;
   status: MapMarkerDtoStatus;
   type: MapMarkerDtoType;
 }

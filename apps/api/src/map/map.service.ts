@@ -81,6 +81,7 @@ export class MapService {
       select: {
         id: true,
         postId: true,
+        userId: true,
         lat: true,
         lng: true,
         post: { select: { status: true } },
@@ -101,6 +102,7 @@ export class MapService {
       type: "sighting",
       id: s.id,
       postId: s.postId ?? undefined,
+      userId: s.userId,
       lat: s.lat,
       lng: s.lng,
       status: s.post?.status ?? "lost",

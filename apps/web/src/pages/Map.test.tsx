@@ -49,6 +49,15 @@ vi.mock("../api/orvalClient", () => ({
   }),
 }));
 
+vi.mock("../auth/AuthProvider", () => ({
+  useAuth: () => ({
+    token: null,
+    userId: null,
+    setToken: vi.fn(),
+    clearToken: vi.fn(),
+  }),
+}));
+
 const sampleMarkers = [
   { id: "post-1", type: "post", status: "lost", lat: 35.9, lng: 139.6 },
   {

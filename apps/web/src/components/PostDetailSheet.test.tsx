@@ -143,4 +143,82 @@ describe("PostDetailSheet", () => {
     await user.click(screen.getByRole("button", { name: "閉じる" }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  describe("メッセージを送るボタン", () => {
+    const sightingProps = {
+      markerType: "sighting" as const,
+      sightingId: "sighting-1",
+      sightingUserId: "user-2",
+      currentUserId: "user-2",
+    };
+
+    it("ログイン済みかつ自分がSighting投稿者かつPost投稿者でない時、ボタンが表示されること", () => {
+      renderSheet({
+        ...sightingProps,
+        post: { ...basePost, userId: "user-1" },
+      });
+      expect(
+        screen.getByRole("button", { name: "メッセージを送る" })
+      ).toBeInTheDocument();
+    });
+
+    it("currentUserIdが未指定（未ログイン）の時、ボタンが非表示であること", () => {
+      renderSheet({
+        ...sightingProps,
+        currentUserId: undefined,
+        post: { ...basePost, userId: "user-1" },
+      });
+      expect(
+        screen.queryByRole("button", { name: "メッセージを送る" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("自分がPost投稿者の時、ボタンが非表示であること", () => {
+      renderSheet({
+        ...sightingProps,
+        currentUserId: "user-1",
+        sightingUserId: "user-1",
+        post: { ...basePost, userId: "user-1" },
+      });
+      expect(
+        screen.queryByRole("button", { name: "メッセージを送る" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("自分がSighting投稿者でない時、ボタンが非表示であること", () => {
+      renderSheet({
+        ...sightingProps,
+        currentUserId: "user-3",
+        post: { ...basePost, userId: "user-1" },
+      });
+      expect(
+        screen.queryByRole("button", { name: "メッセージを送る" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("markerType=postの時、ボタンが非表示であること", () => {
+      renderSheet({
+        ...sightingProps,
+        markerType: "post",
+        post: { ...basePost, userId: "user-1" },
+      });
+      expect(
+        screen.queryByRole("button", { name: "メッセージを送る" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("ボタンを押した時、onSendMessageが呼ばれること", async () => {
+      const user = userEvent.setup();
+      const onSendMessage = vi.fn();
+      renderSheet({
+        ...sightingProps,
+        post: { ...basePost, userId: "user-1" },
+        onSendMessage,
+      });
+      await user.click(
+        screen.getByRole("button", { name: "メッセージを送る" })
+      );
+      expect(onSendMessage).toHaveBeenCalledWith("post-1", "sighting-1");
+    });
+  });
 });

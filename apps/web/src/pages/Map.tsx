@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { Map as LeafletMap } from "leaflet";
@@ -8,6 +8,7 @@ import type {
   MapMarkerDto,
   PostResponseDto,
 } from "../../../../packages/api-client/src/index";
+import { useAuth } from "../auth/AuthProvider";
 import { useApiClient } from "../api/orvalClient";
 import PostDetailSheet from "../components/PostDetailSheet";
 import "../styles/map.css";
@@ -80,6 +81,8 @@ function createMarkerIcon(marker: MapMarkerDto) {
 
 export default function Map() {
   const api = useApiClient();
+  const { userId: currentUserId } = useAuth();
+  const navigate = useNavigate();
   const [markers, setMarkers] = useState<MapMarkerDto[]>([]);
   const [filter, setFilter] = useState<FilterValue>("all");
   const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
@@ -339,6 +342,19 @@ export default function Map() {
         post={selectedPost}
         markerType={selectedMarker?.type ?? "post"}
         isLoading={isLoadingPost}
+        currentUserId={currentUserId}
+        sightingId={
+          selectedMarker?.type === "sighting" ? selectedMarker.id : undefined
+        }
+        sightingUserId={
+          selectedMarker?.type === "sighting"
+            ? selectedMarker.userId
+            : undefined
+        }
+        onSendMessage={async (postId, sightingId) => {
+          const conv = await api.createConversation(postId, sightingId);
+          navigate(`/conversations/${conv.id}`);
+        }}
       />
     </div>
   );
