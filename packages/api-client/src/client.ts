@@ -14,6 +14,7 @@ import {
   usersControllerRegister,
   mapControllerGetMarkers,
   conversationsControllerFindAll,
+  conversationsControllerCreate,
   conversationsControllerFindOne,
   conversationsControllerFindMessages,
   conversationsControllerCreateMessage,
@@ -147,6 +148,10 @@ export function createClient(options: ClientOptions) {
     },
     listConversations: async () => {
       const r = await conversationsControllerFindAll();
+      return r.data;
+    },
+    createConversation: async (postId: string, sightingId: string) => {
+      const r = await conversationsControllerCreate({ postId, sightingId });
       return r.data;
     },
     getConversation: async (id: string) => {

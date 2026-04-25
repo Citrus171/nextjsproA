@@ -7,6 +7,10 @@ interface PostDetailSheetProps {
   post: PostResponseDto | null;
   markerType: "post" | "sighting";
   isLoading: boolean;
+  currentUserId?: string | null;
+  sightingId?: string | null;
+  sightingUserId?: string | null;
+  onSendMessage?: (postId: string, sightingId: string) => void;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -25,8 +29,19 @@ export default function PostDetailSheet({
   post,
   markerType,
   isLoading,
+  currentUserId,
+  sightingId,
+  sightingUserId,
+  onSendMessage,
 }: PostDetailSheetProps) {
   const title = markerType === "post" ? "迷い猫投稿" : "目撃情報";
+
+  const showMessageButton =
+    markerType === "sighting" &&
+    !!currentUserId &&
+    !!sightingUserId &&
+    currentUserId === sightingUserId &&
+    post?.userId !== currentUserId;
 
   return (
     <Sheet open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
@@ -51,6 +66,19 @@ export default function PostDetailSheet({
               ×
             </button>
           </div>
+
+          {showMessageButton && post && sightingId && (
+            <div className="mt-4">
+              <button
+                type="button"
+                aria-label="メッセージを送る"
+                onClick={() => onSendMessage?.(post.id, sightingId)}
+                className="w-full py-3 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700"
+              >
+                メッセージを送る
+              </button>
+            </div>
+          )}
 
           {isLoading ? (
             <p className="text-slate-500 mt-6">読み込み中…</p>
