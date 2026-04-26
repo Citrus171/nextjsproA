@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   Marker,
@@ -113,6 +113,7 @@ export default function Map() {
   const [error, setError] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const geocodingInProgress = useRef(false);
   const [viewportHeight, setViewportHeight] = useState(() =>
     getViewportHeight()
   );
@@ -306,8 +307,11 @@ export default function Map() {
             <MapClickHandler
               enabled={pickingLocation}
               onClick={async (lat, lng) => {
-                setPickingLocation(false);
+                if (geocodingInProgress.current) return;
+                geocodingInProgress.current = true;
                 const result = await reverseGeocode(lat, lng);
+                geocodingInProgress.current = false;
+                setPickingLocation(false);
                 setPickedLocation({ lat, lng, ...result });
                 setSightingModalOpen(true);
               }}

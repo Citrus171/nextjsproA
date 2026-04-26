@@ -17,10 +17,8 @@ describe("reverseGeocode", () => {
     const result = await reverseGeocode(35.9062, 139.6236);
     expect(result).toEqual({ address: "埼玉県さいたま市浦和区" });
 
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining("lat=35.9062"),
-      expect.objectContaining({ headers: expect.anything() })
-    );
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining("lat=35.9062"));
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining("email="));
   });
 
   it("HTTP エラー時、geocodeError を返すこと", async () => {
