@@ -486,6 +486,18 @@
 - [x] SightingModal で閉じるボタンを押した時、onClose が呼ばれること
 - [x] SightingModal で緯度が数値でない時、エラーメッセージが表示されること
 - [x] SightingModal で postId なしで送信すると、postId を含まずに createSighting が呼ばれること
+- [x] SightingModal で「地図から選択」ボタンが表示されること（postId あり・なし両方）
+- [x] SightingModal で「地図から選択」クリックで onSelectFromMap が呼ばれること
+- [x] SightingModal で pickedLocation が更新された時、lat/lng/address フィールドに反映されること
+- [x] SightingModal で pickedLocation に geocodeError がある時、エラーメッセージが表示されること
+- [x] SightingModal で forceMount 時、isOpen=false → true でフォーム値が保持されること
+- [x] Map で「目撃投稿」ボタンクリックで SightingModal が開くこと
+- [x] Map で「地図から選択」クリック後、「タップして場所を選択」バナーが表示されること
+- [x] Map で地図クリックで lat/lng・住所が SightingModal にセットされ再表示されること
+- [x] Map で Nominatim 失敗時、lat/lng セット済みでモーダルが再表示されエラーメッセージが表示されること
+- [x] reverseGeocode で正常時、Nominatim から住所文字列を返すこと
+- [x] reverseGeocode で HTTP エラー時、geocodeError を返すこと
+- [x] reverseGeocode でネットワークエラー時、geocodeError を返すこと
 - [x] Conversations で会話一覧が表示される時、相手ニックネームと投稿タイトルが表示されること
 - [x] Conversations で lastMessageがある時、最新メッセージ本文が表示されること
 - [x] Conversations で lastMessageがない時、メッセージなし文言が表示されること

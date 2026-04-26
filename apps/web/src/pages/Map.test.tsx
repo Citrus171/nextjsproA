@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { vi } from "vitest";
@@ -11,6 +11,16 @@ const mockCreateConversation = vi.fn();
 const mockFlyTo = vi.fn();
 const mockGetCurrentPosition = vi.fn();
 const mockNavigate = vi.fn();
+const { mockReverseGeocode } = vi.hoisted(() => ({
+  mockReverseGeocode:
+    vi.fn<
+      (
+        lat: number,
+        lng: number
+      ) => Promise<{ address?: string; geocodeError?: string }>
+    >(),
+}));
+let triggerMapClick: ((lat: number, lng: number) => void) | null = null;
 const mockMapInstance = {
   flyTo: mockFlyTo,
 };
@@ -22,6 +32,15 @@ vi.mock("react-leaflet", () => ({
   ),
   TileLayer: () => <div data-testid="tile-layer" />,
   useMap: () => mockMapInstance,
+  useMapEvents: (handlers: {
+    click?: (e: { latlng: { lat: number; lng: number } }) => void;
+  }) => {
+    if (handlers.click) {
+      triggerMapClick = (lat: number, lng: number) =>
+        handlers.click?.({ latlng: { lat, lng } });
+    }
+    return mockMapInstance;
+  },
   Marker: ({
     children,
     title,
@@ -44,6 +63,10 @@ vi.mock("react-leaflet", () => ({
   Popup: ({ children }: { children: ReactNode }) => (
     <div data-testid="popup">{children}</div>
   ),
+}));
+
+vi.mock("../lib/reverseGeocode", () => ({
+  reverseGeocode: mockReverseGeocode,
 }));
 
 vi.mock("react-router-dom", async (importOriginal) => {
@@ -119,6 +142,9 @@ describe("Map", () => {
     mockNavigate.mockReset();
     mockFlyTo.mockReset();
     mockGetCurrentPosition.mockReset();
+    mockReverseGeocode.mockReset();
+    mockReverseGeocode.mockResolvedValue({ address: "埼玉県さいたま市" });
+    triggerMapClick = null;
     mockGetMapMarkers.mockResolvedValue([]);
     mockGetPost.mockResolvedValue(samplePost);
     mockCreateSighting.mockResolvedValue(undefined);
@@ -285,6 +311,77 @@ describe("Map", () => {
       expect(
         await screen.findByRole("heading", { name: "目撃を報告する" })
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("地図から選択モード", () => {
+    it("「目撃投稿」ボタンクリックで SightingModal が開くこと", async () => {
+      const user = userEvent.setup();
+      renderMap();
+
+      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
+
+      expect(
+        await screen.findByRole("heading", { name: "目撃を報告する" })
+      ).toBeInTheDocument();
+    });
+
+    it("「地図から選択」クリック後、モーダルが非表示になり「タップして場所を選択」バナーが表示されること", async () => {
+      const user = userEvent.setup();
+      renderMap();
+
+      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
+      await screen.findByRole("heading", { name: "目撃を報告する" });
+
+      await user.click(screen.getByRole("button", { name: "地図から選択" }));
+
+      expect(screen.getByText("タップして場所を選択")).toBeInTheDocument();
+    });
+
+    it("選択モード中に地図クリックで lat/lng・住所が SightingModal にセットされ再表示されること", async () => {
+      const user = userEvent.setup();
+      renderMap();
+
+      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
+      await screen.findByRole("heading", { name: "目撃を報告する" });
+
+      await user.click(screen.getByRole("button", { name: "地図から選択" }));
+
+      triggerMapClick?.(35.91, 139.61);
+
+      await waitFor(() => {
+        expect(mockReverseGeocode).toHaveBeenCalledWith(35.91, 139.61);
+      });
+
+      expect(
+        await screen.findByRole("heading", { name: "目撃を報告する" })
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText("緯度")).toHaveValue("35.91");
+      expect(screen.getByLabelText("経度")).toHaveValue("139.61");
+      expect(screen.getByLabelText("住所")).toHaveValue("埼玉県さいたま市");
+    });
+
+    it("Nominatim 失敗時、lat/lng セット済みでモーダルが再表示され、エラーメッセージが表示されること", async () => {
+      const user = userEvent.setup();
+      mockReverseGeocode.mockResolvedValue({
+        geocodeError: "住所の自動取得に失敗しました。手動で入力してください",
+      });
+      renderMap();
+
+      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
+      await screen.findByRole("heading", { name: "目撃を報告する" });
+
+      await user.click(screen.getByRole("button", { name: "地図から選択" }));
+
+      triggerMapClick?.(35.91, 139.61);
+
+      expect(
+        await screen.findByRole("heading", { name: "目撃を報告する" })
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText("緯度")).toHaveValue("35.91");
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "住所の自動取得に失敗しました。手動で入力してください"
+      );
     });
   });
 });

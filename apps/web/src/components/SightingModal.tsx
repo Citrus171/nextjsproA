@@ -1,12 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApiClient } from "../api/orvalClient";
 import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
+
+interface PickedLocation {
+  lat: number;
+  lng: number;
+  address?: string;
+  geocodeError?: string;
+}
 
 interface SightingModalProps {
   isOpen: boolean;
   onClose: () => void;
   postId?: string;
   onSuccess: () => void;
+  onSelectFromMap?: () => void;
+  pickedLocation?: PickedLocation | null;
+  forceMount?: true;
 }
 
 export default function SightingModal({
@@ -14,6 +24,9 @@ export default function SightingModal({
   onClose,
   postId,
   onSuccess,
+  onSelectFromMap,
+  pickedLocation,
+  forceMount,
 }: SightingModalProps) {
   const api = useApiClient();
   const [lat, setLat] = useState("");
@@ -23,6 +36,15 @@ export default function SightingModal({
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!pickedLocation) return;
+    setLat(String(pickedLocation.lat));
+    setLng(String(pickedLocation.lng));
+    if (pickedLocation.address !== undefined)
+      setAddress(pickedLocation.address);
+    if (pickedLocation.geocodeError) setError(pickedLocation.geocodeError);
+  }, [pickedLocation]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +83,7 @@ export default function SightingModal({
     <Sheet open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <SheetContent
         side="bottom"
+        forceMount={forceMount}
         className="h-[80vh] p-0 overflow-hidden"
         aria-label="目撃を報告する"
       >
@@ -84,6 +107,15 @@ export default function SightingModal({
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <button
+              type="button"
+              aria-label="地図から選択"
+              onClick={onSelectFromMap}
+              className="w-full py-2 rounded-xl border border-blue-500 text-blue-600 font-bold text-sm hover:bg-blue-50"
+            >
+              地図から選択
+            </button>
+
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-lat"

@@ -24,13 +24,14 @@ type SheetContentProps = React.ComponentPropsWithoutRef<
   typeof SheetPrimitive.Content
 > & {
   side?: "top" | "right" | "bottom" | "left";
+  forceMount?: true;
 };
 
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "bottom", className, children, ...props }, ref) => (
-  <SheetPortal>
+>(({ side = "bottom", className, children, forceMount, ...props }, ref) => (
+  <SheetPortal forceMount={forceMount}>
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}

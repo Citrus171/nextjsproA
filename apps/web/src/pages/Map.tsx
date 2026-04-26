@@ -1,9 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import { Link, useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import type { Map as LeafletMap } from "leaflet";
+import type { Map as LeafletMap, LeafletMouseEvent } from "leaflet";
 import type {
   MapMarkerDto,
   PostResponseDto,
@@ -12,6 +18,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { useApiClient } from "../api/orvalClient";
 import PostDetailSheet from "../components/PostDetailSheet";
 import SightingModal from "../components/SightingModal";
+import { reverseGeocode } from "../lib/reverseGeocode";
 import "../styles/map.css";
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)
@@ -94,9 +101,15 @@ export default function Map() {
     null
   );
   const [isLoadingPost, setIsLoadingPost] = useState(false);
-  const [sightingModalPostId, setSightingModalPostId] = useState<string | null>(
-    null
-  );
+  const [sightingModalOpen, setSightingModalOpen] = useState(false);
+  const [sightingPostId, setSightingPostId] = useState<string | null>(null);
+  const [pickingLocation, setPickingLocation] = useState(false);
+  const [pickedLocation, setPickedLocation] = useState<{
+    lat: number;
+    lng: number;
+    address?: string;
+    geocodeError?: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -290,6 +303,15 @@ export default function Map() {
             className="map-stage__map"
           >
             <MapInstanceBridge onReady={setMapInstance} />
+            <MapClickHandler
+              enabled={pickingLocation}
+              onClick={async (lat, lng) => {
+                const result = await reverseGeocode(lat, lng);
+                setPickingLocation(false);
+                setPickedLocation({ lat, lng, ...result });
+                setSightingModalOpen(true);
+              }}
+            />
             <TileLayer
               attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -333,12 +355,23 @@ export default function Map() {
         </Link>
         <button
           type="button"
+          aria-label="目撃投稿"
           className="map-bottom-bar__button map-bottom-bar__button--sighting"
+          onClick={() => {
+            setSightingPostId(null);
+            setSightingModalOpen(true);
+          }}
         >
           <PlusIcon />
           <span>目撃投稿</span>
         </button>
       </nav>
+
+      {pickingLocation && (
+        <div className="map-picking-banner" aria-live="polite">
+          タップして場所を選択
+        </div>
+      )}
 
       <PostDetailSheet
         isOpen={selectedMarker !== null}
@@ -360,7 +393,8 @@ export default function Map() {
             navigate("/login");
             return;
           }
-          setSightingModalPostId(postId);
+          setSightingPostId(postId);
+          setSightingModalOpen(true);
         }}
         onSendMessage={async (postId, sightingId) => {
           try {
@@ -373,11 +407,22 @@ export default function Map() {
       />
 
       <SightingModal
-        isOpen={sightingModalPostId !== null}
-        onClose={() => setSightingModalPostId(null)}
-        postId={sightingModalPostId ?? undefined}
+        isOpen={sightingModalOpen}
+        forceMount={pickingLocation ? true : undefined}
+        onClose={() => {
+          setSightingModalOpen(false);
+          setSightingPostId(null);
+        }}
+        postId={sightingPostId ?? undefined}
+        pickedLocation={pickedLocation}
+        onSelectFromMap={() => {
+          setSightingModalOpen(false);
+          setPickingLocation(true);
+          setPickedLocation(null);
+        }}
         onSuccess={() => {
-          setSightingModalPostId(null);
+          setSightingModalOpen(false);
+          setSightingPostId(null);
           api
             .getMapMarkers()
             .then((data) => setMarkers(data))
@@ -441,5 +486,20 @@ function MapInstanceBridge({
   useEffect(() => {
     onReady(map);
   }, [map, onReady]);
+  return null;
+}
+
+function MapClickHandler({
+  enabled,
+  onClick,
+}: {
+  enabled: boolean;
+  onClick: (lat: number, lng: number) => void;
+}) {
+  useMapEvents({
+    click(e: LeafletMouseEvent) {
+      if (enabled) onClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
   return null;
 }

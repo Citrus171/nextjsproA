@@ -296,9 +296,14 @@ apps/web/src/
     │       ├── 目撃マーカーを押した時、目撃情報シートが開くこと
     │       ├── 迷子フィルターを押した時、迷子マーカーだけが表示されること
     │       ├── 現在地ボタンを押すと現在地へ移動すること
-    │       └── 目撃を報告するボタン
-    │           ├── 未認証でボタンをクリックした時、/loginにリダイレクトされること
-    │           └── 認証済みかつ他者のPostでボタンをクリックした時、SightingModalが開くこと
+    │       ├── 目撃を報告するボタン
+    │       │   ├── 未認証でボタンをクリックした時、/loginにリダイレクトされること
+    │       │   └── 認証済みかつ他者のPostでボタンをクリックした時、SightingModalが開くこと
+    │       └── 地図から選択モード
+    │           ├── 「目撃投稿」ボタンクリックで SightingModal が開くこと
+    │           ├── 「地図から選択」クリック後、「タップして場所を選択」バナーが表示されること
+    │           ├── 選択モード中に地図クリックで lat/lng・住所が SightingModal にセットされ再表示されること
+    │           └── Nominatim 失敗時、lat/lng セット済みでモーダルが再表示されエラーメッセージが表示されること
     ├── components/PostDetailSheet.test.tsx
     │   └── PostDetailSheet
     │       ├── isOpen=true の時、ダイアログが表示されること
@@ -335,7 +340,18 @@ apps/web/src/
     │       ├── 必須項目未入力で送信しても、createSighting が呼ばれないこと
     │       ├── 閉じるボタンを押した時、onClose が呼ばれること
     │       ├── 緯度が数値でない時、エラーメッセージが表示されること
-    │       └── postId なしで送信すると、postId を含まずに createSighting が呼ばれること
+    │       ├── postId なしで送信すると、postId を含まずに createSighting が呼ばれること
+    │       └── 地図から選択
+    │           ├── 「地図から選択」ボタンが表示されること（postId あり・なし両方）
+    │           ├── 「地図から選択」クリックで onSelectFromMap が呼ばれること
+    │           ├── pickedLocation が更新された時、lat/lng/address フィールドに反映されること
+    │           ├── pickedLocation に geocodeError がある時、エラーメッセージが表示されること
+    │           └── forceMount 時、isOpen=false → true でフォーム値が保持されること
+    ├── lib/reverseGeocode.test.ts
+    │   └── reverseGeocode
+    │       ├── 正常時、Nominatim から住所文字列を返すこと
+    │       ├── HTTP エラー時、geocodeError を返すこと
+    │       └── ネットワークエラー時、geocodeError を返すこと
     ├── EditPost.test.tsx
     │   └── EditPost
     │       └── 取得した postType を表示し、送信時に postType を含める
