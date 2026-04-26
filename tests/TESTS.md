@@ -446,7 +446,15 @@
 - [x] App で /posts を開いて認証済みの時、Logout が表示され Login が表示されない
 - [x] App でヘッダーに会話一覧リンクが表示されること
 - [x] CreatePost で必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し /posts へ戻る
-- [x] EditPost で取得した postType を表示し、送信時に postType を含める
+- [x] EditPost で投稿データ取得後、petDetail を含むフォームに初期値がセットされること
+- [x] EditPost で変更して保存した時、updatePost が petDetail/location を含むデータで呼ばれること
+- [x] EditPost で削除ボタンをクリックした時、確認ダイアログが表示されること
+- [x] EditPost で削除ダイアログで「削除を確定する」を押した時、deletePost が呼ばれ / にリダイレクトされること
+- [x] EditPost で削除ダイアログで「キャンセル」を押した時、deletePost が呼ばれないこと
+- [x] EditPost で既存画像がサムネイル表示されること
+- [x] EditPost で既存画像の個別削除ボタンをクリックした時、deleteImage が imageId で呼ばれること
+- [x] EditPost で画像追加アップロードで addImages が呼ばれること
+- [x] EditPost で remainingSlots=0 の時、追加アップロードボタンが非表示になること
 - [x] Map で検索バーと種別フィルターを表示する
 - [x] Map で迷い猫投稿を押すと /create に遷移する
 - [x] Map で迷子マーカーを押すと詳細シートが開き投稿者名を表示する
