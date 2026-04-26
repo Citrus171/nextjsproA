@@ -115,4 +115,103 @@ describe("SightingModal", () => {
     await user.click(screen.getByRole("button", { name: "閉じる" }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  describe("地図から選択", () => {
+    it("「地図から選択」ボタンが表示されること（postId あり・なし両方）", () => {
+      const { rerender } = renderModal();
+      expect(
+        screen.getByRole("button", { name: "地図から選択" })
+      ).toBeInTheDocument();
+
+      rerender(
+        <SightingModal
+          isOpen={true}
+          onClose={() => {}}
+          onSuccess={() => {}}
+          postId="post-1"
+        />
+      );
+      expect(
+        screen.getByRole("button", { name: "地図から選択" })
+      ).toBeInTheDocument();
+    });
+
+    it("「地図から選択」クリックで onSelectFromMap が呼ばれること", async () => {
+      const user = userEvent.setup();
+      const onSelectFromMap = vi.fn();
+      renderModal({ onSelectFromMap });
+
+      await user.click(screen.getByRole("button", { name: "地図から選択" }));
+      expect(onSelectFromMap).toHaveBeenCalledTimes(1);
+    });
+
+    it("pickedLocation が更新された時、lat/lng/address フィールドに反映されること", async () => {
+      const { rerender } = renderModal();
+
+      rerender(
+        <SightingModal
+          isOpen={true}
+          onClose={() => {}}
+          onSuccess={() => {}}
+          pickedLocation={{
+            lat: 35.9,
+            lng: 139.6,
+            address: "埼玉県さいたま市",
+          }}
+        />
+      );
+
+      expect(screen.getByLabelText("緯度")).toHaveValue("35.9");
+      expect(screen.getByLabelText("経度")).toHaveValue("139.6");
+      expect(screen.getByLabelText("住所")).toHaveValue("埼玉県さいたま市");
+    });
+
+    it("pickedLocation に geocodeError がある時、エラーメッセージが表示されること", async () => {
+      const { rerender } = renderModal();
+
+      rerender(
+        <SightingModal
+          isOpen={true}
+          onClose={() => {}}
+          onSuccess={() => {}}
+          pickedLocation={{
+            lat: 35.9,
+            lng: 139.6,
+            geocodeError:
+              "住所の自動取得に失敗しました。手動で入力してください",
+          }}
+        />
+      );
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "住所の自動取得に失敗しました。手動で入力してください"
+      );
+    });
+
+    it("forceMount 時、isOpen=false になった後も isOpen=true に戻るとコメント等フォーム値が保持されること", async () => {
+      const user = userEvent.setup();
+      const { rerender } = renderModal({ forceMount: true });
+
+      await user.type(screen.getByLabelText("コメント"), "テストコメント");
+
+      rerender(
+        <SightingModal
+          isOpen={false}
+          forceMount={true}
+          onClose={() => {}}
+          onSuccess={() => {}}
+        />
+      );
+      rerender(
+        <SightingModal
+          isOpen={true}
+          forceMount={true}
+          onClose={() => {}}
+          onSuccess={() => {}}
+        />
+      );
+
+      expect(screen.getByLabelText("コメント")).toHaveValue("テストコメント");
+    });
+  });
 });
