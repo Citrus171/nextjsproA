@@ -314,9 +314,23 @@ describe("Map", () => {
     });
   });
 
-  describe("地図から選択モード", () => {
-    it("「目撃投稿」ボタンクリックで SightingModal が開くこと", async () => {
+  describe("目撃投稿ボタン（BottomBar）", () => {
+    it("未認証で「目撃投稿」ボタンをクリックした時、/loginにリダイレクトされること", async () => {
       const user = userEvent.setup();
+      mockAuth.userId = null;
+      renderMap();
+
+      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
+
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
+      expect(
+        screen.queryByRole("heading", { name: "目撃を報告する" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("認証済みで「目撃投稿」ボタンをクリックした時、SightingModalが開くこと", async () => {
+      const user = userEvent.setup();
+      mockAuth.userId = "user-1";
       renderMap();
 
       await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
@@ -324,6 +338,12 @@ describe("Map", () => {
       expect(
         await screen.findByRole("heading", { name: "目撃を報告する" })
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("地図から選択モード", () => {
+    beforeEach(() => {
+      mockAuth.userId = "user-1";
     });
 
     it("「地図から選択」クリック後、モーダルが非表示になり「タップして場所を選択」バナーが表示されること", async () => {
