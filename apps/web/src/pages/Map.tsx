@@ -6,7 +6,7 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { Map as LeafletMap, LeafletMouseEvent } from "leaflet";
@@ -350,13 +350,20 @@ export default function Map() {
       </main>
 
       <nav className="map-bottom-bar" aria-label="投稿アクション">
-        <Link
-          to="/create"
+        <button
+          type="button"
           className="map-bottom-bar__button map-bottom-bar__button--lost"
+          onClick={() => {
+            if (!currentUserId) {
+              navigate("/login");
+              return;
+            }
+            navigate("/create");
+          }}
         >
           <PlusIcon />
           <span>迷い猫投稿</span>
-        </Link>
+        </button>
         <button
           type="button"
           aria-label="目撃投稿"

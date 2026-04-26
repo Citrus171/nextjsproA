@@ -1,10 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { CheckedState } from "@radix-ui/react-checkbox";
 import { useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
+import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useApiClient } from "../api/orvalClient";
+import { reverseGeocode } from "../lib/reverseGeocode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +35,7 @@ import {
   Calendar,
   ChevronLeft,
   Upload,
+  LocateFixed,
 } from "lucide-react";
 
 // Leaflet デフォルトアイコン修正
@@ -57,6 +66,18 @@ function MapClickHandler({
       onMapClick({ lat: e.latlng.lat, lng: e.latlng.lng });
     },
   });
+  return null;
+}
+
+function MapInstanceBridge({
+  onReady,
+}: {
+  onReady: (map: LeafletMap) => void;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    onReady(map);
+  }, [map, onReady]);
   return null;
 }
 
@@ -106,12 +127,43 @@ export default function CreatePost() {
   // UI
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const mapRef = useRef<LeafletMap | null>(null);
 
   useEffect(() => {
     return () => {
       previews.forEach((preview) => URL.revokeObjectURL(preview));
     };
   }, [previews]);
+
+  const handleCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError("このブラウザでは現在地を取得できません");
+      return;
+    }
+    setIsLocating(true);
+    setLocationError(null);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude: lat, longitude: lng } = position.coords;
+        setPinPos({ lat, lng });
+        mapRef.current?.flyTo([lat, lng], 16, { animate: true });
+        const result = await reverseGeocode(lat, lng);
+        if ("address" in result) {
+          setAddress(result.address);
+        } else {
+          setLocationError(result.geocodeError);
+        }
+        setIsLocating(false);
+      },
+      () => {
+        setLocationError("現在地の取得に失敗しました");
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
@@ -503,9 +555,23 @@ export default function CreatePost() {
 
           {/* Leaflet 地図 */}
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
-              地図でピンを指定 <span className="text-red-500">*</span>
-            </Label>
+            <div className="flex items-center justify-between ml-1">
+              <Label className="text-xs font-bold text-slate-500">
+                地図でピンを指定 <span className="text-red-500">*</span>
+              </Label>
+              <button
+                type="button"
+                onClick={handleCurrentLocation}
+                disabled={isLocating}
+                className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 disabled:opacity-50"
+              >
+                <LocateFixed size={14} />
+                {isLocating ? "取得中…" : "現在地を使う"}
+              </button>
+            </div>
+            {locationError && (
+              <p className="text-xs text-red-500 ml-1">{locationError}</p>
+            )}
             <div className="relative h-64 rounded-[2rem] overflow-hidden">
               <MapContainer
                 center={DEFAULT_CENTER}
@@ -513,6 +579,11 @@ export default function CreatePost() {
                 style={{ height: "100%", width: "100%" }}
                 scrollWheelZoom={false}
               >
+                <MapInstanceBridge
+                  onReady={(m) => {
+                    mapRef.current = m;
+                  }}
+                />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
