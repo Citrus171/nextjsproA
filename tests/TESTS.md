@@ -455,6 +455,8 @@
 - [x] Map で現在地ボタンを押すと現在地へ移動する
 - [x] Map で未認証のまま「目撃を報告する」をクリックした時、/login にリダイレクトされること
 - [x] Map で認証済みかつ他者のPostで「目撃を報告する」をクリックした時、SightingModal が開くこと
+- [x] Map で未認証で「目撃投稿」ボタンをクリックした時、/login にリダイレクトされること
+- [x] Map で認証済みで「目撃投稿」ボタンをクリックした時、SightingModal が開くこと
 - [x] PostDetailSheet で isOpen=true の時、ダイアログが表示されること
 - [x] PostDetailSheet で isLoading=true の時、ローディングが表示されること
 - [x] PostDetailSheet で status=lost の時、迷子バッジが表示されること

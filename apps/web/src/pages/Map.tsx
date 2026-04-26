@@ -362,6 +362,10 @@ export default function Map() {
           aria-label="目撃投稿"
           className="map-bottom-bar__button map-bottom-bar__button--sighting"
           onClick={() => {
+            if (!currentUserId) {
+              navigate("/login");
+              return;
+            }
             setSightingPostId(null);
             setSightingModalOpen(true);
           }}
