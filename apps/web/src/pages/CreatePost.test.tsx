@@ -21,6 +21,7 @@ vi.mock("react-leaflet", () => ({
   ),
   TileLayer: () => null,
   Marker: () => null,
+  useMap: () => ({ flyTo: vi.fn() }),
   useMapEvents: (events: {
     click?: (e: { latlng: { lat: number; lng: number } }) => void;
   }) => {

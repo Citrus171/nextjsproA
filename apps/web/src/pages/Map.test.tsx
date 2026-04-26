@@ -164,10 +164,9 @@ describe("Map", () => {
     expect(screen.getByRole("button", { name: "すべて" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "迷子" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "目撃" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "迷い猫投稿" })).toHaveAttribute(
-      "href",
-      "/create"
-    );
+    expect(
+      screen.getByRole("button", { name: "迷い猫投稿" })
+    ).toBeInTheDocument();
   });
 
   it("迷子マーカーを押した時、詳細シートが開くこと", async () => {
