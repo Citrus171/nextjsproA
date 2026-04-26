@@ -6,11 +6,9 @@ export async function reverseGeocode(
   lat: number,
   lng: number
 ): Promise<ReverseGeocodeResult> {
-  const url = `${NOMINATIM_URL}?lat=${lat}&lon=${lng}&format=json`;
+  const url = `${NOMINATIM_URL}?lat=${lat}&lon=${lng}&format=json&email=troqy.kitamura@gmail.com`;
   try {
-    const res = await fetch(url, {
-      headers: { Referer: window.location.origin },
-    });
+    const res = await fetch(url);
     if (!res.ok) {
       return {
         geocodeError: "住所の自動取得に失敗しました。手動で入力してください",

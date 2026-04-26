@@ -306,8 +306,8 @@ export default function Map() {
             <MapClickHandler
               enabled={pickingLocation}
               onClick={async (lat, lng) => {
-                const result = await reverseGeocode(lat, lng);
                 setPickingLocation(false);
+                const result = await reverseGeocode(lat, lng);
                 setPickedLocation({ lat, lng, ...result });
                 setSightingModalOpen(true);
               }}
