@@ -484,6 +484,8 @@
 - [x] SightingModal で必須項目を入力して送信すると、createSighting が正しく呼ばれること
 - [x] SightingModal で必須項目未入力で送信しても、createSighting が呼ばれないこと
 - [x] SightingModal で閉じるボタンを押した時、onClose が呼ばれること
+- [x] SightingModal で緯度が数値でない時、エラーメッセージが表示されること
+- [x] SightingModal で postId なしで送信すると、postId を含まずに createSighting が呼ばれること
 - [x] Conversations で会話一覧が表示される時、相手ニックネームと投稿タイトルが表示されること
 - [x] Conversations で lastMessageがある時、最新メッセージ本文が表示されること
 - [x] Conversations で lastMessageがない時、メッセージなし文言が表示されること

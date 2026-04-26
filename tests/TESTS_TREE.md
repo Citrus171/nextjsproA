@@ -333,7 +333,9 @@ apps/web/src/
     │       ├── postId が渡された時、postId フィールドが非表示であること
     │       ├── 必須項目を入力して送信すると、createSighting が正しく呼ばれること
     │       ├── 必須項目未入力で送信しても、createSighting が呼ばれないこと
-    │       └── 閉じるボタンを押した時、onClose が呼ばれること
+    │       ├── 閉じるボタンを押した時、onClose が呼ばれること
+    │       ├── 緯度が数値でない時、エラーメッセージが表示されること
+    │       └── postId なしで送信すると、postId を含まずに createSighting が呼ばれること
     ├── EditPost.test.tsx
     │   └── EditPost
     │       └── 取得した postType を表示し、送信時に postType を含める

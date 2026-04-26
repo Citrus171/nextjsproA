@@ -76,6 +76,37 @@ describe("SightingModal", () => {
     expect(mockCreateSighting).not.toHaveBeenCalled();
   });
 
+  it("緯度が数値でない時、エラーメッセージが表示されること", async () => {
+    const user = userEvent.setup();
+    renderModal();
+
+    await user.type(screen.getByLabelText("緯度"), "abc");
+    await user.type(screen.getByLabelText("経度"), "139.6");
+    await user.type(screen.getByLabelText("目撃日時"), "2026-04-26T10:00");
+    await user.click(screen.getByRole("button", { name: "送信" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "緯度・経度は正しい数値を入力してください"
+    );
+    expect(mockCreateSighting).not.toHaveBeenCalled();
+  });
+
+  it("postId なしで送信すると、postId を含まずに createSighting が呼ばれること", async () => {
+    const user = userEvent.setup();
+    renderModal();
+
+    await user.type(screen.getByLabelText("緯度"), "35.9");
+    await user.type(screen.getByLabelText("経度"), "139.6");
+    await user.type(screen.getByLabelText("目撃日時"), "2026-04-26T10:00");
+    await user.click(screen.getByRole("button", { name: "送信" }));
+
+    await waitFor(() => {
+      expect(mockCreateSighting).toHaveBeenCalledWith(
+        expect.not.objectContaining({ postId: expect.anything() })
+      );
+    });
+  });
+
   it("閉じるボタンを押した時、onClose が呼ばれること", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();

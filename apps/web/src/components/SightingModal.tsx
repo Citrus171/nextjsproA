@@ -26,9 +26,16 @@ export default function SightingModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!lat || !lng || !sightedAt) {
+      setError("緯度・経度・目撃日時は必須です");
+      return;
+    }
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
-    if (!lat || !lng || !sightedAt || isNaN(latNum) || isNaN(lngNum)) return;
+    if (isNaN(latNum) || isNaN(lngNum)) {
+      setError("緯度・経度は正しい数値を入力してください");
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
@@ -87,9 +94,8 @@ export default function SightingModal({
               <input
                 id="sighting-lat"
                 aria-label="緯度"
-                type="number"
-                step="any"
-                required
+                type="text"
+                inputMode="decimal"
                 value={lat}
                 onChange={(e) => setLat(e.target.value)}
                 className="border rounded-lg px-3 py-2 text-sm"
@@ -107,9 +113,8 @@ export default function SightingModal({
               <input
                 id="sighting-lng"
                 aria-label="経度"
-                type="number"
-                step="any"
-                required
+                type="text"
+                inputMode="decimal"
                 value={lng}
                 onChange={(e) => setLng(e.target.value)}
                 className="border rounded-lg px-3 py-2 text-sm"
