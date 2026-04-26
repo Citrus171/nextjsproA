@@ -6,11 +6,15 @@ import { MemoryRouter } from "react-router-dom";
 
 const mockGetMapMarkers = vi.fn();
 const mockGetPost = vi.fn();
+const mockCreateSighting = vi.fn();
+const mockCreateConversation = vi.fn();
 const mockFlyTo = vi.fn();
 const mockGetCurrentPosition = vi.fn();
+const mockNavigate = vi.fn();
 const mockMapInstance = {
   flyTo: mockFlyTo,
 };
+const mockAuth = { userId: null as string | null };
 
 vi.mock("react-leaflet", () => ({
   MapContainer: ({ children }: { children: ReactNode }) => (
@@ -42,17 +46,24 @@ vi.mock("react-leaflet", () => ({
   ),
 }));
 
+vi.mock("react-router-dom", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("react-router-dom")>();
+  return { ...mod, useNavigate: () => mockNavigate };
+});
+
 vi.mock("../api/orvalClient", () => ({
   useApiClient: () => ({
     getMapMarkers: mockGetMapMarkers,
     getPost: mockGetPost,
+    createSighting: mockCreateSighting,
+    createConversation: mockCreateConversation,
   }),
 }));
 
 vi.mock("../auth/AuthProvider", () => ({
   useAuth: () => ({
     token: null,
-    userId: null,
+    userId: mockAuth.userId,
     setToken: vi.fn(),
     clearToken: vi.fn(),
   }),
@@ -104,10 +115,14 @@ describe("Map", () => {
   }
 
   beforeEach(() => {
+    mockAuth.userId = null;
+    mockNavigate.mockReset();
     mockFlyTo.mockReset();
     mockGetCurrentPosition.mockReset();
     mockGetMapMarkers.mockResolvedValue([]);
     mockGetPost.mockResolvedValue(samplePost);
+    mockCreateSighting.mockResolvedValue(undefined);
+    mockCreateConversation.mockResolvedValue({ id: "conv-1" });
     Object.defineProperty(window.navigator, "geolocation", {
       configurable: true,
       value: {
@@ -226,6 +241,50 @@ describe("Map", () => {
     expect(mockGetCurrentPosition).toHaveBeenCalledTimes(1);
     expect(mockFlyTo).toHaveBeenCalledWith([35.92, 139.62], 16, {
       animate: true,
+    });
+  });
+
+  describe("目撃を報告するボタン", () => {
+    it("未認証でボタンをクリックした時、/loginにリダイレクトされること", async () => {
+      const user = userEvent.setup();
+      mockAuth.userId = null;
+      mockGetMapMarkers.mockResolvedValue(sampleMarkers as unknown as never[]);
+
+      renderMap();
+
+      const postMarkers = await screen.findAllByRole("button", {
+        name: "迷子投稿",
+      });
+      await user.click(postMarkers[0]);
+
+      const reportBtn = await screen.findByRole("button", {
+        name: "目撃を報告する",
+      });
+      await user.click(reportBtn);
+
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
+    });
+
+    it("認証済みかつ他者のPostでボタンをクリックした時、SightingModalが開くこと", async () => {
+      const user = userEvent.setup();
+      mockAuth.userId = "user-2";
+      mockGetMapMarkers.mockResolvedValue(sampleMarkers as unknown as never[]);
+
+      renderMap();
+
+      const postMarkers = await screen.findAllByRole("button", {
+        name: "迷子投稿",
+      });
+      await user.click(postMarkers[0]);
+
+      const reportBtn = await screen.findByRole("button", {
+        name: "目撃を報告する",
+      });
+      await user.click(reportBtn);
+
+      expect(
+        await screen.findByRole("heading", { name: "目撃を報告する" })
+      ).toBeInTheDocument();
     });
   });
 });

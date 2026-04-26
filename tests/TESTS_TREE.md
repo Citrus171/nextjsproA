@@ -295,7 +295,10 @@ apps/web/src/
     │       ├── 迷子マーカーを押した時、詳細シートが開くこと
     │       ├── 目撃マーカーを押した時、目撃情報シートが開くこと
     │       ├── 迷子フィルターを押した時、迷子マーカーだけが表示されること
-    │       └── 現在地ボタンを押すと現在地へ移動すること
+    │       ├── 現在地ボタンを押すと現在地へ移動すること
+    │       └── 目撃を報告するボタン
+    │           ├── 未認証でボタンをクリックした時、/loginにリダイレクトされること
+    │           └── 認証済みかつ他者のPostでボタンをクリックした時、SightingModalが開くこと
     ├── components/PostDetailSheet.test.tsx
     │   └── PostDetailSheet
     │       ├── isOpen=true の時、ダイアログが表示されること
@@ -311,6 +314,12 @@ apps/web/src/
     │       ├── 画像がある時、1枚目の画像が表示されること
     │       ├── 画像がない時、プレースホルダーが表示されること
     │       ├── 閉じるボタンを押した時、onClose が呼ばれること
+    │       ├── 目撃を報告するボタン
+    │       │   ├── markerType=post かつ他者のPost の時、ボタンが表示されること
+    │       │   ├── 未認証（currentUserId=null）の時、ボタンが表示されること
+    │       │   ├── 自分がPost投稿者の時、ボタンが非表示であること
+    │       │   ├── markerType=sighting の時、ボタンが非表示であること
+    │       │   └── ボタンを押した時、onReportSighting が postId で呼ばれること
     │       └── メッセージを送るボタン
     │           ├── ログイン済みかつ自分がSighting投稿者かつPost投稿者でない時、ボタンが表示されること
     │           ├── currentUserIdが未指定（未ログイン）の時、ボタンが非表示であること
@@ -318,6 +327,13 @@ apps/web/src/
     │           ├── 自分がSighting投稿者でない時、ボタンが非表示であること
     │           ├── markerType=postの時、ボタンが非表示であること
     │           └── ボタンを押した時、onSendMessageが呼ばれること
+    ├── components/SightingModal.test.tsx
+    │   └── SightingModal
+    │       ├── isOpen=true の時、フォームが表示されること
+    │       ├── postId が渡された時、postId フィールドが非表示であること
+    │       ├── 必須項目を入力して送信すると、createSighting が正しく呼ばれること
+    │       ├── 必須項目未入力で送信しても、createSighting が呼ばれないこと
+    │       └── 閉じるボタンを押した時、onClose が呼ばれること
     ├── EditPost.test.tsx
     │   └── EditPost
     │       └── 取得した postType を表示し、送信時に postType を含める

@@ -11,6 +11,7 @@ interface PostDetailSheetProps {
   sightingId?: string | null;
   sightingUserId?: string | null;
   onSendMessage?: (postId: string, sightingId: string) => void;
+  onReportSighting?: (postId: string) => void;
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -33,6 +34,7 @@ export default function PostDetailSheet({
   sightingId,
   sightingUserId,
   onSendMessage,
+  onReportSighting,
 }: PostDetailSheetProps) {
   const title = markerType === "post" ? "迷い猫投稿" : "目撃情報";
 
@@ -42,6 +44,9 @@ export default function PostDetailSheet({
     !!sightingUserId &&
     currentUserId === sightingUserId &&
     post?.userId !== currentUserId;
+
+  const showReportSightingButton =
+    markerType === "post" && !!post && currentUserId !== post.userId;
 
   return (
     <Sheet open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
@@ -66,6 +71,19 @@ export default function PostDetailSheet({
               ×
             </button>
           </div>
+
+          {showReportSightingButton && (
+            <div className="mt-4">
+              <button
+                type="button"
+                aria-label="目撃を報告する"
+                onClick={() => onReportSighting?.(post.id)}
+                className="w-full py-3 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700"
+              >
+                目撃を報告する
+              </button>
+            </div>
+          )}
 
           {showMessageButton && post && sightingId && (
             <div className="mt-4">
