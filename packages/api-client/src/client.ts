@@ -20,7 +20,17 @@ import {
   conversationsControllerCreateMessage,
   conversationsControllerMarkAsRead,
   type ConversationsControllerCreateMessageBody,
+  sightingsControllerCreate,
 } from "./index";
+
+export type CreateSightingInput = {
+  lat: number;
+  lng: number;
+  sightedAt: string;
+  postId?: string;
+  address?: string;
+  comment?: string;
+};
 
 export type ClientOptions = {
   baseURL?: string;
@@ -171,6 +181,10 @@ export function createClient(options: ClientOptions) {
     },
     markAsRead: async (id: string) => {
       await conversationsControllerMarkAsRead(id);
+    },
+    createSighting: async (data: CreateSightingInput) => {
+      const r = await sightingsControllerCreate(data);
+      return r.data;
     },
   };
 }

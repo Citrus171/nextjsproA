@@ -11,6 +11,7 @@ import type {
 import { useAuth } from "../auth/AuthProvider";
 import { useApiClient } from "../api/orvalClient";
 import PostDetailSheet from "../components/PostDetailSheet";
+import SightingModal from "../components/SightingModal";
 import "../styles/map.css";
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)
@@ -93,6 +94,9 @@ export default function Map() {
     null
   );
   const [isLoadingPost, setIsLoadingPost] = useState(false);
+  const [sightingModalPostId, setSightingModalPostId] = useState<string | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -351,6 +355,13 @@ export default function Map() {
             ? selectedMarker.userId
             : undefined
         }
+        onReportSighting={(postId) => {
+          if (!currentUserId) {
+            navigate("/login");
+            return;
+          }
+          setSightingModalPostId(postId);
+        }}
         onSendMessage={async (postId, sightingId) => {
           try {
             const conv = await api.createConversation(postId, sightingId);
@@ -358,6 +369,19 @@ export default function Map() {
           } catch {
             setError("メッセージの送信に失敗しました");
           }
+        }}
+      />
+
+      <SightingModal
+        isOpen={sightingModalPostId !== null}
+        onClose={() => setSightingModalPostId(null)}
+        postId={sightingModalPostId ?? undefined}
+        onSuccess={() => {
+          setSightingModalPostId(null);
+          api
+            .getMapMarkers()
+            .then((data) => setMarkers(data))
+            .catch(() => {});
         }}
       />
     </div>

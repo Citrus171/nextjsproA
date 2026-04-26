@@ -453,6 +453,8 @@
 - [x] Map で目撃マーカーを押すと目撃情報シートが開くこと
 - [x] Map で迷子フィルターを押すと迷子マーカーだけが表示される
 - [x] Map で現在地ボタンを押すと現在地へ移動する
+- [x] Map で未認証のまま「目撃を報告する」をクリックした時、/login にリダイレクトされること
+- [x] Map で認証済みかつ他者のPostで「目撃を報告する」をクリックした時、SightingModal が開くこと
 - [x] PostDetailSheet で isOpen=true の時、ダイアログが表示されること
 - [x] PostDetailSheet で isLoading=true の時、ローディングが表示されること
 - [x] PostDetailSheet で status=lost の時、迷子バッジが表示されること
@@ -472,6 +474,18 @@
 - [x] PostDetailSheet で自分がSighting投稿者でない時、メッセージボタンが非表示であること
 - [x] PostDetailSheet でmarkerType=postの時、メッセージボタンが非表示であること
 - [x] PostDetailSheet でメッセージボタンを押した時、onSendMessageが呼ばれること
+- [x] PostDetailSheet で markerType=post かつ他者のPost の時、目撃を報告するボタンが表示されること
+- [x] PostDetailSheet で未認証（currentUserId=null）の時、目撃を報告するボタンが表示されること
+- [x] PostDetailSheet で自分がPost投稿者の時、目撃を報告するボタンが非表示であること
+- [x] PostDetailSheet で markerType=sighting の時、目撃を報告するボタンが非表示であること
+- [x] PostDetailSheet でボタンを押した時、onReportSighting が postId で呼ばれること
+- [x] SightingModal で isOpen=true の時、フォームが表示されること
+- [x] SightingModal で postId が渡された時、postId フィールドが非表示であること
+- [x] SightingModal で必須項目を入力して送信すると、createSighting が正しく呼ばれること
+- [x] SightingModal で必須項目未入力で送信しても、createSighting が呼ばれないこと
+- [x] SightingModal で閉じるボタンを押した時、onClose が呼ばれること
+- [x] SightingModal で緯度が数値でない時、エラーメッセージが表示されること
+- [x] SightingModal で postId なしで送信すると、postId を含まずに createSighting が呼ばれること
 - [x] Conversations で会話一覧が表示される時、相手ニックネームと投稿タイトルが表示されること
 - [x] Conversations で lastMessageがある時、最新メッセージ本文が表示されること
 - [x] Conversations で lastMessageがない時、メッセージなし文言が表示されること

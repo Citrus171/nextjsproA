@@ -144,6 +144,69 @@ describe("PostDetailSheet", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  describe("目撃を報告するボタン", () => {
+    it("markerType=post かつ他者のPost の時、ボタンが表示されること", () => {
+      renderSheet({
+        markerType: "post",
+        currentUserId: "user-2",
+        post: { ...basePost, userId: "user-1" },
+        onReportSighting: vi.fn(),
+      });
+      expect(
+        screen.getByRole("button", { name: "目撃を報告する" })
+      ).toBeInTheDocument();
+    });
+
+    it("未認証（currentUserId=null）の時、ボタンが表示されること", () => {
+      renderSheet({
+        markerType: "post",
+        currentUserId: null,
+        post: { ...basePost, userId: "user-1" },
+        onReportSighting: vi.fn(),
+      });
+      expect(
+        screen.getByRole("button", { name: "目撃を報告する" })
+      ).toBeInTheDocument();
+    });
+
+    it("自分がPost投稿者の時、ボタンが非表示であること", () => {
+      renderSheet({
+        markerType: "post",
+        currentUserId: "user-1",
+        post: { ...basePost, userId: "user-1" },
+        onReportSighting: vi.fn(),
+      });
+      expect(
+        screen.queryByRole("button", { name: "目撃を報告する" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("markerType=sighting の時、ボタンが非表示であること", () => {
+      renderSheet({
+        markerType: "sighting",
+        currentUserId: "user-2",
+        post: { ...basePost, userId: "user-1" },
+        onReportSighting: vi.fn(),
+      });
+      expect(
+        screen.queryByRole("button", { name: "目撃を報告する" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("ボタンを押した時、onReportSighting が postId で呼ばれること", async () => {
+      const user = userEvent.setup();
+      const onReportSighting = vi.fn();
+      renderSheet({
+        markerType: "post",
+        currentUserId: "user-2",
+        post: { ...basePost, userId: "user-1" },
+        onReportSighting,
+      });
+      await user.click(screen.getByRole("button", { name: "目撃を報告する" }));
+      expect(onReportSighting).toHaveBeenCalledWith("post-1");
+    });
+  });
+
   describe("メッセージを送るボタン", () => {
     const sightingProps = {
       markerType: "sighting" as const,
