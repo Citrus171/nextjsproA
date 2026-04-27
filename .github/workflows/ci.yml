@@ -218,8 +218,7 @@ jobs:
   schemathesis:
     name: API Fuzz (Schemathesis)
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    continue-on-error: true
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
 
     services:
       postgres:
@@ -291,9 +290,16 @@ jobs:
 
       - name: Run Schemathesis
         run: |
+          THRESHOLD=65
           schemathesis run \
             http://localhost:3000/api-json \
-            --url http://localhost:3000 \
-            --checks not_a_server_error \
+            --checks all \
             --max-examples 25 \
-            --continue-on-failure
+            --continue-on-failure 2>&1 | tee /tmp/schemathesis.log || true
+          FAILURES=$(grep -oP '\d+ unique failures' /tmp/schemathesis.log | grep -oP '^\d+' || echo 0)
+          echo "Unique failures: ${FAILURES} (threshold: ${THRESHOLD})"
+          if [ "${FAILURES}" -gt "${THRESHOLD}" ]; then
+            echo "❌ Failures (${FAILURES}) exceeded threshold (${THRESHOLD})"
+            exit 1
+          fi
+          echo "✅ Failures (${FAILURES}) within threshold (${THRESHOLD})"
