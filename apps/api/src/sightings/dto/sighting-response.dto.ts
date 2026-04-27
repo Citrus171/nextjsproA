@@ -18,8 +18,12 @@ export class SightingResponseDto {
   })
   address: string | null;
 
-  @ApiProperty({ example: "2024-01-02T00:00:00.000Z" })
-  sightedAt: Date;
+  @ApiProperty({
+    type: String,
+    format: "date-time",
+    example: "2024-01-02T00:00:00.000Z",
+  })
+  sightedAt: string;
 
   @ApiProperty({
     example: "公園付近で目撃しました",
@@ -28,6 +32,10 @@ export class SightingResponseDto {
   })
   comment: string | null;
 
-  @ApiProperty({ example: "2024-01-02T00:00:00.000Z" })
-  createdAt: Date;
+  @ApiProperty({
+    type: String,
+    format: "date-time",
+    example: "2024-01-02T00:00:00.000Z",
+  })
+  createdAt: string;
 }
