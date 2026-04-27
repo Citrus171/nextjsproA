@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authControllerRefresh } from "../../../../packages/api-client/src/index";
 
 type AuthContextValue = {
   token: string | null;
   userId: string | null;
+  isRestoring: boolean;
   setToken: (t: string | null) => void;
   clearToken: () => void;
 };
@@ -26,7 +28,24 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const [token, setTokenState] = useState<string | null>(null);
+  const [isRestoring, setIsRestoring] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    authControllerRefresh()
+      .then((res) => {
+        const t =
+          (res as { data?: { accessToken?: string } }).data?.accessToken ??
+          null;
+        setTokenState(t);
+      })
+      .catch(() => {
+        // setTokenState(null) しない: 登録直後のトークンを競合で上書きするのを防ぐ
+      })
+      .finally(() => {
+        setIsRestoring(false);
+      });
+  }, []);
 
   const setToken = (t: string | null) => setTokenState(t);
   const clearToken = () => {
@@ -37,7 +56,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   const userId = decodeUserId(token);
 
   return (
-    <AuthContext.Provider value={{ token, userId, setToken, clearToken }}>
+    <AuthContext.Provider
+      value={{ token, userId, isRestoring, setToken, clearToken }}
+    >
       {children}
     </AuthContext.Provider>
   );

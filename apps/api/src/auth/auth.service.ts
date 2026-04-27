@@ -35,7 +35,12 @@ export class AuthService {
       include: { user: { select: { emailEncrypted: true, role: true } } },
     });
     if (!rec || rec.expiresAt <= new Date()) return null;
-    await this.prisma.refreshToken.delete({ where: { token: oldToken } });
+    try {
+      await this.prisma.refreshToken.delete({ where: { token: oldToken } });
+    } catch {
+      // 同時リクエストによって既に削除済み → 無効なトークンとして扱う
+      return null;
+    }
     const newToken = crypto.randomBytes(48).toString("hex");
     const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 30 * 1000);
     await this.prisma.refreshToken.create({

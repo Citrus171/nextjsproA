@@ -324,45 +324,30 @@ describe("Map", () => {
     });
   });
 
-  describe("目撃投稿ボタン（BottomBar）", () => {
-    it("未認証で「目撃投稿」ボタンをクリックした時、/loginにリダイレクトされること", async () => {
-      const user = userEvent.setup();
-      mockAuth.userId = null;
-      renderMap();
-
-      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
-
-      expect(mockNavigate).toHaveBeenCalledWith("/login");
-      expect(
-        screen.queryByRole("heading", { name: "目撃を報告する" })
-      ).not.toBeInTheDocument();
-    });
-
-    it("認証済みで「目撃投稿」ボタンをクリックした時、SightingModalが開くこと", async () => {
-      const user = userEvent.setup();
-      mockAuth.userId = "user-1";
-      renderMap();
-
-      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
-
-      expect(
-        await screen.findByRole("heading", { name: "目撃を報告する" })
-      ).toBeInTheDocument();
-    });
-  });
-
   describe("地図から選択モード", () => {
+    // 底バーの独立した目撃投稿ボタンは削除済み。
+    // SightingModalは投稿マーカー→SheetのReportSightingボタン経由で開く。
     beforeEach(() => {
-      mockAuth.userId = "user-1";
+      mockAuth.userId = "user-2"; // 投稿者(user-1)と異なるユーザーで「目撃を報告する」を表示
+      mockGetMapMarkers.mockResolvedValue(sampleMarkers as unknown as never[]);
     });
+
+    async function openSightingModal(user: ReturnType<typeof userEvent.setup>) {
+      const postMarkers = await screen.findAllByRole("button", {
+        name: "迷子投稿",
+      });
+      await user.click(postMarkers[0]);
+      await user.click(
+        await screen.findByRole("button", { name: "目撃を報告する" })
+      );
+      await screen.findByRole("heading", { name: "目撃を報告する" });
+    }
 
     it("「地図から選択」クリック後、モーダルが非表示になり「タップして場所を選択」バナーが表示されること", async () => {
       const user = userEvent.setup();
       renderMap();
 
-      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
-      await screen.findByRole("heading", { name: "目撃を報告する" });
-
+      await openSightingModal(user);
       await user.click(screen.getByRole("button", { name: "地図から選択" }));
 
       expect(screen.getByText("タップして場所を選択")).toBeInTheDocument();
@@ -372,9 +357,7 @@ describe("Map", () => {
       const user = userEvent.setup();
       renderMap();
 
-      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
-      await screen.findByRole("heading", { name: "目撃を報告する" });
-
+      await openSightingModal(user);
       await user.click(screen.getByRole("button", { name: "地図から選択" }));
 
       triggerMapClick?.(35.91, 139.61);
@@ -398,9 +381,7 @@ describe("Map", () => {
       });
       renderMap();
 
-      await user.click(await screen.findByRole("button", { name: "目撃投稿" }));
-      await screen.findByRole("heading", { name: "目撃を報告する" });
-
+      await openSightingModal(user);
       await user.click(screen.getByRole("button", { name: "地図から選択" }));
 
       triggerMapClick?.(35.91, 139.61);

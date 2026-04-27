@@ -92,7 +92,9 @@ export function createClient(options: ClientOptions) {
       if (!original) return Promise.reject(err);
       if (
         err?.response?.status === 401 &&
-        !(original as InternalAxiosRequestConfig & { _retry?: boolean })._retry
+        !(original as InternalAxiosRequestConfig & { _retry?: boolean })
+          ._retry &&
+        !original.url?.includes("/auth/refresh")
       ) {
         (original as InternalAxiosRequestConfig & { _retry?: boolean })._retry =
           true;

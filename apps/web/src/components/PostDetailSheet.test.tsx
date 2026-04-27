@@ -221,16 +221,27 @@ describe("PostDetailSheet", () => {
   });
 
   describe("メッセージを送るボタン", () => {
-    const sightingProps = {
+    const baseSightingProps = {
       markerType: "sighting" as const,
       sightingId: "sighting-1",
       sightingUserId: "user-2",
-      currentUserId: "user-2",
     };
 
-    it("ログイン済みかつ自分がSighting投稿者かつPost投稿者でない時、ボタンが表示されること", () => {
+    it("投稿者（user-1）が目撃マーカーを見ている時、ボタンが表示されること", () => {
       renderSheet({
-        ...sightingProps,
+        ...baseSightingProps,
+        currentUserId: "user-1",
+        post: { ...basePost, userId: "user-1" },
+      });
+      expect(
+        screen.getByRole("button", { name: "メッセージを送る" })
+      ).toBeInTheDocument();
+    });
+
+    it("目撃者（user-2）が自分の目撃マーカーを見ている時、ボタンが表示されること", () => {
+      renderSheet({
+        ...baseSightingProps,
+        currentUserId: "user-2",
         post: { ...basePost, userId: "user-1" },
       });
       expect(
@@ -240,7 +251,7 @@ describe("PostDetailSheet", () => {
 
     it("currentUserIdが未指定（未ログイン）の時、ボタンが非表示であること", () => {
       renderSheet({
-        ...sightingProps,
+        ...baseSightingProps,
         currentUserId: undefined,
         post: { ...basePost, userId: "user-1" },
       });
@@ -249,9 +260,9 @@ describe("PostDetailSheet", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("自分がPost投稿者の時、ボタンが非表示であること", () => {
+    it("投稿者と目撃者が同一人物の時（自分の投稿に自分で目撃）、ボタンが非表示であること", () => {
       renderSheet({
-        ...sightingProps,
+        ...baseSightingProps,
         currentUserId: "user-1",
         sightingUserId: "user-1",
         post: { ...basePost, userId: "user-1" },
@@ -261,9 +272,9 @@ describe("PostDetailSheet", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("自分がSighting投稿者でない時、ボタンが非表示であること", () => {
+    it("第三者（投稿者でも目撃者でもない）の時、ボタンが非表示であること", () => {
       renderSheet({
-        ...sightingProps,
+        ...baseSightingProps,
         currentUserId: "user-3",
         post: { ...basePost, userId: "user-1" },
       });
@@ -274,8 +285,9 @@ describe("PostDetailSheet", () => {
 
     it("markerType=postの時、ボタンが非表示であること", () => {
       renderSheet({
-        ...sightingProps,
+        ...baseSightingProps,
         markerType: "post",
+        currentUserId: "user-1",
         post: { ...basePost, userId: "user-1" },
       });
       expect(
@@ -287,7 +299,8 @@ describe("PostDetailSheet", () => {
       const user = userEvent.setup();
       const onSendMessage = vi.fn();
       renderSheet({
-        ...sightingProps,
+        ...baseSightingProps,
+        currentUserId: "user-1",
         post: { ...basePost, userId: "user-1" },
         onSendMessage,
       });

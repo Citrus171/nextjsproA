@@ -132,13 +132,15 @@ function setupQueryMocks({
           data: conversation,
           isLoading: conversationLoading,
           error: conversationError,
-        } as ReturnType<typeof useQuery>;
+          refetch: vi.fn(),
+        } as unknown as ReturnType<typeof useQuery>;
       }
       return {
         data: messages,
         isLoading: messagesLoading,
         error: messagesError,
-      } as ReturnType<typeof useQuery>;
+        refetch: vi.fn(),
+      } as unknown as ReturnType<typeof useQuery>;
     }
   );
   vi.mocked(useMutation).mockReturnValue({
@@ -243,6 +245,62 @@ describe("ConversationChat", () => {
       });
 
       expect(await screen.findByText("新着メッセージ")).toBeInTheDocument();
+    });
+
+    it("disconnect イベント受信時、切断バナーが表示されること", () => {
+      setupQueryMocks();
+
+      render(<ConversationChat />);
+
+      act(() => {
+        listeners["disconnect"]?.();
+      });
+
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "接続が切れました。再接続中…"
+      );
+    });
+
+    it("connect イベント受信時、切断バナーが非表示になること", () => {
+      setupQueryMocks();
+
+      render(<ConversationChat />);
+
+      act(() => {
+        listeners["disconnect"]?.();
+      });
+      act(() => {
+        listeners["connect"]?.();
+      });
+
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("connect_error イベント受信時、切断バナーが表示されること", () => {
+      setupQueryMocks();
+
+      render(<ConversationChat />);
+
+      act(() => {
+        listeners["connect_error"]?.();
+      });
+
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "接続が切れました。再接続中…"
+      );
+    });
+
+    it("再接続時に joinConversation が再送されること", () => {
+      setupQueryMocks();
+
+      render(<ConversationChat />);
+      mockSocketEmit.mockClear();
+
+      act(() => {
+        listeners["connect"]?.();
+      });
+
+      expect(mockSocketEmit).toHaveBeenCalledWith("joinConversation", "conv-1");
     });
   });
 

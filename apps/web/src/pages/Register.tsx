@@ -12,7 +12,11 @@ export default function Register() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await usersControllerRegister({ name: name || undefined, email, password });
+      await usersControllerRegister({
+        name: name || undefined,
+        email,
+        password,
+      });
       navigate("/login");
     } catch (err) {
       const axiosErr = err as AxiosError<{ error?: string; message?: string }>;
