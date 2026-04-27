@@ -47,7 +47,7 @@ export class UsersService {
           );
         }
         if (target.includes("email") || target.includes("emailhash")) {
-          throw new BadRequestException(
+          throw new ConflictException(
             "このメールアドレスはすでに使用されています"
           );
         }

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -64,6 +65,7 @@ export class SightingsController {
   })
   @ApiResponse({ status: 200, type: [SightingResponseDto] })
   findByPost(@Query("postId") postId: string) {
+    if (!postId) throw new BadRequestException("postIdは必須です");
     return this.sightingsService.findByPost(postId);
   }
 

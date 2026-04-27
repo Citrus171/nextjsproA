@@ -218,8 +218,7 @@ jobs:
   schemathesis:
     name: API Fuzz (Schemathesis)
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    continue-on-error: true
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
 
     services:
       postgres:
@@ -293,7 +292,7 @@ jobs:
         run: |
           schemathesis run \
             http://localhost:3000/api-json \
-            --url http://localhost:3000 \
-            --checks not_a_server_error \
+            --checks all \
             --max-examples 25 \
+            --max-failures 40 \
             --continue-on-failure
