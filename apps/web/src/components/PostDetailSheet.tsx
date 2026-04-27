@@ -63,12 +63,12 @@ export default function PostDetailSheet({
     <Sheet open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <SheetContent
         side="bottom"
-        className="h-[90vh] p-0 overflow-hidden"
+        className="h-[90dvh] p-0 overflow-hidden"
         aria-label={title}
       >
         <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3" />
 
-        <div className="h-full overflow-y-auto px-6 pb-8">
+        <div className="h-full overflow-y-auto px-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between mt-4 mb-2">
             <SheetTitle asChild>
               <h2 className="text-xl font-black text-slate-900">{title}</h2>

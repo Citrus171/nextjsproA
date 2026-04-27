@@ -212,6 +212,15 @@ export default function Map() {
     };
   }, [api, selectedMarker]);
 
+  useEffect(() => {
+    if (!mapInstance) return;
+    if (selectedMarker !== null || sightingModalOpen) {
+      mapInstance.dragging.disable();
+    } else {
+      mapInstance.dragging.enable();
+    }
+  }, [mapInstance, selectedMarker, sightingModalOpen]);
+
   // viewportHeight は将来のレスポンシブ対応のために保持
   void clamp(viewportHeight, 0, Infinity);
 
