@@ -294,5 +294,5 @@ jobs:
             http://localhost:3000/api-json \
             --checks all \
             --max-examples 25 \
-            --max-failures 40 \
+            --max-failures 65 \
             --continue-on-failure
