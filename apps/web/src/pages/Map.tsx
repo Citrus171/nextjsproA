@@ -92,6 +92,7 @@ export default function Map() {
   const { userId: currentUserId } = useAuth();
   const navigate = useNavigate();
   const [markers, setMarkers] = useState<MapMarkerDto[]>([]);
+  const [markersRefreshKey, setMarkersRefreshKey] = useState(0);
   const [filter, setFilter] = useState<FilterValue>("all");
   const [mapInstance, setMapInstance] = useState<LeafletMap | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<MapMarkerDto | null>(
@@ -136,7 +137,7 @@ export default function Map() {
         setError(null);
       })
       .catch(() => setError("マーカーデータの取得に失敗しました"));
-  }, [api]);
+  }, [api, markersRefreshKey]);
 
   const visibleMarkers = useMemo(() => {
     if (filter === "all") return markers;
@@ -419,6 +420,7 @@ export default function Map() {
             setError("メッセージの送信に失敗しました");
           }
         }}
+        onSightingDeleted={() => setMarkersRefreshKey((k) => k + 1)}
         onEdit={(postId) => navigate(`/edit/${postId}`)}
       />
 

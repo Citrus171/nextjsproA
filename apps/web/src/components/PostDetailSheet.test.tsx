@@ -1,7 +1,15 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { vi } from "vitest";
 import type { PostResponseDto } from "../../../../packages/api-client/src/index";
 import PostDetailSheet from "./PostDetailSheet";
+
+vi.mock("../api/orvalClient", () => ({
+  useApiClient: () => ({
+    findSightingsByPost: vi.fn().mockResolvedValue([]),
+  }),
+}));
 
 const basePost: PostResponseDto = {
   id: "post-1",
@@ -55,15 +63,20 @@ const postWithDetail: PostResponseDto = {
 function renderSheet(
   props: Partial<Parameters<typeof PostDetailSheet>[0]> = {}
 ) {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   return render(
-    <PostDetailSheet
-      isOpen={true}
-      onClose={() => {}}
-      post={basePost}
-      markerType="post"
-      isLoading={false}
-      {...props}
-    />
+    <QueryClientProvider client={queryClient}>
+      <PostDetailSheet
+        isOpen={true}
+        onClose={() => {}}
+        post={basePost}
+        markerType="post"
+        isLoading={false}
+        {...props}
+      />
+    </QueryClientProvider>
   );
 }
 

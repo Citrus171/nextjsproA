@@ -1,5 +1,6 @@
 import type { PostResponseDto } from "../../../../packages/api-client/src/index";
 import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
+import SightingList from "./SightingList";
 
 interface PostDetailSheetProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface PostDetailSheetProps {
   sightingUserId?: string | null;
   onSendMessage?: (postId: string, sightingId: string) => void;
   onReportSighting?: (postId: string) => void;
+  onSightingDeleted?: () => void;
   onEdit?: (postId: string) => void;
 }
 
@@ -36,6 +38,7 @@ export default function PostDetailSheet({
   sightingUserId,
   onSendMessage,
   onReportSighting,
+  onSightingDeleted,
   onEdit,
 }: PostDetailSheetProps) {
   const title = markerType === "post" ? "迷い猫投稿" : "目撃情報";
@@ -104,6 +107,14 @@ export default function PostDetailSheet({
                 目撃を報告する
               </button>
             </div>
+          )}
+
+          {markerType === "post" && post && !isLoading && (
+            <SightingList
+              postId={post.id}
+              currentUserId={currentUserId ?? null}
+              onSightingDeleted={onSightingDeleted ?? (() => {})}
+            />
           )}
 
           {showMessageButton && post && sightingId && (
