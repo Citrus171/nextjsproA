@@ -97,12 +97,12 @@ describe("API E2E", () => {
       expect(res.status).toBe(400);
     });
 
-    it("重複メールは 400 を返す", async () => {
+    it("重複メールは 409 を返す", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/users/register")
         .send({ email: OWNER_EMAIL, password: PASSWORD, name: "Dup" });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(409);
     });
 
     it("重複 nickname で 409 を返す", async () => {
