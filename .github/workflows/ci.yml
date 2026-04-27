@@ -290,9 +290,16 @@ jobs:
 
       - name: Run Schemathesis
         run: |
+          THRESHOLD=65
           schemathesis run \
             http://localhost:3000/api-json \
             --checks all \
             --max-examples 25 \
-            --max-failures 65 \
-            --continue-on-failure
+            --continue-on-failure 2>&1 | tee /tmp/schemathesis.log || true
+          FAILURES=$(grep -oP '\d+ unique failures' /tmp/schemathesis.log | grep -oP '^\d+' || echo 0)
+          echo "Unique failures: ${FAILURES} (threshold: ${THRESHOLD})"
+          if [ "${FAILURES}" -gt "${THRESHOLD}" ]; then
+            echo "❌ Failures (${FAILURES}) exceeded threshold (${THRESHOLD})"
+            exit 1
+          fi
+          echo "✅ Failures (${FAILURES}) within threshold (${THRESHOLD})"
