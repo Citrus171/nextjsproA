@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
         setTokenState(t);
       })
       .catch(() => {
-        setTokenState(null);
+        // setTokenState(null) しない: 登録直後のトークンを競合で上書きするのを防ぐ
       })
       .finally(() => {
         setIsRestoring(false);
