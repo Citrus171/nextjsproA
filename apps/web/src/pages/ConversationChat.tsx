@@ -40,7 +40,12 @@ export default function ConversationChat() {
 
   useEffect(() => {
     if (initialMessages) {
-      setMessages(initialMessages);
+      setMessages((prev) => {
+        if (prev.length === 0) return initialMessages;
+        const serverIds = new Set(initialMessages.map((m) => m.id));
+        const socketOnly = prev.filter((m) => !serverIds.has(m.id));
+        return [...initialMessages, ...socketOnly];
+      });
     }
   }, [initialMessages]);
 
@@ -49,6 +54,7 @@ export default function ConversationChat() {
 
     client.markAsRead(id);
 
+    let isFirstConnect = true;
     const socket = createConversationSocket(token);
     socket.emit("joinConversation", id);
 
@@ -63,7 +69,10 @@ export default function ConversationChat() {
     socket.on("connect", () => {
       setSocketDisconnected(false);
       socket.emit("joinConversation", id);
-      fetchMessagesRef.current?.();
+      if (!isFirstConnect) {
+        fetchMessagesRef.current?.();
+      }
+      isFirstConnect = false;
     });
 
     socket.on("connect_error", () => {

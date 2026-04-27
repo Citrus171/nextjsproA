@@ -1,11 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
 export default async function globalTeardown() {
-  const prisma = new PrismaClient();
-  try {
-    await prisma.post.deleteMany({ where: { title: { startsWith: "E2E-" } } });
-    await prisma.user.deleteMany({ where: { email: { startsWith: "e2e-" } } });
-  } finally {
-    await prisma.$disconnect();
-  }
+  // CI では DB がジョブ毎にリセットされるためクリーンアップ不要。
+  // ローカルでテストデータを削除する場合は prisma studio や docker compose down で対応。
 }
