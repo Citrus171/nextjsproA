@@ -700,7 +700,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SightingResponseDto"
+                  }
+                }
+              }
+            }
           }
         },
         "tags": ["sightings"]
@@ -1383,6 +1393,9 @@
           "postId": {
             "type": "string"
           },
+          "userId": {
+            "type": "string"
+          },
           "lat": {
             "type": "number"
           },
@@ -1396,6 +1409,40 @@
           }
         },
         "required": ["type", "id", "lat", "lng", "status"]
+      },
+      "SightingResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "00000000-0000-0000-0000-000000000002"
+          },
+          "userId": {
+            "type": "string",
+            "example": "10000000-0000-0000-0000-000000000002"
+          },
+          "address": {
+            "type": "string",
+            "example": "埼玉県さいたま市浦和区",
+            "nullable": true
+          },
+          "sightedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-02T00:00:00.000Z"
+          },
+          "comment": {
+            "type": "string",
+            "example": "公園付近で目撃しました",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-02T00:00:00.000Z"
+          }
+        },
+        "required": ["id", "userId", "sightedAt", "createdAt"]
       },
       "ConversationResponseDto": {
         "type": "object",

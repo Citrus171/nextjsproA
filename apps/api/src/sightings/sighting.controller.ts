@@ -25,6 +25,7 @@ import {
   OPENAPI_SIGHTING_ID_EXAMPLE,
 } from "../common/openapi-examples";
 import { CreateSightingDto } from "./dto/create-sighting.dto";
+import { SightingResponseDto } from "./dto/sighting-response.dto";
 import { SightingsService } from "./sighting.service";
 
 @ApiTags("sightings")
@@ -61,6 +62,7 @@ export class SightingsController {
     required: true,
     example: OPENAPI_POST_ID_EXAMPLE,
   })
+  @ApiResponse({ status: 200, type: [SightingResponseDto] })
   findByPost(@Query("postId") postId: string) {
     return this.sightingsService.findByPost(postId);
   }

@@ -154,6 +154,17 @@ export interface ConversationResponseDto {
   sightingId: string;
 }
 
+export interface SightingResponseDto {
+  /** @nullable */
+  address?: string | null;
+  /** @nullable */
+  comment?: string | null;
+  createdAt: string;
+  id: string;
+  sightedAt: string;
+  userId: string;
+}
+
 export type MapMarkerDtoType =
   (typeof MapMarkerDtoType)[keyof typeof MapMarkerDtoType];
 
@@ -177,9 +188,9 @@ export interface MapMarkerDto {
   lat: number;
   lng: number;
   postId?: string;
-  userId?: string;
   status: MapMarkerDtoStatus;
   type: MapMarkerDtoType;
+  userId?: string;
 }
 
 export interface LogoutResponseDto {
@@ -523,7 +534,9 @@ export const sightingsControllerCreate = <TData = AxiosResponse<void>>(
 /**
  * @summary postId別の目撃情報一覧を取得する
  */
-export const sightingsControllerFindByPost = <TData = AxiosResponse<void>>(
+export const sightingsControllerFindByPost = <
+  TData = AxiosResponse<SightingResponseDto[]>,
+>(
   params: SightingsControllerFindByPostParams,
   options?: AxiosRequestConfig
 ): Promise<TData> => {
@@ -655,7 +668,9 @@ export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>;
 export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>;
 export type MapControllerGetMarkersResult = AxiosResponse<MapMarkerDto[]>;
 export type SightingsControllerCreateResult = AxiosResponse<void>;
-export type SightingsControllerFindByPostResult = AxiosResponse<void>;
+export type SightingsControllerFindByPostResult = AxiosResponse<
+  SightingResponseDto[]
+>;
 export type SightingsControllerRemoveResult = AxiosResponse<void>;
 export type SightingsControllerToggleFavoriteResult =
   AxiosResponse<SightingsControllerToggleFavorite201>;

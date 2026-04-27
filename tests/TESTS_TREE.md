@@ -334,6 +334,16 @@ apps/web/src/
     │           ├── 自分がSighting投稿者でない時、ボタンが非表示であること
     │           ├── markerType=postの時、ボタンが非表示であること
     │           └── ボタンを押した時、onSendMessageが呼ばれること
+    ├── components/SightingList.test.tsx
+    │   └── SightingList
+    │       ├── ローディング中は読み込み中テキストが表示されること
+    │       ├── Sighting が 0 件の時、空状態メッセージが表示されること
+    │       ├── Sighting 一覧に sightedAt・address・comment が表示されること
+    │       ├── 自分の Sighting にのみ削除ボタンが表示されること
+    │       ├── 他人の Sighting には削除ボタンが表示されないこと
+    │       ├── 削除ボタン押下で AlertDialog が表示されること
+    │       ├── AlertDialog 確認で deleteSighting が呼ばれること
+    │       └── 削除成功後に onSightingDeleted コールバックが呼ばれること
     ├── components/SightingModal.test.tsx
     │   └── SightingModal
     │       ├── isOpen=true の時、フォームが表示されること

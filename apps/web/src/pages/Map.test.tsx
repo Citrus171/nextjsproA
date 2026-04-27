@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const mockGetMapMarkers = vi.fn();
 const mockGetPost = vi.fn();
@@ -74,12 +75,15 @@ vi.mock("react-router-dom", async (importOriginal) => {
   return { ...mod, useNavigate: () => mockNavigate };
 });
 
+const mockFindSightingsByPost = vi.fn();
+
 vi.mock("../api/orvalClient", () => ({
   useApiClient: () => ({
     getMapMarkers: mockGetMapMarkers,
     getPost: mockGetPost,
     createSighting: mockCreateSighting,
     createConversation: mockCreateConversation,
+    findSightingsByPost: mockFindSightingsByPost,
   }),
 }));
 
@@ -130,10 +134,15 @@ import Map from "./Map";
 
 describe("Map", () => {
   function renderMap() {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     return render(
-      <MemoryRouter>
-        <Map />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <Map />
+        </MemoryRouter>
+      </QueryClientProvider>
     );
   }
 
@@ -149,6 +158,7 @@ describe("Map", () => {
     mockGetPost.mockResolvedValue(samplePost);
     mockCreateSighting.mockResolvedValue(undefined);
     mockCreateConversation.mockResolvedValue({ id: "conv-1" });
+    mockFindSightingsByPost.mockResolvedValue([]);
     Object.defineProperty(window.navigator, "geolocation", {
       configurable: true,
       value: {
