@@ -73,13 +73,14 @@ function createMarkerIcon(marker: MapMarkerDto) {
   const shapeClass =
     marker.type === "post" ? "map-marker--pin" : "map-marker--circle";
 
+  const label = getMarkerLabel(marker);
   return L.divIcon({
     className: "map-marker-icon",
     html: `
-      <span class="map-marker ${shapeClass}" style="--marker-fill:${tone.fill};--marker-edge:${tone.edge};">
+      <span class="map-marker ${shapeClass}" role="button" tabindex="0" aria-label="${label}" style="--marker-fill:${tone.fill};--marker-edge:${tone.edge};">
         <span class="map-marker__core"></span>
       </span>
-      <span class="map-marker-label">${getMarkerLabel(marker)}</span>
+      <span class="map-marker-label" aria-hidden="true">${label}</span>
     `,
     iconSize: [44, 56],
     iconAnchor: [22, 50],
@@ -373,22 +374,6 @@ export default function Map() {
         >
           <PlusIcon />
           <span>迷い猫投稿</span>
-        </button>
-        <button
-          type="button"
-          aria-label="目撃投稿"
-          className="map-bottom-bar__button map-bottom-bar__button--sighting"
-          onClick={() => {
-            if (!currentUserId) {
-              navigate("/login");
-              return;
-            }
-            setSightingPostId(null);
-            setSightingModalOpen(true);
-          }}
-        >
-          <PlusIcon />
-          <span>目撃投稿</span>
         </button>
       </nav>
 

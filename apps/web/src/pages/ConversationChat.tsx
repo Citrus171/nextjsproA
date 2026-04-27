@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { createConversationSocket } from "../lib/conversationSocket";
@@ -12,6 +12,8 @@ export default function ConversationChat() {
   const { token, userId } = useAuth();
   const [messages, setMessages] = useState<MessageResponseDto[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [socketDisconnected, setSocketDisconnected] = useState(false);
+  const fetchMessagesRef = useRef<(() => void) | null>(null);
 
   const { data: conversation } = useQuery({
     queryKey: ["conversation", id],
@@ -23,11 +25,18 @@ export default function ConversationChat() {
     data: initialMessages,
     isLoading,
     error,
+    refetch: refetchMessages,
   } = useQuery({
     queryKey: ["messages", id],
     queryFn: () => client.getMessages(id!),
     enabled: !!id,
   });
+
+  useEffect(() => {
+    fetchMessagesRef.current = () => {
+      void refetchMessages();
+    };
+  }, [refetchMessages]);
 
   useEffect(() => {
     if (initialMessages) {
@@ -45,6 +54,20 @@ export default function ConversationChat() {
 
     socket.on("newMessage", (msg: MessageResponseDto) => {
       setMessages((prev) => [...prev, msg]);
+    });
+
+    socket.on("disconnect", () => {
+      setSocketDisconnected(true);
+    });
+
+    socket.on("connect", () => {
+      setSocketDisconnected(false);
+      socket.emit("joinConversation", id);
+      fetchMessagesRef.current?.();
+    });
+
+    socket.on("connect_error", () => {
+      setSocketDisconnected(true);
     });
 
     return () => {
@@ -67,6 +90,20 @@ export default function ConversationChat() {
 
   return (
     <div>
+      {socketDisconnected && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          style={{
+            background: "#fef2f2",
+            color: "#b91c1c",
+            padding: "8px 12px",
+            fontSize: 13,
+          }}
+        >
+          接続が切れました。再接続中…
+        </div>
+      )}
       <div>
         {conversation && (
           <>

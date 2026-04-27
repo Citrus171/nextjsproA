@@ -12,7 +12,8 @@ import { useAuth } from "./auth/AuthProvider";
 import Header from "./components/Header";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
-  const { token } = useAuth();
+  const { token, isRestoring } = useAuth();
+  if (isRestoring) return null;
   return token ? <>{children}</> : <Navigate to="/login" replace />;
 }
 

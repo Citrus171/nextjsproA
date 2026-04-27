@@ -47,8 +47,8 @@ export default function PostDetailSheet({
     markerType === "sighting" &&
     !!currentUserId &&
     !!sightingUserId &&
-    currentUserId === sightingUserId &&
-    post?.userId !== currentUserId;
+    (currentUserId === post?.userId || currentUserId === sightingUserId) &&
+    post?.userId !== sightingUserId;
 
   const showReportSightingButton =
     markerType === "post" && !!post && currentUserId !== post.userId;
