@@ -419,6 +419,7 @@ export default function Map() {
             setError("メッセージの送信に失敗しました");
           }
         }}
+        onEdit={(postId) => navigate(`/edit/${postId}`)}
       />
 
       <SightingModal

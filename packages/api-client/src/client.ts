@@ -6,11 +6,14 @@ import {
   authControllerLogout,
   type PostsControllerCreateBody,
   type UpdatePostDto,
+  type AddImagesResponseDto,
   postsControllerList,
   postsControllerCreate,
   postsControllerUpdate,
   postsControllerGet,
   postsControllerRemove,
+  postsControllerAddImages,
+  postsControllerRemoveImage,
   usersControllerRegister,
   mapControllerGetMarkers,
   conversationsControllerFindAll,
@@ -141,16 +144,23 @@ export function createClient(options: ClientOptions) {
       const r = await postsControllerGet(id);
       return r.data;
     },
-    updatePost: async (
-      id: string,
-      data: Pick<UpdatePostDto, "title" | "description" | "postType">
-    ) => {
+    updatePost: async (id: string, data: UpdatePostDto) => {
       const r = await postsControllerUpdate(id, data);
       return r.data;
     },
     deletePost: async (id: string) => {
       const r = await postsControllerRemove(id);
       return r.data;
+    },
+    addImages: async (
+      id: string,
+      images: File[]
+    ): Promise<AddImagesResponseDto> => {
+      const r = await postsControllerAddImages(id, { images });
+      return r.data;
+    },
+    deleteImage: async (id: string, imageId: string) => {
+      await postsControllerRemoveImage(id, imageId);
     },
     getMapMarkers: async () => {
       const r = await mapControllerGetMarkers();
