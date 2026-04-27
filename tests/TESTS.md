@@ -498,6 +498,8 @@
 - [x] SightingList で削除ボタン押下で AlertDialog が表示されること
 - [x] SightingList で AlertDialog 確認で deleteSighting が呼ばれること
 - [x] SightingList で削除成功後に onSightingDeleted コールバックが呼ばれること
+- [x] SightingList で削除処理中は確認ダイアログの削除ボタンが無効化されること
+- [x] SightingList で削除 API が失敗した時、エラーメッセージが表示されること
 - [x] SightingModal で isOpen=true の時、フォームが表示されること
 - [x] SightingModal で postId が渡された時、postId フィールドが非表示であること
 - [x] SightingModal で必須項目を入力して送信すると、createSighting が正しく呼ばれること

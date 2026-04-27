@@ -33,6 +33,15 @@ const sighting2: SightingResponseDto = {
   createdAt: "2026-04-21T13:00:00.000Z",
 };
 
+const sighting3: SightingResponseDto = {
+  id: "s-3",
+  userId: "user-1",
+  address: "埼玉県熊谷市",
+  sightedAt: "2026-04-22T09:00:00.000Z",
+  comment: null,
+  createdAt: "2026-04-22T10:00:00.000Z",
+};
+
 function renderSightingList(
   props: Partial<Parameters<typeof SightingList>[0]> = {}
 ) {
@@ -136,5 +145,37 @@ describe("SightingList", () => {
     await user.click(screen.getByRole("button", { name: "削除" }));
     await user.click(screen.getByRole("button", { name: "削除する" }));
     await waitFor(() => expect(onSightingDeleted).toHaveBeenCalledTimes(1));
+  });
+
+  it("削除処理中は確認ダイアログの削除ボタンが無効化されること", async () => {
+    const user = userEvent.setup();
+    mockFindSightingsByPost.mockResolvedValue([sighting1, sighting3]);
+    mockDeleteSighting.mockReturnValue(new Promise(() => {}));
+    renderSightingList({ currentUserId: "user-1" });
+    const deleteButtons = await screen.findAllByRole("button", {
+      name: "削除",
+    });
+    expect(deleteButtons).toHaveLength(2);
+    await user.click(deleteButtons[0]);
+    await user.click(screen.getByRole("button", { name: "削除する" }));
+    await user.click(deleteButtons[1]);
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "削除する" })).toBeDisabled()
+    );
+  });
+
+  it("削除APIが失敗した時、エラーメッセージが表示されること", async () => {
+    const user = userEvent.setup();
+    mockFindSightingsByPost.mockResolvedValue([sighting1]);
+    mockDeleteSighting.mockRejectedValue(new Error("サーバーエラー"));
+    renderSightingList({ currentUserId: "user-1" });
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "削除" })).toBeInTheDocument()
+    );
+    await user.click(screen.getByRole("button", { name: "削除" }));
+    await user.click(screen.getByRole("button", { name: "削除する" }));
+    await waitFor(() =>
+      expect(screen.getByText("削除に失敗しました")).toBeInTheDocument()
+    );
   });
 });

@@ -347,7 +347,9 @@ apps/web/src/
     │       ├── 他人の Sighting には削除ボタンが表示されないこと
     │       ├── 削除ボタン押下で AlertDialog が表示されること
     │       ├── AlertDialog 確認で deleteSighting が呼ばれること
-    │       └── 削除成功後に onSightingDeleted コールバックが呼ばれること
+    │       ├── 削除成功後に onSightingDeleted コールバックが呼ばれること
+    │       ├── 削除処理中は確認ダイアログの削除ボタンが無効化されること
+    │       └── 削除 API が失敗した時、エラーメッセージが表示されること
     ├── components/SightingModal.test.tsx
     │   └── SightingModal
     │       ├── isOpen=true の時、フォームが表示されること

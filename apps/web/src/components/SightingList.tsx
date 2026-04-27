@@ -38,6 +38,7 @@ export default function SightingList({
   const api = useApiClient();
   const queryClient = useQueryClient();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const { data: sightings, isLoading } = useQuery({
     queryKey: ["sightings", postId],
@@ -50,6 +51,10 @@ export default function SightingList({
       queryClient.invalidateQueries({ queryKey: ["sightings", postId] });
       onSightingDeleted();
       setDeletingId(null);
+      setDeleteError(null);
+    },
+    onError: () => {
+      setDeleteError("削除に失敗しました");
     },
   });
 
@@ -65,6 +70,9 @@ export default function SightingList({
 
   return (
     <>
+      {deleteError && (
+        <p className="text-red-500 text-sm mt-2">{deleteError}</p>
+      )}
       <div className="mt-4 space-y-3">
         {sightings.map((s: SightingResponseDto) => (
           <div key={s.id} className="bg-slate-50 rounded-2xl p-4">
@@ -113,6 +121,7 @@ export default function SightingList({
             <AlertDialogCancel>キャンセル</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deletingId && deleteMutation.mutate(deletingId)}
+              disabled={deleteMutation.isPending}
             >
               削除する
             </AlertDialogAction>
