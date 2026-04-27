@@ -77,7 +77,7 @@ function createMarkerIcon(marker: MapMarkerDto) {
   return L.divIcon({
     className: "map-marker-icon",
     html: `
-      <span class="map-marker ${shapeClass}" role="button" tabindex="0" aria-label="${label}" style="--marker-fill:${tone.fill};--marker-edge:${tone.edge};">
+      <span class="map-marker ${shapeClass}" role="button" tabindex="0" aria-label="${label}" data-marker-id="${marker.id}" style="--marker-fill:${tone.fill};--marker-edge:${tone.edge};">
         <span class="map-marker__core"></span>
       </span>
       <span class="map-marker-label" aria-hidden="true">${label}</span>
