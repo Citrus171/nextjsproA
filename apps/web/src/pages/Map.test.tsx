@@ -24,6 +24,7 @@ const { mockReverseGeocode } = vi.hoisted(() => ({
 let triggerMapClick: ((lat: number, lng: number) => void) | null = null;
 const mockMapInstance = {
   flyTo: mockFlyTo,
+  dragging: { enable: vi.fn(), disable: vi.fn() },
 };
 const mockAuth = { userId: null as string | null };
 
