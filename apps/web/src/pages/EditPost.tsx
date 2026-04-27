@@ -116,6 +116,10 @@ export default function EditPost() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const handleMapReady = useCallback((m: LeafletMap) => {
+    mapRef.current = m;
+  }, []);
+
   const loadPost = useCallback(async (postId: string) => {
     const post = await apiRef.current.getPost(postId);
     setDescription(post.description ?? "");
@@ -149,6 +153,12 @@ export default function EditPost() {
     loadPost(id).catch(() => setError("投稿の取得に失敗しました"));
   }, [id, loadPost]);
 
+  useEffect(() => {
+    if (pinPos && mapRef.current) {
+      mapRef.current.flyTo([pinPos.lat, pinPos.lng], 15);
+    }
+  }, [pinPos]);
+
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
       setLocationError("このブラウザでは現在地を取得できません");
@@ -178,6 +188,11 @@ export default function EditPost() {
     const files = Array.from(e.target.files ?? []);
     if (!files.length || !id) return;
     e.target.value = "";
+    setError(null);
+    if (files.length > remainingSlots) {
+      setError(`追加できる画像は残り ${remainingSlots} 枚です`);
+      return;
+    }
     try {
       const result = await api.addImages(id, files);
       setExistingImages(result.images);
@@ -189,6 +204,7 @@ export default function EditPost() {
 
   const handleDeleteImage = async (imageId: string) => {
     if (!id) return;
+    setError(null);
     try {
       await api.deleteImage(id, imageId);
       setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
@@ -201,6 +217,7 @@ export default function EditPost() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
+    setError(null);
     setSubmitting(true);
     try {
       await api.updatePost(id, {
@@ -236,6 +253,7 @@ export default function EditPost() {
 
   const confirmDelete = async () => {
     if (!id) return;
+    setError(null);
     setDeleting(true);
     try {
       await api.deletePost(id);
@@ -571,11 +589,7 @@ export default function EditPost() {
                 style={{ height: "100%", width: "100%" }}
                 scrollWheelZoom={false}
               >
-                <MapInstanceBridge
-                  onReady={(m) => {
-                    mapRef.current = m;
-                  }}
-                />
+                <MapInstanceBridge onReady={handleMapReady} />
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

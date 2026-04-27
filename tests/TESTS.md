@@ -455,6 +455,7 @@
 - [x] EditPost で既存画像の個別削除ボタンをクリックした時、deleteImage が imageId で呼ばれること
 - [x] EditPost で画像追加アップロードで addImages が呼ばれること
 - [x] EditPost で remainingSlots=0 の時、追加アップロードボタンが非表示になること
+- [x] EditPost で remainingSlots を超える枚数を選択した時、エラーメッセージが表示され addImages が呼ばれないこと
 - [x] Map で検索バーと種別フィルターを表示する
 - [x] Map で迷い猫投稿を押すと /create に遷移する
 - [x] Map で迷子マーカーを押すと詳細シートが開き投稿者名を表示する

@@ -256,7 +256,6 @@ describe("EditPost", () => {
   });
 
   it("remainingSlots=0 の時、追加アップロードボタンが非表示になること", async () => {
-    mockAddImages.mockResolvedValue({ images: [], remainingSlots: 0 });
     const postWithImages = {
       ...basePost,
       images: Array.from({ length: 3 }, (_, i) => ({
@@ -274,5 +273,28 @@ describe("EditPost", () => {
     );
 
     expect(screen.queryByTestId("image-upload-input")).not.toBeInTheDocument();
+  });
+
+  it("remainingSlots を超える枚数を選択した時、エラーメッセージが表示され addImages が呼ばれないこと", async () => {
+    const user = userEvent.setup();
+    render(<EditPost />);
+
+    await waitFor(() =>
+      expect(screen.getByDisplayValue("レオ")).toBeInTheDocument()
+    );
+
+    const files = [
+      new File(["a"], "cat1.jpg", { type: "image/jpeg" }),
+      new File(["b"], "cat2.jpg", { type: "image/jpeg" }),
+      new File(["c"], "cat3.jpg", { type: "image/jpeg" }),
+      new File(["d"], "cat4.jpg", { type: "image/jpeg" }),
+    ];
+    const input = screen.getByTestId("image-upload-input");
+    await user.upload(input, files);
+
+    expect(mockAddImages).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("追加できる画像は残り 3 枚です")
+    ).toBeInTheDocument();
   });
 });

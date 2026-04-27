@@ -368,7 +368,8 @@ apps/web/src/
     │       ├── 既存画像がサムネイル表示されること
     │       ├── 既存画像の個別削除ボタンをクリックした時、deleteImage が imageId で呼ばれること
     │       ├── 画像追加アップロードで addImages が呼ばれること
-    │       └── remainingSlots=0 の時、追加アップロードボタンが非表示になること
+    │       ├── remainingSlots=0 の時、追加アップロードボタンが非表示になること
+    │       └── remainingSlots を超える枚数を選択した時、エラーメッセージが表示され addImages が呼ばれないこと
     ├── Conversations.test.tsx
     │   └── Conversations
     │       ├── 会話一覧の表示
