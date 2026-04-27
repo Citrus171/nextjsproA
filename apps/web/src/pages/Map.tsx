@@ -421,6 +421,7 @@ export default function Map() {
           }
         }}
         onSightingDeleted={() => setMarkersRefreshKey((k) => k + 1)}
+        onEdit={(postId) => navigate(`/edit/${postId}`)}
       />
 
       <SightingModal

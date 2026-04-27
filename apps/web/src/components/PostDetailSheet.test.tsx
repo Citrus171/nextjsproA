@@ -297,4 +297,43 @@ describe("PostDetailSheet", () => {
       expect(onSendMessage).toHaveBeenCalledWith("post-1", "sighting-1");
     });
   });
+
+  describe("編集ボタン", () => {
+    it("markerType=post かつ自分の投稿の時、編集ボタンが表示されること", () => {
+      const onEdit = vi.fn();
+      renderSheet({
+        markerType: "post",
+        currentUserId: "user-1",
+        post: { ...basePost, userId: "user-1" },
+        onEdit,
+      });
+      expect(
+        screen.getByRole("button", { name: "編集する" })
+      ).toBeInTheDocument();
+    });
+
+    it("他人の投稿の時、編集ボタンが非表示であること", () => {
+      renderSheet({
+        markerType: "post",
+        currentUserId: "user-2",
+        post: { ...basePost, userId: "user-1" },
+      });
+      expect(
+        screen.queryByRole("button", { name: "編集する" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("編集ボタンをクリックした時、onEdit が postId で呼ばれること", async () => {
+      const user = userEvent.setup();
+      const onEdit = vi.fn();
+      renderSheet({
+        markerType: "post",
+        currentUserId: "user-1",
+        post: { ...basePost, userId: "user-1" },
+        onEdit,
+      });
+      await user.click(screen.getByRole("button", { name: "編集する" }));
+      expect(onEdit).toHaveBeenCalledWith("post-1");
+    });
+  });
 });

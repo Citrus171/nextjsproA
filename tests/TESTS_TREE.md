@@ -327,13 +327,17 @@ apps/web/src/
     │       │   ├── 自分がPost投稿者の時、ボタンが非表示であること
     │       │   ├── markerType=sighting の時、ボタンが非表示であること
     │       │   └── ボタンを押した時、onReportSighting が postId で呼ばれること
-    │       └── メッセージを送るボタン
-    │           ├── ログイン済みかつ自分がSighting投稿者かつPost投稿者でない時、ボタンが表示されること
-    │           ├── currentUserIdが未指定（未ログイン）の時、ボタンが非表示であること
-    │           ├── 自分がPost投稿者の時、ボタンが非表示であること
-    │           ├── 自分がSighting投稿者でない時、ボタンが非表示であること
-    │           ├── markerType=postの時、ボタンが非表示であること
-    │           └── ボタンを押した時、onSendMessageが呼ばれること
+    │       ├── メッセージを送るボタン
+    │       │   ├── ログイン済みかつ自分がSighting投稿者かつPost投稿者でない時、ボタンが表示されること
+    │       │   ├── currentUserIdが未指定（未ログイン）の時、ボタンが非表示であること
+    │       │   ├── 自分がPost投稿者の時、ボタンが非表示であること
+    │       │   ├── 自分がSighting投稿者でない時、ボタンが非表示であること
+    │       │   ├── markerType=postの時、ボタンが非表示であること
+    │       │   └── ボタンを押した時、onSendMessageが呼ばれること
+    │       └── 編集ボタン
+    │           ├── markerType=post かつ自分の投稿の時、編集ボタンが表示されること
+    │           ├── 他人の投稿の時、編集ボタンが非表示であること
+    │           └── 編集ボタンをクリックした時、onEdit が postId で呼ばれること
     ├── components/SightingList.test.tsx
     │   └── SightingList
     │       ├── ローディング中は読み込み中テキストが表示されること
@@ -366,7 +370,16 @@ apps/web/src/
     │       └── ネットワークエラー時、geocodeError を返すこと
     ├── EditPost.test.tsx
     │   └── EditPost
-    │       └── 取得した postType を表示し、送信時に postType を含める
+    │       ├── 投稿データ取得後、petDetail を含むフォームに初期値がセットされること
+    │       ├── 変更して保存した時、updatePost が petDetail/location を含むデータで呼ばれること
+    │       ├── 削除ボタンをクリックした時、確認ダイアログが表示されること
+    │       ├── 削除ダイアログで「削除を確定する」を押した時、deletePost が呼ばれ / にリダイレクトされること
+    │       ├── 削除ダイアログで「キャンセル」を押した時、deletePost が呼ばれないこと
+    │       ├── 既存画像がサムネイル表示されること
+    │       ├── 既存画像の個別削除ボタンをクリックした時、deleteImage が imageId で呼ばれること
+    │       ├── 画像追加アップロードで addImages が呼ばれること
+    │       ├── remainingSlots=0 の時、追加アップロードボタンが非表示になること
+    │       └── remainingSlots を超える枚数を選択した時、エラーメッセージが表示され addImages が呼ばれないこと
     ├── Conversations.test.tsx
     │   └── Conversations
     │       ├── 会話一覧の表示
