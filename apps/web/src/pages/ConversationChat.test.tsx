@@ -133,14 +133,14 @@ function setupQueryMocks({
           isLoading: conversationLoading,
           error: conversationError,
           refetch: vi.fn(),
-        } as ReturnType<typeof useQuery>;
+        } as unknown as ReturnType<typeof useQuery>;
       }
       return {
         data: messages,
         isLoading: messagesLoading,
         error: messagesError,
         refetch: vi.fn(),
-      } as ReturnType<typeof useQuery>;
+      } as unknown as ReturnType<typeof useQuery>;
     }
   );
   vi.mocked(useMutation).mockReturnValue({
