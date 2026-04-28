@@ -9,6 +9,7 @@ import Map from "./pages/Map";
 import Conversations from "./pages/Conversations";
 import ConversationChat from "./pages/ConversationChat";
 import { useAuth } from "./auth/AuthProvider";
+import { Sonner } from "./components/ui/sonner";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isRestoring } = useAuth();
@@ -19,6 +20,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <>
+      <Sonner position="top-center" richColors />
       <Routes>
         <Route path="/" element={<Map />} />
         <Route path="/posts" element={<Posts />} />

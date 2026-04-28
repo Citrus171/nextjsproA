@@ -1,9 +1,6 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import type { PostResponseDto } from "../../../../packages/api-client/src/index";
-import {
-  useInfiniteQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useApiClient } from "../api/orvalClient";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -17,7 +14,8 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "../components/ui/alert-dialog";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
+import { MapPinned } from "lucide-react";
 
 const PER_PAGE = 5;
 
@@ -27,7 +25,6 @@ export default function Posts() {
   const navigate = useNavigate();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const {
     data,
@@ -42,7 +39,10 @@ export default function Posts() {
       api.listPosts(pageParam, PER_PAGE),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
-      const totalFetched = allPages.reduce((sum, page) => sum + (page.items?.length ?? 0), 0);
+      const totalFetched = allPages.reduce(
+        (sum, page) => sum + (page.items?.length ?? 0),
+        0
+      );
       if (totalFetched >= (lastPage.total ?? 0)) return undefined;
       return allPages.length + 1;
     },
@@ -50,15 +50,18 @@ export default function Posts() {
 
   const allItems = data?.pages.flatMap((page) => page.items ?? []) ?? [];
 
-  const handleDelete = useCallback(async (id: string) => {
-    try {
-      await api.deletePost(id);
-      queryClient.invalidateQueries({ queryKey: ["posts"] });
-      toast.success("削除しました");
-    } catch (e) {
-      toast.error("削除に失敗しました");
-    }
-  }, [api, queryClient]);
+  const handleDelete = useCallback(
+    async (id: string) => {
+      try {
+        await api.deletePost(id);
+        queryClient.invalidateQueries({ queryKey: ["posts"] });
+        toast.success("削除しました");
+      } catch (e) {
+        toast.error("削除に失敗しました");
+      }
+    },
+    [api, queryClient]
+  );
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -96,12 +99,10 @@ export default function Posts() {
     );
   }
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString("ja-JP");
+  const formatDate = (iso: string) => new Date(iso).toLocaleDateString("ja-JP");
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Toaster position="top-center" richColors />
       <div className="mx-auto max-w-4xl px-4 py-6">
         {/* ヘッダー */}
         <div className="mb-6 flex items-center justify-between">
@@ -121,7 +122,7 @@ export default function Posts() {
         </div>
 
         {/* カードグリッド */}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {allItems.map((p: PostResponseDto) => (
             <div
               key={p.id}
@@ -174,35 +175,31 @@ export default function Posts() {
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
                       aria-label={`${p.petDetail?.name ?? "投稿"}の位置を開く`}
                     >
-                      🗺
+                      <MapPinned size={16} aria-hidden="true" />
                     </button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
                           type="button"
                           className="text-sm font-semibold text-red-600 hover:text-red-700"
-                          onClick={() => setDeletingId(p.id)}
                         >
                           Delete
                         </button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>投稿を削除しますか？</AlertDialogTitle>
+                          <AlertDialogTitle>
+                            投稿を削除しますか？
+                          </AlertDialogTitle>
                           <AlertDialogDescription>
                             この操作は取り消せません。
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel onClick={() => setDeletingId(null)}>
-                            キャンセル
-                          </AlertDialogCancel>
+                          <AlertDialogCancel>キャンセル</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => {
-                              if (deletingId) {
-                                handleDelete(deletingId);
-                                setDeletingId(null);
-                              }
+                              handleDelete(p.id);
                             }}
                           >
                             削除する
@@ -237,9 +234,7 @@ export default function Posts() {
         )}
 
         {!hasNextPage && allItems.length === 0 && (
-          <p className="mt-12 text-center text-slate-400">
-            投稿がありません
-          </p>
+          <p className="mt-12 text-center text-slate-400">投稿がありません</p>
         )}
 
         {/* IntersectionObserver センチネル */}

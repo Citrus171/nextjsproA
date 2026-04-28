@@ -445,6 +445,7 @@
 - [x] App で未認証で /posts にアクセスしたとき、Posts ページが表示されること
 - [x] App で未認証で /create にアクセスしたとき、/login にリダイレクトされること
 - [x] CreatePost で必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し /posts へ戻る
+- [x] CreatePost で投稿APIが失敗した時、エラートーストを表示して遷移しないこと
 - [x] EditPost で投稿データ取得後、petDetail を含むフォームに初期値がセットされること
 - [x] EditPost で変更して保存した時、updatePost が petDetail/location を含むデータで呼ばれること
 - [x] EditPost で削除ボタンをクリックした時、確認ダイアログが表示されること
@@ -566,6 +567,11 @@
 - [x] Posts で削除が失敗した時、エラートーストが表示されること
 - [x] Posts で地図アイコンボタンをクリックした時、/?postId=xxx に遷移すること
 - [x] Posts で← Map ボタンをクリックした時、/ に遷移すること
+
+### Register (`src/pages/Register.test.tsx`)
+
+- [x] Register で入力して登録した時、ユーザー登録後に /login へ遷移すること
+- [x] Register で登録に失敗した時、エラートーストが表示されること
 
 ---
 

@@ -16,9 +16,10 @@ const { mockToastSuccess, mockToastError } = vi.hoisted(() => ({
 let triggerIntersection: (() => void) | null = null;
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom"
-  );
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom"
+    );
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -138,6 +139,16 @@ describe("Posts", () => {
               ],
               this as unknown as IntersectionObserver
             );
+          };
+        });
+        disconnect = vi.fn();
+        unobserve = vi.fn();
+        takeRecords = vi.fn(() => []);
+        constructor(callback: IntersectionObserverCallback) {
+          this.callback = callback;
+        }
+      }
+    );
   });
 
   afterEach(() => {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usersControllerRegister } from "../../../../packages/api-client/src/index";
 import type { AxiosError } from "axios";
+import { toast } from "sonner";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -24,8 +25,8 @@ export default function Register() {
         axiosErr.response?.data?.error ||
         axiosErr.response?.data?.message ||
         axiosErr.message ||
-        "Register failed";
-      alert(msg);
+        "登録に失敗しました";
+      toast.error(msg);
     }
   };
 
