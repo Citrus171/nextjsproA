@@ -1,6 +1,14 @@
 import { AuthService } from "./auth.service";
 import * as bcrypt from "bcrypt";
 
+jest.mock("../utils/crypto", () => ({
+  decryptEmail: jest.fn().mockReturnValue("test@example.com"),
+  normalizeEmail: jest.fn((e: string) => e.toLowerCase()),
+  hmacEmail: jest.fn().mockReturnValue("hmac"),
+  encryptEmail: jest.fn().mockReturnValue("encrypted"),
+  sha256Hex: jest.fn().mockReturnValue("sha256"),
+}));
+
 const makeUser = (overrides = {}) => ({
   id: "user1",
   email: "test@example.com",
@@ -100,7 +108,8 @@ describe("AuthService", () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValue({
         token: "old",
         userId: "user1",
-        user: { email: "test@example.com" },
+        expiresAt: new Date(Date.now() + 86400000),
+        user: { emailEncrypted: "encrypted", role: "user" },
       });
       mockPrisma.refreshToken.delete.mockResolvedValue({});
       mockPrisma.refreshToken.create.mockResolvedValue({});

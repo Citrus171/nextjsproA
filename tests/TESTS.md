@@ -279,11 +279,15 @@
 
 #### handleJoin
 
-- [x] 指定した会話ルームにjoinすること
+- [x] userIdがない場合は切断されjoinしない
+- [x] 会話参加権限がない場合は切断されjoinしない
+- [x] 会話が存在しない場合は切断されjoinしない
+- [x] 会話参加権限がある場合は指定した会話ルームにjoinすること
 
 #### handleLeave
 
-- [x] 指定した会話ルームからleaveすること
+- [x] userIdがない場合は切断されleaveしない
+- [x] userIdがある場合は指定した会話ルームからleaveすること
 
 #### broadcastMessage
 
@@ -355,6 +359,12 @@
 - [x] ConflictException はそのまま伝播する
 - [x] nickname があれば service に渡す
 - [x] nickname がなくても name を後方互換で使う
+
+#### remove
+
+- [x] 管理者がユーザーを削除できる
+- [x] 存在しないユーザーIDはP2025エラーを404に変換する
+- [x] P2025以外のエラーは再スローされる
 
 ### Dredd 契約テスト
 

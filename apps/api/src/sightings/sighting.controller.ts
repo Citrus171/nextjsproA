@@ -21,6 +21,7 @@ import {
   ApiParam,
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
 import {
   OPENAPI_POST_ID_EXAMPLE,
   OPENAPI_SIGHTING_ID_EXAMPLE,
@@ -51,9 +52,8 @@ export class SightingsController {
       },
     },
   })
-  create(@Request() req: any, @Body() dto: CreateSightingDto) {
-    const userId = req.user?.id ?? req.user?.userId;
-    return this.sightingsService.create(userId, dto);
+  create(@Request() req: AuthenticatedRequest, @Body() dto: CreateSightingDto) {
+    return this.sightingsService.create(req.user.id, dto);
   }
 
   @Get()
@@ -76,10 +76,12 @@ export class SightingsController {
   @ApiOperation({ summary: "目撃情報を削除する（本人または管理者）" })
   @ApiParam({ name: "id", example: OPENAPI_SIGHTING_ID_EXAMPLE })
   @ApiResponse({ status: 204 })
-  remove(@Request() req: any, @Param("id") id: string) {
-    const userId = req.user?.id ?? req.user?.userId;
-    const isAdmin = req.user?.role === "admin";
-    return this.sightingsService.remove(userId, id, isAdmin);
+  remove(@Request() req: AuthenticatedRequest, @Param("id") id: string) {
+    return this.sightingsService.remove(
+      req.user.id,
+      id,
+      req.user.role === "admin"
+    );
   }
 
   @Post(":id/favorite")
@@ -93,8 +95,10 @@ export class SightingsController {
   })
   @ApiResponse({ status: 400, description: "お気に入り上限超過" })
   @ApiResponse({ status: 404, description: "Sighting not found" })
-  async toggleFavorite(@Request() req: any, @Param("id") id: string) {
-    const userId = req.user?.id ?? req.user?.userId;
-    return this.sightingsService.toggleFavorite(userId, id);
+  async toggleFavorite(
+    @Request() req: AuthenticatedRequest,
+    @Param("id") id: string
+  ) {
+    return this.sightingsService.toggleFavorite(req.user.id, id);
   }
 }

@@ -168,9 +168,13 @@ apps/api/src/
 │   │   │   ├── 有効なトークンで接続した場合はsocket.data.userIdが設定される
 │   │   │   └── Authorizationヘッダー（Bearer形式）でも認証できる
 │   │   ├── handleJoin
-│   │   │   └── 指定した会話ルームにjoinすること
+│   │   │   ├── userIdがない場合は切断されjoinしない
+│   │   │   ├── 会話参加権限がない場合は切断されjoinしない
+│   │   │   ├── 会話が存在しない場合は切断されjoinしない
+│   │   │   └── 会話参加権限がある場合は指定した会話ルームにjoinすること
 │   │   ├── handleLeave
-│   │   │   └── 指定した会話ルームからleaveすること
+│   │   │   ├── userIdがない場合は切断されleaveしない
+│   │   │   └── userIdがある場合は指定した会話ルームからleaveすること
 │   │   └── broadcastMessage
 │   │       └── 最小化されたペイロードのみemitする（readAtを含まない）
 │   └── conversation.controller.spec.ts
@@ -216,7 +220,11 @@ apps/api/src/
     │       ├── nickname と name がないと BadRequestException を返す
     │       ├── ConflictException はそのまま伝播する
     │       ├── nickname があれば service に渡す
-    │       └── nickname がなくても name を後方互換で使う
+    │       ├── nickname がなくても name を後方互換で使う
+    │       └── remove
+    │           ├── 管理者がユーザーを削除できる
+    │           ├── 存在しないユーザーIDはP2025エラーを404に変換する
+    │           └── P2025以外のエラーは再スローされる
     ├── dto/
     │   └── register.dto.spec.ts
     │       └── RegisterDto

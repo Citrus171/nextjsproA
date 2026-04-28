@@ -24,7 +24,7 @@ export class UsersService {
     const emailEncrypted = encryptEmail(normalized);
 
     try {
-      const user = await (this.prisma.user as any).create({
+      const user = await this.prisma.user.create({
         data: {
           emailEncrypted,
           emailHash,
@@ -62,11 +62,11 @@ export class UsersService {
     const hmac = hmacEmail(normalized);
     const sha = sha256Hex(normalized);
     // Try HMAC first, fallback to SHA256 (transitional for existing rows)
-    let user = await (this.prisma.user as any).findUnique({
+    let user = await this.prisma.user.findUnique({
       where: { emailHash: hmac },
     });
     if (!user) {
-      user = await (this.prisma.user as any).findUnique({
+      user = await this.prisma.user.findUnique({
         where: { emailHash: sha },
       });
     }
@@ -82,7 +82,7 @@ export class UsersService {
   }
 
   async findById(id: string) {
-    const user = await (this.prisma.user as any).findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) return null;
     let emailDec = null;
     try {
@@ -96,7 +96,7 @@ export class UsersService {
   // TanStack Start: export const getUsers = createServerFn(async () => db.user.findMany())
   // NestJS:  この1行が「サーバー関数の中身」に相当する
   async findAll() {
-    const users = await (this.prisma.user as any).findMany({
+    const users = await this.prisma.user.findMany({
       select: {
         id: true,
         emailEncrypted: true,

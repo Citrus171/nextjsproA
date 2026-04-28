@@ -33,6 +33,7 @@ import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./post.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
 import { Plan } from "@prisma/client";
 import { PLAN_LIMITS } from "../common/plan-limits";
 import {
@@ -127,12 +128,11 @@ export class PostsController {
     },
   })
   async create(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Body() dto: CreatePostDto,
     @UploadedFiles() files: Express.Multer.File[]
   ) {
-    const userId = req.user?.id ?? req.user?.userId;
-    return this.posts.create(userId, dto, files ?? []);
+    return this.posts.create(req.user.id, dto, files ?? []);
   }
 
   @Get()
@@ -156,12 +156,11 @@ export class PostsController {
   @ApiResponse({ status: 200, type: PostResponseDto })
   @ApiResponse({ status: 403, description: "Forbidden: not the post owner" })
   async update(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param("id") id: string,
     @Body() body: UpdatePostDto
   ) {
-    const userId = req.user?.id ?? req.user?.userId;
-    return this.posts.update(id, userId, body);
+    return this.posts.update(id, req.user.id, body);
   }
 
   @Delete(":id")
@@ -172,10 +171,8 @@ export class PostsController {
     status: 403,
     description: "Forbidden: not the post owner or admin",
   })
-  async remove(@Req() req: any, @Param("id") id: string) {
-    const userId = req.user?.id ?? req.user?.userId;
-    const isAdmin = req.user?.role === "admin";
-    return this.posts.remove(id, userId, isAdmin);
+  async remove(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
+    return this.posts.remove(id, req.user.id, req.user.role === "admin");
   }
 
   @HttpPost(":id/images")
@@ -207,12 +204,11 @@ export class PostsController {
     },
   })
   async addImages(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param("id") id: string,
     @UploadedFiles() files: Express.Multer.File[]
   ) {
-    const userId = req.user?.id ?? req.user?.userId;
-    return this.posts.addImages(id, userId, files ?? []);
+    return this.posts.addImages(id, req.user.id, files ?? []);
   }
 
   @Delete(":id/images/:imageId")
@@ -226,12 +222,11 @@ export class PostsController {
   })
   @ApiResponse({ status: 404, description: "Image not found" })
   async removeImage(
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param("id") id: string,
     @Param("imageId") imageId: string
   ) {
-    const userId = req.user?.id ?? req.user?.userId;
-    return this.posts.removeImage(id, imageId, userId);
+    return this.posts.removeImage(id, imageId, req.user.id);
   }
 
   @HttpPost(":id/favorite")
@@ -244,8 +239,10 @@ export class PostsController {
   @ApiResponse({ status: 400, description: "お気に入り上限超過" })
   @ApiResponse({ status: 403, description: "自分の投稿はお気に入り不可" })
   @ApiResponse({ status: 404, description: "Post not found" })
-  async toggleFavorite(@Req() req: any, @Param("id") id: string) {
-    const userId = req.user?.id ?? req.user?.userId;
-    return this.posts.toggleFavorite(userId, id);
+  async toggleFavorite(
+    @Req() req: AuthenticatedRequest,
+    @Param("id") id: string
+  ) {
+    return this.posts.toggleFavorite(req.user.id, id);
   }
 }

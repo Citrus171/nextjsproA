@@ -30,7 +30,7 @@ export class AuthService {
   }
 
   async rotateRefreshToken(oldToken: string) {
-    const rec = await (this.prisma.refreshToken as any).findUnique({
+    const rec = await this.prisma.refreshToken.findUnique({
       where: { token: oldToken },
       include: { user: { select: { emailEncrypted: true, role: true } } },
     });
@@ -48,7 +48,7 @@ export class AuthService {
     });
     const email = rec.user.emailEncrypted
       ? decryptEmail(rec.user.emailEncrypted)
-      : (rec.user.email ?? null);
+      : null;
     return {
       newToken,
       userId: rec.userId,
