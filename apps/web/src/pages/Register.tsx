@@ -93,7 +93,7 @@ export default function Register() {
             </div>
           )}
 
-          <form onSubmit={submit} className="space-y-5">
+          <form onSubmit={submit} noValidate className="space-y-5">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
                 <Label
