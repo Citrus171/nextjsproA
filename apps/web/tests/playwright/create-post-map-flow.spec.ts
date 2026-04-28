@@ -12,28 +12,32 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   const description = `${uniqueToken}-description`;
 
   await page.goto(`${baseUrl}/register`);
-  await page.fill('input[placeholder="email"]', email);
-  await page.fill('input[placeholder="password"]', password);
-  await page.fill('input[placeholder="name"]', `E2E User ${uniqueToken}`);
+  await page.fill(
+    'input[placeholder="ニックネーム"]',
+    `E2E User ${uniqueToken}`
+  );
+  await page.fill('input[placeholder="example@email.com"]', email);
+  await page.fill('input[placeholder="8文字以上"]', password);
+  await page.fill('input[placeholder="もう一度入力"]', password);
   await Promise.all([
     page.waitForResponse(
       (res) =>
         res.url().includes("/api/users/register") &&
         res.request().method() === "POST"
     ),
-    page.click('button:has-text("Register")'),
+    page.click('button:has-text("アカウントを作成")'),
   ]);
   await expect(page).toHaveURL(`${baseUrl}/login`);
 
-  await page.fill('input[placeholder="email"]', email);
-  await page.fill('input[placeholder="password"]', password);
+  await page.fill('input[placeholder="example@email.com"]', email);
+  await page.fill('input[placeholder="パスワードを入力"]', password);
   await Promise.all([
     page.waitForResponse(
       (res) =>
         res.url().includes("/api/auth/login") &&
         res.request().method() === "POST"
     ),
-    page.click('button:has-text("Login")'),
+    page.click('button:has-text("ログイン")'),
   ]);
   await expect(page).toHaveURL(`${baseUrl}/posts`);
 
