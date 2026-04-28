@@ -24,9 +24,33 @@ const { mockReverseGeocode } = vi.hoisted(() => ({
     >(),
 }));
 let triggerMapClick: ((lat: number, lng: number) => void) | null = null;
+let mapClickHandler:
+  | ((e: { latlng: { lat: number; lng: number } }) => void)
+  | null = null;
 const mockMapInstance = {
   flyTo: mockFlyTo,
   dragging: { enable: vi.fn(), disable: vi.fn() },
+  on: vi.fn(
+    (
+      _event: string,
+      handler: (e: { latlng: { lat: number; lng: number } }) => void
+    ) => {
+      mapClickHandler = handler;
+      triggerMapClick = (lat: number, lng: number) =>
+        handler({ latlng: { lat, lng } });
+    }
+  ),
+  off: vi.fn(
+    (
+      _event: string,
+      handler: (e: { latlng: { lat: number; lng: number } }) => void
+    ) => {
+      if (mapClickHandler === handler) {
+        mapClickHandler = null;
+        triggerMapClick = null;
+      }
+    }
+  ),
 };
 const mockAuth = { userId: null as string | null };
 
@@ -36,15 +60,6 @@ vi.mock("react-leaflet", () => ({
   ),
   TileLayer: () => <div data-testid="tile-layer" />,
   useMap: () => mockMapInstance,
-  useMapEvents: (handlers: {
-    click?: (e: { latlng: { lat: number; lng: number } }) => void;
-  }) => {
-    if (handlers.click) {
-      triggerMapClick = (lat: number, lng: number) =>
-        handlers.click?.({ latlng: { lat, lng } });
-    }
-    return mockMapInstance;
-  },
   Marker: ({
     children,
     title,
@@ -161,6 +176,7 @@ describe("Map", () => {
     mockReverseGeocode.mockReset();
     mockReverseGeocode.mockResolvedValue({ address: "埼玉県さいたま市" });
     triggerMapClick = null;
+    mapClickHandler = null;
     mockGetMapMarkers.mockResolvedValue([]);
     mockGetPost.mockResolvedValue(samplePost);
     mockCreateSighting.mockResolvedValue(undefined);
@@ -195,7 +211,9 @@ describe("Map", () => {
 
       await user.click(screen.getByRole("button", { name: "アカウント" }));
 
-      expect(screen.queryByText("ログアウトしますか？")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("ログアウトしますか？")
+      ).not.toBeInTheDocument();
       expect(mockLogout).not.toHaveBeenCalled();
       expect(mockClearToken).not.toHaveBeenCalled();
     });
@@ -208,8 +226,12 @@ describe("Map", () => {
 
       await user.click(screen.getByRole("button", { name: "アカウント" }));
 
-      expect(await screen.findByText("ログアウトしますか？")).toBeInTheDocument();
-      expect(screen.getByText("ログイン状態を解除します。")).toBeInTheDocument();
+      expect(
+        await screen.findByText("ログアウトしますか？")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("ログイン状態を解除します。")
+      ).toBeInTheDocument();
     });
 
     it("ダイアログでキャンセル押下時、ログアウト処理が実行されないこと", async () => {
