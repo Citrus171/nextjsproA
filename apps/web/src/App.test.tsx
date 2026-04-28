@@ -72,7 +72,7 @@ describe("App", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: "Login" })
+      await screen.findByRole("button", { name: "ログイン" })
     ).toBeInTheDocument();
   });
 });
