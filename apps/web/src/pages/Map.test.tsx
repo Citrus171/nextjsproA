@@ -9,6 +9,8 @@ const mockGetMapMarkers = vi.fn();
 const mockGetPost = vi.fn();
 const mockCreateSighting = vi.fn();
 const mockCreateConversation = vi.fn();
+const mockLogout = vi.fn();
+const mockClearToken = vi.fn();
 const mockFlyTo = vi.fn();
 const mockGetCurrentPosition = vi.fn();
 const mockNavigate = vi.fn();
@@ -85,6 +87,7 @@ vi.mock("../api/orvalClient", () => ({
     createSighting: mockCreateSighting,
     createConversation: mockCreateConversation,
     findSightingsByPost: mockFindSightingsByPost,
+    logout: mockLogout,
   }),
 }));
 
@@ -93,7 +96,7 @@ vi.mock("../auth/AuthProvider", () => ({
     token: null,
     userId: mockAuth.userId,
     setToken: vi.fn(),
-    clearToken: vi.fn(),
+    clearToken: mockClearToken,
   }),
 }));
 
@@ -150,6 +153,9 @@ describe("Map", () => {
   beforeEach(() => {
     mockAuth.userId = null;
     mockNavigate.mockReset();
+    mockClearToken.mockReset();
+    mockLogout.mockReset();
+    mockLogout.mockResolvedValue(undefined);
     mockFlyTo.mockReset();
     mockGetCurrentPosition.mockReset();
     mockReverseGeocode.mockReset();
