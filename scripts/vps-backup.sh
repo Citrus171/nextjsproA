@@ -12,10 +12,12 @@ RETAIN_DAYS="${RETAIN_DAYS:-7}"
 UPLOADS_ONLY="${UPLOADS_ONLY:-false}"
 DB_ONLY="${DB_ONLY:-false}"
 
-# 環境変数読み込み（DATABASE_URL）
-set -a
-[[ -f ~/finder-backend/apps/api/.env ]] && . ~/finder-backend/apps/api/.env
-set +a
+# 環境変数読み込み（DATABASE_URL のみ抽出）
+ENV_FILE=~/finder-backend/apps/api/.env
+if [[ -z "${DATABASE_URL:-}" ]] && [[ -f "$ENV_FILE" ]]; then
+  DATABASE_URL=$(grep '^DATABASE_URL=' "$ENV_FILE" | head -1 | cut -d= -f2-)
+  export DATABASE_URL
+fi
 
 # オプション解析
 while [[ $# -gt 0 ]]; do

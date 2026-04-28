@@ -59,7 +59,8 @@ done
 echo ""
 echo "🔄 [2/6] PM2 プロセス ($PM2_NAME)"
 if pm2 describe "$PM2_NAME" >/dev/null 2>&1; then
-  PM2_STATUS=$(pm2 jlist | python3 -c "import sys, json; d=json.load(sys.stdin); print(next((p['pm2_env']['status'] for p in d if p['name']=='$PM2_NAME'), 'unknown'))")
+  PM2_STATUS=$(pm2 describe "$PM2_NAME" 2>/dev/null | grep -E '^\s+status' | awk '{print $NF}' | head -1)
+  PM2_STATUS="${PM2_STATUS:-unknown}"
   if [[ "$PM2_STATUS" == "online" ]]; then
     echo "  $PM2_NAME  → OK ($PM2_STATUS)"
   else
