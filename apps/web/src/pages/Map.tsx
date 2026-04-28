@@ -19,6 +19,16 @@ import { useApiClient } from "../api/orvalClient";
 import PostDetailSheet from "../components/PostDetailSheet";
 import SightingModal from "../components/SightingModal";
 import { reverseGeocode } from "../lib/reverseGeocode";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import "../styles/map.css";
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)
@@ -90,7 +100,7 @@ function createMarkerIcon(marker: MapMarkerDto) {
 
 export default function Map() {
   const api = useApiClient();
-  const { userId: currentUserId } = useAuth();
+  const { userId: currentUserId, clearToken } = useAuth();
   const navigate = useNavigate();
   const [markers, setMarkers] = useState<MapMarkerDto[]>([]);
   const [markersRefreshKey, setMarkersRefreshKey] = useState(0);
@@ -119,6 +129,7 @@ export default function Map() {
   const [viewportHeight, setViewportHeight] = useState(() =>
     getViewportHeight()
   );
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setViewportHeight(getViewportHeight());
@@ -233,6 +244,10 @@ export default function Map() {
             className="map-icon-button"
             type="button"
             aria-label="メニュー"
+            onClick={() => {
+              if (!currentUserId) return;
+              setShowLogoutDialog(true);
+            }}
           >
             <MenuIcon />
           </button>
@@ -259,6 +274,10 @@ export default function Map() {
               className="map-account-button"
               type="button"
               aria-label="アカウント"
+              onClick={() => {
+                if (!currentUserId) return;
+                setShowLogoutDialog(true);
+              }}
             >
               <UserIcon />
             </button>
@@ -441,6 +460,35 @@ export default function Map() {
             .catch(() => {});
         }}
       />
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ログアウトしますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              ログイン状態を解除します。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowLogoutDialog(false)}>
+              キャンセル
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                try {
+                  await api.logout();
+                } catch {
+                  // エラー時もローカル状態はクリアする
+                }
+                setShowLogoutDialog(false);
+                clearToken();
+              }}
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

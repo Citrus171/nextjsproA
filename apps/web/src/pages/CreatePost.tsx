@@ -37,6 +37,7 @@ import {
   Upload,
   LocateFixed,
 } from "lucide-react";
+import { toast } from "sonner";
 
 // Leaflet デフォルトアイコン修正
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)
@@ -230,7 +231,7 @@ export default function CreatePost() {
       });
       navigate("/posts");
     } catch {
-      alert("投稿に失敗しました。もう一度お試しください。");
+      toast.error("投稿に失敗しました。もう一度お試しください。");
     } finally {
       setSubmitting(false);
     }

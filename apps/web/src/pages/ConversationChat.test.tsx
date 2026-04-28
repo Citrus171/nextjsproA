@@ -1,4 +1,5 @@
 import { render, screen, act, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import type {
   ConversationListItemDto,
@@ -42,6 +43,8 @@ vi.mock("../lib/conversationSocket", () => ({
   createConversationSocket: vi.fn(() => mockSocket),
 }));
 
+const mockNavigate = vi.fn();
+
 vi.mock("react-router-dom", async () => {
   const actual =
     await vi.importActual<typeof import("react-router-dom")>(
@@ -50,6 +53,7 @@ vi.mock("react-router-dom", async () => {
   return {
     ...actual,
     useParams: () => ({ id: "conv-1" }),
+    useNavigate: () => mockNavigate,
   };
 });
 
@@ -168,6 +172,17 @@ describe("ConversationChat", () => {
 
       expect(screen.getByText("相手ニック")).toBeInTheDocument();
       expect(screen.getByText("迷子のネコ")).toBeInTheDocument();
+    });
+
+    it("← 会話一覧ボタンをクリックした時、/conversations に遷移すること", async () => {
+      const user = userEvent.setup();
+      setupQueryMocks();
+
+      render(<ConversationChat />);
+
+      await user.click(screen.getByRole("button", { name: "← 会話一覧" }));
+
+      expect(mockNavigate).toHaveBeenCalledWith("/conversations");
     });
   });
 

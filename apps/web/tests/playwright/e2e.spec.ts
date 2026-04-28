@@ -49,7 +49,6 @@ test("basic E2E flow: register → login → create post → view posts", async 
 
   // Login now returns to the posts page so the shared header remains available.
   await expect(page).toHaveURL(`${baseUrl}/posts`, { timeout: 15000 });
-  await expect(page.getByRole("button", { name: "Logout" })).toBeVisible();
 
   // 3. Create post from the posts page so the shared header is available.
   await page.click('a[href="/create"]');
@@ -93,10 +92,17 @@ test("basic E2E flow: register → login → create post → view posts", async 
   // The create form returns to the posts page, where the new item should appear.
   await page.waitForURL(`${baseUrl}/posts`);
 
-  // 4. Verify post appears in list
-  await expect(page.getByRole("heading", { name: postTitle })).toBeVisible();
+  // 4. Verify post appears in list (pet name is shown as heading)
+  await expect(page.getByRole("heading", { name: "ミケ" })).toBeVisible();
 
-  // 5. Logout
-  await page.click('button:has-text("Logout")');
-  await expect(page.getByRole("link", { name: "Login" })).toBeVisible();
+  // 5. Logout from map page
+  await page.goto(`${baseUrl}/`);
+  await page.getByRole("button", { name: "アカウント" }).click();
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "OK" })
+    .click();
+
+  // Verify redirected to login page
+  await expect(page).toHaveURL(`${baseUrl}/login`, { timeout: 15000 });
 });

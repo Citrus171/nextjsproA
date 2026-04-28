@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/LoginWithAuth";
 import Register from "./pages/Register";
 import Posts from "./pages/Posts";
@@ -9,7 +9,7 @@ import Map from "./pages/Map";
 import Conversations from "./pages/Conversations";
 import ConversationChat from "./pages/ConversationChat";
 import { useAuth } from "./auth/AuthProvider";
-import Header from "./components/Header";
+import { Sonner } from "./components/ui/sonner";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isRestoring } = useAuth();
@@ -18,13 +18,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { token, clearToken } = useAuth();
-  const location = useLocation();
-  const isMapPage = location.pathname === "/";
-
   return (
     <>
-      {!isMapPage && <Header token={token} onLogout={clearToken} />}
+      <Sonner position="top-center" richColors />
       <Routes>
         <Route path="/" element={<Map />} />
         <Route path="/posts" element={<Posts />} />

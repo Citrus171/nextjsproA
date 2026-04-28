@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { createConversationSocket } from "../lib/conversationSocket";
 import { useApiClient } from "../api/orvalClient";
@@ -10,6 +10,7 @@ export default function ConversationChat() {
   const { id } = useParams<{ id: string }>();
   const client = useApiClient();
   const { token, userId } = useAuth();
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<MessageResponseDto[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [socketDisconnected, setSocketDisconnected] = useState(false);
@@ -99,6 +100,11 @@ export default function ConversationChat() {
 
   return (
     <div>
+      <div>
+        <button type="button" onClick={() => navigate("/conversations")}>
+          ← 会話一覧
+        </button>
+      </div>
       {socketDisconnected && (
         <div
           role="alert"
