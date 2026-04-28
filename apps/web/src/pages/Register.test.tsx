@@ -1,15 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
 import { vi } from "vitest";
 
 const mockNavigate = vi.fn();
 const mockRegister = vi.fn();
-const mockToastError = vi.fn();
-
-vi.mock("../../../../packages/api-client/src/index", () => ({
-  usersControllerRegister: (...args: unknown[]) => mockRegister(...args),
-}));
 
 vi.mock("react-router-dom", async () => {
   const actual =
@@ -19,66 +13,115 @@ vi.mock("react-router-dom", async () => {
   return {
     ...actual,
     useNavigate: () => mockNavigate,
+    Link: ({ to, children }: { to: string; children: React.ReactNode }) => (
+      <a href={to}>{children}</a>
+    ),
   };
 });
 
-vi.mock("sonner", () => ({
-  toast: {
-    error: (...args: unknown[]) => mockToastError(...args),
-  },
+vi.mock("../../../../packages/api-client/src/index", () => ({
+  usersControllerRegister: (...args: unknown[]) => mockRegister(...args),
 }));
 
 import Register from "./Register";
 
 describe("Register", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockNavigate.mockClear();
+    mockRegister.mockClear();
   });
 
-  it("入力して登録した時、ユーザー登録後に /login へ遷移すること", async () => {
-    mockRegister.mockResolvedValueOnce({});
+  it("フォームが正しくレンダリングされること（名前は任意、ログインへのリンクあり）", () => {
+    render(<Register />);
+    expect(screen.getByLabelText(/お名前/i)).toBeInTheDocument();
+    expect(screen.getByText(/任意/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("メールアドレス")).toBeInTheDocument();
+    expect(screen.getByLabelText("パスワード")).toBeInTheDocument();
+    expect(screen.getByLabelText("パスワード（確認）")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /アカウントを作成/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/ログイン/i)).toBeInTheDocument();
+  });
+
+  it("メール形式が不正な時、フィールド下にエラーが表示されること", async () => {
     const user = userEvent.setup();
+    render(<Register />);
 
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
+    await user.type(screen.getByLabelText("メールアドレス"), "invalid-email");
+    await user.type(screen.getByLabelText("パスワード"), "password123");
+    await user.type(screen.getByLabelText("パスワード（確認）"), "password123");
+    await user.click(screen.getByRole("button", { name: /アカウントを作成/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/正しいメールアドレスを入力してください/i)
+      ).toBeInTheDocument();
+    });
+    expect(mockRegister).not.toHaveBeenCalled();
+  });
+
+  it("パスワードが8文字未満の時、フィールド下にエラーが表示されること", async () => {
+    const user = userEvent.setup();
+    render(<Register />);
+
+    await user.type(
+      screen.getByLabelText("メールアドレス"),
+      "test@example.com"
     );
+    await user.type(screen.getByLabelText("パスワード"), "short");
+    await user.type(screen.getByLabelText("パスワード（確認）"), "short");
+    await user.click(screen.getByRole("button", { name: /アカウントを作成/i }));
 
-    await user.type(screen.getByPlaceholderText("name"), "mike");
-    await user.type(screen.getByPlaceholderText("email"), "mike@example.com");
-    await user.type(screen.getByPlaceholderText("password"), "Password123");
-    await user.click(screen.getByRole("button", { name: "Register" }));
+    await waitFor(() => {
+      expect(
+        screen.getByText(/パスワードは8文字以上で入力してください/i)
+      ).toBeInTheDocument();
+    });
+    expect(mockRegister).not.toHaveBeenCalled();
+  });
+
+  it("パスワードと確認用が一致しない時、フィールド下にエラーが表示されること", async () => {
+    const user = userEvent.setup();
+    render(<Register />);
+
+    await user.type(
+      screen.getByLabelText("メールアドレス"),
+      "test@example.com"
+    );
+    await user.type(screen.getByLabelText("パスワード"), "password123");
+    await user.type(
+      screen.getByLabelText("パスワード（確認）"),
+      "different456"
+    );
+    await user.click(screen.getByRole("button", { name: /アカウントを作成/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/パスワードが一致しません/i)).toBeInTheDocument();
+    });
+    expect(mockRegister).not.toHaveBeenCalled();
+  });
+
+  it("正常登録後、ログイン画面（/login）にリダイレクトすること", async () => {
+    mockRegister.mockResolvedValue({});
+    const user = userEvent.setup();
+    render(<Register />);
+
+    await user.type(
+      screen.getByLabelText("メールアドレス"),
+      "test@example.com"
+    );
+    await user.type(screen.getByLabelText("パスワード"), "password123");
+    await user.type(screen.getByLabelText("パスワード（確認）"), "password123");
+    await user.click(screen.getByRole("button", { name: /アカウントを作成/i }));
 
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith({
-        name: "mike",
-        email: "mike@example.com",
-        password: "Password123",
+        email: "test@example.com",
+        password: "password123",
+        name: undefined,
       });
+      expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
-    expect(mockNavigate).toHaveBeenCalledWith("/login");
-  });
-
-  it("登録に失敗した時、エラートーストが表示されること", async () => {
-    mockRegister.mockRejectedValueOnce({
-      response: { data: { message: "登録に失敗しました" } },
-    });
-    const user = userEvent.setup();
-
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
-
-    await user.type(screen.getByPlaceholderText("email"), "mike@example.com");
-    await user.type(screen.getByPlaceholderText("password"), "Password123");
-    await user.click(screen.getByRole("button", { name: "Register" }));
-
-    await waitFor(() => {
-      expect(mockToastError).toHaveBeenCalledWith("登録に失敗しました");
-    });
-    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
