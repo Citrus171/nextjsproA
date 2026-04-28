@@ -92,8 +92,8 @@ test("basic E2E flow: register → login → create post → view posts", async 
   // The create form returns to the posts page, where the new item should appear.
   await page.waitForURL(`${baseUrl}/posts`);
 
-  // 4. Verify post appears in list
-  await expect(page.getByRole("heading", { name: postTitle })).toBeVisible();
+  // 4. Verify post appears in list (pet name is shown as heading)
+  await expect(page.getByRole("heading", { name: "ミケ" })).toBeVisible();
 
   // 5. Logout from map page
   await page.goto(`${baseUrl}/`);
