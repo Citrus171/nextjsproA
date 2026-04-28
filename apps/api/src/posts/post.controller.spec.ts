@@ -97,7 +97,9 @@ describe("PostsController", () => {
     it("dto と files をサービスに渡す", async () => {
       const post = makePost();
       mockPostsService.create.mockResolvedValue(post);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
       const dto = { title: "Title", description: "Content" };
 
       const result = await controller.create(req, dto as any, []);
@@ -109,7 +111,9 @@ describe("PostsController", () => {
     it("ファイル付きで作成できる", async () => {
       const post = makePost();
       mockPostsService.create.mockResolvedValue(post);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
       const dto = { title: "Title", description: "Content" };
       const files = [
         {
@@ -127,7 +131,9 @@ describe("PostsController", () => {
     it("files が undefined の時は空配列を渡す", async () => {
       const post = makePost();
       mockPostsService.create.mockResolvedValue(post);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await controller.create(
         req,
@@ -145,7 +151,9 @@ describe("PostsController", () => {
     it("petDetail と location を含む dto をサービスに渡す", async () => {
       const post = makePost();
       mockPostsService.create.mockResolvedValue(post);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
       const dto = {
         title: "Title",
         description: "Content",
@@ -175,7 +183,9 @@ describe("PostsController", () => {
     it("オーナーが更新できる", async () => {
       const updated = makePost({ title: "New" });
       mockPostsService.update.mockResolvedValue(updated);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       const result = await controller.update(req, "post1", {
         title: "New",
@@ -189,7 +199,9 @@ describe("PostsController", () => {
 
     it("オーナー以外は ForbiddenException を伝播する", async () => {
       mockPostsService.update.mockRejectedValue(new ForbiddenException());
-      const req = { user: { id: "other" } };
+      const req = {
+        user: { id: "other", email: "other@test.com", role: "user" as const },
+      };
 
       await expect(
         controller.update(req, "post1", { title: "X" } as any)
@@ -200,7 +212,9 @@ describe("PostsController", () => {
       mockPostsService.update.mockRejectedValue(
         new HttpException("Not found", 404)
       );
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await expect(
         controller.update(req, "no-such", {} as any)
@@ -210,7 +224,9 @@ describe("PostsController", () => {
     it("petDetail と location を含む dto をサービスに渡す", async () => {
       const updated = makePost();
       mockPostsService.update.mockResolvedValue(updated);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
       const dto = {
         petDetail: {
           name: "New",
@@ -242,7 +258,9 @@ describe("PostsController", () => {
         ],
       };
       mockPostsService.addImages.mockResolvedValue(response);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
       const files = [{ originalname: "a.png", buffer: Buffer.from("") } as any];
 
       const result = await controller.addImages(req, "post1", files);
@@ -260,7 +278,9 @@ describe("PostsController", () => {
         remainingSlots: 5,
         images: [],
       });
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await controller.addImages(req, "post1", undefined as any);
 
@@ -273,7 +293,9 @@ describe("PostsController", () => {
 
     it("オーナー以外は ForbiddenException を伝播する", async () => {
       mockPostsService.addImages.mockRejectedValue(new ForbiddenException());
-      const req = { user: { id: "other" } };
+      const req = {
+        user: { id: "other", email: "other@test.com", role: "user" as const },
+      };
 
       await expect(controller.addImages(req, "post1", [])).rejects.toThrow(
         ForbiddenException
@@ -282,7 +304,9 @@ describe("PostsController", () => {
 
     it("枚数超過は BadRequestException を伝播する", async () => {
       mockPostsService.addImages.mockRejectedValue(new BadRequestException());
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await expect(controller.addImages(req, "post1", [])).rejects.toThrow(
         BadRequestException
@@ -300,7 +324,9 @@ describe("PostsController", () => {
         createdAt: new Date(),
       };
       mockPostsService.removeImage.mockResolvedValue(image);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       const result = await controller.removeImage(req, "post1", "img1");
 
@@ -314,7 +340,9 @@ describe("PostsController", () => {
 
     it("オーナー以外は ForbiddenException を伝播する", async () => {
       mockPostsService.removeImage.mockRejectedValue(new ForbiddenException());
-      const req = { user: { id: "other" } };
+      const req = {
+        user: { id: "other", email: "other@test.com", role: "user" as const },
+      };
 
       await expect(
         controller.removeImage(req, "post1", "img1")
@@ -323,7 +351,9 @@ describe("PostsController", () => {
 
     it("存在しない画像は NotFoundException を伝播する", async () => {
       mockPostsService.removeImage.mockRejectedValue(new NotFoundException());
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await expect(
         controller.removeImage(req, "post1", "no-img")
@@ -335,7 +365,9 @@ describe("PostsController", () => {
   describe("toggleFavorite", () => {
     it("{ favorited: true } を返す", async () => {
       mockPostsService.toggleFavorite.mockResolvedValue({ favorited: true });
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       const result = await controller.toggleFavorite(req, "post1");
 
@@ -350,7 +382,9 @@ describe("PostsController", () => {
       mockPostsService.toggleFavorite.mockRejectedValue(
         new ForbiddenException()
       );
-      const req = { user: { id: "owner" } };
+      const req = {
+        user: { id: "owner", email: "owner@test.com", role: "user" as const },
+      };
 
       await expect(controller.toggleFavorite(req, "post1")).rejects.toThrow(
         ForbiddenException
@@ -361,7 +395,9 @@ describe("PostsController", () => {
       mockPostsService.toggleFavorite.mockRejectedValue(
         new BadRequestException()
       );
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await expect(controller.toggleFavorite(req, "post1")).rejects.toThrow(
         BadRequestException
@@ -409,7 +445,9 @@ describe("PostsController", () => {
     it("オーナーが削除できる", async () => {
       const post = makePost();
       mockPostsService.remove.mockResolvedValue(post);
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       const result = await controller.remove(req, "post1");
 
@@ -423,7 +461,9 @@ describe("PostsController", () => {
 
     it("オーナー以外は ForbiddenException を伝播する", async () => {
       mockPostsService.remove.mockRejectedValue(new ForbiddenException());
-      const req = { user: { id: "other" } };
+      const req = {
+        user: { id: "other", email: "other@test.com", role: "user" as const },
+      };
 
       await expect(controller.remove(req, "post1")).rejects.toThrow(
         ForbiddenException
@@ -434,7 +474,9 @@ describe("PostsController", () => {
       mockPostsService.remove.mockRejectedValue(
         new HttpException("Not found", 404)
       );
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await expect(controller.remove(req, "no-such")).rejects.toThrow(
         HttpException

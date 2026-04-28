@@ -11,6 +11,7 @@ import { Server, Socket } from "socket.io";
 import { JwtService } from "@nestjs/jwt";
 import { Message } from "@prisma/client";
 import { JwtPayload } from "../auth/interfaces/jwt-payload.interface";
+import { ConversationsService } from "./conversation.service";
 
 @WebSocketGateway({
   cors: { origin: process.env.WEB_ORIGIN || "http://localhost:5173" },
@@ -24,7 +25,10 @@ export class ConversationsGateway
 
   private readonly userSocketMap = new Map<string, string>();
 
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private conversationsService: ConversationsService
+  ) {}
 
   handleConnection(client: Socket) {
     const raw =
@@ -54,10 +58,21 @@ export class ConversationsGateway
   }
 
   @SubscribeMessage("joinConversation")
-  handleJoin(
+  async handleJoin(
     @MessageBody() conversationId: string,
     @ConnectedSocket() client: Socket
   ) {
+    const userId = client.data.userId as string | undefined;
+    if (!userId) {
+      client.disconnect();
+      return;
+    }
+    try {
+      await this.conversationsService.findOneForUser(userId, conversationId);
+    } catch {
+      client.disconnect();
+      return;
+    }
     client.join(`conversation:${conversationId}`);
   }
 
@@ -66,6 +81,11 @@ export class ConversationsGateway
     @MessageBody() conversationId: string,
     @ConnectedSocket() client: Socket
   ) {
+    const userId = client.data.userId as string | undefined;
+    if (!userId) {
+      client.disconnect();
+      return;
+    }
     client.leave(`conversation:${conversationId}`);
   }
 

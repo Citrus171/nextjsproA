@@ -7,7 +7,6 @@ import {
   Patch,
   Post,
   Request,
-  UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
 import {
@@ -33,13 +32,7 @@ import {
 import { MessageResponseDto } from "./dto/message-response.dto";
 import { ConversationsService } from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
-
-type AuthenticatedRequest = {
-  user?: {
-    id?: string;
-    userId?: string;
-  };
-};
+import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
 
 @ApiTags("conversations")
 @Controller("conversations")
@@ -52,11 +45,7 @@ export class ConversationsController {
   ) {}
 
   private getAuthenticatedUserId(req: AuthenticatedRequest): string {
-    const userId = req.user?.id ?? req.user?.userId;
-    if (!userId) {
-      throw new UnauthorizedException("認証ユーザー情報が不正です");
-    }
-    return userId;
+    return req.user.id;
   }
 
   @Post()

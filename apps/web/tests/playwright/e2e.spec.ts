@@ -93,7 +93,9 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await page.waitForURL(`${baseUrl}/posts`);
 
   // 4. Verify post appears in list (pet name is shown as heading)
-  await expect(page.getByRole("heading", { name: "ミケ" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "ミケ" }).first()
+  ).toBeVisible();
 
   // 5. Logout from map page
   await page.goto(`${baseUrl}/`);

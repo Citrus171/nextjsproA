@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
+} from "@nestjs/common";
 import { UsersController } from "./user.controller";
 import { RegisterDto } from "./dto/register.dto";
 
@@ -6,6 +11,7 @@ describe("UsersController", () => {
   let controller: UsersController;
   const mockUsersService = {
     createUser: jest.fn(),
+    deleteUser: jest.fn(),
   };
 
   beforeEach(() => {
@@ -83,5 +89,47 @@ describe("UsersController", () => {
       "password123",
       "Alice"
     );
+  });
+
+  // ─── remove ─────────────────────────────────────────────────
+  describe("remove", () => {
+    it("管理者がユーザーを削除できる", async () => {
+      const deleted = {
+        id: "user1",
+        nickname: "Alice",
+        role: "user",
+        createdAt: new Date(),
+      };
+      mockUsersService.deleteUser.mockResolvedValue(deleted);
+
+      const result = await controller.remove("user1");
+
+      expect(mockUsersService.deleteUser).toHaveBeenCalledWith("user1");
+      expect(result).toBe(deleted);
+    });
+
+    it("存在しないユーザーIDはP2025エラーを404に変換する", async () => {
+      mockUsersService.deleteUser.mockRejectedValue({ code: "P2025" });
+
+      await expect(controller.remove("nonexistent")).rejects.toThrow(
+        HttpException
+      );
+
+      try {
+        await controller.remove("nonexistent");
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.NOT_FOUND);
+        const body = (e as HttpException).getResponse() as { error: string };
+        expect(body.error).toBe("ユーザーが見つかりません");
+      }
+    });
+
+    it("P2025以外のエラーは再スローされる", async () => {
+      const dbError = new Error("DB接続エラー");
+      mockUsersService.deleteUser.mockRejectedValue(dbError);
+
+      await expect(controller.remove("user1")).rejects.toThrow(dbError);
+    });
   });
 });

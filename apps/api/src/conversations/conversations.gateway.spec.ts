@@ -1,5 +1,7 @@
 import { JwtService } from "@nestjs/jwt";
+import { ForbiddenException, NotFoundException } from "@nestjs/common";
 import { ConversationsGateway } from "./conversations.gateway";
+import { ConversationsService } from "./conversation.service";
 import { Socket } from "socket.io";
 
 function makeSocket(token?: string, authToken?: string): jest.Mocked<Socket> {
@@ -18,10 +20,14 @@ function makeSocket(token?: string, authToken?: string): jest.Mocked<Socket> {
 describe("ConversationsGateway", () => {
   let gateway: ConversationsGateway;
   let jwtService: jest.Mocked<JwtService>;
+  let conversationsService: jest.Mocked<ConversationsService>;
 
   beforeEach(() => {
     jwtService = { verify: jest.fn() } as unknown as jest.Mocked<JwtService>;
-    gateway = new ConversationsGateway(jwtService);
+    conversationsService = {
+      findOneForUser: jest.fn(),
+    } as unknown as jest.Mocked<ConversationsService>;
+    gateway = new ConversationsGateway(jwtService, conversationsService);
   });
 
   // ─── handleConnection ──────────────────────────────────────
@@ -58,19 +64,61 @@ describe("ConversationsGateway", () => {
     });
   });
 
-  // ─── handleJoin / handleLeave ──────────────────────────────
+  // ─── handleJoin ────────────────────────────────────────────
   describe("handleJoin", () => {
-    it("指定した会話ルームにjoinすること", () => {
+    it("userIdがない場合は切断されjoinしない", async () => {
       const client = makeSocket();
-      gateway.handleJoin("conv-1", client);
+      await gateway.handleJoin("conv-1", client);
+      expect(client.disconnect).toHaveBeenCalled();
+      expect(client.join).not.toHaveBeenCalled();
+    });
+
+    it("会話参加権限がない場合は切断されjoinしない", async () => {
+      conversationsService.findOneForUser.mockRejectedValue(
+        new ForbiddenException()
+      );
+      const client = makeSocket();
+      client.data.userId = "user-1";
+      await gateway.handleJoin("conv-1", client);
+      expect(client.disconnect).toHaveBeenCalled();
+      expect(client.join).not.toHaveBeenCalled();
+    });
+
+    it("会話が存在しない場合は切断されjoinしない", async () => {
+      conversationsService.findOneForUser.mockRejectedValue(
+        new NotFoundException()
+      );
+      const client = makeSocket();
+      client.data.userId = "user-1";
+      await gateway.handleJoin("conv-1", client);
+      expect(client.disconnect).toHaveBeenCalled();
+      expect(client.join).not.toHaveBeenCalled();
+    });
+
+    it("会話参加権限がある場合は指定した会話ルームにjoinすること", async () => {
+      conversationsService.findOneForUser.mockResolvedValue({} as never);
+      const client = makeSocket();
+      client.data.userId = "user-1";
+      await gateway.handleJoin("conv-1", client);
+      expect(client.disconnect).not.toHaveBeenCalled();
       expect(client.join).toHaveBeenCalledWith("conversation:conv-1");
     });
   });
 
+  // ─── handleLeave ───────────────────────────────────────────
   describe("handleLeave", () => {
-    it("指定した会話ルームからleaveすること", () => {
+    it("userIdがない場合は切断されleaveしない", () => {
       const client = makeSocket();
       gateway.handleLeave("conv-1", client);
+      expect(client.disconnect).toHaveBeenCalled();
+      expect(client.leave).not.toHaveBeenCalled();
+    });
+
+    it("userIdがある場合は指定した会話ルームからleaveすること", () => {
+      const client = makeSocket();
+      client.data.userId = "user-1";
+      gateway.handleLeave("conv-1", client);
+      expect(client.disconnect).not.toHaveBeenCalled();
       expect(client.leave).toHaveBeenCalledWith("conversation:conv-1");
     });
   });

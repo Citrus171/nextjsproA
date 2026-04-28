@@ -28,10 +28,12 @@ describe("SightingsController", () => {
     it("目撃情報を作成してサービスの結果を返すこと", async () => {
       const sighting = { id: "s-1", postId: "p-1", userId: "user-1" };
       mockSightingsService.create.mockResolvedValue(sighting);
-      const req = { user: { userId: "user-1" } };
+      const req = {
+        user: { id: "user-1", email: "test@test.com", role: "user" as const },
+      };
       const dto = { postId: "p-1", lat: 35.0, lng: 139.0, note: "test" };
 
-      const result = await controller.create(req as any, dto as any);
+      const result = await controller.create(req, dto as any);
 
       expect(mockSightingsService.create).toHaveBeenCalledWith("user-1", dto);
       expect(result).toBe(sighting);
@@ -55,9 +57,11 @@ describe("SightingsController", () => {
   describe("remove", () => {
     it("目撃情報を削除してサービスの結果を返すこと", async () => {
       mockSightingsService.remove.mockResolvedValue({ id: "s-1" });
-      const req = { user: { userId: "user-1" } };
+      const req = {
+        user: { id: "user-1", email: "test@test.com", role: "user" as const },
+      };
 
-      const result = await controller.remove(req as any, "s-1");
+      const result = await controller.remove(req, "s-1");
 
       expect(mockSightingsService.remove).toHaveBeenCalledWith(
         "user-1",
@@ -69,9 +73,11 @@ describe("SightingsController", () => {
 
     it("ForbiddenException を伝播する", async () => {
       mockSightingsService.remove.mockRejectedValue(new ForbiddenException());
-      const req = { user: { userId: "user-1" } };
+      const req = {
+        user: { id: "user-1", email: "test@test.com", role: "user" as const },
+      };
 
-      await expect(controller.remove(req as any, "s-1")).rejects.toThrow(
+      await expect(controller.remove(req, "s-1")).rejects.toThrow(
         ForbiddenException
       );
     });
@@ -83,7 +89,9 @@ describe("SightingsController", () => {
       mockSightingsService.toggleFavorite.mockResolvedValue({
         favorited: true,
       });
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       const result = await controller.toggleFavorite(req as any, "s-1");
 
@@ -98,7 +106,9 @@ describe("SightingsController", () => {
       mockSightingsService.toggleFavorite.mockResolvedValue({
         favorited: false,
       });
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       const result = await controller.toggleFavorite(req as any, "s-1");
 
@@ -109,7 +119,9 @@ describe("SightingsController", () => {
       mockSightingsService.toggleFavorite.mockRejectedValue(
         new BadRequestException()
       );
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await expect(
         controller.toggleFavorite(req as any, "s-1")
@@ -120,7 +132,9 @@ describe("SightingsController", () => {
       mockSightingsService.toggleFavorite.mockRejectedValue(
         new NotFoundException()
       );
-      const req = { user: { id: "user1" } };
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
 
       await expect(
         controller.toggleFavorite(req as any, "s-1")
