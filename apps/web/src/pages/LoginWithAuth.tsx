@@ -25,7 +25,7 @@ export default function LoginWithAuth() {
       const res = await api.login(email, password);
       if (res?.accessToken) {
         setToken(res.accessToken);
-        navigate("/");
+        navigate("/posts");
       } else {
         setAuthError("ログインに失敗しました");
       }
