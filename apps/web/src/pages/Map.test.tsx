@@ -186,6 +186,61 @@ describe("Map", () => {
     ).toBeInTheDocument();
   });
 
+  describe("アカウントボタン", () => {
+    it("未認証でクリックした時、ログアウト確認ダイアログが表示されないこと", async () => {
+      const user = userEvent.setup();
+      mockAuth.userId = null;
+
+      renderMap();
+
+      await user.click(screen.getByRole("button", { name: "アカウント" }));
+
+      expect(screen.queryByText("ログアウトしますか？")).not.toBeInTheDocument();
+      expect(mockLogout).not.toHaveBeenCalled();
+      expect(mockClearToken).not.toHaveBeenCalled();
+    });
+
+    it("認証済みでクリックした時、ログアウト確認ダイアログが表示されること", async () => {
+      const user = userEvent.setup();
+      mockAuth.userId = "user-1";
+
+      renderMap();
+
+      await user.click(screen.getByRole("button", { name: "アカウント" }));
+
+      expect(await screen.findByText("ログアウトしますか？")).toBeInTheDocument();
+      expect(screen.getByText("ログイン状態を解除します。")).toBeInTheDocument();
+    });
+
+    it("ダイアログでキャンセル押下時、ログアウト処理が実行されないこと", async () => {
+      const user = userEvent.setup();
+      mockAuth.userId = "user-1";
+
+      renderMap();
+
+      await user.click(screen.getByRole("button", { name: "アカウント" }));
+      await screen.findByText("ログアウトしますか？");
+      await user.click(screen.getByRole("button", { name: "キャンセル" }));
+
+      expect(mockLogout).not.toHaveBeenCalled();
+      expect(mockClearToken).not.toHaveBeenCalled();
+    });
+
+    it("ダイアログでOK押下時、ログアウト処理が実行されること", async () => {
+      const user = userEvent.setup();
+      mockAuth.userId = "user-1";
+
+      renderMap();
+
+      await user.click(screen.getByRole("button", { name: "アカウント" }));
+      await screen.findByText("ログアウトしますか？");
+      await user.click(screen.getByRole("button", { name: "OK" }));
+
+      expect(mockLogout).toHaveBeenCalledTimes(1);
+      expect(mockClearToken).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it("迷子マーカーを押した時、詳細シートが開くこと", async () => {
     const user = userEvent.setup();
     mockGetMapMarkers.mockResolvedValue(sampleMarkers as unknown as never[]);

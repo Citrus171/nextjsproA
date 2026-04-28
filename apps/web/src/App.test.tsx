@@ -5,11 +5,21 @@ import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import App from "@/App";
 import React, { useEffect } from "react";
 
+vi.mock("../../../packages/api-client/src/index", () => ({
+  authControllerRefresh: vi.fn().mockRejectedValue(new Error("no cookie")),
+}));
+
 vi.mock("@/api/orvalClient", () => ({
   useApiClient: () => ({
     listConversations: vi.fn().mockResolvedValue([]),
+    listPosts: vi.fn().mockResolvedValue({ items: [], total: 0 }),
+    getMapMarkers: vi.fn().mockResolvedValue([]),
+    login: vi.fn(),
+    logout: vi.fn(),
   }),
 }));
+
+vi.mock("@/pages/UsersModal", () => ({ default: () => null }));
 
 function SetToken({ token }: { token: string }) {
   const { setToken } = useAuth();
@@ -40,40 +50,29 @@ const createWrapper = (
 };
 
 describe("App", () => {
-  it("renders navigation links", () => {
-    const Wrapper = createWrapper();
+  it("未認証で /posts にアクセスしたとき、Posts ページが表示されること", async () => {
+    const Wrapper = createWrapper(null, "/posts");
     render(
       <Wrapper>
         <App />
       </Wrapper>
     );
 
-    expect(screen.getByText("Posts")).toBeInTheDocument();
-    expect(screen.getByText("New Post")).toBeInTheDocument();
-    expect(screen.getByText("Login")).toBeInTheDocument();
-    expect(screen.getByText("Register")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "← Map" })
+    ).toBeInTheDocument();
   });
 
-  it("shows logout button when authenticated", async () => {
-    const Wrapper = createWrapper("mock-token");
+  it("未認証で /create にアクセスしたとき、/login にリダイレクトされること", async () => {
+    const Wrapper = createWrapper(null, "/create");
     render(
       <Wrapper>
         <App />
       </Wrapper>
     );
 
-    expect(await screen.findByText("Logout")).toBeInTheDocument();
-    expect(screen.queryByText("Login")).not.toBeInTheDocument();
-  });
-
-  it("ヘッダーに会話一覧リンクが表示されること", () => {
-    const Wrapper = createWrapper();
-    render(
-      <Wrapper>
-        <App />
-      </Wrapper>
-    );
-
-    expect(screen.getByRole("link", { name: /会話/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Login" })
+    ).toBeInTheDocument();
   });
 });

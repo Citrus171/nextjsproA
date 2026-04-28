@@ -442,9 +442,8 @@
 
 ## Web Unit (`apps/web/src/**/*.test.tsx`)
 
-- [x] App で /posts を開いた時、共通ナビの Posts / New Post / Login / Register が表示される
-- [x] App で /posts を開いて認証済みの時、Logout が表示され Login が表示されない
-- [x] App でヘッダーに会話一覧リンクが表示されること
+- [x] App で未認証で /posts にアクセスしたとき、Posts ページが表示されること
+- [x] App で未認証で /create にアクセスしたとき、/login にリダイレクトされること
 - [x] CreatePost で必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し /posts へ戻る
 - [x] EditPost で投稿データ取得後、petDetail を含むフォームに初期値がセットされること
 - [x] EditPost で変更して保存した時、updatePost が petDetail/location を含むデータで呼ばれること
@@ -531,19 +530,42 @@
 - [x] Conversations で取得エラーの時、エラーメッセージが表示されること
 - [x] Conversations でunreadCountが1以上の時、未読バッジが表示されること
 - [x] Conversations でunreadCountが0の時、未読バッジが表示されないこと
+- [x] Conversations で← Map ボタンをクリックした時、/ に遷移すること
 - [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
 - [x] Conversations で5秒間隔でポーリングするようにuseQueryが呼ばれること
 - [x] ConversationChat でページ開時、相手ニックネームと投稿タイトルが表示されること
+- [x] ConversationChat で← 会話一覧ボタンをクリックした時、/conversations に遷移すること
 - [x] ConversationChat でメッセージ一覧が表示される時、各bodyが表示されること
 - [x] ConversationChat で自分のメッセージには自分用クラスが付くこと
 - [x] ConversationChat で相手のメッセージには相手用クラスが付くこと
 - [x] ConversationChat でページ開時に joinConversation イベントが送信されること
 - [x] ConversationChat で newMessage イベント受信時、メッセージリストに追加されること
+- [x] ConversationChat で disconnect イベント受信時、切断バナーが表示されること
+- [x] ConversationChat で connect イベント受信時、切断バナーが非表示になること
+- [x] ConversationChat で connect_error イベント受信時、切断バナーが表示されること
+- [x] ConversationChat で再接続時に joinConversation が再送されること
 - [x] ConversationChat で送信ボタンクリック時、mutate が呼ばれること
 - [x] ConversationChat で1000文字超の入力は送信ボタンが無効になること
 - [x] ConversationChat でページを開いた時に markAsRead が呼ばれること
 - [x] ConversationChat でメッセージローディング中は「読み込み中...」が表示されること
 - [x] ConversationChat でメッセージ取得エラー時は「メッセージの取得に失敗しました」が表示されること
+
+### Posts (`src/pages/Posts.test.tsx`)
+
+- [x] Posts でデータ取得中はローディングスピナーが表示されること
+- [x] Posts で投稿データがカード形式で表示されること
+- [x] Posts で画像がない時は「画像がありません」と表示されること
+- [x] Posts でペット名がない時は「名前不明」と表示されること
+- [x] Posts でセンチネルが交差した時、次のページをフェッチすること
+- [x] Posts で追加フェッチ中はローディングスピナーが表示されること
+- [x] Posts で全件表示後は「これ以上ありません」と表示されること
+- [x] Posts で投稿が0件の時は「投稿がありません」と表示されること
+- [x] Posts でDeleteボタンをクリックした時、AlertDialogが表示されること
+- [x] Posts でAlertDialogでキャンセルをクリックした時、削除が実行されないこと
+- [x] Posts でAlertDialogで削除を確認した時、投稿が削除され削除完了トーストが表示されること
+- [x] Posts で削除が失敗した時、エラートーストが表示されること
+- [x] Posts で地図アイコンボタンをクリックした時、/?postId=xxx に遷移すること
+- [x] Posts で← Map ボタンをクリックした時、/ に遷移すること
 
 ---
 

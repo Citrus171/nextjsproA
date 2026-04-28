@@ -25,11 +25,16 @@ export default function Conversations() {
     return <p>会話の取得に失敗しました</p>;
   }
 
-  if (!conversations || conversations.length === 0) {
-    return <p>会話はまだありません</p>;
-  }
-
   return (
+    <div>
+      <div>
+        <button type="button" onClick={() => navigate("/")}>
+          ← Map
+        </button>
+      </div>
+      {(!conversations || conversations.length === 0) ? (
+        <p>会話はまだありません</p>
+      ) : (
     <ul>
       {conversations.map((conv: ConversationListItemDto) => (
         <li key={conv.id}>
@@ -51,5 +56,7 @@ export default function Conversations() {
         </li>
       ))}
     </ul>
+      )}
+    </div>
   );
 }

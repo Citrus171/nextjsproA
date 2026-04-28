@@ -164,6 +164,21 @@ describe("Conversations", () => {
   });
 
   describe("ナビゲーション", () => {
+    it("← Map ボタンをクリックした時、/ に遷移すること", async () => {
+      const user = userEvent.setup();
+      vi.mocked(useQuery).mockReturnValue({
+        data: [],
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      await user.click(screen.getByRole("button", { name: "← Map" }));
+
+      expect(mockNavigate).toHaveBeenCalledWith("/");
+    });
+
     it("会話セルをクリックした時、/conversations/:idへ遷移すること", async () => {
       const user = userEvent.setup();
       vi.mocked(useQuery).mockReturnValue({
