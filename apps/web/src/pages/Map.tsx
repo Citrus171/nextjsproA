@@ -244,6 +244,10 @@ export default function Map() {
             className="map-icon-button"
             type="button"
             aria-label="メニュー"
+            onClick={() => {
+              if (!currentUserId) return;
+              setShowLogoutDialog(true);
+            }}
           >
             <MenuIcon />
           </button>
