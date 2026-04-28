@@ -165,13 +165,17 @@ describe("ConversationChat", () => {
   });
 
   describe("ヘッダー表示", () => {
-    it("ページ開時、相手ニックネームと投稿タイトルが表示されること", () => {
+    it("ページ開時、相手ニックネームがヘッダーに表示されること", () => {
       setupQueryMocks();
 
       render(<ConversationChat />);
 
-      expect(screen.getByText("相手ニック")).toBeInTheDocument();
-      expect(screen.getByText("迷子のネコ")).toBeInTheDocument();
+      const header = screen
+        .getByText("相手ニック")
+        .closest("[data-testid='chat-header']");
+      expect(header).toHaveClass("flex");
+      expect(header).toHaveClass("items-center");
+      expect(header).toHaveClass("gap-3");
     });
 
     it("← 会話一覧ボタンをクリックした時、/conversations に遷移すること", async () => {
@@ -180,9 +184,29 @@ describe("ConversationChat", () => {
 
       render(<ConversationChat />);
 
-      await user.click(screen.getByRole("button", { name: "← 会話一覧" }));
+      await user.click(screen.getByRole("button", { name: "会話一覧に戻る" }));
 
       expect(mockNavigate).toHaveBeenCalledWith("/conversations");
+    });
+
+    it("メッセージリストがスクロール可能な領域であること", () => {
+      setupQueryMocks();
+
+      render(<ConversationChat />);
+
+      const list = document.querySelector("[data-testid='message-list']");
+      expect(list).toHaveClass("flex-1");
+      expect(list).toHaveClass("overflow-y-auto");
+    });
+
+    it("入力欄が画面下部に固定されていること", () => {
+      setupQueryMocks();
+
+      render(<ConversationChat />);
+
+      const inputArea = document.querySelector("[data-testid='chat-input']");
+      expect(inputArea).toHaveClass("sticky");
+      expect(inputArea).toHaveClass("bottom-0");
     });
   });
 
@@ -220,7 +244,26 @@ describe("ConversationChat", () => {
       expect(bubble).toHaveAttribute("data-sender", "self");
     });
 
-    it("相手のメッセージには相手用クラスが付くこと", () => {
+    it("自分のメッセージが右寄せで青色のバブルスタイルであること", () => {
+      setupQueryMocks({
+        messages: [
+          mockMessage({ senderId: "user-1", body: "自分のメッセージ" }),
+        ],
+      });
+
+      render(<ConversationChat />);
+
+      const bubble = screen
+        .getByText("自分のメッセージ")
+        .closest("[data-sender]");
+      expect(bubble).toHaveClass("bg-[#1a73e8]");
+      expect(bubble).toHaveClass("text-white");
+      expect(bubble).toHaveClass("rounded-[1.25rem]");
+      expect(bubble).toHaveClass("rounded-br-sm");
+      expect(bubble).toHaveClass("ml-auto");
+    });
+
+    it("相手のメッセージが左寄せでグレーのバブルスタイルであること", () => {
       setupQueryMocks({
         messages: [
           mockMessage({ senderId: "user-2", body: "相手のメッセージ" }),
@@ -232,7 +275,11 @@ describe("ConversationChat", () => {
       const bubble = screen
         .getByText("相手のメッセージ")
         .closest("[data-sender]");
-      expect(bubble).toHaveAttribute("data-sender", "other");
+      expect(bubble).toHaveClass("bg-slate-100");
+      expect(bubble).toHaveClass("text-slate-900");
+      expect(bubble).toHaveClass("rounded-[1.25rem]");
+      expect(bubble).toHaveClass("rounded-bl-sm");
+      expect(bubble).toHaveClass("mr-auto");
     });
   });
 
@@ -274,6 +321,24 @@ describe("ConversationChat", () => {
       expect(screen.getByRole("alert")).toHaveTextContent(
         "接続が切れました。再接続中…"
       );
+    });
+
+    it("切断バナーはインラインstyleではなくTailwindクラスでスタイルされていること", () => {
+      setupQueryMocks();
+
+      render(<ConversationChat />);
+
+      act(() => {
+        listeners["disconnect"]?.();
+      });
+
+      const banner = screen.getByRole("alert");
+      expect(banner).toHaveClass("bg-red-50");
+      expect(banner).toHaveClass("text-red-700");
+      expect(banner).toHaveClass("text-xs");
+      expect(banner).toHaveClass("px-3");
+      expect(banner).toHaveClass("py-2");
+      expect(banner).not.toHaveAttribute("style");
     });
 
     it("connect イベント受信時、切断バナーが非表示になること", () => {
@@ -363,7 +428,7 @@ describe("ConversationChat", () => {
   });
 
   describe("ローディング・エラー", () => {
-    it("メッセージローディング中は「読み込み中...」が表示されること", () => {
+    it("メッセージローディング中は「読み込み中...」が統一されたスタイルで表示されること", () => {
       setupQueryMocks({ messagesLoading: true, messages: [] });
 
       render(<ConversationChat />);
@@ -371,7 +436,18 @@ describe("ConversationChat", () => {
       expect(screen.getByText("読み込み中...")).toBeInTheDocument();
     });
 
-    it("メッセージ取得エラー時は「メッセージの取得に失敗しました」が表示されること", () => {
+    it("ローディング表示が統一されたスタイルであること", () => {
+      setupQueryMocks({ messagesLoading: true, messages: [] });
+
+      render(<ConversationChat />);
+
+      const loader = screen.getByText("読み込み中...");
+      expect(loader.closest("div")).toHaveClass("text-center");
+      expect(loader).toHaveClass("text-slate-400");
+      expect(loader).toHaveClass("text-sm");
+    });
+
+    it("メッセージ取得エラー時は「メッセージの取得に失敗しました」が統一されたスタイルで表示されること", () => {
       setupQueryMocks({
         messagesError: new Error("Network Error"),
         messages: [],
@@ -382,6 +458,20 @@ describe("ConversationChat", () => {
       expect(
         screen.getByText("メッセージの取得に失敗しました")
       ).toBeInTheDocument();
+    });
+
+    it("エラー表示が統一されたスタイルであること", () => {
+      setupQueryMocks({
+        messagesError: new Error("Network Error"),
+        messages: [],
+      });
+
+      render(<ConversationChat />);
+
+      const errorText = screen.getByText("メッセージの取得に失敗しました");
+      expect(errorText.closest("div")).toHaveClass("text-center");
+      expect(errorText).toHaveClass("text-red-500");
+      expect(errorText).toHaveClass("text-sm");
     });
   });
 });

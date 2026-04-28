@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { vi } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import type { ConversationListItemDto } from "../../../../packages/api-client/src/index";
 
 const mockNavigate = vi.fn();
@@ -34,7 +34,7 @@ vi.mock("@tanstack/react-query", async () => {
 });
 
 import { useQuery } from "@tanstack/react-query";
-import Conversations from "./Conversations";
+import Conversations, { formatDate } from "./Conversations";
 
 const mockConversation = (
   overrides: Partial<ConversationListItemDto> = {}
@@ -150,6 +150,23 @@ describe("Conversations", () => {
       expect(screen.getByText("3")).toBeInTheDocument();
     });
 
+    it("unreadCountが1以上の時、未読バッジが青色の丸スタイルで表示されること", () => {
+      vi.mocked(useQuery).mockReturnValue({
+        data: [mockConversation({ unreadCount: 3 })],
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      const badge = screen.getByText("3");
+      expect(badge).toHaveClass("bg-[#1a73e8]");
+      expect(badge).toHaveClass("text-white");
+      expect(badge).toHaveClass("rounded-full");
+      expect(badge).toHaveClass("w-5");
+      expect(badge).toHaveClass("h-5");
+    });
+
     it("unreadCountが0の時、未読バッジが表示されないこと", () => {
       vi.mocked(useQuery).mockReturnValue({
         data: [mockConversation({ unreadCount: 0 })],
@@ -174,7 +191,7 @@ describe("Conversations", () => {
 
       render(<Conversations />);
 
-      await user.click(screen.getByRole("button", { name: "← Map" }));
+      await user.click(screen.getByRole("button", { name: "Mapに戻る" }));
 
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
@@ -209,5 +226,55 @@ describe("Conversations", () => {
         expect.objectContaining({ refetchInterval: 5000 })
       );
     });
+  });
+});
+
+describe("formatDate", () => {
+  const NOW = "2024-06-15T12:00:00.000Z";
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(NOW));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("1分未満の時、「今」を返すこと", () => {
+    expect(formatDate("2024-06-15T11:59:30.000Z")).toBe("今");
+  });
+
+  it("1分の時、「1分前」を返すこと", () => {
+    expect(formatDate("2024-06-15T11:59:00.000Z")).toBe("1分前");
+  });
+
+  it("59分の時、「59分前」を返すこと", () => {
+    expect(formatDate("2024-06-15T11:01:00.000Z")).toBe("59分前");
+  });
+
+  it("60分（1時間）の時、「1時間前」を返すこと", () => {
+    expect(formatDate("2024-06-15T11:00:00.000Z")).toBe("1時間前");
+  });
+
+  it("23時間の時、「23時間前」を返すこと", () => {
+    expect(formatDate("2024-06-14T13:00:00.000Z")).toBe("23時間前");
+  });
+
+  it("24時間（1日）の時、「1日前」を返すこと", () => {
+    expect(formatDate("2024-06-14T12:00:00.000Z")).toBe("1日前");
+  });
+
+  it("6日の時、「6日前」を返すこと", () => {
+    expect(formatDate("2024-06-09T12:00:00.000Z")).toBe("6日前");
+  });
+
+  it("7日以上の時、年/月/日形式で返すこと", () => {
+    expect(formatDate("2024-06-08T12:00:00.000Z")).toBe("2024/6/8");
+  });
+
+  it("年またぎの時、年情報が含まれること", () => {
+    vi.setSystemTime(new Date("2025-01-05T12:00:00.000Z"));
+    expect(formatDate("2024-12-25T12:00:00.000Z")).toBe("2024/12/25");
   });
 });

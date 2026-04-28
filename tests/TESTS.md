@@ -530,26 +530,42 @@
 - [x] Conversations で会話がない時は空メッセージが表示されること
 - [x] Conversations で取得エラーの時、エラーメッセージが表示されること
 - [x] Conversations でunreadCountが1以上の時、未読バッジが表示されること
+- [x] Conversations でunreadCountが1以上の時、未読バッジが青色の丸スタイルで表示されること
 - [x] Conversations でunreadCountが0の時、未読バッジが表示されないこと
 - [x] Conversations で← Map ボタンをクリックした時、/ に遷移すること
 - [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
 - [x] Conversations で5秒間隔でポーリングするようにuseQueryが呼ばれること
-- [x] ConversationChat でページ開時、相手ニックネームと投稿タイトルが表示されること
+- [x] formatDate で1分未満の時、「今」を返すこと
+- [x] formatDate で1分の時、「1分前」を返すこと
+- [x] formatDate で59分の時、「59分前」を返すこと
+- [x] formatDate で60分（1時間）の時、「1時間前」を返すこと
+- [x] formatDate で23時間の時、「23時間前」を返すこと
+- [x] formatDate で24時間（1日）の時、「1日前」を返すこと
+- [x] formatDate で6日の時、「6日前」を返すこと
+- [x] formatDate で7日以上の時、年/月/日形式で返すこと
+- [x] formatDate で年またぎの時、年情報が含まれること
+- [x] ConversationChat でページ開時、相手ニックネームがヘッダーに表示されること
 - [x] ConversationChat で← 会話一覧ボタンをクリックした時、/conversations に遷移すること
+- [x] ConversationChat でメッセージリストがスクロール可能な領域であること
+- [x] ConversationChat で入力欄が画面下部に固定されていること
 - [x] ConversationChat でメッセージ一覧が表示される時、各bodyが表示されること
 - [x] ConversationChat で自分のメッセージには自分用クラスが付くこと
-- [x] ConversationChat で相手のメッセージには相手用クラスが付くこと
+- [x] ConversationChat で自分のメッセージが右寄せで青色のバブルスタイルであること
+- [x] ConversationChat で相手のメッセージが左寄せでグレーのバブルスタイルであること
 - [x] ConversationChat でページ開時に joinConversation イベントが送信されること
 - [x] ConversationChat で newMessage イベント受信時、メッセージリストに追加されること
 - [x] ConversationChat で disconnect イベント受信時、切断バナーが表示されること
+- [x] ConversationChat で切断バナーはインラインstyleではなくTailwindクラスでスタイルされていること
 - [x] ConversationChat で connect イベント受信時、切断バナーが非表示になること
 - [x] ConversationChat で connect_error イベント受信時、切断バナーが表示されること
 - [x] ConversationChat で再接続時に joinConversation が再送されること
 - [x] ConversationChat で送信ボタンクリック時、mutate が呼ばれること
 - [x] ConversationChat で1000文字超の入力は送信ボタンが無効になること
 - [x] ConversationChat でページを開いた時に markAsRead が呼ばれること
-- [x] ConversationChat でメッセージローディング中は「読み込み中...」が表示されること
-- [x] ConversationChat でメッセージ取得エラー時は「メッセージの取得に失敗しました」が表示されること
+- [x] ConversationChat でメッセージローディング中は「読み込み中...」が統一されたスタイルで表示されること
+- [x] ConversationChat でローディング表示が統一されたスタイルであること
+- [x] ConversationChat でメッセージ取得エラー時は「メッセージの取得に失敗しました」が統一されたスタイルで表示されること
+- [x] ConversationChat でエラー表示が統一されたスタイルであること
 
 ### LoginWithAuth (`src/pages/LoginWithAuth.test.tsx`)
 
