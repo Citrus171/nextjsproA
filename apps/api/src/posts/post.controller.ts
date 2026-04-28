@@ -160,7 +160,8 @@ export class PostsController {
     @Param("id") id: string,
     @Body() body: UpdatePostDto
   ) {
-    return this.posts.update(id, req.user.id, body);
+    const isAdmin = req.user?.role === "admin";
+    return this.posts.update(id, req.user.id, body, isAdmin);
   }
 
   @Delete(":id")
@@ -208,7 +209,8 @@ export class PostsController {
     @Param("id") id: string,
     @UploadedFiles() files: Express.Multer.File[]
   ) {
-    return this.posts.addImages(id, req.user.id, files ?? []);
+    const isAdmin = req.user?.role === "admin";
+    return this.posts.addImages(id, req.user.id, files ?? [], isAdmin);
   }
 
   @Delete(":id/images/:imageId")

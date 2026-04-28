@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { authControllerRefresh } from "../../../../packages/api-client/src/index";
 
@@ -30,8 +36,11 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   const [token, setTokenState] = useState<string | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
   const navigate = useNavigate();
+  const refreshCalledRef = useRef(false);
 
   useEffect(() => {
+    if (refreshCalledRef.current) return;
+    refreshCalledRef.current = true;
     authControllerRefresh()
       .then((res) => {
         const t =

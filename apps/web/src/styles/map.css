@@ -208,6 +208,21 @@
   cursor: progress;
 }
 
+.map-picking-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1400;
+  padding: 10px 16px;
+  background: rgba(26, 115, 232, 0.96);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+}
+
 .map-current-location-button__icon {
   width: 19px;
   height: 19px;

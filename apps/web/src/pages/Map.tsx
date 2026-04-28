@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  MapContainer,
-  Marker,
-  TileLayer,
-  useMap,
-  useMapEvents,
-} from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -439,7 +433,6 @@ export default function Map() {
 
       <SightingModal
         isOpen={sightingModalOpen}
-        forceMount={pickingLocation ? true : undefined}
         onClose={() => {
           setSightingModalOpen(false);
           setSightingPostId(null);
@@ -448,6 +441,7 @@ export default function Map() {
         pickedLocation={pickedLocation}
         onSelectFromMap={() => {
           setSightingModalOpen(false);
+          setSelectedMarker(null);
           setPickingLocation(true);
           setPickedLocation(null);
         }}
@@ -556,10 +550,20 @@ function MapClickHandler({
   enabled: boolean;
   onClick: (lat: number, lng: number) => void;
 }) {
-  useMapEvents({
-    click(e: LeafletMouseEvent) {
-      if (enabled) onClick(e.latlng.lat, e.latlng.lng);
-    },
-  });
+  const map = useMap();
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const handler = (e: LeafletMouseEvent) => {
+      onClick(e.latlng.lat, e.latlng.lng);
+    };
+
+    map.on("click", handler);
+    return () => {
+      map.off("click", handler);
+    };
+  }, [enabled, onClick, map]);
+
   return null;
 }

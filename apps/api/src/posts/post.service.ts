@@ -263,14 +263,15 @@ export class PostsService {
   async addImages(
     postId: string,
     userId: string,
-    files: Express.Multer.File[]
+    files: Express.Multer.File[],
+    isAdmin = false
   ) {
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
       include: { images: true },
     });
     if (!post) throw new NotFoundException("投稿が見つかりません");
-    if (post.userId !== userId)
+    if (post.userId !== userId && !isAdmin)
       throw new ForbiddenException("投稿のオーナーではありません");
 
     const user = await this.prisma.user.findUnique({
@@ -331,7 +332,12 @@ export class PostsService {
     return this.prisma.image.delete({ where: { id: imageId } });
   }
 
-  async update(id: string, userId: string, dto: UpdatePostDto) {
+  async update(
+    id: string,
+    userId: string,
+    dto: UpdatePostDto,
+    isAdmin = false
+  ) {
     const post = await this.prisma.post.findUnique({
       where: { id },
       include: { petDetail: true, location: true },
@@ -339,7 +345,7 @@ export class PostsService {
     if (!post) {
       throw new HttpException("投稿が見つかりません", HttpStatus.NOT_FOUND);
     }
-    if (post.userId !== userId) {
+    if (post.userId !== userId && !isAdmin) {
       throw new ForbiddenException("投稿のオーナーではありません");
     }
 

@@ -191,9 +191,14 @@ describe("PostsController", () => {
         title: "New",
       } as any);
 
-      expect(mockPostsService.update).toHaveBeenCalledWith("post1", "user1", {
-        title: "New",
-      });
+      expect(mockPostsService.update).toHaveBeenCalledWith(
+        "post1",
+        "user1",
+        {
+          title: "New",
+        },
+        false
+      );
       expect(result).toEqual(updated);
     });
 
@@ -242,7 +247,8 @@ describe("PostsController", () => {
       expect(mockPostsService.update).toHaveBeenCalledWith(
         "post1",
         "user1",
-        dto
+        dto,
+        false
       );
       expect(result).toEqual(updated);
     });
@@ -268,7 +274,8 @@ describe("PostsController", () => {
       expect(mockPostsService.addImages).toHaveBeenCalledWith(
         "post1",
         "user1",
-        files
+        files,
+        false
       );
       expect(result).toEqual(response);
     });
@@ -287,7 +294,8 @@ describe("PostsController", () => {
       expect(mockPostsService.addImages).toHaveBeenCalledWith(
         "post1",
         "user1",
-        []
+        [],
+        false
       );
     });
 
