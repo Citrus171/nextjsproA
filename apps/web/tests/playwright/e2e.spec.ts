@@ -34,7 +34,7 @@ test("basic E2E flow: register → login → create post → view posts", async 
 
   // 2. Login
   await page.getByLabel("メールアドレス").fill(email);
-  await page.getByLabel("パスワード").fill(password);
+  await page.getByLabel("パスワード", { exact: true }).fill(password);
   const loginResponsePromise = page.waitForResponse(
     (res) =>
       res.url().includes("/api/auth/login") && res.request().method() === "POST"

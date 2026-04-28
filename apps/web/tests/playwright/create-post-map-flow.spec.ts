@@ -27,7 +27,7 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   await expect(page).toHaveURL(`${baseUrl}/login`);
 
   await page.getByLabel("メールアドレス").fill(email);
-  await page.getByLabel("パスワード").fill(password);
+  await page.getByLabel("パスワード", { exact: true }).fill(password);
   await Promise.all([
     page.waitForResponse(
       (res) =>
