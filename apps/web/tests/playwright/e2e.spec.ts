@@ -12,19 +12,16 @@ test("basic E2E flow: register → login → create post → view posts", async 
 
   // 1. Register
   await page.goto(`${baseUrl}/register`);
-  await page.fill(
-    'input[placeholder="ニックネーム"]',
-    `E2E User ${crypto.randomUUID()}`
-  );
-  await page.fill('input[placeholder="example@email.com"]', email);
-  await page.fill('input[placeholder="8文字以上"]', password);
-  await page.fill('input[placeholder="もう一度入力"]', password);
+  await page.getByLabel("お名前").fill(`E2E User ${crypto.randomUUID()}`);
+  await page.getByLabel("メールアドレス").fill(email);
+  await page.getByLabel("パスワード", { exact: true }).fill(password);
+  await page.getByLabel("パスワード（確認）").fill(password);
   const registerResponsePromise = page.waitForResponse(
     (res) =>
       res.url().includes("/api/users/register") &&
       res.request().method() === "POST"
   );
-  await page.click('button:has-text("アカウントを作成")');
+  await page.getByRole("button", { name: "アカウントを作成" }).click();
 
   const registerResponse = await registerResponsePromise;
   expect(
@@ -36,13 +33,13 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await expect(page).toHaveURL(`${baseUrl}/login`, { timeout: 15000 });
 
   // 2. Login
-  await page.fill('input[placeholder="example@email.com"]', email);
-  await page.fill('input[placeholder="パスワードを入力"]', password);
+  await page.getByLabel("メールアドレス").fill(email);
+  await page.getByLabel("パスワード").fill(password);
   const loginResponsePromise = page.waitForResponse(
     (res) =>
       res.url().includes("/api/auth/login") && res.request().method() === "POST"
   );
-  await page.click('button:has-text("ログイン")');
+  await page.getByRole("button", { name: "ログイン" }).click();
 
   const loginResponse = await loginResponsePromise;
   expect(

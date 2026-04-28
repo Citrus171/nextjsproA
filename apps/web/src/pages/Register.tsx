@@ -126,7 +126,7 @@ export default function Register() {
               </Label>
               <Input
                 id="email"
-                type="text"
+                type="email"
                 placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
