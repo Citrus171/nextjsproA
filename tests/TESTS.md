@@ -545,6 +545,7 @@
 - [x] Conversations で← Map ボタンをクリックした時、/ に遷移すること
 - [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
 - [x] Conversations で5秒間隔でポーリングするようにuseQueryが呼ばれること
+- [x] Conversations でエラー時はポーリングが停止すること
 - [x] formatDate で1分未満の時、「今」を返すこと
 - [x] formatDate で1分の時、「1分前」を返すこと
 - [x] formatDate で59分の時、「59分前」を返すこと
@@ -576,6 +577,31 @@
 - [x] ConversationChat でローディング表示が統一されたスタイルであること
 - [x] ConversationChat でメッセージ取得エラー時は「メッセージの取得に失敗しました」が統一されたスタイルで表示されること
 - [x] ConversationChat でエラー表示が統一されたスタイルであること
+
+### Layout (`src/components/Layout.test.tsx`)
+
+- [x] アウトレットの子ルートがレンダリングされること
+- [x] ボトムタブが表示されること
+- [x] /login パスではタブバーが表示されないこと
+- [x] /register パスではタブバーが表示されないこと
+- [x] authRequired タブ 未認証時は /login への誘導リンクが表示されること
+- [x] authRequired タブ 認証時はタブ本来のリンク先が表示され、現在パスならハイライトされること
+- [x] authOnly タブ 未認証時は表示されないこと
+- [x] authOnly タブ 認証時は表示されること
+
+### MapLayout (`src/components/MapLayout.test.tsx`)
+
+- [x] /posts ルートでマップが背景として表示されること
+- [x] /conversations ルートでもマップが背景として表示されること
+- [x] /create ルートでもマップが背景として表示されること
+- [x] /ではアウトレットの子要素のみが表示されること
+
+### Drawer (`src/components/ui/drawer.test.tsx`)
+
+- [x] open=trueの時、子要素が表示されること
+- [x] open=falseの時、子要素が表示されないこと
+- [x] snapPointsが反映されること
+- [x] Closeコンポーネントがクリックされた時onOpenChangeが呼ばれること
 
 ### LoginWithAuth (`src/pages/LoginWithAuth.test.tsx`)
 

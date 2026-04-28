@@ -18,3 +18,7 @@ if (typeof globalThis.ResizeObserver === "undefined") {
   globalThis.ResizeObserver =
     ResizeObserverMock as unknown as typeof ResizeObserver;
 }
+
+if (!Element.prototype.setPointerCapture) {
+  Element.prototype.setPointerCapture = () => {};
+}

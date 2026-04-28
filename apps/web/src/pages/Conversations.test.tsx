@@ -222,9 +222,32 @@ describe("Conversations", () => {
 
       render(<Conversations />);
 
-      expect(useQuery).toHaveBeenCalledWith(
-        expect.objectContaining({ refetchInterval: 5000 })
-      );
+      const options = vi.mocked(useQuery).mock.calls[0][0] as unknown as {
+        refetchInterval: (query: {
+          state: { error: unknown };
+        }) => number | false;
+      };
+      expect(typeof options.refetchInterval).toBe("function");
+      expect(options.refetchInterval({ state: { error: null } })).toBe(5000);
+    });
+
+    it("エラー時はポーリングが停止すること", () => {
+      vi.mocked(useQuery).mockReturnValue({
+        data: [],
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      const options = vi.mocked(useQuery).mock.calls[0][0] as unknown as {
+        refetchInterval: (query: {
+          state: { error: unknown };
+        }) => number | false;
+      };
+      expect(
+        options.refetchInterval({ state: { error: new Error("test") } })
+      ).toBe(false);
     });
   });
 });
