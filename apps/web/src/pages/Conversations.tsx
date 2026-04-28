@@ -30,7 +30,7 @@ export default function Conversations() {
   } = useQuery({
     queryKey: ["conversations"],
     queryFn: () => client.listConversations(),
-    refetchInterval: 5000,
+    refetchInterval: (query) => (query.state.error ? false : 5000),
   });
 
   if (isLoading) {
