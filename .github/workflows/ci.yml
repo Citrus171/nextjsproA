@@ -290,7 +290,7 @@ jobs:
 
       - name: Run Schemathesis
         run: |
-          THRESHOLD=65
+          THRESHOLD=72
           schemathesis run \
             http://localhost:3000/api-json \
             --checks all \
