@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { ChevronLeft } from "lucide-react";
 import { createConversationSocket } from "../lib/conversationSocket";
 import { useApiClient } from "../api/orvalClient";
 import { useAuth } from "../auth/AuthProvider";
@@ -93,65 +94,125 @@ export default function ConversationChat() {
     },
   });
 
-  if (isLoading) return <p>読み込み中...</p>;
-  if (error) return <p>メッセージの取得に失敗しました</p>;
+  if (isLoading)
+    return (
+      <div className="max-w-2xl mx-auto p-4 sm:p-8 text-center h-screen flex items-center justify-center">
+        <p className="text-slate-400 text-sm">読み込み中...</p>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="max-w-2xl mx-auto p-4 sm:p-8 text-center h-screen flex items-center justify-center">
+        <p className="text-red-500 text-sm">メッセージの取得に失敗しました</p>
+      </div>
+    );
 
   const isOverLimit = inputValue.length > 1000;
 
   return (
-    <div>
-      <div>
-        <button type="button" onClick={() => navigate("/conversations")}>
-          ← 会話一覧
+    <div className="max-w-2xl mx-auto h-[100dvh] flex flex-col font-manrope">
+      {/* Header */}
+      <div
+        data-testid="chat-header"
+        className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 shrink-0"
+      >
+        <button
+          type="button"
+          aria-label="会話一覧に戻る"
+          onClick={() => navigate("/conversations")}
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors"
+        >
+          <ChevronLeft size={24} className="text-slate-700" />
         </button>
+        {conversation && (
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base font-bold text-slate-900 truncate">
+              {conversation.partnerNickname}
+            </h1>
+            {conversation.postTitle && (
+              <p className="text-xs text-slate-400 truncate">
+                {conversation.postTitle}
+              </p>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Disconnect Banner */}
       {socketDisconnected && (
         <div
           role="alert"
           aria-live="assertive"
-          style={{
-            background: "#fef2f2",
-            color: "#b91c1c",
-            padding: "8px 12px",
-            fontSize: 13,
-          }}
+          className="bg-red-50 text-red-700 text-xs px-3 py-2 text-center font-medium shrink-0"
         >
           接続が切れました。再接続中…
         </div>
       )}
-      <div>
-        {conversation && (
-          <>
-            <span>{conversation.partnerNickname}</span>
-            {conversation.postTitle && <span>{conversation.postTitle}</span>}
-          </>
-        )}
+
+      {/* Message List */}
+      <div
+        data-testid="message-list"
+        className="flex-1 overflow-y-auto p-4 space-y-1"
+      >
+        {messages.map((msg) => {
+          const isSelf = msg.senderId === userId;
+          return (
+            <div
+              key={msg.id}
+              data-sender={isSelf ? "self" : "other"}
+              className={`max-w-[75%] px-4 py-2 ${
+                isSelf
+                  ? "bg-[#1a73e8] text-white rounded-[1.25rem] rounded-br-sm ml-auto"
+                  : "bg-slate-100 text-slate-900 rounded-[1.25rem] rounded-bl-sm mr-auto"
+              }`}
+            >
+              {msg.body}
+              <div
+                className={`text-[10px] mt-1 ${
+                  isSelf ? "text-blue-200" : "text-slate-400"
+                }`}
+              >
+                {new Date(msg.createdAt).toLocaleTimeString("ja-JP", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      <div>
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            data-sender={msg.senderId === userId ? "self" : "other"}
+      {/* Input Area */}
+      <div
+        data-testid="chat-input"
+        className="sticky bottom-0 px-4 py-3 border-t border-slate-100 bg-white shrink-0"
+      >
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className="flex-1 h-12 px-4 bg-slate-50 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="メッセージを入力"
+          />
+          <button
+            type="button"
+            disabled={isOverLimit || inputValue.length === 0}
+            onClick={() => sendMessage(inputValue)}
+            className={`h-12 px-6 rounded-full text-sm font-bold transition-all ${
+              isOverLimit || inputValue.length === 0
+                ? "bg-slate-100 text-slate-400"
+                : "bg-[#1a73e8] text-white hover:bg-blue-700 active:scale-[0.98]"
+            }`}
           >
-            {msg.body}
-          </div>
-        ))}
-      </div>
-
-      <div>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-        <button
-          type="button"
-          disabled={isOverLimit || inputValue.length === 0}
-          onClick={() => sendMessage(inputValue)}
-        >
-          送信
-        </button>
+            送信
+          </button>
+        </div>
+        {isOverLimit && (
+          <p className="text-[10px] text-red-500 mt-1 ml-4">
+            1000文字以内で入力してください
+          </p>
+        )}
       </div>
     </div>
   );

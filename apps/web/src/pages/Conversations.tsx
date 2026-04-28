@@ -1,7 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useApiClient } from "../api/orvalClient";
+import { ChevronLeft } from "lucide-react";
 import type { ConversationListItemDto } from "../../../../packages/api-client/src/index";
+
+export function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHour = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHour / 24);
+
+  if (diffMin < 1) return "今";
+  if (diffMin < 60) return `${diffMin}分前`;
+  if (diffHour < 24) return `${diffHour}時間前`;
+  if (diffDay < 7) return `${diffDay}日前`;
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+}
 
 export default function Conversations() {
   const client = useApiClient();
@@ -18,44 +34,88 @@ export default function Conversations() {
   });
 
   if (isLoading) {
-    return <p>読み込み中...</p>;
+    return (
+      <div className="max-w-2xl mx-auto p-4 sm:p-8">
+        <p className="text-center text-slate-400 text-sm">読み込み中...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <p>会話の取得に失敗しました</p>;
+    return (
+      <div className="max-w-2xl mx-auto p-4 sm:p-8">
+        <p className="text-center text-red-500 text-sm">
+          会話の取得に失敗しました
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div>
-        <button type="button" onClick={() => navigate("/")}>
-          ← Map
+    <div className="max-w-2xl mx-auto p-4 sm:p-8 font-manrope">
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors"
+          aria-label="Mapに戻る"
+        >
+          <ChevronLeft size={24} className="text-slate-700" />
         </button>
+        <h1 className="text-2xl font-black tracking-tight text-slate-900">
+          会話一覧
+        </h1>
       </div>
-      {(!conversations || conversations.length === 0) ? (
-        <p>会話はまだありません</p>
+      {!conversations || conversations.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-slate-400 text-sm">会話はまだありません</p>
+        </div>
       ) : (
-    <ul>
-      {conversations.map((conv: ConversationListItemDto) => (
-        <li key={conv.id}>
-          <button
-            type="button"
-            aria-label={conv.partnerNickname}
-            onClick={() => navigate(`/conversations/${conv.id}`)}
-            style={{ width: "100%", textAlign: "left" }}
-          >
-            <span>{conv.partnerNickname}</span>
-            {conv.postTitle && <span>{conv.postTitle}</span>}
-            <span>
-              {conv.lastMessage
-                ? conv.lastMessage.body
-                : "メッセージはまだありません"}
-            </span>
-            {conv.unreadCount > 0 && <span>{conv.unreadCount}</span>}
-          </button>
-        </li>
-      ))}
-    </ul>
+        <ul className="space-y-3">
+          {conversations.map((conv: ConversationListItemDto) => (
+            <li key={conv.id}>
+              <button
+                type="button"
+                aria-label={conv.partnerNickname}
+                onClick={() => navigate(`/conversations/${conv.id}`)}
+                className="w-full text-left bg-white rounded-[2rem] shadow-sm p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-bold text-slate-900 text-sm truncate">
+                      {conv.partnerNickname}
+                    </span>
+                    {conv.postTitle && (
+                      <span className="text-xs text-slate-400 truncate">
+                        {conv.postTitle}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 truncate">
+                    {conv.lastMessage
+                      ? conv.lastMessage.body
+                      : "メッセージはまだありません"}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1 shrink-0">
+                  {conv.lastMessage && (
+                    <span className="text-[10px] text-slate-400">
+                      {formatDate(conv.lastMessage.createdAt)}
+                    </span>
+                  )}
+                  {conv.unreadCount > 0 && (
+                    <span
+                      role="status"
+                      className="bg-[#1a73e8] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                    >
+                      {conv.unreadCount}
+                    </span>
+                  )}
+                </div>
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
