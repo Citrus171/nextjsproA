@@ -1,4 +1,5 @@
 import type { PostResponseDto } from "../../../../packages/api-client/src/index";
+import { useState, useRef } from "react";
 import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
 import SightingList from "./SightingList";
 
@@ -58,6 +59,17 @@ export default function PostDetailSheet({
     !!post &&
     !!currentUserId &&
     currentUserId === post.userId;
+
+  const [activeIdx, setActiveIdx] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const idx = Math.round(
+      scrollRef.current.scrollLeft / scrollRef.current.offsetWidth
+    );
+    setActiveIdx(idx);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
@@ -150,16 +162,47 @@ export default function PostDetailSheet({
                 </span>
               )}
 
-              {/* メイン画像 */}
-              <div className="mt-4 aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center">
+              {/* メイン画像カルーセル */}
+              <div className="mt-4">
                 {post.images.length > 0 ? (
-                  <img
-                    src={post.images[0].url}
-                    alt="投稿画像"
-                    className="w-full h-full object-cover"
-                  />
+                  <>
+                    <div
+                      ref={scrollRef}
+                      onScroll={handleScroll}
+                      className="flex overflow-x-auto snap-x snap-mandatory rounded-2xl"
+                      style={{ scrollbarWidth: "none" }}
+                    >
+                      {post.images.map((img, i) => (
+                        <div
+                          key={img.url}
+                          className="min-w-full aspect-[4/3] shrink-0 snap-center bg-slate-100"
+                        >
+                          <img
+                            src={img.url}
+                            alt={`投稿画像${i + 1}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    {post.images.length > 1 && (
+                      <div className="flex justify-center gap-1.5 mt-2">
+                        {post.images.map((_, i) => (
+                          <span
+                            key={i}
+                            className={`block w-1.5 h-1.5 rounded-full transition-colors ${
+                              i === activeIdx ? "bg-blue-600" : "bg-slate-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <span className="text-slate-400 text-sm">画像なし</span>
+                  <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center">
+                    <span className="text-slate-400 text-sm">画像なし</span>
+                  </div>
                 )}
               </div>
 

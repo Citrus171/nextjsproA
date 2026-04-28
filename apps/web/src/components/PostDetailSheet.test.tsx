@@ -138,7 +138,7 @@ describe("PostDetailSheet", () => {
 
   it("画像がある時、1枚目の画像が表示されること", () => {
     renderSheet({ post: postWithDetail });
-    expect(screen.getByRole("img", { name: "投稿画像" })).toHaveAttribute(
+    expect(screen.getByRole("img", { name: "投稿画像1" })).toHaveAttribute(
       "src",
       "https://example.com/cat.jpg"
     );
@@ -147,6 +147,69 @@ describe("PostDetailSheet", () => {
   it("画像がない時、プレースホルダーが表示されること", () => {
     renderSheet({ post: { ...basePost, images: [] } });
     expect(screen.getByText("画像なし")).toBeInTheDocument();
+  });
+
+  it("画像が複数枚ある時、すべての画像がカルーセルとして表示されること", () => {
+    const postWithMultipleImages: PostResponseDto = {
+      ...postWithDetail,
+      images: [
+        {
+          id: "img-1",
+          postId: "post-1",
+          url: "https://example.com/cat1.jpg",
+          createdAt: "2026-04-23T00:00:00.000Z",
+        },
+        {
+          id: "img-2",
+          postId: "post-1",
+          url: "https://example.com/cat2.jpg",
+          createdAt: "2026-04-23T00:00:00.000Z",
+        },
+        {
+          id: "img-3",
+          postId: "post-1",
+          url: "https://example.com/cat3.jpg",
+          createdAt: "2026-04-23T00:00:00.000Z",
+        },
+      ],
+    };
+    renderSheet({ post: postWithMultipleImages });
+    expect(screen.getByAltText("投稿画像1")).toBeInTheDocument();
+    expect(screen.getByAltText("投稿画像2")).toBeInTheDocument();
+    expect(screen.getByAltText("投稿画像3")).toBeInTheDocument();
+  });
+
+  it("画像が1枚のみの時、ドットインジケーターが表示されないこと", () => {
+    renderSheet({ post: postWithDetail });
+    const dots = document.querySelectorAll(
+      "[class*='w-1.5 h-1.5 rounded-full']"
+    );
+    expect(dots.length).toBe(0);
+  });
+
+  it("画像が複数枚の時、ドットインジケーターが表示されること", () => {
+    const postWithTwoImages: PostResponseDto = {
+      ...postWithDetail,
+      images: [
+        {
+          id: "img-1",
+          postId: "post-1",
+          url: "https://example.com/cat1.jpg",
+          createdAt: "2026-04-23T00:00:00.000Z",
+        },
+        {
+          id: "img-2",
+          postId: "post-1",
+          url: "https://example.com/cat2.jpg",
+          createdAt: "2026-04-23T00:00:00.000Z",
+        },
+      ],
+    };
+    renderSheet({ post: postWithTwoImages });
+    const dots = document.querySelectorAll(
+      "[class*='w-1.5 h-1.5 rounded-full']"
+    );
+    expect(dots.length).toBe(2);
   });
 
   it("閉じるボタンを押した時、onClose が呼ばれること", async () => {

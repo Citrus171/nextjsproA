@@ -66,9 +66,14 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
     "public/omiya-station.jpg",
   ]);
 
-  await page
-    .locator(".leaflet-container")
-    .click({ position: { x: 260, y: 170 } });
+  // 地図ピッカーを開いて場所を指定
+  await page.getByRole("button", { name: "地図で場所を指定する" }).click();
+  await page.locator(".leaflet-container").waitFor({ timeout: 5000 });
+  // 地図初期化時の moveend と reverseGeocode のディレイを待つ
+  await page.waitForTimeout(1000);
+  // ピッカー内で「この場所に決める」をクリック
+  await page.getByRole("button", { name: "この場所に決める" }).click();
+
   await page.fill('input[placeholder="例：白猫のミケを探しています"]', title);
 
   const createResponsePromise = page.waitForResponse(

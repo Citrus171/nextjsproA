@@ -9,6 +9,7 @@ const mockToastError = vi.fn();
 let mapClickHandler:
   | ((e: { latlng: { lat: number; lng: number } }) => void)
   | null = null;
+let mapMoveEndHandler: (() => void) | null = null;
 
 vi.mock("react-leaflet", () => ({
   MapContainer: ({ children }: { children: ReactNode }) => (
@@ -22,12 +23,17 @@ vi.mock("react-leaflet", () => ({
   ),
   TileLayer: () => null,
   Marker: () => null,
-  useMap: () => ({ flyTo: vi.fn() }),
+  useMap: () => ({
+    flyTo: vi.fn(),
+    getCenter: () => ({ lat: 35.9062, lng: 139.6236 }),
+  }),
   useMapEvents: (events: {
     click?: (e: { latlng: { lat: number; lng: number } }) => void;
+    moveend?: () => void;
   }) => {
     mapClickHandler = events.click ?? null;
-    return null;
+    mapMoveEndHandler = events.moveend ?? null;
+    return { getCenter: () => ({ lat: 35.91, lng: 139.63 }) };
   },
 }));
 
@@ -41,6 +47,12 @@ vi.mock("sonner", () => ({
   toast: {
     error: (...args: unknown[]) => mockToastError(...args),
   },
+}));
+
+vi.mock("../lib/reverseGeocode", () => ({
+  reverseGeocode: vi
+    .fn()
+    .mockResolvedValue({ address: "さいたま市中央区1-2-3" }),
 }));
 
 vi.mock("react-router-dom", async () => {
@@ -60,6 +72,7 @@ import CreatePost from "./CreatePost";
 describe("CreatePost", () => {
   beforeEach(() => {
     mapClickHandler = null;
+    mapMoveEndHandler = null;
     mockCreatePost.mockClear();
     mockNavigate.mockClear();
     mockToastError.mockClear();
@@ -101,7 +114,22 @@ describe("CreatePost", () => {
       "中央区1-2-3"
     );
 
-    await user.click(screen.getByTestId("mock-map"));
+    // Open map picker
+    await user.click(
+      screen.getByRole("button", {
+        name: /地図で場所を指定する|場所を変更する/,
+      })
+    );
+
+    // Simulate map moveend to set pickerCenter
+    mapMoveEndHandler?.();
+    await waitFor(() => {
+      expect(screen.getByText("取得中…")).toBeInTheDocument();
+    });
+
+    // Confirm location
+    await user.click(screen.getByRole("button", { name: "この場所に決める" }));
+
     await user.type(
       screen.getByPlaceholderText("例：白猫のミケを探しています"),
       "迷い猫の投稿"
@@ -150,7 +178,7 @@ describe("CreatePost", () => {
     expect(location.city).toBe("さいたま市");
     expect(location.address).toBe("中央区1-2-3");
     expect(location.lat).toBe(35.91);
-    expect(location.lng).toBe(139.62);
+    expect(location.lng).toBe(139.63);
 
     expect(mockNavigate).toHaveBeenCalledWith("/posts");
   });
@@ -191,7 +219,17 @@ describe("CreatePost", () => {
       screen.getByPlaceholderText("例：〇〇1-2-3 〇〇公園付近"),
       "中央区1-2-3"
     );
-    await user.click(screen.getByTestId("mock-map"));
+    // Open map picker and confirm
+    await user.click(
+      screen.getByRole("button", {
+        name: /地図で場所を指定する|場所を変更する/,
+      })
+    );
+    mapMoveEndHandler?.();
+    await waitFor(() => {
+      expect(screen.getByText("取得中…")).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: "この場所に決める" }));
     await user.type(
       screen.getByPlaceholderText("例：白猫のミケを探しています"),
       "迷い猫の投稿"
@@ -207,5 +245,48 @@ describe("CreatePost", () => {
       "投稿に失敗しました。もう一度お試しください。"
     );
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("埋め込み地図が表示されず、地図ピッカー起動ボタンが表示されること", () => {
+    render(<CreatePost />);
+    expect(
+      screen.getByRole("button", { name: /地図で場所を指定する/ })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("mock-map")).not.toBeInTheDocument();
+  });
+
+  it("地図ピッカー起動ボタンをクリックするとフルスクリーンピッカーが開くこと", async () => {
+    const user = userEvent.setup();
+    render(<CreatePost />);
+    await user.click(
+      screen.getByRole("button", { name: /地図で場所を指定する/ })
+    );
+    expect(
+      screen.getByRole("heading", { name: "地図で場所を指定" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "この場所に決める" })
+    ).toBeInTheDocument();
+  });
+
+  it("ピッカー内で「この場所に決める」を押すとピッカーが閉じて場所が更新され、座標が表示されること", async () => {
+    const user = userEvent.setup();
+    render(<CreatePost />);
+    await user.click(
+      screen.getByRole("button", { name: /地図で場所を指定する/ })
+    );
+    mapMoveEndHandler?.();
+    await waitFor(() => {
+      expect(screen.getByText("取得中…")).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: "この場所に決める" }));
+    expect(
+      screen.queryByRole("heading", { name: "地図で場所を指定" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /場所を変更する/ })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/35\.91000/)).toBeInTheDocument();
+    expect(screen.getByText(/139\.63000/)).toBeInTheDocument();
   });
 });

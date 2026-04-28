@@ -70,9 +70,12 @@ test("basic E2E flow: register → login → create post → view posts", async 
     'input[placeholder="例：〇〇1-2-3 〇〇公園付近"]',
     "中央区1-2-3"
   );
-  await page.locator(".leaflet-container").click({
-    position: { x: 260, y: 170 },
-  });
+  // 地図ピッカーを開いて場所を指定
+  await page.getByRole("button", { name: "地図で場所を指定する" }).click();
+  await page.locator(".leaflet-container").waitFor({ timeout: 5000 });
+  await page.waitForTimeout(1000);
+  await page.getByRole("button", { name: "この場所に決める" }).click();
+
   await page.fill(
     'input[placeholder="例：白猫のミケを探しています"]',
     postTitle

@@ -9,7 +9,6 @@ import {
   useMapEvents,
 } from "react-leaflet";
 import L from "leaflet";
-import type { Map as LeafletMap } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useApiClient } from "../api/orvalClient";
 import { reverseGeocode } from "../lib/reverseGeocode";
@@ -70,15 +69,17 @@ function MapClickHandler({
   return null;
 }
 
-function MapInstanceBridge({
-  onReady,
+function MapPickerMoveHandler({
+  onMoveEnd,
 }: {
-  onReady: (map: LeafletMap) => void;
+  onMoveEnd: (lat: number, lng: number) => void;
 }) {
-  const map = useMap();
-  useEffect(() => {
-    onReady(map);
-  }, [map, onReady]);
+  const map = useMapEvents({
+    moveend() {
+      const center = map.getCenter();
+      onMoveEnd(center.lat, center.lng);
+    },
+  });
   return null;
 }
 
@@ -130,7 +131,14 @@ export default function CreatePost() {
   const [submitting, setSubmitting] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const mapRef = useRef<LeafletMap | null>(null);
+
+  const [mapPickerOpen, setMapPickerOpen] = useState(false);
+  const [pickerCenter, setPickerCenter] = useState<LatLng>({
+    lat: DEFAULT_CENTER[0],
+    lng: DEFAULT_CENTER[1],
+  });
+  const [pickerAddress, setPickerAddress] = useState("");
+  const geocodeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     return () => {
@@ -149,7 +157,7 @@ export default function CreatePost() {
       async (position) => {
         const { latitude: lat, longitude: lng } = position.coords;
         setPinPos({ lat, lng });
-        mapRef.current?.flyTo([lat, lng], 16, { animate: true });
+        setPickerCenter({ lat, lng });
         const result = await reverseGeocode(lat, lng);
         if ("address" in result) {
           setAddress(result.address);
@@ -555,6 +563,7 @@ export default function CreatePost() {
           </div>
 
           {/* Leaflet 地図 */}
+          {/* 地図ピン指定ボタン */}
           <div className="space-y-2">
             <div className="flex items-center justify-between ml-1">
               <Label className="text-xs font-bold text-slate-500">
@@ -573,45 +582,40 @@ export default function CreatePost() {
             {locationError && (
               <p className="text-xs text-red-500 ml-1">{locationError}</p>
             )}
-            <div className="relative h-64 rounded-[2rem] overflow-hidden">
-              <MapContainer
-                center={DEFAULT_CENTER}
-                zoom={11}
-                style={{ height: "100%", width: "100%" }}
-                scrollWheelZoom={false}
-              >
-                <MapInstanceBridge
-                  onReady={(m) => {
-                    mapRef.current = m;
-                  }}
-                />
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <MapClickHandler onMapClick={setPinPos} />
-                {pinPos && <Marker position={[pinPos.lat, pinPos.lng]} />}
-              </MapContainer>
-              {!pinPos && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                    <MapPin
-                      size={16}
-                      className="text-red-500"
-                      fill="currentColor"
-                    />
-                    <span className="text-xs font-bold text-slate-700">
-                      地図をタップしてピンを移動
-                    </span>
-                  </div>
-                </div>
+            <button
+              type="button"
+              onClick={() => {
+                setPickerCenter(
+                  pinPos ?? { lat: DEFAULT_CENTER[0], lng: DEFAULT_CENTER[1] }
+                );
+                setPickerAddress(address);
+                setMapPickerOpen(true);
+              }}
+              className="w-full h-24 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-1.5 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+            >
+              {pinPos ? (
+                <>
+                  <MapPin
+                    size={20}
+                    className="text-blue-600"
+                    fill="currentColor"
+                  />
+                  <span className="text-xs font-bold text-blue-600">
+                    場所を変更する
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {pinPos.lat.toFixed(5)}, {pinPos.lng.toFixed(5)}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <MapPin size={20} className="text-slate-400" />
+                  <span className="text-xs font-bold text-slate-500">
+                    地図で場所を指定する
+                  </span>
+                </>
               )}
-            </div>
-            {pinPos && (
-              <p className="text-xs text-slate-400 ml-1">
-                緯度: {pinPos.lat.toFixed(5)} / 経度: {pinPos.lng.toFixed(5)}
-              </p>
-            )}
+            </button>
             {errors.latLng && (
               <p className="text-xs text-red-500 ml-1">{errors.latLng}</p>
             )}
@@ -646,6 +650,91 @@ export default function CreatePost() {
           </p>
         </div>
       </form>
+
+      {/* フルスクリーン地図ピッカー */}
+      {mapPickerOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-white">
+          {/* トップバー */}
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 shrink-0">
+            <button
+              type="button"
+              onClick={() => setMapPickerOpen(false)}
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors"
+              aria-label="閉じる"
+            >
+              <ChevronLeft size={24} className="text-slate-700" />
+            </button>
+            <h2 className="text-base font-bold text-slate-900">
+              地図で場所を指定
+            </h2>
+          </div>
+
+          {/* 地図エリア */}
+          <div className="flex-1 relative">
+            <MapContainer
+              center={[pickerCenter.lat, pickerCenter.lng]}
+              zoom={15}
+              zoomControl={false}
+              scrollWheelZoom={true}
+              className="h-full w-full"
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer
+                attribution="&copy; OpenStreetMap contributors"
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <MapPickerMoveHandler
+                onMoveEnd={(lat, lng) => {
+                  setPickerCenter({ lat, lng });
+                  setPickerAddress("取得中…");
+                  if (geocodeTimerRef.current)
+                    clearTimeout(geocodeTimerRef.current);
+                  geocodeTimerRef.current = setTimeout(async () => {
+                    const result = await reverseGeocode(lat, lng);
+                    setPickerAddress("address" in result ? result.address : "");
+                  }, 500);
+                }}
+              />
+            </MapContainer>
+
+            {/* クロスヘア（固定） */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[400]">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute w-px h-12 bg-slate-700/80" />
+                <div className="absolute h-px w-12 bg-slate-700/80" />
+                <div className="w-3 h-3 rounded-full bg-blue-600 border-2 border-white shadow-md" />
+              </div>
+            </div>
+          </div>
+
+          {/* ボトムバー */}
+          <div className="px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t border-slate-100 shrink-0">
+            <div className="flex items-center gap-2 mb-3 min-h-[1.25rem]">
+              {pickerAddress && (
+                <>
+                  <MapPin size={14} className="text-blue-600 shrink-0" />
+                  <p className="text-sm text-slate-700 truncate">
+                    {pickerAddress}
+                  </p>
+                </>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setPinPos(pickerCenter);
+                if (pickerAddress && pickerAddress !== "取得中…") {
+                  setAddress(pickerAddress);
+                }
+                setMapPickerOpen(false);
+              }}
+              className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full shadow-lg active:scale-[0.98] transition-all"
+            >
+              この場所に決める
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
