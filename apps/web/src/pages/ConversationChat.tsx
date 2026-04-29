@@ -56,32 +56,38 @@ export default function ConversationChat() {
 
     client.markAsRead(id);
 
-    let isFirstConnect = true;
+    let wasConnected = false;
     const socket = createConversationSocket(token);
-    socket.emit("joinConversation", id);
 
     socket.on("newMessage", (msg: MessageResponseDto) => {
       setMessages((prev) => [...prev, msg]);
     });
 
-    socket.on("disconnect", () => {
-      setSocketDisconnected(true);
+    socket.on("disconnect", (reason) => {
+      if (reason === "io client disconnect") return;
+      if (wasConnected) {
+        setSocketDisconnected(true);
+      }
     });
 
     socket.on("connect", () => {
+      wasConnected = true;
       setSocketDisconnected(false);
       socket.emit("joinConversation", id);
-      if (!isFirstConnect) {
-        fetchMessagesRef.current?.();
-      }
-      isFirstConnect = false;
+      fetchMessagesRef.current?.();
     });
 
     socket.on("connect_error", () => {
-      setSocketDisconnected(true);
+      if (wasConnected) {
+        setSocketDisconnected(true);
+      }
     });
 
     return () => {
+      socket.off("newMessage");
+      socket.off("disconnect");
+      socket.off("connect");
+      socket.off("connect_error");
       socket.disconnect();
     };
   }, [id, token]);
