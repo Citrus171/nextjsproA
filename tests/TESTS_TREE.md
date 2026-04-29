@@ -8,14 +8,56 @@ apps/api/src/
 │           ├── 用途別の OpenAPI 例示 ID が重複しないこと
 │           └── 汎用 ID 例示は投稿 ID 例示と一致すること
 ├── auth/
-│   ├── auth.service.spec.ts
-│   │   └── AuthService（既存 + validateUser で role を返すことを検証）
 │   └── roles.guard.spec.ts
 │       └── RolesGuard
 │           ├── @Roles デコレータがない場合は通す
 │           ├── ロールが一致する場合は通す
 │           ├── ロールが一致しない場合は ForbiddenException をスローする
 │           └── ユーザーが未設定の場合は ForbiddenException をスローする
+├── identity/
+│   ├── identity.service.spec.ts
+│   │   └── IdentityService
+│   │       ├── login
+│   │       │   ├── 正しいメールとパスワードでAuthResultを返すこと
+│   │       │   ├── パスワード不一致でUnauthorizedExceptionを投げること
+│   │       │   ├── 存在しないメールアドレスでUnauthorizedExceptionを投げること
+│   │       │   ├── SHA256フォールバック: HMACで見つからなければSHA256で再検索すること
+│   │       │   └── production環境ではCookieのsecureとsameSiteが適切に設定されること
+│   │       ├── refresh
+│   │       │   ├── 有効なトークンで新しいAuthResultを返すこと
+│   │       │   ├── トークンが存在しない場合はUnauthorizedExceptionを投げること
+│   │       │   └── 期限切れトークンはUnauthorizedExceptionを投げること
+│   │       ├── logout
+│   │       │   ├── リフレッシュトークンを削除すること
+│   │       │   └── 存在しないトークンでもエラーを投げないこと
+│   │       ├── register
+│   │       │   ├── 正常にユーザーを登録しUserDtoを返すこと
+│   │       │   ├── メールアドレス重複でConflictExceptionを投げること
+│   │       │   └── ニックネーム重複でConflictExceptionを投げること
+│   │       ├── findAll
+│   │       │   └── 全ユーザーをパスワードなしで返すこと
+│   │       └── deleteUser
+│   │           └── ユーザーを削除しUserDtoを返すこと
+│   └── crypto.service.spec.ts
+│       └── CryptoService
+│           ├── normalizeEmail
+│           │   ├── 大文字を小文字にし、前後空白を除去すること
+│           │   └── 既に正規化済みのメールアドレスはそのまま返すこと
+│           ├── encryptEmail / decryptEmail
+│           │   ├── 暗号化して復号すると元のメールアドレスに戻ること
+│           │   ├── 異なる平文は異なる暗号文を生成すること
+│           │   └── 復号: 壊れたデータは null を返すこと
+│           ├── hmacEmail
+│           │   ├── 同じ入力に対して同じHMACを生成すること（決定性）
+│           │   ├── 異なる入力に対して異なるHMACを生成すること
+│           │   └── 正規化されたメールアドレスに対してのみ使われること
+│           ├── sha256Hex
+│           │   ├── 同じ入力に対して同じハッシュを生成すること
+│           │   ├── 異なる入力に対して異なるハッシュを生成すること
+│           │   └── SHA256ハッシュは64文字の16進数であること
+│           └── generateSecureToken
+│               ├── 96文字の16進数文字列を生成すること (48 bytes)
+│               └── 毎回異なるトークンを生成すること
 ├── posts/
 │   ├── post.service.spec.ts
 │   │   ├── findAll
@@ -225,19 +267,12 @@ apps/api/src/
     │           ├── 管理者がユーザーを削除できる
     │           ├── 存在しないユーザーIDはP2025エラーを404に変換する
     │           └── P2025以外のエラーは再スローされる
-    ├── dto/
-    │   └── register.dto.spec.ts
-    │       └── RegisterDto
-    │           ├── name が未指定でもバリデーションは通る
-    │           ├── nickname が未指定でもバリデーションは通る
-    │           └── name と nickname があればバリデーションは通る
-    └── user.service.spec.ts
-        └── UserService
-            ├── nickname の重複時に ConflictException をスローする
-            ├── （既存テスト省略）
-            └── deleteUser
-                ├── 指定IDのユーザーを削除する
-                └── 存在しないIDは Prisma エラーを再スローする
+    └── dto/
+        └── register.dto.spec.ts
+            └── RegisterDto
+                ├── name が未指定でもバリデーションは通る
+                ├── nickname が未指定でもバリデーションは通る
+                └── name と nickname があればバリデーションは通る
 
 apps/api/
 └── Dredd 契約テスト

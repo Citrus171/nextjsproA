@@ -1,0 +1,276 @@
+import { ConflictException, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import * as bcrypt from "bcrypt";
+import { IdentityService } from "./identity.service";
+import { CryptoService } from "./crypto.service";
+
+const mockPrisma = {
+  user: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findMany: jest.fn(),
+    delete: jest.fn(),
+  },
+  refreshToken: {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    delete: jest.fn(),
+  },
+};
+
+const mockJwt = {
+  sign: jest.fn().mockReturnValue("access-token-jwt"),
+};
+
+const mockConfig = {
+  get: jest.fn((key: string) => {
+    if (key === "NODE_ENV") return "test";
+    if (key === "JWT_SECRET") return "jwt-secret";
+    return undefined;
+  }),
+  getOrThrow: jest.fn((key: string) => {
+    if (key === "NODE_ENV") return "test";
+    if (key === "JWT_SECRET") return "jwt-secret";
+    throw new Error(`Config key ${key} not found`);
+  }),
+} as unknown as ConfigService;
+
+const mockCrypto = {
+  normalizeEmail: jest.fn((e: string) => e.toLowerCase().trim()),
+  encryptEmail: jest.fn().mockReturnValue("encrypted-email"),
+  decryptEmail: jest.fn().mockReturnValue("user@example.com"),
+  hmacEmail: jest.fn().mockReturnValue("hmac-hash"),
+  sha256Hex: jest.fn().mockReturnValue("sha256-hash"),
+  generateSecureToken: jest.fn().mockReturnValue("a".repeat(96)),
+};
+
+async function makeUser(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "user-1",
+    emailEncrypted: "encrypted-email",
+    emailHash: "hmac-hash",
+    password: await bcrypt.hash("password123", 10),
+    nickname: "Alice",
+    role: "user",
+    createdAt: new Date("2024-01-01"),
+    ...overrides,
+  };
+}
+
+describe("IdentityService", () => {
+  let service: IdentityService;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    service = new IdentityService(
+      mockPrisma as any,
+      mockJwt as unknown as JwtService,
+      mockConfig,
+      mockCrypto as unknown as CryptoService
+    );
+  });
+
+  describe("login", () => {
+    it("正しいメールとパスワードでAuthResultを返すこと", async () => {
+      const user = await makeUser();
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
+      mockPrisma.refreshToken.create.mockResolvedValueOnce({});
+
+      const result = await service.login("user@example.com", "password123");
+
+      expect(result.accessToken).toBe("access-token-jwt");
+      expect(result.setCookies).toHaveLength(1);
+      expect(result.setCookies[0].name).toBe("refreshToken");
+      expect(result.setCookies[0].value).toBe("a".repeat(96));
+      expect(result.setCookies[0].options.httpOnly).toBe(true);
+      expect(result.setCookies[0].options.sameSite).toBe("lax");
+    });
+
+    it("パスワード不一致でUnauthorizedExceptionを投げること", async () => {
+      const user = await makeUser();
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
+
+      await expect(
+        service.login("user@example.com", "wrongpassword")
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it("存在しないメールアドレスでUnauthorizedExceptionを投げること", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(service.login("no@example.com", "password")).rejects.toThrow(
+        UnauthorizedException
+      );
+    });
+
+    it("SHA256フォールバック: HMACで見つからなければSHA256で再検索すること", async () => {
+      const user = await makeUser();
+      mockPrisma.user.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(user);
+
+      await service.login("user@example.com", "password123");
+
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledTimes(2);
+    });
+
+    it("production環境ではCookieのsecureとsameSiteが適切に設定されること", async () => {
+      const prodConfig = {
+        get: jest.fn((key: string) => {
+          if (key === "NODE_ENV") return "production";
+          if (key === "JWT_SECRET") return "jwt-secret";
+          return undefined;
+        }),
+        getOrThrow: jest.fn((key: string) => {
+          if (key === "NODE_ENV") return "production";
+          if (key === "JWT_SECRET") return "jwt-secret";
+          throw new Error(`Config key ${key} not found`);
+        }),
+      } as unknown as ConfigService;
+      const prodService = new IdentityService(
+        mockPrisma as any,
+        mockJwt as unknown as JwtService,
+        prodConfig,
+        mockCrypto as unknown as CryptoService
+      );
+
+      const user = await makeUser();
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
+
+      const result = await prodService.login("user@example.com", "password123");
+
+      expect(result.setCookies[0].options.secure).toBe(true);
+      expect(result.setCookies[0].options.sameSite).toBe("none");
+    });
+  });
+
+  describe("refresh", () => {
+    it("有効なトークンで新しいAuthResultを返すこと", async () => {
+      const ts = new Date(Date.now() + 86400000);
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        token: "old-refresh-token",
+        userId: "user-1",
+        expiresAt: ts,
+        user: { emailEncrypted: "enc-email", role: "user" },
+      });
+      mockPrisma.refreshToken.create.mockResolvedValueOnce({});
+
+      const result = await service.refresh("old-refresh-token");
+
+      expect(result.accessToken).toBe("access-token-jwt");
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({
+        where: { token: "old-refresh-token" },
+      });
+    });
+
+    it("トークンが存在しない場合はUnauthorizedExceptionを投げること", async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce(null);
+
+      await expect(service.refresh("nonexistent")).rejects.toThrow(
+        UnauthorizedException
+      );
+    });
+
+    it("期限切れトークンはUnauthorizedExceptionを投げること", async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        token: "old-token",
+        userId: "user-1",
+        expiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(service.refresh("old-token")).rejects.toThrow(
+        UnauthorizedException
+      );
+    });
+  });
+
+  describe("logout", () => {
+    it("リフレッシュトークンを削除すること", async () => {
+      mockPrisma.refreshToken.delete.mockResolvedValueOnce({});
+
+      await service.logout("some-token");
+
+      expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({
+        where: { token: "some-token" },
+      });
+    });
+
+    it("存在しないトークンでもエラーを投げないこと", async () => {
+      mockPrisma.refreshToken.delete.mockRejectedValueOnce(
+        new Error("not found")
+      );
+
+      await expect(service.logout("nonexistent")).resolves.toBeUndefined();
+    });
+  });
+
+  describe("register", () => {
+    it("正常にユーザーを登録しUserDtoを返すこと", async () => {
+      const createdUser = await makeUser();
+      mockPrisma.user.create.mockResolvedValueOnce(createdUser);
+
+      const result = await service.register(
+        "user@example.com",
+        "password123",
+        "Alice"
+      );
+
+      expect(result.id).toBe("user-1");
+      expect(result.email).toBe("user@example.com");
+      expect(result.nickname).toBe("Alice");
+      expect(result.role).toBe("user");
+      expect(mockPrisma.user.create).toHaveBeenCalled();
+    });
+
+    it("メールアドレス重複でConflictExceptionを投げること", async () => {
+      const e = new Error("P2002") as any;
+      e.code = "P2002";
+      e.meta = { target: ["emailHash"] };
+      mockPrisma.user.create.mockRejectedValueOnce(e);
+
+      await expect(
+        service.register("dup@example.com", "pass", "nick")
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it("ニックネーム重複でConflictExceptionを投げること", async () => {
+      const e = new Error("P2002") as any;
+      e.code = "P2002";
+      e.meta = { target: ["nickname"] };
+      mockPrisma.user.create.mockRejectedValueOnce(e);
+
+      await expect(
+        service.register("a@example.com", "pass", "dup")
+      ).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe("findAll", () => {
+    it("全ユーザーをパスワードなしで返すこと", async () => {
+      const u1 = await makeUser({ id: "u1", nickname: "A" });
+      const u2 = await makeUser({ id: "u2", nickname: "B" });
+      mockPrisma.user.findMany.mockResolvedValueOnce([u1, u2]);
+
+      const result = await service.findAll();
+
+      expect(result).toHaveLength(2);
+      expect(result[0].email).toBe("user@example.com");
+      expect(result[0]).not.toHaveProperty("password");
+      expect(result[0]).not.toHaveProperty("emailEncrypted");
+    });
+  });
+
+  describe("deleteUser", () => {
+    it("ユーザーを削除しUserDtoを返すこと", async () => {
+      const u = await makeUser({ id: "u1", nickname: "Alice" });
+      u.emailEncrypted = "enc";
+      mockPrisma.user.delete.mockResolvedValueOnce(u);
+
+      const result = await service.deleteUser("u1");
+
+      expect(result.id).toBe("u1");
+      expect(result.nickname).toBe("Alice");
+    });
+  });
+});
