@@ -19,6 +19,7 @@ export class CreateSightingDto {
   @ApiProperty({ required: false, example: "Saitama City, Urawa-ku" })
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   address?: string;
   @ApiProperty({ example: "2024-01-02T00:00:00.000Z" })
   @IsDateString()
@@ -26,5 +27,6 @@ export class CreateSightingDto {
   @ApiProperty({ required: false, example: "Seed sighting" })
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
   comment?: string;
 }

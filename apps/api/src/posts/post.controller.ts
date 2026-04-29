@@ -50,7 +50,11 @@ const ALLOWED_MIME_TYPES = [
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const MAX_IMAGES_PER_POST = PLAN_LIMITS[Plan.premium].imageUploadLimit;
 
-export function imageFileFilter(_req: any, file: Express.Multer.File, cb: any) {
+export function imageFileFilter(
+  _req: Express.Request,
+  file: Express.Multer.File,
+  cb: (error: Error | null, acceptFile: boolean) => void
+) {
   if (!file || !file.originalname || !file.mimetype) {
     return cb(null, false);
   }
@@ -138,8 +142,8 @@ export class PostsController {
   @Get()
   @ApiResponse({ status: 200, type: PostListResponseDto })
   async list(@Query("page") page = "1", @Query("perPage") perPage = "10") {
-    const p = parseInt(page as any, 10) || 1;
-    const pp = parseInt(perPage as any, 10) || 10;
+    const p = parseInt(page, 10) || 1;
+    const pp = parseInt(perPage, 10) || 10;
     return this.posts.findAll(p, pp);
   }
 

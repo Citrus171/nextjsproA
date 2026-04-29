@@ -26,7 +26,6 @@ describe("ConversationsService", () => {
   let service: ConversationsService;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     service = new ConversationsService(mockPrisma as any);
     jest.clearAllMocks();
   });

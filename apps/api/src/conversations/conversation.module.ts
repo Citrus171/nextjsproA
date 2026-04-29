@@ -1,7 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
-import { PrismaService } from "../prisma.service";
 import { ConversationsController } from "./conversation.controller";
 import { ConversationsService } from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
@@ -18,6 +17,6 @@ import { IdentityModule } from "../identity/identity.module";
     }),
   ],
   controllers: [ConversationsController],
-  providers: [ConversationsService, ConversationsGateway, PrismaService],
+  providers: [ConversationsService, ConversationsGateway],
 })
 export class ConversationsModule {}
