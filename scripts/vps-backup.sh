@@ -7,13 +7,15 @@ set -euo pipefail
 # DB (pg_dump) と uploads を日時付きで保存し、古いバックアップを自動削除
 # =============================================================================
 
-OUTPUT_DIR="${OUTPUT_DIR:-~/finder-backend/backups}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$(dirname "$SCRIPT_DIR")}"
+OUTPUT_DIR="${OUTPUT_DIR:-$PROJECT_DIR/backups}"
 RETAIN_DAYS="${RETAIN_DAYS:-7}"
 UPLOADS_ONLY="${UPLOADS_ONLY:-false}"
 DB_ONLY="${DB_ONLY:-false}"
 
 # 環境変数読み込み（DATABASE_URL のみ抽出）
-ENV_FILE=~/finder-backend/apps/api/.env
+ENV_FILE="$PROJECT_DIR/apps/api/.env"
 if [[ -z "${DATABASE_URL:-}" ]] && [[ -f "$ENV_FILE" ]]; then
   DATABASE_URL=$(grep '^DATABASE_URL=' "$ENV_FILE" | head -1 | cut -d= -f2-)
   export DATABASE_URL
@@ -31,7 +33,7 @@ while [[ $# -gt 0 ]]; do
 Usage: vps-backup.sh [OPTIONS]
 
 Options:
-  --output DIR          バックアップ出力先（デフォルト: ~/finder-backend/backups）
+  --output DIR          バックアップ出力先（デフォルト: $PROJECT_DIR/backups）
   --retain N            N 日分以上前のバックアップを削除（デフォルト: 7）
   --uploads-only        uploads のみバックアップ
   --db-only             DB のみバックアップ
@@ -45,7 +47,6 @@ done
 
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_DIR="$OUTPUT_DIR/$TIMESTAMP"
-PROJECT_DIR="${PROJECT_DIR:-~/finder-backend}"
 
 mkdir -p "$BACKUP_DIR"
 

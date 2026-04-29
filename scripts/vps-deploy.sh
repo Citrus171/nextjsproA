@@ -8,7 +8,9 @@ set -euo pipefail
 # → API ビルド → PM2 再起動 → Web ビルド & rsync → Nginx リロード → ヘルスチェック
 # =============================================================================
 
-PROJECT_DIR="${PROJECT_DIR:-~/finder-backend}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="${PROJECT_DIR:-$(dirname "$SCRIPT_DIR")}"
+export PROJECT_DIR
 PM2_NAME="${PM2_NAME:-api}"
 DOMAIN="${DOMAIN:-finder.miyaoo.com}"
 SKIP_BACKUP="${SKIP_BACKUP:-false}"
@@ -33,7 +35,7 @@ Options:
   --help, -h            このヘルプを表示
 
 Environment Variables:
-  PROJECT_DIR           プロジェクトルートパス（デフォルト: ~/finder-backend）
+  PROJECT_DIR           プロジェクトルートパス（未設定時はスクリプト位置から自動検出）
   PM2_NAME              PM2 プロセス名（デフォルト: api）
   DOMAIN                本番ドメイン（デフォルト: finder.miyaoo.com）
   SKIP_BACKUP           true でバックアップをスキップ
