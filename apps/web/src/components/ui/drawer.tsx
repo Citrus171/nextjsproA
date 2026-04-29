@@ -35,7 +35,7 @@ const DrawerContent = React.forwardRef<
     <VaulDrawer.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 bg-white rounded-t-[2rem] shadow-xl flex flex-col",
+        "fixed inset-x-0 bottom-0 bg-background rounded-t-[2rem] shadow-xl flex flex-col",
         className
       )}
       {...props}
@@ -53,7 +53,7 @@ const DrawerHandle = React.forwardRef<
   <VaulDrawer.Handle
     ref={ref}
     className={cn(
-      "w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 shrink-0",
+      "w-12 h-1.5 bg-border rounded-full mx-auto mt-3 shrink-0",
       className
     )}
     {...props}
@@ -67,7 +67,7 @@ const DrawerTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <VaulDrawer.Title
     ref={ref}
-    className={cn("text-lg font-semibold text-slate-900", className)}
+    className={cn("text-lg font-semibold text-foreground", className)}
     {...props}
   />
 ));
@@ -79,7 +79,7 @@ const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <VaulDrawer.Description
     ref={ref}
-    className={cn("text-sm text-slate-500", className)}
+    className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
 ));

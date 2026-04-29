@@ -160,8 +160,8 @@ describe("Conversations", () => {
       render(<Conversations />);
 
       const badge = screen.getByText("3");
-      expect(badge).toHaveClass("bg-[#1a73e8]");
-      expect(badge).toHaveClass("text-white");
+      expect(badge).toHaveClass("bg-primary");
+      expect(badge).toHaveClass("text-primary-foreground");
       expect(badge).toHaveClass("rounded-full");
       expect(badge).toHaveClass("w-5");
       expect(badge).toHaveClass("h-5");

@@ -595,13 +595,6 @@
 - [x] authOnly タブ 未認証時は表示されないこと
 - [x] authOnly タブ 認証時は表示されること
 
-### MapLayout (`src/components/MapLayout.test.tsx`)
-
-- [x] /posts ルートでマップが背景として表示されること
-- [x] /conversations ルートでもマップが背景として表示されること
-- [x] /create ルートでもマップが背景として表示されること
-- [x] /ではアウトレットの子要素のみが表示されること
-
 ### Drawer (`src/components/ui/drawer.test.tsx`)
 
 - [x] open=trueの時、子要素が表示されること

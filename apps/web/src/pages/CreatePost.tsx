@@ -257,7 +257,7 @@ export default function CreatePost() {
         >
           <ChevronLeft size={24} />
         </Button>
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">
+        <h1 className="text-3xl font-black tracking-tight text-foreground">
           迷子猫の情報を登録
         </h1>
       </div>
@@ -266,12 +266,12 @@ export default function CreatePost() {
         {/* 1. お写真 */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <Camera className="text-blue-600" size={20} />
-            <h2 className="text-lg font-black text-slate-800">
+            <Camera className="text-primary" size={20} />
+            <h2 className="text-lg font-black text-foreground">
               お写真（最大{MAX_IMAGES}枚）
             </h2>
           </div>
-          <Card className="border-none bg-slate-50 rounded-[2rem] overflow-hidden">
+          <Card className="border-none bg-muted rounded-[2rem] overflow-hidden">
             <CardContent className="p-6">
               <div className="grid grid-cols-3 gap-3">
                 {previews.map((src, i) => (
@@ -295,10 +295,10 @@ export default function CreatePost() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-white flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
+                    className="aspect-square rounded-2xl border-2 border-dashed border-border bg-card flex flex-col items-center justify-center cursor-pointer hover:bg-accent transition-colors"
                   >
-                    <Upload size={24} className="text-slate-400 mb-1" />
-                    <span className="text-[10px] font-bold text-slate-400">
+                    <Upload size={24} className="text-muted-foreground mb-1" />
+                    <span className="text-xs font-bold text-muted-foreground">
                       追加
                     </span>
                   </button>
@@ -308,7 +308,7 @@ export default function CreatePost() {
                 }).map((_, i) => (
                   <div
                     key={`placeholder-${i}`}
-                    className="aspect-square rounded-2xl bg-slate-100 flex items-center justify-center text-slate-300"
+                    className="aspect-square rounded-2xl bg-muted flex items-center justify-center text-muted-foreground"
                   >
                     <Plus size={20} />
                   </div>
@@ -322,7 +322,7 @@ export default function CreatePost() {
                 className="hidden"
                 onChange={handleImageSelect}
               />
-              <p className="mt-4 text-[10px] font-medium text-slate-400 text-center">
+              <p className="mt-4 text-xs font-medium text-muted-foreground text-center">
                 ※全身、顔、特徴的な模様がわかる写真を推奨します。
               </p>
             </CardContent>
@@ -332,42 +332,42 @@ export default function CreatePost() {
         {/* 2. ねこちゃんの情報 */}
         <section className="space-y-6">
           <div className="flex items-center gap-2">
-            <Cat className="text-blue-600" size={20} />
-            <h2 className="text-lg font-black text-slate-800">
+            <Cat className="text-primary" size={20} />
+            <h2 className="text-lg font-black text-foreground">
               ねこちゃんの情報
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
-                お名前 <span className="text-red-500">*</span>
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
+                お名前 <span className="text-destructive">*</span>
               </Label>
               <Input
                 placeholder="例：レオ"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
               {errors.name && (
-                <p className="text-xs text-red-500 ml-1">{errors.name}</p>
+                <p className="text-xs text-destructive ml-1">{errors.name}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
                 種類
               </Label>
               <Input
                 placeholder="例：日本猫、スコティッシュ等"
                 value={breed}
                 onChange={(e) => setBreed(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
           </div>
 
           <div className="space-y-3">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               性別
             </Label>
             <RadioGroup
@@ -386,7 +386,7 @@ export default function CreatePost() {
               ).map((g) => (
                 <div
                   key={g.value}
-                  className="flex items-center space-x-2 bg-slate-50 px-4 py-2 rounded-full"
+                  className="flex items-center space-x-2 bg-muted px-4 py-2 rounded-full"
                 >
                   <RadioGroupItem value={g.value} id={`gender-${g.value}`} />
                   <Label
@@ -402,68 +402,70 @@ export default function CreatePost() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
-                年齢（推定可）<span className="text-red-500">*</span>
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
+                年齢（推定可）<span className="text-destructive">*</span>
               </Label>
               <Input
                 placeholder="例：推定2歳"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
               {errors.age && (
-                <p className="text-xs text-red-500 ml-1">{errors.age}</p>
+                <p className="text-xs text-destructive ml-1">{errors.age}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
-                毛色 <span className="text-red-500">*</span>
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
+                毛色 <span className="text-destructive">*</span>
               </Label>
               <Input
                 placeholder="例：茶トラ、白黒ハチワレ"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
               {errors.color && (
-                <p className="text-xs text-red-500 ml-1">{errors.color}</p>
+                <p className="text-xs text-destructive ml-1">{errors.color}</p>
               )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               特徴（しっぽの形、鳴き声、性格など）
-              <span className="text-red-500">*</span>
+              <span className="text-destructive">*</span>
             </Label>
             <Textarea
               placeholder="例：かぎしっぽです。少し人見知りですが、おやつを見せると寄ってきます。"
               value={features}
               onChange={(e) => setFeatures(e.target.value)}
-              className="min-h-[100px] border-none bg-slate-50 rounded-2xl p-4 focus-visible:ring-2 focus-visible:ring-blue-500 resize-none"
+              className="min-h-[100px] border-none bg-muted rounded-2xl p-4 focus-visible:ring-2 focus-visible:ring-ring resize-none"
             />
             {errors.features && (
-              <p className="text-xs text-red-500 ml-1">{errors.features}</p>
+              <p className="text-xs text-destructive ml-1">{errors.features}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
-              詳しい説明 <span className="text-red-500">*</span>
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
+              詳しい説明 <span className="text-destructive">*</span>
             </Label>
             <Textarea
               placeholder="例：首輪なし。人懐こい性格で、名前を呼ぶと振り向きます。"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[80px] border-none bg-slate-50 rounded-2xl p-4 focus-visible:ring-2 focus-visible:ring-blue-500 resize-none"
+              className="min-h-[80px] border-none bg-muted rounded-2xl p-4 focus-visible:ring-2 focus-visible:ring-ring resize-none"
             />
             {errors.description && (
-              <p className="text-xs text-red-500 ml-1">{errors.description}</p>
+              <p className="text-xs text-destructive ml-1">
+                {errors.description}
+              </p>
             )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-            <div className="flex items-center space-x-3 bg-slate-50 p-4 rounded-2xl">
+            <div className="flex items-center space-x-3 bg-muted p-4 rounded-2xl">
               <Checkbox
                 id="microchip"
                 checked={microchip}
@@ -473,7 +475,7 @@ export default function CreatePost() {
                 マイクロチップあり
               </Label>
             </div>
-            <div className="flex items-center space-x-3 bg-slate-50 p-4 rounded-2xl">
+            <div className="flex items-center space-x-3 bg-muted p-4 rounded-2xl">
               <Checkbox
                 id="neutered"
                 checked={neutered}
@@ -489,41 +491,41 @@ export default function CreatePost() {
         {/* 3. いつ・どこで？ */}
         <section className="space-y-6">
           <div className="flex items-center gap-2">
-            <MapPin className="text-blue-600" size={20} />
-            <h2 className="text-lg font-black text-slate-800">
+            <MapPin className="text-primary" size={20} />
+            <h2 className="text-lg font-black text-foreground">
               いつ・どこで？
             </h2>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
-              いなくなった日時 <span className="text-red-500">*</span>
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
+              いなくなった日時 <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Calendar
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                 size={18}
               />
               <Input
                 type="datetime-local"
                 value={lostDate}
                 onChange={(e) => setLostDate(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl pl-12 focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="h-12 border-none bg-muted rounded-2xl pl-12 focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
             {errors.lostDate && (
-              <p className="text-xs text-red-500 ml-1">{errors.lostDate}</p>
+              <p className="text-xs text-destructive ml-1">{errors.lostDate}</p>
             )}
           </div>
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 ml-1">
+                <Label className="text-xs font-bold text-muted-foreground ml-1">
                   都道府県
                 </Label>
                 <Select defaultValue="saitama" disabled>
-                  <SelectTrigger className="h-12 border-none bg-slate-50 rounded-2xl px-4">
+                  <SelectTrigger className="h-12 border-none bg-muted rounded-2xl px-4">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -532,32 +534,34 @@ export default function CreatePost() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-slate-500 ml-1">
-                  市区町村 <span className="text-red-500">*</span>
+                <Label className="text-xs font-bold text-muted-foreground ml-1">
+                  市区町村 <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   placeholder="例：さいたま市"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="h-12 border-none bg-slate-50 rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-blue-500"
+                  className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 {errors.city && (
-                  <p className="text-xs text-red-500 ml-1">{errors.city}</p>
+                  <p className="text-xs text-destructive ml-1">{errors.city}</p>
                 )}
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
-                それ以降の住所・目印 <span className="text-red-500">*</span>
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
+                それ以降の住所・目印 <span className="text-destructive">*</span>
               </Label>
               <Input
                 placeholder="例：〇〇1-2-3 〇〇公園付近"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-blue-500"
+                className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
               {errors.address && (
-                <p className="text-xs text-red-500 ml-1">{errors.address}</p>
+                <p className="text-xs text-destructive ml-1">
+                  {errors.address}
+                </p>
               )}
             </div>
           </div>
@@ -566,21 +570,21 @@ export default function CreatePost() {
           {/* 地図ピン指定ボタン */}
           <div className="space-y-2">
             <div className="flex items-center justify-between ml-1">
-              <Label className="text-xs font-bold text-slate-500">
-                地図でピンを指定 <span className="text-red-500">*</span>
+              <Label className="text-xs font-bold text-muted-foreground">
+                地図でピンを指定 <span className="text-destructive">*</span>
               </Label>
               <button
                 type="button"
                 onClick={handleCurrentLocation}
                 disabled={isLocating}
-                className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 disabled:opacity-50"
               >
                 <LocateFixed size={14} />
                 {isLocating ? "取得中…" : "現在地を使う"}
               </button>
             </div>
             {locationError && (
-              <p className="text-xs text-red-500 ml-1">{locationError}</p>
+              <p className="text-xs text-destructive ml-1">{locationError}</p>
             )}
             <button
               type="button"
@@ -591,39 +595,39 @@ export default function CreatePost() {
                 setPickerAddress(address);
                 setMapPickerOpen(true);
               }}
-              className="w-full h-24 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-1.5 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              className="w-full h-24 rounded-[2rem] bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center gap-1.5 hover:bg-accent hover:border-primary/30 transition-colors"
             >
               {pinPos ? (
                 <>
                   <MapPin
                     size={20}
-                    className="text-blue-600"
+                    className="text-primary"
                     fill="currentColor"
                   />
-                  <span className="text-xs font-bold text-blue-600">
+                  <span className="text-xs font-bold text-primary">
                     場所を変更する
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-xs text-muted-foreground">
                     {pinPos.lat.toFixed(5)}, {pinPos.lng.toFixed(5)}
                   </span>
                 </>
               ) : (
                 <>
-                  <MapPin size={20} className="text-slate-400" />
-                  <span className="text-xs font-bold text-slate-500">
+                  <MapPin size={20} className="text-muted-foreground" />
+                  <span className="text-xs font-bold text-muted-foreground">
                     地図で場所を指定する
                   </span>
                 </>
               )}
             </button>
             {errors.latLng && (
-              <p className="text-xs text-red-500 ml-1">{errors.latLng}</p>
+              <p className="text-xs text-destructive ml-1">{errors.latLng}</p>
             )}
           </div>
 
           {/* タイトル（任意） */}
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               投稿タイトル（任意・最大100文字）
             </Label>
             <Input
@@ -631,7 +635,7 @@ export default function CreatePost() {
               value={title}
               maxLength={100}
               onChange={(e) => setTitle(e.target.value)}
-              className="h-12 border-none bg-slate-50 rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
         </section>
@@ -641,11 +645,11 @@ export default function CreatePost() {
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white text-lg font-black rounded-full shadow-2xl shadow-blue-500/20 active:scale-[0.98] transition-all"
+            className="w-full h-16 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-black rounded-full shadow-2xl shadow-primary/20 active:scale-[0.98] transition-all"
           >
             {submitting ? "送信中…" : "この内容で報告する"}
           </Button>
-          <p className="mt-4 text-center text-[10px] font-medium text-slate-400">
+          <p className="mt-4 text-center text-xs font-medium text-muted-foreground">
             ボタンを押すと近隣のボランティアと「ねこさがし」ユーザーに通知が届きます。情報は公開されます。
           </p>
         </div>
@@ -653,18 +657,18 @@ export default function CreatePost() {
 
       {/* フルスクリーン地図ピッカー */}
       {mapPickerOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-white">
+        <div className="fixed inset-0 z-50 flex flex-col bg-card">
           {/* トップバー */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 shrink-0">
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0">
             <button
               type="button"
               onClick={() => setMapPickerOpen(false)}
-              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors"
               aria-label="閉じる"
             >
-              <ChevronLeft size={24} className="text-slate-700" />
+              <ChevronLeft size={24} className="text-foreground" />
             </button>
-            <h2 className="text-base font-bold text-slate-900">
+            <h2 className="text-base font-bold text-foreground">
               地図で場所を指定
             </h2>
           </div>
@@ -700,20 +704,20 @@ export default function CreatePost() {
             {/* クロスヘア（固定） */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-[400]">
               <div className="relative flex items-center justify-center">
-                <div className="absolute w-px h-12 bg-slate-700/80" />
-                <div className="absolute h-px w-12 bg-slate-700/80" />
-                <div className="w-3 h-3 rounded-full bg-blue-600 border-2 border-white shadow-md" />
+                <div className="absolute w-px h-12 bg-foreground/80" />
+                <div className="absolute h-px w-12 bg-foreground/80" />
+                <div className="w-3 h-3 rounded-full bg-primary border-2 border-white shadow-md" />
               </div>
             </div>
           </div>
 
           {/* ボトムバー */}
-          <div className="px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-white border-t border-slate-100 shrink-0">
+          <div className="px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-card border-t border-border shrink-0">
             <div className="flex items-center gap-2 mb-3 min-h-[1.25rem]">
               {pickerAddress && (
                 <>
-                  <MapPin size={14} className="text-blue-600 shrink-0" />
-                  <p className="text-sm text-slate-700 truncate">
+                  <MapPin size={14} className="text-primary shrink-0" />
+                  <p className="text-sm text-foreground truncate">
                     {pickerAddress}
                   </p>
                 </>
@@ -728,7 +732,7 @@ export default function CreatePost() {
                 }
                 setMapPickerOpen(false);
               }}
-              className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full shadow-lg active:scale-[0.98] transition-all"
+              className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full shadow-lg active:scale-[0.98] transition-all"
             >
               この場所に決める
             </button>

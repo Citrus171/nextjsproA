@@ -442,12 +442,6 @@ apps/web/src/
     │       └── authOnly タブ
     │           ├── 未認証時は表示されないこと
     │           └── 認証時は表示されること
-    ├── components/MapLayout.test.tsx
-    │   └── MapLayout
-    │       ├── /posts ルートでマップが背景として表示されること
-    │       ├── /conversations ルートでもマップが背景として表示されること
-    │       ├── /create ルートでもマップが背景として表示されること
-    │       └── /ではアウトレットの子要素のみが表示されること
     ├── components/ui/drawer.test.tsx
     │   └── Drawer
     │       ├── open=trueの時、子要素が表示されること

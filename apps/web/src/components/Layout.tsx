@@ -34,14 +34,14 @@ export default function Layout() {
   const hideTabBar = HIDE_TAB_BAR_PATHS.includes(currentPath);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-manrope">
+    <div className="min-h-screen bg-background font-manrope">
       <main className={hideTabBar ? "" : "pb-20"}>
         <Outlet />
       </main>
 
       {!hideTabBar && (
         <nav
-          className="fixed bottom-0 left-0 right-0 z-[2000] bg-white border-t border-slate-200 px-2 pb-[env(safe-area-inset-bottom)]"
+          className="fixed bottom-0 left-0 right-0 z-[2000] bg-card border-t border-border px-2 pb-[env(safe-area-inset-bottom)]"
           role="navigation"
           aria-label="メインナビゲーション"
         >
@@ -56,13 +56,13 @@ export default function Layout() {
                     className={cn(
                       "flex flex-col items-center justify-center gap-0.5 min-w-[48px] h-full px-2 rounded-lg transition-colors",
                       currentPath === tab.to
-                        ? "text-blue-600"
-                        : "text-slate-500 hover:text-slate-700"
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                     aria-label={tab.label}
                   >
                     <tab.icon size={22} aria-hidden="true" />
-                    <span className="text-[10px] font-bold">{tab.label}</span>
+                    <span className="text-xs font-bold">{tab.label}</span>
                   </Link>
                 );
               }
@@ -73,13 +73,13 @@ export default function Layout() {
                   className={cn(
                     "flex flex-col items-center justify-center gap-0.5 min-w-[48px] h-full px-2 rounded-lg transition-colors",
                     currentPath === tab.to
-                      ? "text-blue-600"
-                      : "text-slate-500 hover:text-slate-700"
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                   aria-label={tab.label}
                 >
                   <tab.icon size={22} aria-hidden="true" />
-                  <span className="text-[10px] font-bold">{tab.label}</span>
+                  <span className="text-xs font-bold">{tab.label}</span>
                 </Link>
               );
             })}

@@ -111,7 +111,7 @@ describe("Layout", () => {
       );
       const link = screen.getByRole("link", { name: "投稿" });
       expect(link).toHaveAttribute("href", "/create");
-      expect(link.className).toContain("text-blue-600");
+      expect(link.className).toContain("text-primary");
     });
   });
 
