@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Cat, Eye, EyeOff } from "lucide-react";
+import { Cat, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
 import { useApiClient } from "../api/orvalClient";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export default function LoginWithAuth() {
       <div className="flex flex-col items-center justify-center pt-16 pb-8 px-6">
         <div className="flex items-center gap-3 mb-3">
           <Cat className="w-10 h-10 text-primary" strokeWidth={1.5} />
-          <span className="text-3xl font-black text-foreground">
+          <span className="text-3xl font-extrabold text-foreground">
             ねこさがし
           </span>
         </div>
@@ -61,10 +61,11 @@ export default function LoginWithAuth() {
 
       {/* フォームカード */}
       <div className="flex-1 px-4">
-        <div className="bg-card rounded-[2rem] p-6 shadow-sm max-w-sm mx-auto">
+        <div className="bg-card rounded-3xl p-6 shadow-sm max-w-sm mx-auto">
           {authError && (
-            <div className="mb-4 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
-              {authError}
+            <div className="mb-4 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+              <span>{authError}</span>
             </div>
           )}
 
@@ -110,7 +111,7 @@ export default function LoginWithAuth() {
                   type="button"
                   aria-label="パスワードを表示"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />

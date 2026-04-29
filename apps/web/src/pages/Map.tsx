@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
@@ -120,6 +120,7 @@ export default function Map() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const geocodingInProgress = useRef(false);
+  const moveDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [viewportHeight, setViewportHeight] = useState(() =>
     getViewportHeight()
   );
@@ -144,6 +145,33 @@ export default function Map() {
       })
       .catch(() => setError("マーカーデータの取得に失敗しました"));
   }, [api, markersRefreshKey]);
+
+  const fetchMarkersWithBounds = useCallback(
+    (bounds: { south: number; north: number; west: number; east: number }) => {
+      if (moveDebounceRef.current) clearTimeout(moveDebounceRef.current);
+      moveDebounceRef.current = setTimeout(() => {
+        api
+          .getMapMarkers({
+            minLat: bounds.south,
+            maxLat: bounds.north,
+            minLng: bounds.west,
+            maxLng: bounds.east,
+          })
+          .then((data) => {
+            setMarkers(data);
+            setError(null);
+          })
+          .catch(() => setError("マーカーデータの取得に失敗しました"));
+      }, 500);
+    },
+    [api]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (moveDebounceRef.current) clearTimeout(moveDebounceRef.current);
+    };
+  }, []);
 
   const visibleMarkers = useMemo(() => {
     if (filter === "all") return markers;
@@ -239,11 +267,11 @@ export default function Map() {
   void clamp(viewportHeight, 0, Infinity);
 
   return (
-    <div className="map-page">
-      <header className="map-header">
-        <div className="map-header__panel">
+    <div className="relative w-full min-h-dvh overflow-hidden map-page">
+      <header className="fixed top-0 left-0 right-0 z-[1300] px-4 pt-4 md:px-5 md:pt-5 pointer-events-none">
+        <div className="flex items-center gap-2.5 p-2.5 rounded-[20px] bg-white/[0.98] shadow-[0_8px_26px_rgba(15,23,42,0.18)] backdrop-blur-[12px] pointer-events-auto md:max-w-[640px]">
           <button
-            className="map-icon-button"
+            className="inline-flex items-center justify-center w-11 h-11 border-0 rounded-full bg-transparent text-[#5f6368] cursor-pointer flex-shrink-0 outline-none hover:bg-black/[0.06] focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
             type="button"
             aria-label="メニュー"
             onClick={() => {
@@ -253,27 +281,30 @@ export default function Map() {
           >
             <MenuIcon />
           </button>
-          <label className="map-search" htmlFor="map-search-input">
-            <span className="map-search__icon" aria-hidden="true">
+          <label
+            className="flex items-center gap-2.5 flex-1 min-w-0 h-10 px-3.5 rounded-full bg-[#f8f9fa] border border-[#e4e7eb]"
+            htmlFor="map-search-input"
+          >
+            <span className="flex-shrink-0 text-primary" aria-hidden="true">
               <SearchIcon />
             </span>
             <input
               id="map-search-input"
               type="search"
               placeholder="検索..."
-              className="map-search__input"
+              className="flex-1 min-w-0 border-0 outline-none bg-transparent text-[#202124] text-base placeholder:text-[#70757a]"
             />
           </label>
-          <div className="map-header__actions">
+          <div className="flex items-center gap-1.5 pl-1.5 border-l border-[#dadce0]">
             <button
-              className="map-icon-button map-icon-button--primary"
+              className="inline-flex items-center justify-center w-11 h-11 border-0 rounded-full bg-transparent text-primary cursor-pointer flex-shrink-0 outline-none hover:bg-black/[0.06] focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
               type="button"
               aria-label="検索"
             >
               <SearchIcon />
             </button>
             <button
-              className="map-account-button"
+              className="inline-flex items-center justify-center w-11 h-11 border-0 rounded-full bg-primary text-white cursor-pointer flex-shrink-0 outline-none hover:bg-primary/90 focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
               type="button"
               aria-label="アカウント"
               onClick={() => {
@@ -287,17 +318,28 @@ export default function Map() {
         </div>
 
         <div
-          className="map-filter-row"
+          className="flex gap-2.5 mt-3 pt-1 pb-0 px-0.5 overflow-x-auto pointer-events-auto scrollbar-none"
           role="group"
           aria-label="地図フィルター"
         >
           {FILTER_OPTIONS.map((option) => {
             const isActive = filter === option.value;
+            const activeColors: Record<string, string> = {
+              all: "bg-[#3c4043]",
+              lost: "bg-destructive",
+              sighting: "bg-primary",
+            };
             return (
               <button
                 key={option.value}
                 type="button"
-                className={`map-chip ${isActive ? `map-chip--active map-chip--${option.value}` : ""}`}
+                className={`inline-flex items-center justify-center flex-shrink-0 min-h-9 px-4 rounded-full border text-sm font-bold cursor-pointer outline-none transition-colors
+                  ${
+                    isActive
+                      ? `${activeColors[option.value]} text-white border-transparent`
+                      : "border-[#d8dde3] bg-white/[0.96] text-[#3c4043] shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
+                  }
+                  focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]`}
                 aria-pressed={isActive}
                 onClick={() => setFilter(option.value)}
               >
@@ -309,21 +351,24 @@ export default function Map() {
       </header>
 
       {error && (
-        <p className="map-floating-error" role="status">
+        <p
+          className="fixed top-[112px] left-4 right-4 md:top-[116px] md:left-5 md:right-auto md:max-w-[420px] z-[1250] m-0 px-3 py-2.5 rounded-xl border border-[#f5c2c7] bg-[rgba(255,240,239,0.98)] text-[#b3261e] text-[13px] shadow-[0_6px_20px_rgba(15,23,42,0.16)]"
+          role="status"
+        >
           {error}
         </p>
       )}
       {locationError && (
         <p
-          className="map-floating-error map-floating-error--location"
+          className="fixed top-[164px] left-4 right-4 md:top-[168px] md:left-5 md:right-auto md:max-w-[420px] z-[1250] m-0 px-3 py-2.5 rounded-xl border border-[#f5c2c7] bg-[rgba(255,240,239,0.98)] text-[#b3261e] text-[13px] shadow-[0_6px_20px_rgba(15,23,42,0.16)]"
           role="status"
         >
           {locationError}
         </p>
       )}
 
-      <main className="map-stage">
-        <div className="map-stage__frame">
+      <main className="relative w-full h-dvh pt-[92px] pb-[92px] md:pb-6">
+        <div className="relative w-full h-full overflow-hidden map-stage__frame">
           <MapContainer
             center={DEFAULT_CENTER}
             zoom={DEFAULT_ZOOM}
@@ -334,7 +379,10 @@ export default function Map() {
               [35.7, 139.4],
               [36.1, 139.9],
             ]}
-            className="map-stage__map"
+            wheelPxPerZoomLevel={480}
+            zoomSnap={0.5}
+            zoomDelta={0.5}
+            className="w-full h-full"
           >
             <MapInstanceBridge onReady={setMapInstance} />
             <MapClickHandler
@@ -349,6 +397,7 @@ export default function Map() {
                 setSightingModalOpen(true);
               }}
             />
+            <MapMoveHandler onMove={fetchMarkersWithBounds} />
             <TileLayer
               attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -367,20 +416,20 @@ export default function Map() {
           </MapContainer>
 
           {mapInstance && (
-            <div className="map-stage__controls">
-              <div className="map-zoom-controls">
+            <div className="absolute top-4 right-4 md:top-5 md:right-5 z-[1100] pointer-events-auto flex flex-col gap-2">
+              <div className="flex flex-col rounded-md overflow-hidden shadow-[0_4px_14px_rgba(15,23,42,0.2)]">
                 <button
                   type="button"
-                  className="map-zoom-button"
+                  className="inline-flex items-center justify-center w-11 h-11 p-0 border-0 bg-[rgba(31,41,55,0.96)] text-white cursor-pointer outline-none hover:bg-[rgba(17,24,39,0.98)] active:bg-[rgba(55,65,81,0.96)] focus-visible:shadow-[inset_0_0_0_2px_hsl(var(--ring))]"
                   aria-label="ズームイン"
                   onClick={handleZoomIn}
                 >
                   <ZoomInIcon />
                 </button>
-                <div className="map-zoom-divider" />
+                <div className="h-px bg-white/15" />
                 <button
                   type="button"
-                  className="map-zoom-button"
+                  className="inline-flex items-center justify-center w-11 h-11 p-0 border-0 bg-[rgba(31,41,55,0.96)] text-white cursor-pointer outline-none hover:bg-[rgba(17,24,39,0.98)] active:bg-[rgba(55,65,81,0.96)] focus-visible:shadow-[inset_0_0_0_2px_hsl(var(--ring))]"
                   aria-label="ズームアウト"
                   onClick={handleZoomOut}
                 >
@@ -389,7 +438,7 @@ export default function Map() {
               </div>
               <button
                 type="button"
-                className="map-current-location-button"
+                className="relative inline-flex items-center justify-center w-11 h-11 p-0 border-0 rounded-md bg-[rgba(31,41,55,0.96)] text-white shadow-[0_4px_14px_rgba(15,23,42,0.2)] cursor-pointer outline-none hover:bg-[rgba(17,24,39,0.98)] focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_14px_rgba(15,23,42,0.2)] disabled:opacity-70 disabled:cursor-progress"
                 aria-label="現在地へ移動"
                 onClick={handleCurrentLocationClick}
                 disabled={isLocating}
@@ -401,10 +450,13 @@ export default function Map() {
         </div>
       </main>
 
-      <nav className="map-bottom-bar" aria-label="投稿アクション">
+      <nav
+        className="fixed left-0 right-0 bottom-0 z-[1300] grid grid-cols-2 gap-3 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-white via-white/[0.94] to-white/[0.02] md:left-4 md:right-4 md:bottom-4 md:max-w-[720px] md:mx-auto md:rounded-3xl md:shadow-[0_12px_32px_rgba(15,23,42,0.18)]"
+        aria-label="投稿アクション"
+      >
         <button
           type="button"
-          className="map-bottom-bar__button map-bottom-bar__button--lost"
+          className="inline-flex items-center justify-center gap-2.5 min-h-[58px] rounded-2xl border border-[#f5c2c7] bg-[#fff0ef] text-[#d93025] text-[15px] font-bold shadow-[0_4px_16px_rgba(15,23,42,0.12)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.12)]"
           onClick={() => {
             if (!currentUserId) {
               navigate("/login");
@@ -419,7 +471,10 @@ export default function Map() {
       </nav>
 
       {pickingLocation && (
-        <div className="map-picking-banner" aria-live="polite">
+        <div
+          className="fixed top-0 left-0 right-0 z-[1400] py-2.5 px-4 bg-primary/[0.96] text-white text-sm font-bold text-center shadow-[0_4px_14px_rgba(15,23,42,0.2)]"
+          aria-live="polite"
+        >
           タップして場所を選択
         </div>
       )}
@@ -535,7 +590,7 @@ function LocationIcon({ loading }: { loading: boolean }) {
   return (
     <svg
       aria-hidden="true"
-      className={`map-current-location-button__icon ${loading ? "map-current-location-button__icon--loading" : ""}`}
+      className={`w-[19px] h-[19px] block ${loading ? "animate-[map-locate-spin_1s_linear_infinite]" : ""}`}
       viewBox="0 0 24 24"
       role="presentation"
       focusable="false"
@@ -562,7 +617,7 @@ function LocationIcon({ loading }: { loading: boolean }) {
 function ZoomInIcon() {
   return (
     <svg
-      className="map-zoom-button__icon"
+      className="w-[18px] h-[18px] block"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -578,7 +633,7 @@ function ZoomInIcon() {
 function ZoomOutIcon() {
   return (
     <svg
-      className="map-zoom-button__icon"
+      className="w-[18px] h-[18px] block"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -623,6 +678,38 @@ function MapClickHandler({
       map.off("click", handler);
     };
   }, [enabled, onClick, map]);
+
+  return null;
+}
+
+function MapMoveHandler({
+  onMove,
+}: {
+  onMove: (bounds: {
+    south: number;
+    north: number;
+    west: number;
+    east: number;
+  }) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    const handler = () => {
+      const b = map.getBounds();
+      onMove({
+        south: b.getSouth(),
+        north: b.getNorth(),
+        west: b.getWest(),
+        east: b.getEast(),
+      });
+    };
+
+    map.on("moveend", handler);
+    return () => {
+      map.off("moveend", handler);
+    };
+  }, [onMove, map]);
 
   return null;
 }

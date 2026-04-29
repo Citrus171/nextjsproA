@@ -24,33 +24,41 @@ const { mockReverseGeocode } = vi.hoisted(() => ({
     >(),
 }));
 let triggerMapClick: ((lat: number, lng: number) => void) | null = null;
-let mapClickHandler:
-  | ((e: { latlng: { lat: number; lng: number } }) => void)
-  | null = null;
+let triggerMapMoveend: (() => void) | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const eventHandlers: Record<string, ((...args: any[]) => void) | null> = {};
 const mockMapInstance = {
   flyTo: mockFlyTo,
+  getBounds: vi.fn(() => ({
+    getSouth: () => 35.8,
+    getNorth: () => 36.0,
+    getWest: () => 139.3,
+    getEast: () => 139.7,
+  })),
   dragging: { enable: vi.fn(), disable: vi.fn() },
-  on: vi.fn(
-    (
-      _event: string,
-      handler: (e: { latlng: { lat: number; lng: number } }) => void
-    ) => {
-      mapClickHandler = handler;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  on: vi.fn((event: string, handler: (...args: any[]) => void) => {
+    eventHandlers[event] = handler;
+    if (event === "click") {
       triggerMapClick = (lat: number, lng: number) =>
         handler({ latlng: { lat, lng } });
     }
-  ),
-  off: vi.fn(
-    (
-      _event: string,
-      handler: (e: { latlng: { lat: number; lng: number } }) => void
-    ) => {
-      if (mapClickHandler === handler) {
-        mapClickHandler = null;
-        triggerMapClick = null;
-      }
+    if (event === "moveend") {
+      triggerMapMoveend = () => handler();
     }
-  ),
+  }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  off: vi.fn((event: string, handler: (...args: any[]) => void) => {
+    if (eventHandlers[event] === handler) {
+      eventHandlers[event] = null;
+    }
+    if (event === "click" && triggerMapClick) {
+      triggerMapClick = null;
+    }
+    if (event === "moveend" && triggerMapMoveend) {
+      triggerMapMoveend = null;
+    }
+  }),
 };
 const mockAuth = { userId: null as string | null };
 
@@ -176,7 +184,7 @@ describe("Map", () => {
     mockReverseGeocode.mockReset();
     mockReverseGeocode.mockResolvedValue({ address: "埼玉県さいたま市" });
     triggerMapClick = null;
-    mapClickHandler = null;
+    triggerMapMoveend = null;
     mockGetMapMarkers.mockResolvedValue([]);
     mockGetPost.mockResolvedValue(samplePost);
     mockCreateSighting.mockResolvedValue(undefined);

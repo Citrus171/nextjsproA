@@ -109,15 +109,15 @@ export default function Posts() {
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-muted"
+            className="inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
-            ← Map
+            マップに戻る
           </button>
           <Link
             to="/create"
-            className="inline-flex items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
+            className="inline-flex items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
-            New Post
+            新規投稿
           </Link>
         </div>
 
@@ -126,7 +126,7 @@ export default function Posts() {
           {allItems.map((p: PostResponseDto) => (
             <div
               key={p.id}
-              className="overflow-hidden rounded-[2rem] bg-card shadow-sm"
+              className="overflow-hidden rounded-3xl bg-card shadow-sm"
             >
               {/* 画像サムネイル */}
               <div className="relative h-48 w-full bg-muted">
@@ -164,26 +164,26 @@ export default function Posts() {
                 <div className="flex items-center justify-between">
                   <Link
                     to={`/edit/${p.id}`}
-                    className="text-sm font-semibold text-primary hover:underline"
+                    className="text-sm font-semibold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
                   >
-                    Edit
+                    編集
                   </Link>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => navigate(`/?postId=${p.id}`)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-border"
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       aria-label={`${p.petDetail?.name ?? "投稿"}の位置を開く`}
                     >
-                      <MapPinned size={16} aria-hidden="true" />
+                      <MapPinned size={18} aria-hidden="true" />
                     </button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button
                           type="button"
-                          className="text-sm font-semibold text-destructive hover:text-destructive/80"
+                          className="text-sm font-semibold text-destructive hover:text-destructive/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
                         >
-                          Delete
+                          削除
                         </button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>

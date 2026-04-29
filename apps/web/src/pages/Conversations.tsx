@@ -59,12 +59,12 @@ export default function Conversations() {
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none transition-colors"
           aria-label="Mapに戻る"
         >
           <ChevronLeft size={24} className="text-foreground" />
         </button>
-        <h1 className="text-2xl font-black tracking-tight text-foreground">
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
           会話一覧
         </h1>
       </div>
@@ -80,7 +80,7 @@ export default function Conversations() {
                 type="button"
                 aria-label={conv.partnerNickname}
                 onClick={() => navigate(`/conversations/${conv.id}`)}
-                className="w-full text-left bg-card rounded-[2rem] shadow-sm p-4 flex items-center gap-4 hover:bg-muted transition-colors"
+                className="w-full text-left bg-card rounded-3xl shadow-sm p-4 flex items-center gap-4 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -108,7 +108,7 @@ export default function Conversations() {
                   {conv.unreadCount > 0 && (
                     <span
                       role="status"
-                      className="bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                      className="bg-primary text-primary-foreground text-xs rounded-full min-w-6 h-6 px-1.5 flex items-center justify-center font-bold"
                     >
                       {conv.unreadCount}
                     </span>

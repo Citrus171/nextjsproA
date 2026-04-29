@@ -122,7 +122,7 @@ export default function ConversationChat() {
           type="button"
           aria-label="会話一覧に戻る"
           onClick={() => navigate("/conversations")}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none transition-colors"
         >
           <ChevronLeft size={24} className="text-foreground" />
         </button>
@@ -196,14 +196,14 @@ export default function ConversationChat() {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            className="flex-1 h-12 px-4 bg-muted rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex-1 h-12 px-4 bg-muted rounded-full text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="メッセージを入力"
           />
           <button
             type="button"
             disabled={isOverLimit || inputValue.length === 0}
             onClick={() => sendMessage(inputValue)}
-            className={`h-12 px-6 rounded-full text-sm font-bold transition-all ${
+            className={`h-12 px-6 rounded-full text-sm font-bold transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
               isOverLimit || inputValue.length === 0
                 ? "bg-muted text-muted-foreground"
                 : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"

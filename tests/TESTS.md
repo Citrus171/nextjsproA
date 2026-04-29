@@ -334,24 +334,70 @@
 
 ---
 
-### AuthService (`src/auth/auth.service.spec.ts`)
+### IdentityService (`src/identity/identity.service.spec.ts`)
 
-#### validateUser
+#### login
 
-- [x] 正しいパスワードで id と email と role を返す
+- [x] 正しいメールとパスワードでAuthResultを返すこと
+- [x] パスワード不一致でUnauthorizedExceptionを投げること
+- [x] 存在しないメールアドレスでUnauthorizedExceptionを投げること
+- [x] SHA256フォールバック: HMACで見つからなければSHA256で再検索すること
+- [x] production環境ではCookieのsecureとsameSiteが適切に設定されること
 
-（その他既存テスト省略）
+#### refresh
 
-### UserService (`src/users/user.service.spec.ts`)
+- [x] 有効なトークンで新しいAuthResultを返すこと
+- [x] トークンが存在しない場合はUnauthorizedExceptionを投げること
+- [x] 期限切れトークンはUnauthorizedExceptionを投げること
 
-#### createUser
+#### logout
 
-- [x] nickname の重複時に ConflictException をスローする
+- [x] リフレッシュトークンを削除すること
+- [x] 存在しないトークンでもエラーを投げないこと
+
+#### register
+
+- [x] 正常にユーザーを登録しUserDtoを返すこと
+- [x] メールアドレス重複でConflictExceptionを投げること
+- [x] ニックネーム重複でConflictExceptionを投げること
+
+#### findAll
+
+- [x] 全ユーザーをパスワードなしで返すこと
 
 #### deleteUser
 
-- [x] 指定IDのユーザーを削除する
-- [x] 存在しないIDは Prisma エラーを再スローする
+- [x] ユーザーを削除しUserDtoを返すこと
+
+### CryptoService (`src/identity/crypto.service.spec.ts`)
+
+#### normalizeEmail
+
+- [x] 大文字を小文字にし、前後空白を除去すること
+- [x] 既に正規化済みのメールアドレスはそのまま返すこと
+
+#### encryptEmail / decryptEmail
+
+- [x] 暗号化して復号すると元のメールアドレスに戻ること
+- [x] 異なる平文は異なる暗号文を生成すること
+- [x] 復号: 壊れたデータは null を返すこと
+
+#### hmacEmail
+
+- [x] 同じ入力に対して同じHMACを生成すること（決定性）
+- [x] 異なる入力に対して異なるHMACを生成すること
+- [x] 正規化されたメールアドレスに対してのみ使われること
+
+#### sha256Hex
+
+- [x] 同じ入力に対して同じハッシュを生成すること
+- [x] 異なる入力に対して異なるハッシュを生成すること
+- [x] SHA256ハッシュは64文字の16進数であること
+
+#### generateSecureToken
+
+- [x] 96文字の16進数文字列を生成すること (48 bytes)
+- [x] 毎回異なるトークンを生成すること
 
 ### UsersController (`src/users/user.controller.spec.ts`)
 

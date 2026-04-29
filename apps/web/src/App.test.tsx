@@ -59,7 +59,7 @@ describe("App", () => {
     );
 
     expect(
-      await screen.findByRole("button", { name: "← Map" })
+      await screen.findByRole("button", { name: "マップに戻る" })
     ).toBeInTheDocument();
   });
 

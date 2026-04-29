@@ -25,12 +25,12 @@ import { RolesGuard } from "../auth/roles.guard";
 import { OPENAPI_USER_ID_EXAMPLE } from "../common/openapi-examples";
 import { RegisterDto } from "./dto/register.dto";
 import { UserResponseDto } from "./dto/user-response.dto";
-import { UsersService } from "./user.service";
+import { IIdentityService } from "../identity/identity.service";
 
 @ApiTags("users")
 @Controller("users")
 export class UsersController {
-  constructor(private users: UsersService) {}
+  constructor(private readonly identity: IIdentityService) {}
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -40,7 +40,7 @@ export class UsersController {
   @ApiResponse({ status: 401, description: "認証が必要です" })
   @ApiResponse({ status: 403, description: "管理者のみ" })
   async findAll() {
-    return this.users.findAll();
+    return this.identity.findAll();
   }
 
   @Delete(":id")
@@ -55,7 +55,7 @@ export class UsersController {
   @ApiResponse({ status: 404, description: "ユーザーが見つかりません" })
   async remove(@Param("id") id: string) {
     try {
-      return await this.users.deleteUser(id);
+      return await this.identity.deleteUser(id);
     } catch (e: any) {
       if (e?.code === "P2025") {
         throw new HttpException(
@@ -103,7 +103,7 @@ export class UsersController {
       throw new BadRequestException({ error: "ニックネームは必須です" });
     }
     try {
-      const user = await this.users.createUser(
+      const user = await this.identity.register(
         dto.email,
         dto.password,
         nickname

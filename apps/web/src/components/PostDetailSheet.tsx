@@ -2,6 +2,7 @@ import type { PostResponseDto } from "../../../../packages/api-client/src/index"
 import { useState, useRef } from "react";
 import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
 import SightingList from "./SightingList";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PostDetailSheetProps {
   isOpen: boolean;
@@ -71,6 +72,15 @@ export default function PostDetailSheet({
     setActiveIdx(idx);
   };
 
+  const scrollToImage = (idx: number) => {
+    if (!scrollRef.current || !post?.images.length) return;
+    scrollRef.current.scrollTo({
+      left: idx * scrollRef.current.offsetWidth,
+      behavior: "smooth",
+    });
+    setActiveIdx(idx);
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <SheetContent
@@ -83,13 +93,15 @@ export default function PostDetailSheet({
         <div className="h-full overflow-y-auto px-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between mt-4 mb-2">
             <SheetTitle asChild>
-              <h2 className="text-xl font-black text-foreground">{title}</h2>
+              <h2 className="text-xl font-extrabold text-foreground">
+                {title}
+              </h2>
             </SheetTitle>
             <button
               type="button"
               aria-label="閉じる"
               onClick={onClose}
-              className="text-muted-foreground hover:text-foreground text-2xl leading-none"
+              className="flex items-center justify-center w-11 h-11 text-muted-foreground hover:text-foreground text-2xl leading-none rounded-full hover:bg-muted transition-colors"
             >
               ×
             </button>
@@ -166,33 +178,69 @@ export default function PostDetailSheet({
               <div className="mt-4">
                 {post.images.length > 0 ? (
                   <>
-                    <div
-                      ref={scrollRef}
-                      onScroll={handleScroll}
-                      className="flex overflow-x-auto snap-x snap-mandatory rounded-2xl"
-                      style={{ scrollbarWidth: "none" }}
-                    >
-                      {post.images.map((img, i) => (
-                        <div
-                          key={img.url}
-                          className="min-w-full aspect-[4/3] shrink-0 snap-center bg-muted"
-                        >
-                          <img
-                            src={img.url}
-                            alt={`投稿画像${i + 1}`}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                          />
-                        </div>
-                      ))}
+                    <div className="relative group">
+                      <div
+                        ref={scrollRef}
+                        onScroll={handleScroll}
+                        className="flex overflow-x-auto snap-x snap-mandatory rounded-2xl"
+                        style={{ scrollbarWidth: "none" }}
+                      >
+                        {post.images.map((img, i) => (
+                          <div
+                            key={img.url}
+                            className="min-w-full aspect-[4/3] shrink-0 snap-center bg-muted"
+                          >
+                            <img
+                              src={img.url}
+                              alt={`投稿画像${i + 1}`}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      {post.images.length > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            aria-label="前の画像"
+                            onClick={() =>
+                              scrollToImage(
+                                (activeIdx - 1 + post.images.length) %
+                                  post.images.length
+                              )
+                            }
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <ChevronLeft size={18} />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="次の画像"
+                            onClick={() =>
+                              scrollToImage(
+                                (activeIdx + 1) % post.images.length
+                              )
+                            }
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <ChevronRight size={18} />
+                          </button>
+                        </>
+                      )}
                     </div>
                     {post.images.length > 1 && (
-                      <div className="flex justify-center gap-1.5 mt-2">
+                      <div className="flex items-center justify-center gap-1.5 mt-2">
                         {post.images.map((_, i) => (
-                          <span
+                          <button
                             key={i}
+                            type="button"
+                            aria-label={`画像${i + 1}を表示`}
+                            onClick={() => scrollToImage(i)}
                             className={`block w-1.5 h-1.5 rounded-full transition-colors ${
-                              i === activeIdx ? "bg-primary" : "bg-border"
+                              i === activeIdx
+                                ? "bg-primary"
+                                : "bg-border hover:bg-muted-foreground"
                             }`}
                           />
                         ))}
@@ -249,7 +297,7 @@ export default function PostDetailSheet({
                   </div>
 
                   <div className="mt-4">
-                    <h3 className="text-base font-black text-foreground mb-2 flex items-center gap-2">
+                    <h3 className="text-base font-extrabold text-foreground mb-2 flex items-center gap-2">
                       <span className="w-1 h-5 bg-primary rounded-full inline-block" />
                       特徴・性格
                     </h3>
@@ -263,7 +311,7 @@ export default function PostDetailSheet({
               {/* location セクション */}
               {post.location && (
                 <div className="mt-6">
-                  <h3 className="text-base font-black text-foreground mb-2 flex items-center gap-2">
+                  <h3 className="text-base font-extrabold text-foreground mb-2 flex items-center gap-2">
                     <span className="w-1 h-5 bg-primary rounded-full inline-block" />
                     最後に目撃された場所
                   </h3>

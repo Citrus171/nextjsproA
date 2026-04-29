@@ -9,13 +9,14 @@ import { RegisterDto } from "./dto/register.dto";
 
 describe("UsersController", () => {
   let controller: UsersController;
-  const mockUsersService = {
-    createUser: jest.fn(),
+  const mockIdentityService = {
+    register: jest.fn(),
     deleteUser: jest.fn(),
+    findAll: jest.fn(),
   };
 
   beforeEach(() => {
-    controller = new UsersController(mockUsersService as any);
+    controller = new UsersController(mockIdentityService as any);
     jest.clearAllMocks();
   });
 
@@ -26,11 +27,11 @@ describe("UsersController", () => {
     } as RegisterDto;
 
     await expect(controller.register(dto)).rejects.toThrow(BadRequestException);
-    expect(mockUsersService.createUser).not.toHaveBeenCalled();
+    expect(mockIdentityService.register).not.toHaveBeenCalled();
   });
 
   it("ConflictException はそのまま伝播する", async () => {
-    mockUsersService.createUser.mockRejectedValue(
+    mockIdentityService.register.mockRejectedValue(
       new ConflictException("このニックネームはすでに使用されています")
     );
 
@@ -45,10 +46,11 @@ describe("UsersController", () => {
 
   it("nickname があれば service に渡す", async () => {
     const createdAt = new Date("2026-01-01T00:00:00.000Z");
-    mockUsersService.createUser.mockResolvedValue({
+    mockIdentityService.register.mockResolvedValue({
       id: "user1",
       email: "a@b.com",
       nickname: "Alice",
+      role: "user",
       createdAt,
     });
 
@@ -58,7 +60,7 @@ describe("UsersController", () => {
       nickname: "Alice",
     } as RegisterDto);
 
-    expect(mockUsersService.createUser).toHaveBeenCalledWith(
+    expect(mockIdentityService.register).toHaveBeenCalledWith(
       "a@b.com",
       "password123",
       "Alice"
@@ -72,10 +74,12 @@ describe("UsersController", () => {
   });
 
   it("nickname がなくても name を後方互換で使う", async () => {
-    mockUsersService.createUser.mockResolvedValue({
+    mockIdentityService.register.mockResolvedValue({
       id: "user1",
       email: "a@b.com",
       nickname: "Alice",
+      role: "user",
+      createdAt: new Date(),
     });
 
     await controller.register({
@@ -84,7 +88,7 @@ describe("UsersController", () => {
       name: "Alice",
     } as RegisterDto);
 
-    expect(mockUsersService.createUser).toHaveBeenCalledWith(
+    expect(mockIdentityService.register).toHaveBeenCalledWith(
       "a@b.com",
       "password123",
       "Alice"
@@ -96,20 +100,21 @@ describe("UsersController", () => {
     it("管理者がユーザーを削除できる", async () => {
       const deleted = {
         id: "user1",
+        email: "a@b.com",
         nickname: "Alice",
         role: "user",
         createdAt: new Date(),
       };
-      mockUsersService.deleteUser.mockResolvedValue(deleted);
+      mockIdentityService.deleteUser.mockResolvedValue(deleted);
 
       const result = await controller.remove("user1");
 
-      expect(mockUsersService.deleteUser).toHaveBeenCalledWith("user1");
+      expect(mockIdentityService.deleteUser).toHaveBeenCalledWith("user1");
       expect(result).toBe(deleted);
     });
 
     it("存在しないユーザーIDはP2025エラーを404に変換する", async () => {
-      mockUsersService.deleteUser.mockRejectedValue({ code: "P2025" });
+      mockIdentityService.deleteUser.mockRejectedValue({ code: "P2025" });
 
       await expect(controller.remove("nonexistent")).rejects.toThrow(
         HttpException
@@ -127,7 +132,7 @@ describe("UsersController", () => {
 
     it("P2025以外のエラーは再スローされる", async () => {
       const dbError = new Error("DB接続エラー");
-      mockUsersService.deleteUser.mockRejectedValue(dbError);
+      mockIdentityService.deleteUser.mockRejectedValue(dbError);
 
       await expect(controller.remove("user1")).rejects.toThrow(dbError);
     });

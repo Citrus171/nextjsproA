@@ -258,7 +258,7 @@ describe("Posts", () => {
       });
       render(<Posts />, { wrapper: createWrapper() });
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: "Delete" }));
+      await user.click(screen.getByRole("button", { name: "削除" }));
       expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
       expect(screen.getByText("投稿を削除しますか？")).toBeInTheDocument();
     });
@@ -272,7 +272,7 @@ describe("Posts", () => {
       });
       render(<Posts />, { wrapper: createWrapper() });
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: "Delete" }));
+      await user.click(screen.getByRole("button", { name: "削除" }));
       await user.click(screen.getByRole("button", { name: "キャンセル" }));
       expect(mockDeletePost).not.toHaveBeenCalled();
     });
@@ -288,7 +288,7 @@ describe("Posts", () => {
       });
       render(<Posts />, { wrapper: createWrapper() });
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: "Delete" }));
+      await user.click(screen.getByRole("button", { name: "削除" }));
       await user.click(screen.getByRole("button", { name: "削除する" }));
       await waitFor(() => {
         expect(mockDeletePost).toHaveBeenCalledWith("post-1");
@@ -309,7 +309,7 @@ describe("Posts", () => {
       });
       render(<Posts />, { wrapper: createWrapper() });
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: "Delete" }));
+      await user.click(screen.getByRole("button", { name: "削除" }));
       await user.click(screen.getByRole("button", { name: "削除する" }));
       await waitFor(() => {
         expect(mockToastError).toHaveBeenCalledWith("削除に失敗しました");
@@ -341,7 +341,7 @@ describe("Posts", () => {
       });
       render(<Posts />, { wrapper: createWrapper() });
       const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: "← Map" }));
+      await user.click(screen.getByRole("button", { name: "マップに戻る" }));
       expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });

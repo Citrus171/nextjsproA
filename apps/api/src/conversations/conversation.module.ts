@@ -5,9 +5,11 @@ import { PrismaService } from "../prisma.service";
 import { ConversationsController } from "./conversation.controller";
 import { ConversationsService } from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
+import { IdentityModule } from "../identity/identity.module";
 
 @Module({
   imports: [
+    IdentityModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
