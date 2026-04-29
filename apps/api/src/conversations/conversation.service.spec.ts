@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   NotFoundException,
 } from "@nestjs/common";
@@ -13,6 +12,7 @@ const mockPrisma = {
   conversation: {
     create: jest.fn(),
     findUnique: jest.fn(),
+    findFirst: jest.fn(),
     findMany: jest.fn(),
   },
   message: {
@@ -66,7 +66,7 @@ describe("ConversationsService", () => {
       expect(result).toMatchObject({ id: "conv-1" });
     });
 
-    it("同一postId+sightingIdの会話はConflictException", async () => {
+    it("同一postId+sightingIdの会話は既存の会話を返すこと", async () => {
       mockPrisma.post.findUnique.mockResolvedValue({
         id: "post-1",
         userId: "owner-1",
@@ -82,10 +82,20 @@ describe("ConversationsService", () => {
           clientVersion: "0.0.0",
         })
       );
+      mockPrisma.conversation.findFirst.mockResolvedValue({
+        id: "conv-1",
+        postId: "post-1",
+        sightingId: "sighting-1",
+        ownerId: "owner-1",
+        sighterId: "sighter-1",
+      });
 
-      await expect(service.create("owner-1", dto)).rejects.toThrow(
-        ConflictException
-      );
+      const result = await service.create("owner-1", dto);
+
+      expect(mockPrisma.conversation.findFirst).toHaveBeenCalledWith({
+        where: { postId: "post-1", sightingId: "sighting-1" },
+      });
+      expect(result).toMatchObject({ id: "conv-1" });
     });
 
     it("存在しないpostIdはNotFoundException", async () => {

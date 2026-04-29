@@ -235,7 +235,7 @@
 #### create
 
 - [x] 有効なデータで会話を作成できること
-- [x] 同一postId+sightingIdの会話はConflictException
+- [x] 同一postId+sightingIdの会話は既存の会話を返すこと
 - [x] 存在しないpostIdはNotFoundException
 - [x] 存在しないsightingIdはNotFoundException
 - [x] 会話参加者以外（無関係なユーザー）はForbiddenException
@@ -456,6 +456,9 @@
 - [x] App で未認証で /create にアクセスしたとき、/login にリダイレクトされること
 - [x] CreatePost で必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し /posts へ戻る
 - [x] CreatePost で投稿APIが失敗した時、エラートーストを表示して遷移しないこと
+- [x] CreatePost で埋め込み地図が表示されず、地図ピッカー起動ボタンが表示されること
+- [x] CreatePost で地図ピッカー起動ボタンをクリックするとフルスクリーンピッカーが開くこと
+- [x] CreatePost でピッカー内で「この場所に決める」を押すとピッカーが閉じて座標が表示されること
 - [x] EditPost で投稿データ取得後、petDetail を含むフォームに初期値がセットされること
 - [x] EditPost で変更して保存した時、updatePost が petDetail/location を含むデータで呼ばれること
 - [x] EditPost で削除ボタンをクリックした時、確認ダイアログが表示されること
@@ -492,6 +495,9 @@
 - [x] PostDetailSheet で location が null の時、場所セクションが表示されないこと
 - [x] PostDetailSheet で画像がある時、1枚目の画像が表示されること
 - [x] PostDetailSheet で画像がない時、プレースホルダーが表示されること
+- [x] PostDetailSheet で画像が複数枚ある時、すべての画像がカルーセルとして表示されること
+- [x] PostDetailSheet で画像が1枚のみの時、ドットインジケーターが表示されないこと
+- [x] PostDetailSheet で画像が複数枚の時、ドットインジケーターが表示されること
 - [x] PostDetailSheet で閉じるボタンを押した時、onClose が呼ばれること
 - [x] PostDetailSheet でログイン済みかつ自分がSighting投稿者かつPost投稿者でない時、メッセージボタンが表示されること
 - [x] PostDetailSheet でcurrentUserIdが未指定（未ログイン）の時、メッセージボタンが非表示であること
@@ -545,6 +551,7 @@
 - [x] Conversations で← Map ボタンをクリックした時、/ に遷移すること
 - [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
 - [x] Conversations で5秒間隔でポーリングするようにuseQueryが呼ばれること
+- [x] Conversations でエラー時はポーリングが停止すること
 - [x] formatDate で1分未満の時、「今」を返すこと
 - [x] formatDate で1分の時、「1分前」を返すこと
 - [x] formatDate で59分の時、「59分前」を返すこと
@@ -576,6 +583,24 @@
 - [x] ConversationChat でローディング表示が統一されたスタイルであること
 - [x] ConversationChat でメッセージ取得エラー時は「メッセージの取得に失敗しました」が統一されたスタイルで表示されること
 - [x] ConversationChat でエラー表示が統一されたスタイルであること
+
+### Layout (`src/components/Layout.test.tsx`)
+
+- [x] アウトレットの子ルートがレンダリングされること
+- [x] ボトムタブが表示されること
+- [x] /login パスではタブバーが表示されないこと
+- [x] /register パスではタブバーが表示されないこと
+- [x] authRequired タブ 未認証時は /login への誘導リンクが表示されること
+- [x] authRequired タブ 認証時はタブ本来のリンク先が表示され、現在パスならハイライトされること
+- [x] authOnly タブ 未認証時は表示されないこと
+- [x] authOnly タブ 認証時は表示されること
+
+### Drawer (`src/components/ui/drawer.test.tsx`)
+
+- [x] open=trueの時、子要素が表示されること
+- [x] open=falseの時、子要素が表示されないこと
+- [x] snapPointsが反映されること
+- [x] Closeコンポーネントがクリックされた時onOpenChangeが呼ばれること
 
 ### LoginWithAuth (`src/pages/LoginWithAuth.test.tsx`)
 

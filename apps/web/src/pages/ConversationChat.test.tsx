@@ -256,8 +256,8 @@ describe("ConversationChat", () => {
       const bubble = screen
         .getByText("自分のメッセージ")
         .closest("[data-sender]");
-      expect(bubble).toHaveClass("bg-[#1a73e8]");
-      expect(bubble).toHaveClass("text-white");
+      expect(bubble).toHaveClass("bg-primary");
+      expect(bubble).toHaveClass("text-primary-foreground");
       expect(bubble).toHaveClass("rounded-[1.25rem]");
       expect(bubble).toHaveClass("rounded-br-sm");
       expect(bubble).toHaveClass("ml-auto");
@@ -275,8 +275,8 @@ describe("ConversationChat", () => {
       const bubble = screen
         .getByText("相手のメッセージ")
         .closest("[data-sender]");
-      expect(bubble).toHaveClass("bg-slate-100");
-      expect(bubble).toHaveClass("text-slate-900");
+      expect(bubble).toHaveClass("bg-muted");
+      expect(bubble).toHaveClass("text-foreground");
       expect(bubble).toHaveClass("rounded-[1.25rem]");
       expect(bubble).toHaveClass("rounded-bl-sm");
       expect(bubble).toHaveClass("mr-auto");
@@ -333,8 +333,8 @@ describe("ConversationChat", () => {
       });
 
       const banner = screen.getByRole("alert");
-      expect(banner).toHaveClass("bg-red-50");
-      expect(banner).toHaveClass("text-red-700");
+      expect(banner).toHaveClass("bg-destructive/10");
+      expect(banner).toHaveClass("text-destructive");
       expect(banner).toHaveClass("text-xs");
       expect(banner).toHaveClass("px-3");
       expect(banner).toHaveClass("py-2");
@@ -443,7 +443,7 @@ describe("ConversationChat", () => {
 
       const loader = screen.getByText("読み込み中...");
       expect(loader.closest("div")).toHaveClass("text-center");
-      expect(loader).toHaveClass("text-slate-400");
+      expect(loader).toHaveClass("text-muted-foreground");
       expect(loader).toHaveClass("text-sm");
     });
 
@@ -470,7 +470,7 @@ describe("ConversationChat", () => {
 
       const errorText = screen.getByText("メッセージの取得に失敗しました");
       expect(errorText.closest("div")).toHaveClass("text-center");
-      expect(errorText).toHaveClass("text-red-500");
+      expect(errorText).toHaveClass("text-destructive");
       expect(errorText).toHaveClass("text-sm");
     });
   });

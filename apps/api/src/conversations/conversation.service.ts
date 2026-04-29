@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -48,7 +47,10 @@ export class ConversationsService {
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === "P2002"
       ) {
-        throw new ConflictException("この組み合わせの会話はすでに存在します");
+        const existing = await this.prisma.conversation.findFirst({
+          where: { postId: dto.postId, sightingId: dto.sightingId },
+        });
+        if (existing) return existing;
       }
       throw e;
     }

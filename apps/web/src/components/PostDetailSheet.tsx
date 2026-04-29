@@ -1,4 +1,5 @@
 import type { PostResponseDto } from "../../../../packages/api-client/src/index";
+import { useState, useRef } from "react";
 import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
 import SightingList from "./SightingList";
 
@@ -23,8 +24,8 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  lost: "bg-red-600 text-white",
-  resolved: "bg-slate-400 text-white",
+  lost: "bg-destructive text-destructive-foreground",
+  resolved: "bg-muted-foreground text-primary-foreground",
 };
 
 export default function PostDetailSheet({
@@ -59,6 +60,17 @@ export default function PostDetailSheet({
     !!currentUserId &&
     currentUserId === post.userId;
 
+  const [activeIdx, setActiveIdx] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const idx = Math.round(
+      scrollRef.current.scrollLeft / scrollRef.current.offsetWidth
+    );
+    setActiveIdx(idx);
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
       <SheetContent
@@ -66,18 +78,18 @@ export default function PostDetailSheet({
         className="h-[90dvh] p-0 overflow-hidden"
         aria-label={title}
       >
-        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3" />
+        <div className="w-12 h-1.5 bg-border rounded-full mx-auto mt-3" />
 
         <div className="h-full overflow-y-auto px-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between mt-4 mb-2">
             <SheetTitle asChild>
-              <h2 className="text-xl font-black text-slate-900">{title}</h2>
+              <h2 className="text-xl font-black text-foreground">{title}</h2>
             </SheetTitle>
             <button
               type="button"
               aria-label="閉じる"
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 text-2xl leading-none"
+              className="text-muted-foreground hover:text-foreground text-2xl leading-none"
             >
               ×
             </button>
@@ -89,7 +101,7 @@ export default function PostDetailSheet({
                 type="button"
                 aria-label="編集する"
                 onClick={() => onEdit?.(post.id)}
-                className="w-full py-3 rounded-2xl bg-slate-100 text-slate-800 font-bold text-sm hover:bg-slate-200"
+                className="w-full py-3 rounded-2xl bg-muted text-foreground font-bold text-sm hover:bg-accent"
               >
                 編集する
               </button>
@@ -102,7 +114,7 @@ export default function PostDetailSheet({
                 type="button"
                 aria-label="目撃を報告する"
                 onClick={() => onReportSighting?.(post.id)}
-                className="w-full py-3 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700"
+                className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90"
               >
                 目撃を報告する
               </button>
@@ -123,7 +135,7 @@ export default function PostDetailSheet({
                 type="button"
                 aria-label="メッセージを送る"
                 onClick={() => onSendMessage?.(post.id, sightingId)}
-                className="w-full py-3 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700"
+                className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90"
               >
                 メッセージを送る
               </button>
@@ -131,12 +143,12 @@ export default function PostDetailSheet({
           )}
 
           {isLoading ? (
-            <p className="text-slate-500 mt-6">読み込み中…</p>
+            <p className="text-muted-foreground mt-6">読み込み中…</p>
           ) : post ? (
             <>
               {/* タイトル */}
               {post.title && (
-                <p className="text-slate-600 text-sm font-medium mb-2">
+                <p className="text-muted-foreground text-sm font-medium mb-2">
                   {post.title}
                 </p>
               )}
@@ -144,22 +156,55 @@ export default function PostDetailSheet({
               {/* ステータスバッジ */}
               {post.status && (
                 <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${STATUS_COLOR[post.status] ?? "bg-slate-200"}`}
+                  className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${STATUS_COLOR[post.status] ?? "bg-muted"}`}
                 >
                   {STATUS_LABEL[post.status] ?? post.status}
                 </span>
               )}
 
-              {/* メイン画像 */}
-              <div className="mt-4 aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 flex items-center justify-center">
+              {/* メイン画像カルーセル */}
+              <div className="mt-4">
                 {post.images.length > 0 ? (
-                  <img
-                    src={post.images[0].url}
-                    alt="投稿画像"
-                    className="w-full h-full object-cover"
-                  />
+                  <>
+                    <div
+                      ref={scrollRef}
+                      onScroll={handleScroll}
+                      className="flex overflow-x-auto snap-x snap-mandatory rounded-2xl"
+                      style={{ scrollbarWidth: "none" }}
+                    >
+                      {post.images.map((img, i) => (
+                        <div
+                          key={img.url}
+                          className="min-w-full aspect-[4/3] shrink-0 snap-center bg-muted"
+                        >
+                          <img
+                            src={img.url}
+                            alt={`投稿画像${i + 1}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    {post.images.length > 1 && (
+                      <div className="flex justify-center gap-1.5 mt-2">
+                        {post.images.map((_, i) => (
+                          <span
+                            key={i}
+                            className={`block w-1.5 h-1.5 rounded-full transition-colors ${
+                              i === activeIdx ? "bg-primary" : "bg-border"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <span className="text-slate-400 text-sm">画像なし</span>
+                  <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted flex items-center justify-center">
+                    <span className="text-muted-foreground text-sm">
+                      画像なし
+                    </span>
+                  </div>
                 )}
               </div>
 
@@ -167,27 +212,27 @@ export default function PostDetailSheet({
               {post.petDetail && (
                 <>
                   <div className="mt-6 grid grid-cols-2 gap-3">
-                    <div className="bg-slate-50 p-3 rounded-xl">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                    <div className="bg-muted p-3 rounded-xl">
+                      <span className="text-xs font-bold text-muted-foreground uppercase">
                         毛色
                       </span>
-                      <p className="text-sm font-bold text-slate-800 mt-0.5">
+                      <p className="text-sm font-bold text-foreground mt-0.5">
                         {post.petDetail.color}
                       </p>
                     </div>
-                    <div className="bg-slate-50 p-3 rounded-xl">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                    <div className="bg-muted p-3 rounded-xl">
+                      <span className="text-xs font-bold text-muted-foreground uppercase">
                         年齢
                       </span>
-                      <p className="text-sm font-bold text-slate-800 mt-0.5">
+                      <p className="text-sm font-bold text-foreground mt-0.5">
                         {post.petDetail.age}
                       </p>
                     </div>
-                    <div className="bg-slate-50 p-3 rounded-xl">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">
+                    <div className="bg-muted p-3 rounded-xl">
+                      <span className="text-xs font-bold text-muted-foreground uppercase">
                         去勢 / チップ
                       </span>
-                      <p className="text-sm font-bold text-slate-800 mt-0.5">
+                      <p className="text-sm font-bold text-foreground mt-0.5">
                         {post.petDetail.neutered === true
                           ? "済み"
                           : post.petDetail.neutered === false
@@ -204,11 +249,11 @@ export default function PostDetailSheet({
                   </div>
 
                   <div className="mt-4">
-                    <h3 className="text-base font-black text-slate-900 mb-2 flex items-center gap-2">
-                      <span className="w-1 h-5 bg-blue-600 rounded-full inline-block" />
+                    <h3 className="text-base font-black text-foreground mb-2 flex items-center gap-2">
+                      <span className="w-1 h-5 bg-primary rounded-full inline-block" />
                       特徴・性格
                     </h3>
-                    <p className="text-sm leading-relaxed text-slate-600 bg-slate-50 p-4 rounded-2xl">
+                    <p className="text-sm leading-relaxed text-foreground bg-muted p-4 rounded-2xl">
                       {post.petDetail.features}
                     </p>
                   </div>
@@ -218,13 +263,13 @@ export default function PostDetailSheet({
               {/* location セクション */}
               {post.location && (
                 <div className="mt-6">
-                  <h3 className="text-base font-black text-slate-900 mb-2 flex items-center gap-2">
-                    <span className="w-1 h-5 bg-blue-600 rounded-full inline-block" />
+                  <h3 className="text-base font-black text-foreground mb-2 flex items-center gap-2">
+                    <span className="w-1 h-5 bg-primary rounded-full inline-block" />
                     最後に目撃された場所
                   </h3>
-                  <div className="flex items-center gap-2 bg-slate-50 p-4 rounded-2xl">
-                    <span className="text-blue-600 text-lg">📍</span>
-                    <span className="text-sm font-bold text-slate-700">
+                  <div className="flex items-center gap-2 bg-muted p-4 rounded-2xl">
+                    <span className="text-primary text-lg">📍</span>
+                    <span className="text-sm font-bold text-foreground">
                       {post.location.prefecture}
                       {post.location.city}
                       {post.location.address}
@@ -234,7 +279,7 @@ export default function PostDetailSheet({
               )}
             </>
           ) : (
-            <p className="text-slate-500 mt-6">
+            <p className="text-muted-foreground mt-6">
               詳細情報を取得できませんでした
             </p>
           )}

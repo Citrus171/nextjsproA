@@ -97,13 +97,15 @@ export default function ConversationChat() {
   if (isLoading)
     return (
       <div className="max-w-2xl mx-auto p-4 sm:p-8 text-center h-screen flex items-center justify-center">
-        <p className="text-slate-400 text-sm">読み込み中...</p>
+        <p className="text-muted-foreground text-sm">読み込み中...</p>
       </div>
     );
   if (error)
     return (
       <div className="max-w-2xl mx-auto p-4 sm:p-8 text-center h-screen flex items-center justify-center">
-        <p className="text-red-500 text-sm">メッセージの取得に失敗しました</p>
+        <p className="text-destructive text-sm">
+          メッセージの取得に失敗しました
+        </p>
       </div>
     );
 
@@ -114,23 +116,23 @@ export default function ConversationChat() {
       {/* Header */}
       <div
         data-testid="chat-header"
-        className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 shrink-0"
+        className="flex items-center gap-3 px-4 py-3 border-b border-border shrink-0"
       >
         <button
           type="button"
           aria-label="会話一覧に戻る"
           onClick={() => navigate("/conversations")}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors"
         >
-          <ChevronLeft size={24} className="text-slate-700" />
+          <ChevronLeft size={24} className="text-foreground" />
         </button>
         {conversation && (
           <div className="flex-1 min-w-0">
-            <h1 className="text-base font-bold text-slate-900 truncate">
+            <h1 className="text-base font-bold text-foreground truncate">
               {conversation.partnerNickname}
             </h1>
             {conversation.postTitle && (
-              <p className="text-xs text-slate-400 truncate">
+              <p className="text-xs text-muted-foreground truncate">
                 {conversation.postTitle}
               </p>
             )}
@@ -143,7 +145,7 @@ export default function ConversationChat() {
         <div
           role="alert"
           aria-live="assertive"
-          className="bg-red-50 text-red-700 text-xs px-3 py-2 text-center font-medium shrink-0"
+          className="bg-destructive/10 text-destructive text-xs px-3 py-2 text-center font-medium shrink-0"
         >
           接続が切れました。再接続中…
         </div>
@@ -162,14 +164,16 @@ export default function ConversationChat() {
               data-sender={isSelf ? "self" : "other"}
               className={`max-w-[75%] px-4 py-2 ${
                 isSelf
-                  ? "bg-[#1a73e8] text-white rounded-[1.25rem] rounded-br-sm ml-auto"
-                  : "bg-slate-100 text-slate-900 rounded-[1.25rem] rounded-bl-sm mr-auto"
+                  ? "bg-primary text-primary-foreground rounded-[1.25rem] rounded-br-sm ml-auto"
+                  : "bg-muted text-foreground rounded-[1.25rem] rounded-bl-sm mr-auto"
               }`}
             >
               {msg.body}
               <div
-                className={`text-[10px] mt-1 ${
-                  isSelf ? "text-blue-200" : "text-slate-400"
+                className={`text-xs mt-1 ${
+                  isSelf
+                    ? "text-primary-foreground/70"
+                    : "text-muted-foreground"
                 }`}
               >
                 {new Date(msg.createdAt).toLocaleTimeString("ja-JP", {
@@ -185,14 +189,14 @@ export default function ConversationChat() {
       {/* Input Area */}
       <div
         data-testid="chat-input"
-        className="sticky bottom-0 px-4 py-3 border-t border-slate-100 bg-white shrink-0"
+        className="sticky bottom-0 px-4 py-3 border-t border-border bg-card shrink-0"
       >
         <div className="flex items-center gap-2">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            className="flex-1 h-12 px-4 bg-slate-50 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 h-12 px-4 bg-muted rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="メッセージを入力"
           />
           <button
@@ -201,15 +205,15 @@ export default function ConversationChat() {
             onClick={() => sendMessage(inputValue)}
             className={`h-12 px-6 rounded-full text-sm font-bold transition-all ${
               isOverLimit || inputValue.length === 0
-                ? "bg-slate-100 text-slate-400"
-                : "bg-[#1a73e8] text-white hover:bg-blue-700 active:scale-[0.98]"
+                ? "bg-muted text-muted-foreground"
+                : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"
             }`}
           >
             送信
           </button>
         </div>
         {isOverLimit && (
-          <p className="text-[10px] text-red-500 mt-1 ml-4">
+          <p className="text-xs text-destructive mt-1 ml-4">
             1000文字以内で入力してください
           </p>
         )}

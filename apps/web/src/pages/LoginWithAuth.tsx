@@ -45,23 +45,25 @@ export default function LoginWithAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-background font-manrope flex flex-col">
       {/* ヘッダービジュアル */}
       <div className="flex flex-col items-center justify-center pt-16 pb-8 px-6">
         <div className="flex items-center gap-3 mb-3">
-          <Cat className="w-10 h-10 text-[#1a73e8]" strokeWidth={1.5} />
-          <span className="text-3xl font-black text-slate-900">ねこさがし</span>
+          <Cat className="w-10 h-10 text-primary" strokeWidth={1.5} />
+          <span className="text-3xl font-black text-foreground">
+            ねこさがし
+          </span>
         </div>
-        <p className="text-slate-500 text-sm text-center">
+        <p className="text-muted-foreground text-sm text-center">
           埼玉の迷い猫・目撃情報を共有しよう
         </p>
       </div>
 
       {/* フォームカード */}
       <div className="flex-1 px-4">
-        <div className="bg-white rounded-[2rem] p-6 shadow-sm max-w-sm mx-auto">
+        <div className="bg-card rounded-[2rem] p-6 shadow-sm max-w-sm mx-auto">
           {authError && (
-            <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+            <div className="mb-4 rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
               {authError}
             </div>
           )}
@@ -70,7 +72,7 @@ export default function LoginWithAuth() {
             <div className="space-y-1.5">
               <Label
                 htmlFor="email"
-                className="text-sm font-bold text-slate-700"
+                className="text-sm font-bold text-foreground"
               >
                 メールアドレス
               </Label>
@@ -80,7 +82,7 @@ export default function LoginWithAuth() {
                 placeholder="example@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-12 bg-slate-50 border-none rounded-xl text-slate-900 placeholder:text-slate-400"
+                className="h-12 bg-muted border-none rounded-xl text-foreground placeholder:text-muted-foreground"
                 required
                 autoComplete="email"
               />
@@ -89,7 +91,7 @@ export default function LoginWithAuth() {
             <div className="space-y-1.5">
               <Label
                 htmlFor="password"
-                className="text-sm font-bold text-slate-700"
+                className="text-sm font-bold text-foreground"
               >
                 パスワード
               </Label>
@@ -100,7 +102,7 @@ export default function LoginWithAuth() {
                   placeholder="パスワードを入力"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 bg-slate-50 border-none rounded-xl text-slate-900 placeholder:text-slate-400 pr-12"
+                  className="h-12 bg-muted border-none rounded-xl text-foreground placeholder:text-muted-foreground pr-12"
                   required
                   autoComplete="current-password"
                 />
@@ -108,7 +110,7 @@ export default function LoginWithAuth() {
                   type="button"
                   aria-label="パスワードを表示"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -122,17 +124,17 @@ export default function LoginWithAuth() {
             <Button
               type="submit"
               disabled={submitting}
-              className="w-full h-12 rounded-full bg-[#1a73e8] hover:bg-[#1557b0] text-white font-bold text-base shadow-md active:scale-[0.98] transition-transform"
+              className="w-full h-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-base shadow-md active:scale-[0.98] transition-transform"
             >
               {submitting ? "ログイン中..." : "ログイン"}
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-500">
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             アカウントをお持ちでない方は{" "}
             <Link
               to="/register"
-              className="text-[#1a73e8] font-bold hover:underline"
+              className="text-primary font-bold hover:underline"
             >
               新規登録
             </Link>

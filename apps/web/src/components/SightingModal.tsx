@@ -87,12 +87,12 @@ export default function SightingModal({
         className="h-[80dvh] p-0 overflow-hidden"
         aria-label="目撃を報告する"
       >
-        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3" />
+        <div className="w-12 h-1.5 bg-border rounded-full mx-auto mt-3" />
 
         <div className="h-full overflow-y-auto px-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between mt-4 mb-4">
             <SheetTitle asChild>
-              <h2 className="text-xl font-black text-slate-900">
+              <h2 className="text-xl font-black text-foreground">
                 目撃を報告する
               </h2>
             </SheetTitle>
@@ -100,7 +100,7 @@ export default function SightingModal({
               type="button"
               aria-label="閉じる"
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 text-2xl leading-none"
+              className="text-muted-foreground hover:text-foreground text-2xl leading-none"
             >
               ×
             </button>
@@ -111,7 +111,7 @@ export default function SightingModal({
               type="button"
               aria-label="地図から選択"
               onClick={onSelectFromMap}
-              className="w-full py-2 rounded-xl border border-blue-500 text-blue-600 font-bold text-sm hover:bg-blue-50"
+              className="w-full py-2 rounded-xl border border-primary text-primary font-bold text-sm hover:bg-accent"
             >
               地図から選択
             </button>
@@ -119,7 +119,7 @@ export default function SightingModal({
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-lat"
-                className="text-sm font-bold text-slate-700"
+                className="text-sm font-bold text-foreground"
               >
                 緯度
               </label>
@@ -138,7 +138,7 @@ export default function SightingModal({
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-lng"
-                className="text-sm font-bold text-slate-700"
+                className="text-sm font-bold text-foreground"
               >
                 経度
               </label>
@@ -157,7 +157,7 @@ export default function SightingModal({
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-sightedAt"
-                className="text-sm font-bold text-slate-700"
+                className="text-sm font-bold text-foreground"
               >
                 目撃日時
               </label>
@@ -175,7 +175,7 @@ export default function SightingModal({
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-address"
-                className="text-sm font-bold text-slate-700"
+                className="text-sm font-bold text-foreground"
               >
                 住所（任意）
               </label>
@@ -193,7 +193,7 @@ export default function SightingModal({
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-comment"
-                className="text-sm font-bold text-slate-700"
+                className="text-sm font-bold text-foreground"
               >
                 コメント（任意）
               </label>
@@ -209,7 +209,7 @@ export default function SightingModal({
             </div>
 
             {error && (
-              <p className="text-red-600 text-sm" role="alert">
+              <p className="text-destructive text-sm" role="alert">
                 {error}
               </p>
             )}
@@ -218,7 +218,7 @@ export default function SightingModal({
               type="submit"
               aria-label="送信"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-2xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 disabled:opacity-50"
+              className="w-full py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 disabled:opacity-50"
             >
               {isSubmitting ? "送信中..." : "送信"}
             </button>

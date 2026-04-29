@@ -59,36 +59,40 @@ export default function SightingList({
   });
 
   if (isLoading) {
-    return <p className="text-slate-500 text-sm mt-4">読み込み中…</p>;
+    return <p className="text-muted-foreground text-sm mt-4">読み込み中…</p>;
   }
 
   if (!sightings || sightings.length === 0) {
     return (
-      <p className="text-slate-400 text-sm mt-4">まだ目撃情報はありません</p>
+      <p className="text-muted-foreground text-sm mt-4">
+        まだ目撃情報はありません
+      </p>
     );
   }
 
   return (
     <>
       {deleteError && (
-        <p className="text-red-500 text-sm mt-2">{deleteError}</p>
+        <p className="text-destructive text-sm mt-2">{deleteError}</p>
       )}
       <div className="mt-4 space-y-3">
         {sightings.map((s: SightingResponseDto) => (
-          <div key={s.id} className="bg-slate-50 rounded-2xl p-4">
+          <div key={s.id} className="bg-muted rounded-2xl p-4">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-slate-400 mb-1">
+                <p className="text-xs text-muted-foreground mb-1">
                   {formatSightedAt(s.sightedAt)}
                 </p>
                 {s.address && (
-                  <p className="text-sm font-bold text-slate-700 flex items-center gap-1">
-                    <span className="text-blue-500">📍</span>
+                  <p className="text-sm font-bold text-foreground flex items-center gap-1">
+                    <span className="text-primary">📍</span>
                     {s.address}
                   </p>
                 )}
                 {s.comment && (
-                  <p className="text-sm text-slate-600 mt-1">{s.comment}</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {s.comment}
+                  </p>
                 )}
               </div>
               {currentUserId === s.userId && (
@@ -96,7 +100,7 @@ export default function SightingList({
                   type="button"
                   aria-label="削除"
                   onClick={() => setDeletingId(s.id)}
-                  className="shrink-0 text-xs text-red-500 hover:text-red-700 font-bold px-2 py-1 rounded-lg hover:bg-red-50"
+                  className="shrink-0 text-xs text-destructive hover:text-destructive/80 font-bold px-2 py-1 rounded-lg hover:bg-destructive/10"
                 >
                   削除
                 </button>

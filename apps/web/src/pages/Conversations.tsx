@@ -30,13 +30,15 @@ export default function Conversations() {
   } = useQuery({
     queryKey: ["conversations"],
     queryFn: () => client.listConversations(),
-    refetchInterval: 5000,
+    refetchInterval: (query) => (query.state.error ? false : 5000),
   });
 
   if (isLoading) {
     return (
       <div className="max-w-2xl mx-auto p-4 sm:p-8">
-        <p className="text-center text-slate-400 text-sm">読み込み中...</p>
+        <p className="text-center text-muted-foreground text-sm">
+          読み込み中...
+        </p>
       </div>
     );
   }
@@ -44,7 +46,7 @@ export default function Conversations() {
   if (error) {
     return (
       <div className="max-w-2xl mx-auto p-4 sm:p-8">
-        <p className="text-center text-red-500 text-sm">
+        <p className="text-center text-destructive text-sm">
           会話の取得に失敗しました
         </p>
       </div>
@@ -57,18 +59,18 @@ export default function Conversations() {
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors"
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors"
           aria-label="Mapに戻る"
         >
-          <ChevronLeft size={24} className="text-slate-700" />
+          <ChevronLeft size={24} className="text-foreground" />
         </button>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900">
+        <h1 className="text-2xl font-black tracking-tight text-foreground">
           会話一覧
         </h1>
       </div>
       {!conversations || conversations.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-slate-400 text-sm">会話はまだありません</p>
+          <p className="text-muted-foreground text-sm">会話はまだありません</p>
         </div>
       ) : (
         <ul className="space-y-3">
@@ -78,20 +80,20 @@ export default function Conversations() {
                 type="button"
                 aria-label={conv.partnerNickname}
                 onClick={() => navigate(`/conversations/${conv.id}`)}
-                className="w-full text-left bg-white rounded-[2rem] shadow-sm p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
+                className="w-full text-left bg-card rounded-[2rem] shadow-sm p-4 flex items-center gap-4 hover:bg-muted transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-slate-900 text-sm truncate">
+                    <span className="font-bold text-foreground text-sm truncate">
                       {conv.partnerNickname}
                     </span>
                     {conv.postTitle && (
-                      <span className="text-xs text-slate-400 truncate">
+                      <span className="text-xs text-muted-foreground truncate">
                         {conv.postTitle}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-xs text-muted-foreground truncate">
                     {conv.lastMessage
                       ? conv.lastMessage.body
                       : "メッセージはまだありません"}
@@ -99,14 +101,14 @@ export default function Conversations() {
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   {conv.lastMessage && (
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-xs text-muted-foreground">
                       {formatDate(conv.lastMessage.createdAt)}
                     </span>
                   )}
                   {conv.unreadCount > 0 && (
                     <span
                       role="status"
-                      className="bg-[#1a73e8] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+                      className="bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
                     >
                       {conv.unreadCount}
                     </span>

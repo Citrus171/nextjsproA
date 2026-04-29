@@ -180,6 +180,14 @@ export default function Map() {
     );
   };
 
+  const handleZoomIn = () => {
+    mapInstance?.zoomIn();
+  };
+
+  const handleZoomOut = () => {
+    mapInstance?.zoomOut();
+  };
+
   useEffect(() => {
     if (!selectedMarker) {
       setSelectedPost(null);
@@ -319,6 +327,7 @@ export default function Map() {
           <MapContainer
             center={DEFAULT_CENTER}
             zoom={DEFAULT_ZOOM}
+            zoomControl={false}
             minZoom={11}
             maxZoom={19}
             maxBounds={[
@@ -359,6 +368,25 @@ export default function Map() {
 
           {mapInstance && (
             <div className="map-stage__controls">
+              <div className="map-zoom-controls">
+                <button
+                  type="button"
+                  className="map-zoom-button"
+                  aria-label="ズームイン"
+                  onClick={handleZoomIn}
+                >
+                  <ZoomInIcon />
+                </button>
+                <div className="map-zoom-divider" />
+                <button
+                  type="button"
+                  className="map-zoom-button"
+                  aria-label="ズームアウト"
+                  onClick={handleZoomOut}
+                >
+                  <ZoomOutIcon />
+                </button>
+              </div>
               <button
                 type="button"
                 className="map-current-location-button"
@@ -527,6 +555,37 @@ function LocationIcon({ loading }: { loading: boolean }) {
         strokeWidth="1.6"
         strokeLinecap="round"
       />
+    </svg>
+  );
+}
+
+function ZoomInIcon() {
+  return (
+    <svg
+      className="map-zoom-button__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function ZoomOutIcon() {
+  return (
+    <svg
+      className="map-zoom-button__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+    >
+      <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   );
 }

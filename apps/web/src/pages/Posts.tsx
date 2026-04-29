@@ -82,10 +82,10 @@ export default function Posts() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div
           data-testid="posts-loading-spinner"
-          className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-[#1a73e8]"
+          className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-primary"
         />
       </div>
     );
@@ -93,7 +93,7 @@ export default function Posts() {
 
   if (isError) {
     return (
-      <div className="flex h-screen items-center justify-center text-red-600">
+      <div className="flex h-screen items-center justify-center text-destructive bg-background">
         エラーが発生しました
       </div>
     );
@@ -102,20 +102,20 @@ export default function Posts() {
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString("ja-JP");
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-4xl px-4 py-6">
         {/* ヘッダー */}
         <div className="mb-6 flex items-center justify-between">
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="inline-flex items-center gap-1 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-100"
+            className="inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-muted"
           >
             ← Map
           </button>
           <Link
             to="/create"
-            className="inline-flex items-center rounded-full bg-[#1a73e8] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#1557b0]"
+            className="inline-flex items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
           >
             New Post
           </Link>
@@ -126,10 +126,10 @@ export default function Posts() {
           {allItems.map((p: PostResponseDto) => (
             <div
               key={p.id}
-              className="overflow-hidden rounded-[2rem] bg-white shadow-sm"
+              className="overflow-hidden rounded-[2rem] bg-card shadow-sm"
             >
               {/* 画像サムネイル */}
-              <div className="relative h-48 w-full bg-slate-100">
+              <div className="relative h-48 w-full bg-muted">
                 {p.images && p.images.length > 0 ? (
                   <img
                     src={p.images[0].url}
@@ -138,7 +138,7 @@ export default function Posts() {
                     loading="lazy"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                  <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                     画像がありません
                   </div>
                 )}
@@ -146,17 +146,17 @@ export default function Posts() {
 
               {/* カード本文 */}
               <div className="p-4">
-                <h3 className="mb-1 text-lg font-bold text-slate-800">
+                <h3 className="mb-1 text-lg font-bold text-foreground">
                   {p.petDetail?.name ?? "名前不明"}
                 </h3>
-                <p className="mb-2 text-sm text-slate-500">
+                <p className="mb-2 text-sm text-muted-foreground">
                   {p.location?.city ?? ""}
                   {p.location?.address ? `・${p.location.address}` : ""}
                 </p>
-                <p className="mb-3 text-xs text-slate-400">
+                <p className="mb-3 text-xs text-muted-foreground">
                   投稿日: {formatDate(p.createdAt)}
                 </p>
-                <p className="mb-4 line-clamp-2 text-sm text-slate-600">
+                <p className="mb-4 line-clamp-2 text-sm text-foreground">
                   {p.description}
                 </p>
 
@@ -164,7 +164,7 @@ export default function Posts() {
                 <div className="flex items-center justify-between">
                   <Link
                     to={`/edit/${p.id}`}
-                    className="text-sm font-semibold text-[#1a73e8] hover:underline"
+                    className="text-sm font-semibold text-primary hover:underline"
                   >
                     Edit
                   </Link>
@@ -172,7 +172,7 @@ export default function Posts() {
                     <button
                       type="button"
                       onClick={() => navigate(`/?postId=${p.id}`)}
-                      className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-border"
                       aria-label={`${p.petDetail?.name ?? "投稿"}の位置を開く`}
                     >
                       <MapPinned size={16} aria-hidden="true" />
@@ -181,7 +181,7 @@ export default function Posts() {
                       <AlertDialogTrigger asChild>
                         <button
                           type="button"
-                          className="text-sm font-semibold text-red-600 hover:text-red-700"
+                          className="text-sm font-semibold text-destructive hover:text-destructive/80"
                         >
                           Delete
                         </button>
@@ -219,7 +219,7 @@ export default function Posts() {
           <div className="mt-6 flex justify-center">
             <div
               data-testid="posts-loading-more-spinner"
-              className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-[#1a73e8]"
+              className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary"
             />
           </div>
         )}
@@ -227,14 +227,16 @@ export default function Posts() {
         {data && !hasNextPage && allItems.length > 0 && (
           <p
             data-testid="posts-no-more"
-            className="mt-6 text-center text-sm text-slate-400"
+            className="mt-6 text-center text-sm text-muted-foreground"
           >
             これ以上ありません
           </p>
         )}
 
         {!hasNextPage && allItems.length === 0 && (
-          <p className="mt-12 text-center text-slate-400">投稿がありません</p>
+          <p className="mt-12 text-center text-muted-foreground">
+            投稿がありません
+          </p>
         )}
 
         {/* IntersectionObserver センチネル */}

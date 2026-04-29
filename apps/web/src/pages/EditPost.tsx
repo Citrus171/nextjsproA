@@ -277,13 +277,13 @@ export default function EditPost() {
         >
           <ChevronLeft size={24} />
         </Button>
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">
+        <h1 className="text-3xl font-black tracking-tight text-foreground">
           投稿を編集
         </h1>
       </div>
 
       {error && (
-        <p className="mb-4 text-sm text-red-500 bg-red-50 p-3 rounded-xl">
+        <p className="mb-4 text-sm text-destructive bg-destructive/10 p-3 rounded-xl">
           {error}
         </p>
       )}
@@ -295,11 +295,13 @@ export default function EditPost() {
           aria-label="投稿を削除しますか？"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
         >
-          <div className="bg-white rounded-2xl p-6 mx-4 max-w-sm w-full space-y-4">
-            <h2 className="text-lg font-black text-slate-900">
+          <div className="bg-card rounded-2xl p-6 mx-4 max-w-sm w-full space-y-4">
+            <h2 className="text-lg font-black text-foreground">
               投稿を削除しますか？
             </h2>
-            <p className="text-sm text-slate-600">この操作は取り消せません。</p>
+            <p className="text-sm text-muted-foreground">
+              この操作は取り消せません。
+            </p>
             <div className="flex gap-3">
               <Button
                 type="button"
@@ -311,7 +313,7 @@ export default function EditPost() {
               </Button>
               <Button
                 type="button"
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                className="flex-1 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                 onClick={confirmDelete}
                 disabled={deleting}
               >
@@ -326,10 +328,10 @@ export default function EditPost() {
         {/* 画像管理 */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <Camera className="text-blue-600" size={20} />
-            <h2 className="text-lg font-black text-slate-800">お写真</h2>
+            <Camera className="text-primary" size={20} />
+            <h2 className="text-lg font-black text-foreground">お写真</h2>
           </div>
-          <Card className="border-none bg-slate-50 rounded-[2rem] overflow-hidden">
+          <Card className="border-none bg-muted rounded-[2rem] overflow-hidden">
             <CardContent className="p-6">
               <div className="grid grid-cols-3 gap-3">
                 {existingImages.map((img, i) => (
@@ -353,10 +355,10 @@ export default function EditPost() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="aspect-square rounded-2xl border-2 border-dashed border-slate-200 bg-white flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors"
+                    className="aspect-square rounded-2xl border-2 border-dashed border-border bg-card flex flex-col items-center justify-center cursor-pointer hover:bg-accent transition-colors"
                   >
-                    <Upload size={24} className="text-slate-400 mb-1" />
-                    <span className="text-[10px] font-bold text-slate-400">
+                    <Upload size={24} className="text-muted-foreground mb-1" />
+                    <span className="text-xs font-bold text-muted-foreground">
                       追加
                     </span>
                   </button>
@@ -373,7 +375,7 @@ export default function EditPost() {
                   onChange={handleImageUpload}
                 />
               )}
-              <p className="mt-4 text-[10px] font-medium text-slate-400 text-center">
+              <p className="mt-4 text-xs font-medium text-muted-foreground text-center">
                 残り {remainingSlots} 枚追加できます
               </p>
             </CardContent>
@@ -383,37 +385,37 @@ export default function EditPost() {
         {/* ねこちゃんの情報 */}
         <section className="space-y-6">
           <div className="flex items-center gap-2">
-            <Cat className="text-blue-600" size={20} />
-            <h2 className="text-lg font-black text-slate-800">
+            <Cat className="text-primary" size={20} />
+            <h2 className="text-lg font-black text-foreground">
               ねこちゃんの情報
             </h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
                 お名前
               </Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4"
+                className="h-12 border-none bg-muted rounded-2xl px-4"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
                 種類
               </Label>
               <Input
                 value={breed}
                 onChange={(e) => setBreed(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4"
+                className="h-12 border-none bg-muted rounded-2xl px-4"
               />
             </div>
           </div>
 
           <div className="space-y-3">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               性別
             </Label>
             <RadioGroup
@@ -432,7 +434,7 @@ export default function EditPost() {
               ).map((g) => (
                 <div
                   key={g.value}
-                  className="flex items-center space-x-2 bg-slate-50 px-4 py-2 rounded-full"
+                  className="flex items-center space-x-2 bg-muted px-4 py-2 rounded-full"
                 >
                   <RadioGroupItem value={g.value} id={`gender-${g.value}`} />
                   <Label
@@ -448,51 +450,51 @@ export default function EditPost() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
                 年齢
               </Label>
               <Input
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4"
+                className="h-12 border-none bg-muted rounded-2xl px-4"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-slate-500 ml-1">
+              <Label className="text-xs font-bold text-muted-foreground ml-1">
                 毛色
               </Label>
               <Input
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl px-4"
+                className="h-12 border-none bg-muted rounded-2xl px-4"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               特徴
             </Label>
             <Textarea
               value={features}
               onChange={(e) => setFeatures(e.target.value)}
-              className="min-h-[80px] border-none bg-slate-50 rounded-2xl p-4 resize-none"
+              className="min-h-[80px] border-none bg-muted rounded-2xl p-4 resize-none"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               詳しい説明
             </Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[80px] border-none bg-slate-50 rounded-2xl p-4 resize-none"
+              className="min-h-[80px] border-none bg-muted rounded-2xl p-4 resize-none"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-3 bg-slate-50 p-4 rounded-2xl">
+            <div className="flex items-center space-x-3 bg-muted p-4 rounded-2xl">
               <Checkbox
                 id="microchip"
                 checked={microchip}
@@ -502,7 +504,7 @@ export default function EditPost() {
                 マイクロチップあり
               </Label>
             </div>
-            <div className="flex items-center space-x-3 bg-slate-50 p-4 rounded-2xl">
+            <div className="flex items-center space-x-3 bg-muted p-4 rounded-2xl">
               <Checkbox
                 id="neutered"
                 checked={neutered}
@@ -518,69 +520,69 @@ export default function EditPost() {
         {/* いつ・どこで？ */}
         <section className="space-y-6">
           <div className="flex items-center gap-2">
-            <MapPin className="text-blue-600" size={20} />
-            <h2 className="text-lg font-black text-slate-800">
+            <MapPin className="text-primary" size={20} />
+            <h2 className="text-lg font-black text-foreground">
               いつ・どこで？
             </h2>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               いなくなった日時
             </Label>
             <div className="relative">
               <Calendar
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                 size={18}
               />
               <Input
                 type="datetime-local"
                 value={lostDate}
                 onChange={(e) => setLostDate(e.target.value)}
-                className="h-12 border-none bg-slate-50 rounded-2xl pl-12"
+                className="h-12 border-none bg-muted rounded-2xl pl-12"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               市区町村
             </Label>
             <Input
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="h-12 border-none bg-slate-50 rounded-2xl px-4"
+              className="h-12 border-none bg-muted rounded-2xl px-4"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-slate-500 ml-1">
+            <Label className="text-xs font-bold text-muted-foreground ml-1">
               住所・目印
             </Label>
             <Input
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              className="h-12 border-none bg-slate-50 rounded-2xl px-4"
+              className="h-12 border-none bg-muted rounded-2xl px-4"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between ml-1">
-              <Label className="text-xs font-bold text-slate-500">
+              <Label className="text-xs font-bold text-muted-foreground">
                 地図でピンを指定
               </Label>
               <button
                 type="button"
                 onClick={handleCurrentLocation}
                 disabled={isLocating}
-                className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 disabled:opacity-50"
+                className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 disabled:opacity-50"
               >
                 <LocateFixed size={14} />
                 {isLocating ? "取得中…" : "現在地を使う"}
               </button>
             </div>
             {locationError && (
-              <p className="text-xs text-red-500 ml-1">{locationError}</p>
+              <p className="text-xs text-destructive ml-1">{locationError}</p>
             )}
             <div className="relative h-64 rounded-[2rem] overflow-hidden">
               <MapContainer
@@ -599,7 +601,7 @@ export default function EditPost() {
               </MapContainer>
             </div>
             {pinPos && (
-              <p className="text-xs text-slate-400 ml-1">
+              <p className="text-xs text-muted-foreground ml-1">
                 緯度: {pinPos.lat.toFixed(5)} / 経度: {pinPos.lng.toFixed(5)}
               </p>
             )}
@@ -611,14 +613,14 @@ export default function EditPost() {
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white text-lg font-black rounded-full"
+            className="w-full h-16 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-black rounded-full"
           >
             {submitting ? "保存中…" : "保存する"}
           </Button>
           <Button
             type="button"
             variant="outline"
-            className="w-full h-12 border-red-200 text-red-600 hover:bg-red-50 rounded-full font-bold"
+            className="w-full h-12 border-destructive/30 text-destructive hover:bg-destructive/10 rounded-full font-bold"
             onClick={() => setShowDeleteDialog(true)}
           >
             <Trash2 size={16} className="mr-2" />

@@ -482,13 +482,13 @@ describe("API E2E", () => {
         convId = res.body.id;
       });
 
-      it("同一 postId + sightingId での重複作成は 409 を返す", async () => {
+      it("同一 postId + sightingId での重複作成は既存の会話を返す", async () => {
         const res = await request(app.getHttpServer())
           .post("/api/conversations")
           .set("Authorization", `Bearer ${ownerToken}`)
           .send({ postId: convPostId, sightingId: convSightingId });
 
-        expect(res.status).toBe(409);
+        expect(res.status).toBe(201);
       });
 
       it("投稿・目撃情報のどちらにも無関係な第三者は 403 を返す", async () => {
