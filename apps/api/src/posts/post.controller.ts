@@ -136,7 +136,11 @@ export class PostsController {
     @Body() dto: CreatePostDto,
     @UploadedFiles() files: Express.Multer.File[]
   ) {
-    return this.posts.create(req.user.id, dto, files ?? []);
+    return this.posts.create(
+      req.user.id,
+      dto,
+      Array.isArray(files) ? files : []
+    );
   }
 
   @Get()
@@ -214,7 +218,12 @@ export class PostsController {
     @UploadedFiles() files: Express.Multer.File[]
   ) {
     const isAdmin = req.user?.role === "admin";
-    return this.posts.addImages(id, req.user.id, files ?? [], isAdmin);
+    return this.posts.addImages(
+      id,
+      req.user.id,
+      Array.isArray(files) ? files : [],
+      isAdmin
+    );
   }
 
   @Delete(":id/images/:imageId")
