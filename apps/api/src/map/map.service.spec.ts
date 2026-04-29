@@ -13,7 +13,6 @@ describe("MapService", () => {
   let service: MapService;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     service = new MapService(mockPrisma as any);
     jest.clearAllMocks();
   });

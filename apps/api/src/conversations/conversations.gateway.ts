@@ -23,6 +23,9 @@ export class ConversationsGateway
   @WebSocketServer()
   server: Server;
 
+  // userId → socketId の1対1マッピング。
+  // 同一ユーザーが複数タブ/ブラウザで接続した場合は後勝ちとなる。
+  // 意図的な単一接続制約であり、複数接続が必要な場合は Map<string, Set<string>> に変更する。
   private readonly userSocketMap = new Map<string, string>();
 
   constructor(

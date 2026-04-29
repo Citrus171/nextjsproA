@@ -56,8 +56,9 @@ export class UsersController {
   async remove(@Param("id") id: string) {
     try {
       return await this.identity.deleteUser(id);
-    } catch (e: any) {
-      if (e?.code === "P2025") {
+    } catch (e: unknown) {
+      const err = e as { code?: string };
+      if (err?.code === "P2025") {
         throw new HttpException(
           { error: "ユーザーが見つかりません" },
           HttpStatus.NOT_FOUND
@@ -114,7 +115,7 @@ export class UsersController {
         nickname: user.nickname,
         createdAt: user.createdAt,
       };
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (e instanceof HttpException) {
         throw e;
       }

@@ -417,20 +417,24 @@ describe("PostsController", () => {
   describe("imageFileFilter", () => {
     it("fileがnullの時、cb(null, false)を呼ぶこと", () => {
       const cb = jest.fn();
-      imageFileFilter({}, null, cb);
+      imageFileFilter({} as Express.Request, null, cb);
       expect(cb).toHaveBeenCalledWith(null, false);
     });
 
     it("originalnameがない時、cb(null, false)を呼ぶこと", () => {
       const cb = jest.fn();
-      imageFileFilter({}, { mimetype: "image/png" } as any, cb);
+      imageFileFilter(
+        {} as Express.Request,
+        { mimetype: "image/png" } as any,
+        cb
+      );
       expect(cb).toHaveBeenCalledWith(null, false);
     });
 
     it("許可されたMIMEタイプの時、cb(null, true)を呼ぶこと", () => {
       const cb = jest.fn();
       imageFileFilter(
-        {},
+        {} as Express.Request,
         { originalname: "photo.png", mimetype: "image/png" } as any,
         cb
       );
@@ -440,7 +444,7 @@ describe("PostsController", () => {
     it("許可されていないMIMEタイプの時、BadRequestExceptionを渡すこと", () => {
       const cb = jest.fn();
       imageFileFilter(
-        {},
+        {} as Express.Request,
         { originalname: "doc.pdf", mimetype: "application/pdf" } as any,
         cb
       );

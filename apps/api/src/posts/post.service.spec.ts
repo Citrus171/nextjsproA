@@ -735,7 +735,7 @@ describe("PostsService", () => {
         lostDate: "2026-04-21",
       });
 
-      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(2);
+      expect(mockPrisma.$transaction).toHaveBeenCalledTimes(3);
       expect(mockPrisma.$transaction).toHaveBeenCalledWith(
         expect.any(Function),
         expect.objectContaining({
