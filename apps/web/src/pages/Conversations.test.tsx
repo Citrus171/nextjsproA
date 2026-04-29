@@ -163,8 +163,8 @@ describe("Conversations", () => {
       expect(badge).toHaveClass("bg-primary");
       expect(badge).toHaveClass("text-primary-foreground");
       expect(badge).toHaveClass("rounded-full");
-      expect(badge).toHaveClass("w-5");
-      expect(badge).toHaveClass("h-5");
+      expect(badge).toHaveClass("min-w-6");
+      expect(badge).toHaveClass("h-6");
     });
 
     it("unreadCountが0の時、未読バッジが表示されないこと", () => {

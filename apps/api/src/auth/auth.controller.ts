@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  HttpCode,
+  HttpStatus,
   UnauthorizedException,
   Post,
   Req,
@@ -21,6 +23,7 @@ export class AuthController {
   constructor(private readonly identity: IIdentityService) {}
 
   @Post("login")
+  @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, type: AccessTokenResponseDto })
   async login(
     @Body() dto: LoginDto,
@@ -32,6 +35,7 @@ export class AuthController {
   }
 
   @Post("refresh")
+  @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, type: AccessTokenResponseDto })
   async refresh(
     @Req() req: Request,
@@ -48,6 +52,7 @@ export class AuthController {
   }
 
   @Post("logout")
+  @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, type: LogoutResponseDto })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies?.refreshToken;
