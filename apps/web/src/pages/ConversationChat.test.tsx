@@ -289,6 +289,10 @@ describe("ConversationChat", () => {
 
       render(<ConversationChat />);
 
+      act(() => {
+        listeners["connect"]?.();
+      });
+
       expect(mockSocketEmit).toHaveBeenCalledWith("joinConversation", "conv-1");
     });
 
@@ -315,6 +319,9 @@ describe("ConversationChat", () => {
       render(<ConversationChat />);
 
       act(() => {
+        listeners["connect"]?.();
+      });
+      act(() => {
         listeners["disconnect"]?.();
       });
 
@@ -328,6 +335,9 @@ describe("ConversationChat", () => {
 
       render(<ConversationChat />);
 
+      act(() => {
+        listeners["connect"]?.();
+      });
       act(() => {
         listeners["disconnect"]?.();
       });
@@ -347,6 +357,9 @@ describe("ConversationChat", () => {
       render(<ConversationChat />);
 
       act(() => {
+        listeners["connect"]?.();
+      });
+      act(() => {
         listeners["disconnect"]?.();
       });
       act(() => {
@@ -361,6 +374,9 @@ describe("ConversationChat", () => {
 
       render(<ConversationChat />);
 
+      act(() => {
+        listeners["connect"]?.();
+      });
       act(() => {
         listeners["connect_error"]?.();
       });
