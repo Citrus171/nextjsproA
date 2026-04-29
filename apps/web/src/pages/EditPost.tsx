@@ -22,12 +22,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  AlertCircle,
   Camera,
-  MapPin,
-  Cat,
   Calendar,
+  Cat,
   ChevronLeft,
   LocateFixed,
+  MapPin,
+  Plus,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -277,14 +279,15 @@ export default function EditPost() {
         >
           <ChevronLeft size={24} />
         </Button>
-        <h1 className="text-3xl font-black tracking-tight text-foreground">
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
           投稿を編集
         </h1>
       </div>
 
       {error && (
-        <p className="mb-4 text-sm text-destructive bg-destructive/10 p-3 rounded-xl">
-          {error}
+        <p className="mb-4 text-sm text-destructive bg-destructive/10 p-3 rounded-xl flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{error}</span>
         </p>
       )}
 
@@ -296,7 +299,7 @@ export default function EditPost() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
         >
           <div className="bg-card rounded-2xl p-6 mx-4 max-w-sm w-full space-y-4">
-            <h2 className="text-lg font-black text-foreground">
+            <h2 className="text-lg font-extrabold text-foreground">
               投稿を削除しますか？
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -329,9 +332,9 @@ export default function EditPost() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <Camera className="text-primary" size={20} />
-            <h2 className="text-lg font-black text-foreground">お写真</h2>
+            <h2 className="text-lg font-extrabold text-foreground">お写真</h2>
           </div>
-          <Card className="border-none bg-muted rounded-[2rem] overflow-hidden">
+          <Card className="border-none bg-muted rounded-3xl overflow-hidden">
             <CardContent className="p-6">
               <div className="grid grid-cols-3 gap-3">
                 {existingImages.map((img, i) => (
@@ -345,7 +348,7 @@ export default function EditPost() {
                       type="button"
                       aria-label={`既存画像${i + 1}を削除`}
                       onClick={() => handleDeleteImage(img.id)}
-                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      className="absolute -top-1.5 -right-1.5 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm"
                     >
                       ×
                     </button>
@@ -363,6 +366,16 @@ export default function EditPost() {
                     </span>
                   </button>
                 )}
+                {Array.from({
+                  length: Math.max(0, remainingSlots - 1),
+                }).map((_, i) => (
+                  <div
+                    key={`placeholder-${i}`}
+                    className="aspect-square rounded-2xl bg-muted/50 flex items-center justify-center text-muted-foreground"
+                  >
+                    <Plus size={20} />
+                  </div>
+                ))}
               </div>
               {remainingSlots > 0 && (
                 <input
@@ -376,7 +389,9 @@ export default function EditPost() {
                 />
               )}
               <p className="mt-4 text-xs font-medium text-muted-foreground text-center">
-                残り {remainingSlots} 枚追加できます
+                {remainingSlots === 0
+                  ? "最大3枚です"
+                  : `残り ${remainingSlots} 枚追加できます`}
               </p>
             </CardContent>
           </Card>
@@ -386,7 +401,7 @@ export default function EditPost() {
         <section className="space-y-6">
           <div className="flex items-center gap-2">
             <Cat className="text-primary" size={20} />
-            <h2 className="text-lg font-black text-foreground">
+            <h2 className="text-lg font-extrabold text-foreground">
               ねこちゃんの情報
             </h2>
           </div>
@@ -521,7 +536,7 @@ export default function EditPost() {
         <section className="space-y-6">
           <div className="flex items-center gap-2">
             <MapPin className="text-primary" size={20} />
-            <h2 className="text-lg font-black text-foreground">
+            <h2 className="text-lg font-extrabold text-foreground">
               いつ・どこで？
             </h2>
           </div>
@@ -584,7 +599,7 @@ export default function EditPost() {
             {locationError && (
               <p className="text-xs text-destructive ml-1">{locationError}</p>
             )}
-            <div className="relative h-64 rounded-[2rem] overflow-hidden">
+            <div className="relative h-64 rounded-3xl overflow-hidden">
               <MapContainer
                 center={pinPos ? [pinPos.lat, pinPos.lng] : DEFAULT_CENTER}
                 zoom={pinPos ? 15 : 11}
@@ -613,7 +628,7 @@ export default function EditPost() {
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full h-16 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-black rounded-full"
+            className="w-full h-16 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-extrabold rounded-full"
           >
             {submitting ? "保存中…" : "保存する"}
           </Button>

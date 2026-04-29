@@ -177,6 +177,11 @@ export default function CreatePost() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     const remaining = MAX_IMAGES - images.length;
+    if (files.length > remaining) {
+      toast.warning(
+        `画像は最大${MAX_IMAGES}枚までです。先頭${remaining}枚を追加しました。`
+      );
+    }
     const toAdd = files.slice(0, remaining);
     setImages((prev) => [...prev, ...toAdd]);
     const newPreviews = toAdd.map((f) => URL.createObjectURL(f));
@@ -257,7 +262,7 @@ export default function CreatePost() {
         >
           <ChevronLeft size={24} />
         </Button>
-        <h1 className="text-3xl font-black tracking-tight text-foreground">
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
           迷子猫の情報を登録
         </h1>
       </div>
@@ -267,11 +272,11 @@ export default function CreatePost() {
         <section className="space-y-4">
           <div className="flex items-center gap-2">
             <Camera className="text-primary" size={20} />
-            <h2 className="text-lg font-black text-foreground">
+            <h2 className="text-lg font-extrabold text-foreground">
               お写真（最大{MAX_IMAGES}枚）
             </h2>
           </div>
-          <Card className="border-none bg-muted rounded-[2rem] overflow-hidden">
+          <Card className="border-none bg-muted rounded-3xl overflow-hidden">
             <CardContent className="p-6">
               <div className="grid grid-cols-3 gap-3">
                 {previews.map((src, i) => (
@@ -285,7 +290,7 @@ export default function CreatePost() {
                       type="button"
                       onClick={() => removeImage(i)}
                       aria-label={`画像${i + 1}を削除`}
-                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      className="absolute -top-1.5 -right-1.5 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm"
                     >
                       ×
                     </button>
@@ -323,7 +328,9 @@ export default function CreatePost() {
                 onChange={handleImageSelect}
               />
               <p className="mt-4 text-xs font-medium text-muted-foreground text-center">
-                ※全身、顔、特徴的な模様がわかる写真を推奨します。
+                {images.length === MAX_IMAGES
+                  ? "最大3枚です"
+                  : "※全身、顔、特徴的な模様がわかる写真を推奨します。"}
               </p>
             </CardContent>
           </Card>
@@ -333,7 +340,7 @@ export default function CreatePost() {
         <section className="space-y-6">
           <div className="flex items-center gap-2">
             <Cat className="text-primary" size={20} />
-            <h2 className="text-lg font-black text-foreground">
+            <h2 className="text-lg font-extrabold text-foreground">
               ねこちゃんの情報
             </h2>
           </div>
@@ -492,7 +499,7 @@ export default function CreatePost() {
         <section className="space-y-6">
           <div className="flex items-center gap-2">
             <MapPin className="text-primary" size={20} />
-            <h2 className="text-lg font-black text-foreground">
+            <h2 className="text-lg font-extrabold text-foreground">
               いつ・どこで？
             </h2>
           </div>
@@ -595,7 +602,7 @@ export default function CreatePost() {
                 setPickerAddress(address);
                 setMapPickerOpen(true);
               }}
-              className="w-full h-24 rounded-[2rem] bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center gap-1.5 hover:bg-accent hover:border-primary/30 transition-colors"
+              className="w-full h-24 rounded-3xl bg-muted border-2 border-dashed border-border flex flex-col items-center justify-center gap-1.5 hover:bg-accent hover:border-primary/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none transition-colors"
             >
               {pinPos ? (
                 <>
@@ -645,7 +652,7 @@ export default function CreatePost() {
           <Button
             type="submit"
             disabled={submitting}
-            className="w-full h-16 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-black rounded-full shadow-2xl shadow-primary/20 active:scale-[0.98] transition-all"
+            className="w-full h-16 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-extrabold rounded-full shadow-2xl shadow-primary/20 active:scale-[0.98] transition-all"
           >
             {submitting ? "送信中…" : "この内容で報告する"}
           </Button>
@@ -663,7 +670,7 @@ export default function CreatePost() {
             <button
               type="button"
               onClick={() => setMapPickerOpen(false)}
-              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted transition-colors"
+              className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none transition-colors"
               aria-label="閉じる"
             >
               <ChevronLeft size={24} className="text-foreground" />

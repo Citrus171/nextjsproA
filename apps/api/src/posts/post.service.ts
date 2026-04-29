@@ -76,6 +76,10 @@ export class PostsService {
     return `uploads/${postId}/${fileName}`;
   }
 
+  private prefixImageUrl(url: string): string {
+    return `/${url}`;
+  }
+
   private deleteFile(url: string): void {
     const filePath = path.join(__dirname, "../../", url);
     if (fs.existsSync(filePath)) {
@@ -97,106 +101,114 @@ export class PostsService {
       const savedUrls: string[] = [];
 
       try {
-        return await this.prisma.$transaction(
-          async (tx) => {
-            const user = await tx.user.findUnique({
-              where: { id: userId },
-              select: { plan: true },
-            });
-
-            if (!user) {
-              throw new NotFoundException("ユーザーが見つかりません");
-            }
-
-            const imageUploadLimit = getImageUploadLimit(user.plan);
-            if (files.length > imageUploadLimit) {
-              throw new ForbiddenException(
-                `このプランでは画像は最大${imageUploadLimit}枚までです`
-              );
-            }
-
-            const monthlyPostLimit = getMonthlyPostLimit(user.plan);
-            if (monthlyPostLimit !== null) {
-              const { start, end } = getMonthRange();
-              const postCount = await tx.post.count({
-                where: {
-                  userId,
-                  createdAt: {
-                    gte: start,
-                    lt: end,
-                  },
-                },
+        return await this.prisma
+          .$transaction(
+            async (tx) => {
+              const user = await tx.user.findUnique({
+                where: { id: userId },
+                select: { plan: true },
               });
 
-              if (postCount >= monthlyPostLimit) {
+              if (!user) {
+                throw new NotFoundException("ユーザーが見つかりません");
+              }
+
+              const imageUploadLimit = getImageUploadLimit(user.plan);
+              if (files.length > imageUploadLimit) {
                 throw new ForbiddenException(
-                  "無料プランの月間投稿数上限に達しています"
+                  `このプランでは画像は最大${imageUploadLimit}枚までです`
                 );
               }
-            }
 
-            const post = await tx.post.create({
-              data: {
-                title: dto.title,
-                description: dto.description,
-                userId,
-                postType: dto.postType ?? PostType.cat,
-                lostDate,
-              },
-            });
+              const monthlyPostLimit = getMonthlyPostLimit(user.plan);
+              if (monthlyPostLimit !== null) {
+                const { start, end } = getMonthRange();
+                const postCount = await tx.post.count({
+                  where: {
+                    userId,
+                    createdAt: {
+                      gte: start,
+                      lt: end,
+                    },
+                  },
+                });
 
-            if (dto.petDetail) {
-              const pd = dto.petDetail;
-              await tx.petDetail.create({
+                if (postCount >= monthlyPostLimit) {
+                  throw new ForbiddenException(
+                    "無料プランの月間投稿数上限に達しています"
+                  );
+                }
+              }
+
+              const post = await tx.post.create({
                 data: {
-                  postId: post.id,
-                  name: pd.name,
-                  color: pd.color,
-                  age: pd.age,
-                  features: pd.features,
-                  ...(pd.gender !== undefined && {
-                    gender: pd.gender as Gender,
-                  }),
-                  ...(pd.breed !== undefined && { breed: pd.breed }),
-                  ...(pd.size !== undefined && { size: pd.size }),
-                  ...(pd.collar !== undefined && { collar: pd.collar }),
-                  ...(pd.microchip !== undefined && {
-                    microchip: pd.microchip,
-                  }),
-                  ...(pd.neutered !== undefined && { neutered: pd.neutered }),
+                  title: dto.title,
+                  description: dto.description,
+                  userId,
+                  postType: dto.postType ?? PostType.cat,
+                  lostDate,
                 },
               });
-            }
 
-            if (dto.location) {
-              const loc = dto.location;
-              await tx.location.create({
-                data: {
-                  postId: post.id,
-                  prefecture: loc.prefecture as Prefecture,
-                  city: loc.city,
-                  address: loc.address,
-                  lat: loc.lat,
-                  lng: loc.lng,
-                },
+              if (dto.petDetail) {
+                const pd = dto.petDetail;
+                await tx.petDetail.create({
+                  data: {
+                    postId: post.id,
+                    name: pd.name,
+                    color: pd.color,
+                    age: pd.age,
+                    features: pd.features,
+                    ...(pd.gender !== undefined && {
+                      gender: pd.gender as Gender,
+                    }),
+                    ...(pd.breed !== undefined && { breed: pd.breed }),
+                    ...(pd.size !== undefined && { size: pd.size }),
+                    ...(pd.collar !== undefined && { collar: pd.collar }),
+                    ...(pd.microchip !== undefined && {
+                      microchip: pd.microchip,
+                    }),
+                    ...(pd.neutered !== undefined && { neutered: pd.neutered }),
+                  },
+                });
+              }
+
+              if (dto.location) {
+                const loc = dto.location;
+                await tx.location.create({
+                  data: {
+                    postId: post.id,
+                    prefecture: loc.prefecture as Prefecture,
+                    city: loc.city,
+                    address: loc.address,
+                    lat: loc.lat,
+                    lng: loc.lng,
+                  },
+                });
+              }
+
+              for (const file of files) {
+                const url = await this.saveFile(post.id, file);
+                savedUrls.push(url);
+                await tx.image.create({ data: { postId: post.id, url } });
+              }
+
+              return tx.post.findUnique({
+                where: { id: post.id },
+                include: { petDetail: true, location: true, images: true },
               });
+            },
+            {
+              isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
             }
-
-            for (const file of files) {
-              const url = await this.saveFile(post.id, file);
-              savedUrls.push(url);
-              await tx.image.create({ data: { postId: post.id, url } });
-            }
-
-            return tx.post.findUnique({
-              where: { id: post.id },
-              include: { petDetail: true, location: true, images: true },
-            });
-          },
-          {
-            isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-          }
-        );
+          )
+          .then((result) => ({
+            ...result!,
+            images: (result!.images ?? []).map((img) => ({
+              ...img,
+              url: this.prefixImageUrl(img.url),
+            })),
+          }));
       } catch (e) {
         for (const url of savedUrls) {
           try {
@@ -236,6 +248,10 @@ export class PostsService {
       items: items.map(({ user, ...rest }) => ({
         ...rest,
         authorNickname: user?.nickname ?? null,
+        images: (rest.images ?? []).map((img) => ({
+          ...img,
+          url: this.prefixImageUrl(img.url),
+        })),
       })),
       total,
     };
@@ -257,6 +273,10 @@ export class PostsService {
     return {
       ...rest,
       authorNickname: user?.nickname ?? null,
+      images: (rest.images ?? []).map((img) => ({
+        ...img,
+        url: this.prefixImageUrl(img.url),
+      })),
     };
   }
 
@@ -304,7 +324,10 @@ export class PostsService {
 
       return {
         remainingSlots: imageUploadLimit - currentCount - files.length,
-        images: newImages,
+        images: newImages.map((img) => ({
+          ...img,
+          url: this.prefixImageUrl(img.url),
+        })),
       };
     } catch (error) {
       for (const url of savedUrls) {
@@ -329,7 +352,8 @@ export class PostsService {
       throw new NotFoundException("画像が見つかりません");
 
     this.deleteFile(image.url);
-    return this.prisma.image.delete({ where: { id: imageId } });
+    const deleted = await this.prisma.image.delete({ where: { id: imageId } });
+    return { ...deleted, url: this.prefixImageUrl(deleted.url) };
   }
 
   async update(
@@ -349,114 +373,122 @@ export class PostsService {
       throw new ForbiddenException("投稿のオーナーではありません");
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const {
-        petDetail,
-        location,
-        lostDate,
-        status,
-        title,
-        description,
-        postType,
-      } = dto;
+    return this.prisma
+      .$transaction(async (tx) => {
+        const {
+          petDetail,
+          location,
+          lostDate,
+          status,
+          title,
+          description,
+          postType,
+        } = dto;
 
-      await tx.post.update({
-        where: { id },
-        data: {
-          ...(title !== undefined && { title }),
-          ...(description !== undefined && { description }),
-          ...(lostDate !== undefined && { lostDate: new Date(lostDate) }),
-          ...(postType !== undefined && { postType: postType as PostType }),
-          ...(status !== undefined && { status: status as PostStatus }),
-          ...(status === "resolved" && { resolvedAt: new Date() }),
-          ...(status === "lost" && { resolvedAt: null }),
-        },
-      });
-
-      if (petDetail !== undefined) {
-        const pd = petDetail;
-        // petDetailが存在しない場合はcreateパスになるため、必須フィールドを検証する
-        if (
-          !post.petDetail &&
-          (!pd.name || !pd.color || !pd.age || !pd.features)
-        ) {
-          throw new BadRequestException(
-            "petDetailを新規作成する場合、name/color/age/featuresは必須です"
-          );
-        }
-        await tx.petDetail.upsert({
-          where: { postId: id },
-          create: {
-            postId: id,
-            name: pd.name!,
-            color: pd.color!,
-            age: pd.age!,
-            features: pd.features!,
-            ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
-            ...(pd.breed !== undefined && { breed: pd.breed }),
-            ...(pd.size !== undefined && { size: pd.size }),
-            ...(pd.collar !== undefined && { collar: pd.collar }),
-            ...(pd.microchip !== undefined && { microchip: pd.microchip }),
-            ...(pd.neutered !== undefined && { neutered: pd.neutered }),
-          },
-          update: {
-            ...(pd.name !== undefined && { name: pd.name }),
-            ...(pd.color !== undefined && { color: pd.color }),
-            ...(pd.age !== undefined && { age: pd.age }),
-            ...(pd.features !== undefined && { features: pd.features }),
-            ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
-            ...(pd.breed !== undefined && { breed: pd.breed }),
-            ...(pd.size !== undefined && { size: pd.size }),
-            ...(pd.collar !== undefined && { collar: pd.collar }),
-            ...(pd.microchip !== undefined && { microchip: pd.microchip }),
-            ...(pd.neutered !== undefined && { neutered: pd.neutered }),
+        await tx.post.update({
+          where: { id },
+          data: {
+            ...(title !== undefined && { title }),
+            ...(description !== undefined && { description }),
+            ...(lostDate !== undefined && { lostDate: new Date(lostDate) }),
+            ...(postType !== undefined && { postType: postType as PostType }),
+            ...(status !== undefined && { status: status as PostStatus }),
+            ...(status === "resolved" && { resolvedAt: new Date() }),
+            ...(status === "lost" && { resolvedAt: null }),
           },
         });
-      }
 
-      if (location !== undefined) {
-        const loc = location;
-        // locationが存在しない場合はcreateパスになるため、必須フィールドを検証する
-        if (
-          !post.location &&
-          (!loc.prefecture ||
-            !loc.city ||
-            !loc.address ||
-            loc.lat === undefined ||
-            loc.lng === undefined)
-        ) {
-          throw new BadRequestException(
-            "locationを新規作成する場合、prefecture/city/address/lat/lngは必須です"
-          );
+        if (petDetail !== undefined) {
+          const pd = petDetail;
+          // petDetailが存在しない場合はcreateパスになるため、必須フィールドを検証する
+          if (
+            !post.petDetail &&
+            (!pd.name || !pd.color || !pd.age || !pd.features)
+          ) {
+            throw new BadRequestException(
+              "petDetailを新規作成する場合、name/color/age/featuresは必須です"
+            );
+          }
+          await tx.petDetail.upsert({
+            where: { postId: id },
+            create: {
+              postId: id,
+              name: pd.name!,
+              color: pd.color!,
+              age: pd.age!,
+              features: pd.features!,
+              ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
+              ...(pd.breed !== undefined && { breed: pd.breed }),
+              ...(pd.size !== undefined && { size: pd.size }),
+              ...(pd.collar !== undefined && { collar: pd.collar }),
+              ...(pd.microchip !== undefined && { microchip: pd.microchip }),
+              ...(pd.neutered !== undefined && { neutered: pd.neutered }),
+            },
+            update: {
+              ...(pd.name !== undefined && { name: pd.name }),
+              ...(pd.color !== undefined && { color: pd.color }),
+              ...(pd.age !== undefined && { age: pd.age }),
+              ...(pd.features !== undefined && { features: pd.features }),
+              ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
+              ...(pd.breed !== undefined && { breed: pd.breed }),
+              ...(pd.size !== undefined && { size: pd.size }),
+              ...(pd.collar !== undefined && { collar: pd.collar }),
+              ...(pd.microchip !== undefined && { microchip: pd.microchip }),
+              ...(pd.neutered !== undefined && { neutered: pd.neutered }),
+            },
+          });
         }
-        await tx.location.upsert({
-          where: { postId: id },
-          create: {
-            postId: id,
-            prefecture: loc.prefecture! as Prefecture,
-            city: loc.city!,
-            address: loc.address!,
-            lat: loc.lat!,
-            lng: loc.lng!,
-          },
-          update: {
-            ...(loc.prefecture !== undefined && {
-              prefecture: loc.prefecture as Prefecture,
-            }),
-            ...(loc.city !== undefined && { city: loc.city }),
-            ...(loc.address !== undefined && { address: loc.address }),
-            ...(loc.lat !== undefined && { lat: loc.lat }),
-            ...(loc.lng !== undefined && { lng: loc.lng }),
-          },
-        });
-      }
 
-      // すべての更新後に include 付きで再取得してレスポンス形状を統一する
-      return tx.post.findUnique({
-        where: { id },
-        include: { petDetail: true, location: true, images: true },
-      });
-    });
+        if (location !== undefined) {
+          const loc = location;
+          // locationが存在しない場合はcreateパスになるため、必須フィールドを検証する
+          if (
+            !post.location &&
+            (!loc.prefecture ||
+              !loc.city ||
+              !loc.address ||
+              loc.lat === undefined ||
+              loc.lng === undefined)
+          ) {
+            throw new BadRequestException(
+              "locationを新規作成する場合、prefecture/city/address/lat/lngは必須です"
+            );
+          }
+          await tx.location.upsert({
+            where: { postId: id },
+            create: {
+              postId: id,
+              prefecture: loc.prefecture! as Prefecture,
+              city: loc.city!,
+              address: loc.address!,
+              lat: loc.lat!,
+              lng: loc.lng!,
+            },
+            update: {
+              ...(loc.prefecture !== undefined && {
+                prefecture: loc.prefecture as Prefecture,
+              }),
+              ...(loc.city !== undefined && { city: loc.city }),
+              ...(loc.address !== undefined && { address: loc.address }),
+              ...(loc.lat !== undefined && { lat: loc.lat }),
+              ...(loc.lng !== undefined && { lng: loc.lng }),
+            },
+          });
+        }
+
+        // すべての更新後に include 付きで再取得してレスポンス形状を統一する
+        return tx.post.findUnique({
+          where: { id },
+          include: { petDetail: true, location: true, images: true },
+        });
+      })
+      .then((result) => ({
+        ...result!,
+        images: (result!.images ?? []).map((img) => ({
+          ...img,
+          url: this.prefixImageUrl(img.url),
+        })),
+      }));
   }
 
   async toggleFavorite(userId: string, postId: string) {

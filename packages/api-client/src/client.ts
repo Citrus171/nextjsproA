@@ -166,8 +166,13 @@ export function createClient(options: ClientOptions) {
     deleteImage: async (id: string, imageId: string) => {
       await postsControllerRemoveImage(id, imageId);
     },
-    getMapMarkers: async () => {
-      const r = await mapControllerGetMarkers();
+    getMapMarkers: async (params?: {
+      minLat?: number;
+      maxLat?: number;
+      minLng?: number;
+      maxLng?: number;
+    }) => {
+      const r = await mapControllerGetMarkers(params);
       return r.data;
     },
     listConversations: async () => {

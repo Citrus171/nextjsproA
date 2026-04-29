@@ -1,8 +1,7 @@
+/* map.css — 複雑な背景・DivIconマーカー・keyframe のみ保持 */
+
+/* マップページ背景グラデーション */
 .map-page {
-  position: relative;
-  width: 100%;
-  min-height: 100dvh;
-  overflow: hidden;
   background:
     radial-gradient(
       circle at top left,
@@ -13,323 +12,32 @@
   color: #202124;
 }
 
-.map-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1300;
-  padding: 16px 16px 0;
-  pointer-events: none;
-}
-
-.map-header__panel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  pointer-events: auto;
-  padding: 10px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.18);
-  backdrop-filter: blur(12px);
-}
-
-.map-icon-button,
-.map-account-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: #5f6368;
-  cursor: pointer;
-  flex: 0 0 auto;
-}
-
-.map-icon-button:hover,
-.map-account-button:hover {
-  background: rgba(17, 24, 39, 0.06);
-}
-
-.map-icon-button--primary {
-  color: #1a73e8;
-}
-
-.map-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: #f8f9fa;
-  border: 1px solid #e4e7eb;
-}
-
-.map-search__icon {
-  flex: 0 0 auto;
-  color: #1a73e8;
-}
-
-.map-search__input {
-  flex: 1 1 auto;
-  min-width: 0;
-  border: 0;
-  outline: none;
-  background: transparent;
-  color: #202124;
-  font-size: 16px;
-}
-
-.map-search__input::placeholder {
-  color: #70757a;
-}
-
-.map-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-left: 6px;
-  border-left: 1px solid #dadce0;
-}
-
-.map-account-button {
-  background: #1a73e8;
-  color: #ffffff;
-}
-
-.map-filter-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-  padding: 4px 2px 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  pointer-events: auto;
-}
-
-.map-filter-row::-webkit-scrollbar {
-  display: none;
-}
-
-.map-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  min-height: 36px;
-  padding: 0 16px;
-  border-radius: 999px;
-  border: 1px solid #d8dde3;
-  background: rgba(255, 255, 255, 0.96);
-  color: #3c4043;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-  cursor: pointer;
-}
-
-.map-chip--active {
-  color: #ffffff;
-  border-color: transparent;
-}
-
-.map-chip--all.map-chip--active {
-  background: #3c4043;
-}
-
-.map-chip--lost.map-chip--active {
-  background: #d93025;
-}
-
-.map-chip--sighting.map-chip--active {
-  background: #1a73e8;
-}
-
-.map-stage {
-  position: relative;
-  width: 100%;
-  height: 100dvh;
-  padding-top: 92px;
-  padding-bottom: 92px;
-}
-
+/* マップフレーム背景 */
 .map-stage__frame {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
   background:
     linear-gradient(145deg, rgba(89, 126, 109, 0.38), rgba(31, 44, 46, 0.14)),
     linear-gradient(180deg, rgba(95, 129, 111, 0.74), rgba(76, 106, 92, 0.9));
 }
 
-.map-stage__map {
-  width: 100%;
-  height: 100%;
+/* ── スクロールバー非表示 ── */
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
-.map-stage__controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 1100;
-  pointer-events: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.map-zoom-controls {
-  display: flex;
-  flex-direction: column;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
-}
-
-.map-zoom-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  border: 0;
-  background: rgba(31, 41, 55, 0.96);
-  color: #ffffff;
-  cursor: pointer;
-}
-
-.map-zoom-button:hover {
-  background: rgba(17, 24, 39, 0.98);
-}
-
-.map-zoom-button:active {
-  background: rgba(55, 65, 81, 0.96);
-}
-
-.map-zoom-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.map-zoom-button__icon {
-  width: 18px;
-  height: 18px;
-  display: block;
-}
-
-.map-current-location-button {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: rgba(31, 41, 55, 0.96);
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
-  cursor: pointer;
-}
-
-.map-current-location-button:hover {
-  background: rgba(17, 24, 39, 0.98);
-}
-
-.map-current-location-button:disabled {
-  opacity: 0.72;
-  cursor: progress;
-}
-
-.map-picking-banner {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1400;
-  padding: 10px 16px;
-  background: rgba(26, 115, 232, 0.96);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
-  text-align: center;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
-}
-
-.map-current-location-button__icon {
-  width: 19px;
-  height: 19px;
-  display: block;
-}
-
-.map-current-location-button__icon--loading {
-  animation: map-current-location-spin 1s linear infinite;
-}
-
-@keyframes map-current-location-spin {
+/* ── 現在地ボタンローディングアニメ ── */
+@keyframes map-locate-spin {
   from {
     transform: rotate(0deg);
   }
-
   to {
     transform: rotate(360deg);
   }
 }
 
-.map-bottom-bar {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1300;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.02),
-    rgba(255, 255, 255, 0.94) 18%,
-    #ffffff 100%
-  );
-}
-
-.map-bottom-bar__button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 58px;
-  border-radius: 16px;
-  border: 1px solid transparent;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.map-bottom-bar__button--lost {
-  background: #fff0ef;
-  border-color: #f5c2c7;
-  color: #d93025;
-}
-
-.map-bottom-bar__button--sighting {
-  background: #e8f0fe;
-  border-color: #d2e3fc;
-  color: #1a73e8;
-}
-
+/* ── DivIcon マーカー（L.divIcon の innerHTML で生成） ── */
 .map-marker-icon {
   display: inline-flex;
   flex-direction: column;
@@ -385,6 +93,7 @@
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.14);
 }
 
+/* ── Leaflet ポップアップ ── */
 .map-popup {
   min-width: 140px;
   color: #202124;
@@ -400,64 +109,4 @@
   margin: 0;
   padding: 16px;
   color: #d93025;
-}
-
-.map-floating-error {
-  position: fixed;
-  top: 112px;
-  left: 16px;
-  right: 16px;
-  z-index: 1250;
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid #f5c2c7;
-  background: rgba(255, 240, 239, 0.98);
-  color: #b3261e;
-  font-size: 13px;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.16);
-}
-
-.map-floating-error--location {
-  top: 164px;
-}
-
-@media (min-width: 768px) {
-  .map-header {
-    padding: 20px 20px 0;
-  }
-
-  .map-header__panel {
-    max-width: 640px;
-  }
-
-  .map-floating-error {
-    top: 116px;
-    left: 20px;
-    right: auto;
-    max-width: 420px;
-  }
-
-  .map-floating-error--location {
-    top: 168px;
-  }
-
-  .map-stage__controls {
-    top: 20px;
-    right: 20px;
-  }
-
-  .map-stage {
-    padding-bottom: 24px;
-  }
-
-  .map-bottom-bar {
-    left: 16px;
-    right: 16px;
-    bottom: 16px;
-    max-width: 720px;
-    margin: 0 auto;
-    border-radius: 24px;
-    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
-  }
 }

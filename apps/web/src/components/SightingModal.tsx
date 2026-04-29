@@ -92,7 +92,7 @@ export default function SightingModal({
         <div className="h-full overflow-y-auto px-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between mt-4 mb-4">
             <SheetTitle asChild>
-              <h2 className="text-xl font-black text-foreground">
+              <h2 className="text-xl font-extrabold text-foreground">
                 目撃を報告する
               </h2>
             </SheetTitle>

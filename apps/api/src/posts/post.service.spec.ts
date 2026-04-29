@@ -924,7 +924,10 @@ describe("PostsService", () => {
       expect(mockPrisma.image.delete).toHaveBeenCalledWith({
         where: { id: "img1" },
       });
-      expect(result).toEqual(existingImage);
+      expect(result).toEqual({
+        ...existingImage,
+        url: "/uploads/post1/abc.png",
+      });
     });
 
     it("ファイルが存在しない場合 unlinkSync を呼ばない", async () => {

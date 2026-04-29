@@ -9,6 +9,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "prisma db seed",
+    "seed:clean": "ts-node --project prisma/tsconfig.json prisma/seed-clean.ts",
     "openapi": "ts-node src/swagger.ts",
     "typecheck": "tsc --noEmit",
     "lint": "node ../../node_modules/eslint/bin/eslint.js \"{src,apps,libs,test}/**/*.ts\"",
