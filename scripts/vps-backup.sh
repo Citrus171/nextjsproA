@@ -17,7 +17,7 @@ DB_ONLY="${DB_ONLY:-false}"
 # 環境変数読み込み（DATABASE_URL のみ抽出）
 ENV_FILE="$PROJECT_DIR/apps/api/.env"
 if [[ -z "${DATABASE_URL:-}" ]] && [[ -f "$ENV_FILE" ]]; then
-  DATABASE_URL=$(grep '^DATABASE_URL=' "$ENV_FILE" | head -1 | cut -d= -f2-)
+  DATABASE_URL=$(grep '^DATABASE_URL=' "$ENV_FILE" | head -1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//')
   export DATABASE_URL
 fi
 
@@ -67,7 +67,7 @@ if [[ "$UPLOADS_ONLY" != true ]]; then
   else
     echo ""
     echo "📦 DB バックアップ中..."
-    pg_dump "$DATABASE_URL" | gzip > "$BACKUP_DIR/db_backup.sql.gz"
+    pg_dump --dbname="$DATABASE_URL" | gzip > "$BACKUP_DIR/db_backup.sql.gz"
     ls -lh "$BACKUP_DIR/db_backup.sql.gz"
   fi
 fi
