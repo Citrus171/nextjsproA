@@ -17,6 +17,8 @@ interface SightingListProps {
   postId: string;
   currentUserId: string | null;
   onSightingDeleted: () => void;
+  postOwnerId?: string | null;
+  onSendMessage?: (sightingId: string) => void;
 }
 
 function formatSightedAt(iso: string): string {
@@ -34,6 +36,8 @@ export default function SightingList({
   postId,
   currentUserId,
   onSightingDeleted,
+  postOwnerId,
+  onSendMessage,
 }: SightingListProps) {
   const api = useApiClient();
   const queryClient = useQueryClient();
@@ -95,16 +99,31 @@ export default function SightingList({
                   </p>
                 )}
               </div>
-              {currentUserId === s.userId && (
-                <button
-                  type="button"
-                  aria-label="削除"
-                  onClick={() => setDeletingId(s.id)}
-                  className="shrink-0 text-xs text-destructive hover:text-destructive/80 font-bold px-2 py-1 rounded-lg hover:bg-destructive/10"
-                >
-                  削除
-                </button>
-              )}
+              <div className="flex items-center gap-1 shrink-0">
+                {currentUserId === s.userId && (
+                  <button
+                    type="button"
+                    aria-label="削除"
+                    onClick={() => setDeletingId(s.id)}
+                    className="text-xs text-destructive hover:text-destructive/80 font-bold px-2 py-1 rounded-lg hover:bg-destructive/10"
+                  >
+                    削除
+                  </button>
+                )}
+                {currentUserId &&
+                  currentUserId !== s.userId &&
+                  postOwnerId === currentUserId &&
+                  onSendMessage && (
+                    <button
+                      type="button"
+                      aria-label="メッセージを送る"
+                      onClick={() => onSendMessage(s.id)}
+                      className="text-xs text-primary hover:text-primary/80 font-bold px-2 py-1 rounded-lg hover:bg-primary/10"
+                    >
+                      💬
+                    </button>
+                  )}
+              </div>
             </div>
           </div>
         ))}

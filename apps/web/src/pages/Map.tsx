@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { Map as LeafletMap, LeafletMouseEvent } from "leaflet";
@@ -23,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
+import { Sheet, SheetContent } from "../components/ui/sheet";
 import "../styles/map.css";
 
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)
@@ -96,6 +99,7 @@ export default function Map() {
   const api = useApiClient();
   const { userId: currentUserId, clearToken } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [markers, setMarkers] = useState<MapMarkerDto[]>([]);
   const [markersRefreshKey, setMarkersRefreshKey] = useState(0);
   const [filter, setFilter] = useState<FilterValue>("all");
@@ -125,6 +129,30 @@ export default function Map() {
     getViewportHeight()
   );
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+
+  const { data: unreadData } = useQuery({
+    queryKey: ["unread-count"],
+    queryFn: () => api.getUnreadCount(),
+    enabled: !!currentUserId,
+    refetchInterval: 30000,
+  });
+
+  // flyTo on initial load from query params
+  useEffect(() => {
+    const latParam = searchParams.get("lat");
+    const lngParam = searchParams.get("lng");
+    if (latParam && lngParam && mapInstance) {
+      const lat = parseFloat(latParam);
+      const lng = parseFloat(lngParam);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        mapInstance.flyTo([lat, lng], 16, { animate: true });
+        searchParams.delete("lat");
+        searchParams.delete("lng");
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  }, [mapInstance, searchParams, setSearchParams]);
 
   useEffect(() => {
     const handleResize = () => setViewportHeight(getViewportHeight());
@@ -281,28 +309,7 @@ export default function Map() {
           >
             <MenuIcon />
           </button>
-          <label
-            className="flex items-center gap-2.5 flex-1 min-w-0 h-10 px-3.5 rounded-full bg-[#f8f9fa] border border-[#e4e7eb]"
-            htmlFor="map-search-input"
-          >
-            <span className="flex-shrink-0 text-primary" aria-hidden="true">
-              <SearchIcon />
-            </span>
-            <input
-              id="map-search-input"
-              type="search"
-              placeholder="検索..."
-              className="flex-1 min-w-0 border-0 outline-none bg-transparent text-[#202124] text-base placeholder:text-[#70757a]"
-            />
-          </label>
-          <div className="flex items-center gap-1.5 pl-1.5 border-l border-[#dadce0]">
-            <button
-              className="inline-flex items-center justify-center w-11 h-11 border-0 rounded-full bg-transparent text-primary cursor-pointer flex-shrink-0 outline-none hover:bg-black/[0.06] focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
-              type="button"
-              aria-label="検索"
-            >
-              <SearchIcon />
-            </button>
+          <div className="flex items-center gap-1.5 ml-auto">
             <button
               className="inline-flex items-center justify-center w-11 h-11 border-0 rounded-full bg-primary text-white cursor-pointer flex-shrink-0 outline-none hover:bg-primary/90 focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
               type="button"
@@ -398,6 +405,14 @@ export default function Map() {
               }}
             />
             <MapMoveHandler onMove={fetchMarkersWithBounds} />
+            <MapContextMenuHandler
+              enabled={
+                !pickingLocation &&
+                selectedMarker === null &&
+                !sightingModalOpen
+              }
+              onActivate={() => setContextMenuOpen(true)}
+            />
             <TileLayer
               attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -451,14 +466,15 @@ export default function Map() {
       </main>
 
       <nav
-        className="fixed left-0 right-0 bottom-0 z-[1300] grid grid-cols-2 gap-3 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-white via-white/[0.94] to-white/[0.02] md:left-4 md:right-4 md:bottom-4 md:max-w-[720px] md:mx-auto md:rounded-3xl md:shadow-[0_12px_32px_rgba(15,23,42,0.18)]"
+        className={`fixed left-0 right-0 bottom-0 z-[1300] grid gap-2 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-white via-white/[0.94] to-white/[0.02] md:left-4 md:right-4 md:bottom-4 md:max-w-[720px] md:mx-auto md:rounded-3xl md:shadow-[0_12px_32px_rgba(15,23,42,0.18)] ${currentUserId ? "grid-cols-3" : "grid-cols-2"}`}
         aria-label="投稿アクション"
       >
         <button
           type="button"
-          className="inline-flex items-center justify-center gap-2.5 min-h-[58px] rounded-2xl border border-[#f5c2c7] bg-[#fff0ef] text-[#d93025] text-[15px] font-bold shadow-[0_4px_16px_rgba(15,23,42,0.12)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.12)]"
+          className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#f5c2c7] bg-[#fff0ef] text-[#d93025] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.12)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.12)]"
           onClick={() => {
             if (!currentUserId) {
+              toast("投稿を作成するにはログインが必要です");
               navigate("/login");
               return;
             }
@@ -468,6 +484,37 @@ export default function Map() {
           <PlusIcon />
           <span>迷い猫投稿</span>
         </button>
+        <button
+          type="button"
+          className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#dadce0] bg-white text-[#202124] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+          onClick={() => {
+            if (!currentUserId) {
+              toast("目撃を報告するにはログインが必要です");
+              navigate("/login");
+              return;
+            }
+            setSightingPostId(null);
+            setSightingModalOpen(true);
+          }}
+        >
+          <EyeIcon />
+          <span>目撃を報告</span>
+        </button>
+        {currentUserId && (
+          <button
+            type="button"
+            className="relative inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#202124] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+            onClick={() => navigate("/conversations")}
+          >
+            <ChatIcon />
+            <span>会話</span>
+            {unreadData && (unreadData.count ?? 0) > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-extrabold leading-none">
+                {(unreadData.count ?? 0) > 99 ? "99+" : unreadData.count}
+              </span>
+            )}
+          </button>
+        )}
       </nav>
 
       {pickingLocation && (
@@ -496,6 +543,7 @@ export default function Map() {
         }
         onReportSighting={(postId) => {
           if (!currentUserId) {
+            toast("目撃を報告するにはログインが必要です");
             navigate("/login");
             return;
           }
@@ -566,6 +614,51 @@ export default function Map() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Sheet open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
+        <SheetContent side="bottom">
+          <div className="px-6 pt-6 pb-8 space-y-3">
+            <button
+              type="button"
+              className="w-full py-3.5 text-base font-bold text-center rounded-2xl border border-[#f5c2c7] bg-[#fff0ef] text-[#d93025]"
+              onClick={() => {
+                setContextMenuOpen(false);
+                if (!currentUserId) {
+                  toast("投稿を作成するにはログインが必要です");
+                  navigate("/login");
+                } else {
+                  navigate("/create");
+                }
+              }}
+            >
+              迷い猫投稿
+            </button>
+            <button
+              type="button"
+              className="w-full py-3.5 text-base font-bold text-center rounded-2xl border border-[#dadce0] bg-white text-[#202124]"
+              onClick={() => {
+                setContextMenuOpen(false);
+                if (!currentUserId) {
+                  toast("目撃を報告するにはログインが必要です");
+                  navigate("/login");
+                } else {
+                  setSightingPostId(null);
+                  setSightingModalOpen(true);
+                }
+              }}
+            >
+              目撃を報告する
+            </button>
+            <button
+              type="button"
+              className="w-full py-3.5 text-base text-muted-foreground text-center"
+              onClick={() => setContextMenuOpen(false)}
+            >
+              キャンセル
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -574,16 +667,20 @@ function MenuIcon() {
   return <span aria-hidden="true">≡</span>;
 }
 
-function SearchIcon() {
-  return <span aria-hidden="true">⌕</span>;
-}
-
 function UserIcon() {
   return <span aria-hidden="true">◯</span>;
 }
 
 function PlusIcon() {
   return <span aria-hidden="true">＋</span>;
+}
+
+function EyeIcon() {
+  return <span aria-hidden="true">👁</span>;
+}
+
+function ChatIcon() {
+  return <span aria-hidden="true">💬</span>;
 }
 
 function LocationIcon({ loading }: { loading: boolean }) {
@@ -678,6 +775,83 @@ function MapClickHandler({
       map.off("click", handler);
     };
   }, [enabled, onClick, map]);
+
+  return null;
+}
+
+function MapContextMenuHandler({
+  enabled,
+  onActivate,
+}: {
+  enabled: boolean;
+  onActivate: () => void;
+}) {
+  const map = useMap();
+  const startPos = useRef<{ x: number; y: number } | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const clearTimer = () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+
+    const handleContextMenu = (e: L.LeafletMouseEvent) => {
+      e.originalEvent.preventDefault();
+      onActivate();
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      startPos.current = { x: touch.clientX, y: touch.clientY };
+      timerRef.current = setTimeout(() => {
+        onActivate();
+      }, 600);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!startPos.current) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - startPos.current.x;
+      const dy = touch.clientY - startPos.current.y;
+      if (Math.sqrt(dx * dx + dy * dy) > 10) {
+        clearTimer();
+        startPos.current = null;
+      }
+    };
+
+    const handleTouchEnd = () => {
+      clearTimer();
+      startPos.current = null;
+    };
+
+    map.on("contextmenu", handleContextMenu);
+    map.getContainer().addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    map.getContainer().addEventListener("touchmove", handleTouchMove, {
+      passive: true,
+    });
+    map.getContainer().addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      map.off("contextmenu", handleContextMenu);
+      map
+        .getContainer()
+        .removeEventListener("touchstart", handleTouchStart as EventListener);
+      map
+        .getContainer()
+        .removeEventListener("touchmove", handleTouchMove as EventListener);
+      map
+        .getContainer()
+        .removeEventListener("touchend", handleTouchEnd as EventListener);
+      clearTimer();
+    };
+  }, [enabled, onActivate, map]);
 
   return null;
 }

@@ -104,7 +104,7 @@ describe("PostDetailSheet", () => {
   it("markerType=post の時、迷い猫投稿タイトルが表示されること", () => {
     renderSheet({ markerType: "post" });
     expect(
-      screen.getByRole("heading", { name: "迷い猫投稿" })
+      screen.getByRole("heading", { name: "レオを探しています" })
     ).toBeInTheDocument();
   });
 

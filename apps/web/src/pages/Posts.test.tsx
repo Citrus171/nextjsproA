@@ -29,10 +29,20 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
+vi.mock("../auth/AuthProvider", () => ({
+  useAuth: () => ({
+    userId: "user-1",
+    token: null,
+    clearToken: vi.fn(),
+    setToken: vi.fn(),
+  }),
+}));
+
 vi.mock("../api/orvalClient", () => ({
   useApiClient: () => ({
     listPosts: mockListPosts,
     deletePost: mockDeletePost,
+    updatePost: vi.fn(),
   }),
 }));
 

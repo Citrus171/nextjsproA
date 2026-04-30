@@ -2,14 +2,28 @@ import { ApiProperty } from "@nestjs/swagger";
 import {
   OPENAPI_SIGHTING_ID_EXAMPLE,
   OPENAPI_USER_ID_EXAMPLE,
+  OPENAPI_POST_ID_EXAMPLE,
 } from "../../common/openapi-examples";
 
 export class SightingResponseDto {
   @ApiProperty({ example: OPENAPI_SIGHTING_ID_EXAMPLE })
   id: string;
 
+  @ApiProperty({
+    example: OPENAPI_POST_ID_EXAMPLE,
+    required: false,
+    nullable: true,
+  })
+  postId: string | null;
+
   @ApiProperty({ example: OPENAPI_USER_ID_EXAMPLE })
   userId: string;
+
+  @ApiProperty({ example: 35.8617 })
+  lat: number;
+
+  @ApiProperty({ example: 139.6455 })
+  lng: number;
 
   @ApiProperty({
     example: "埼玉県さいたま市浦和区",
@@ -38,4 +52,7 @@ export class SightingResponseDto {
     example: "2024-01-02T00:00:00.000Z",
   })
   createdAt: string;
+
+  @ApiProperty({ example: "報告者ニックネーム", required: false })
+  nickname?: string;
 }

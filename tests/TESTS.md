@@ -193,6 +193,11 @@
 - [x] お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException
 - [x] 存在しないSightingをお気に入りしようとすると NotFoundException
 
+#### findOne
+
+- [x] 指定IDの目撃情報を報告者のニックネーム付きで返すこと
+- [x] 存在しないIDを指定するとNotFoundExceptionを送出すること
+
 ---
 
 ### SightingsController (`src/sightings/sighting.controller.spec.ts`)
@@ -200,6 +205,11 @@
 #### create
 
 - [x] 目撃情報を作成してサービスの結果を返すこと
+
+#### findOne
+
+- [x] 指定IDの目撃詳細を返すこと
+- [x] NotFoundException を伝播する
 
 ### CreateSightingDto (`src/sightings/dto/create-sighting.dto.spec.ts`)
 
@@ -260,11 +270,22 @@
 - [x] 会話参加者以外のメッセージ一覧取得はForbiddenException
 - [x] 存在しない会話のメッセージ一覧はNotFoundException
 
+#### findOneForUser
+
+- [x] 投稿者が会話を取得すると相手は目撃者のニックネームであること
+- [x] 目撃者が会話を取得すると相手は投稿者のニックネームであること
+- [x] 参加者以外が会話を取得するとNotFoundException
+
 #### markAsRead
 
 - [x] 相手が送ったunreadメッセージをすべて既読にすること
 - [x] 会話参加者以外はForbiddenException
 - [x] 存在しない会話はNotFoundException
+
+#### getUnreadCount
+
+- [x] ユーザーの全未読メッセージ数を返すこと
+- [x] 未読メッセージがない場合は 0 を返すこと
 
 ---
 
@@ -305,6 +326,10 @@
 #### markAsRead
 
 - [x] 既読更新結果を返すこと
+
+#### getUnreadCount
+
+- [x] ユーザーの未読メッセージ数を返すこと
 
 ---
 

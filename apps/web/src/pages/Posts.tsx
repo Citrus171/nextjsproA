@@ -1,6 +1,10 @@
 import { useRef, useEffect, useCallback } from "react";
 import type { PostResponseDto } from "../../../../packages/api-client/src/index";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  useMutation,
+} from "@tanstack/react-query";
 import { useApiClient } from "../api/orvalClient";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -16,6 +20,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { toast } from "sonner";
 import { MapPinned } from "lucide-react";
+import { useAuth } from "../auth/AuthProvider";
 
 const PER_PAGE = 5;
 
@@ -23,6 +28,7 @@ export default function Posts() {
   const api = useApiClient();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { userId } = useAuth();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -62,6 +68,17 @@ export default function Posts() {
     },
     [api, queryClient]
   );
+
+  const resolveMutation = useMutation({
+    mutationFn: (id: string) => api.updatePost(id, { status: "resolved" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      toast.success("解決済みにしました");
+    },
+    onError: () => {
+      toast.error("解決済みへの変更に失敗しました");
+    },
+  });
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -162,12 +179,24 @@ export default function Posts() {
 
                 {/* アクションボタン */}
                 <div className="flex items-center justify-between">
-                  <Link
-                    to={`/edit/${p.id}`}
-                    className="text-sm font-semibold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
-                  >
-                    編集
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      to={`/edit/${p.id}`}
+                      className="text-sm font-semibold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
+                    >
+                      編集
+                    </Link>
+                    {userId === p.userId && p.status === "lost" && (
+                      <button
+                        type="button"
+                        onClick={() => resolveMutation.mutate(p.id)}
+                        disabled={resolveMutation.isPending}
+                        className="text-sm font-semibold text-green-600 hover:text-green-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
+                      >
+                        解決済みにする
+                      </button>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -192,7 +221,7 @@ export default function Posts() {
                             投稿を削除しますか？
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            この操作は取り消せません。
+                            この操作は取り消せません。関連する会話と目撃情報も削除されます。
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

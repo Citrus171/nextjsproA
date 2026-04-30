@@ -1,8 +1,14 @@
-import type { PostResponseDto } from "../../../../packages/api-client/src/index";
+import type {
+  PostResponseDto,
+  SightingResponseDto,
+} from "../../../../packages/api-client/src/index";
 import { useState, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
 import SightingList from "./SightingList";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { PREFECTURE_LABELS } from "../lib/constants";
+import { useApiClient } from "../api/orvalClient";
 
 interface PostDetailSheetProps {
   isOpen: boolean;
@@ -43,7 +49,15 @@ export default function PostDetailSheet({
   onSightingDeleted,
   onEdit,
 }: PostDetailSheetProps) {
-  const title = markerType === "post" ? "迷い猫投稿" : "目撃情報";
+  const api = useApiClient();
+  const title =
+    markerType === "post" ? post?.title || "迷い猫投稿" : "目撃情報";
+
+  const { data: sightingDetail } = useQuery({
+    queryKey: ["sighting", sightingId],
+    queryFn: () => api.getSighting(sightingId!),
+    enabled: markerType === "sighting" && !!sightingId,
+  });
 
   const showMessageButton =
     markerType === "sighting" &&
@@ -137,7 +151,11 @@ export default function PostDetailSheet({
             <SightingList
               postId={post.id}
               currentUserId={currentUserId ?? null}
+              postOwnerId={post.userId}
               onSightingDeleted={onSightingDeleted ?? (() => {})}
+              onSendMessage={(sightingId) =>
+                onSendMessage?.(post.id, sightingId)
+              }
             />
           )}
 
@@ -318,12 +336,18 @@ export default function PostDetailSheet({
                   <div className="flex items-center gap-2 bg-muted p-4 rounded-2xl">
                     <span className="text-primary text-lg">📍</span>
                     <span className="text-sm font-bold text-foreground">
-                      {post.location.prefecture}
+                      {PREFECTURE_LABELS[post.location.prefecture] ??
+                        post.location.prefecture}
                       {post.location.city}
                       {post.location.address}
                     </span>
                   </div>
                 </div>
+              )}
+
+              {/* 目撃詳細セクション */}
+              {markerType === "sighting" && sightingDetail && (
+                <SightingDetailSection sighting={sightingDetail} />
               )}
             </>
           ) : (
@@ -334,5 +358,63 @@ export default function PostDetailSheet({
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function SightingDetailSection({
+  sighting,
+}: {
+  sighting: SightingResponseDto;
+}) {
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  return (
+    <div className="mt-6">
+      <h3 className="text-base font-extrabold text-foreground mb-2 flex items-center gap-2">
+        <span className="w-1 h-5 bg-primary rounded-full inline-block" />
+        この目撃について
+      </h3>
+      <div className="bg-muted rounded-2xl p-4 space-y-3">
+        {sighting.address && (
+          <div className="flex items-center gap-2">
+            <span className="text-primary text-sm">📍</span>
+            <span className="text-sm font-bold text-foreground">
+              {sighting.address}
+            </span>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-xs font-bold w-16 shrink-0">
+            日時
+          </span>
+          <span className="text-sm text-foreground">
+            {formatDate(sighting.sightedAt)}
+          </span>
+        </div>
+        {sighting.comment && (
+          <div>
+            <span className="text-muted-foreground text-xs font-bold">
+              コメント
+            </span>
+            <p className="text-sm text-foreground mt-1">{sighting.comment}</p>
+          </div>
+        )}
+        {sighting.nickname && (
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-xs font-bold w-16 shrink-0">
+              報告者
+            </span>
+            <span className="text-sm text-foreground">{sighting.nickname}</span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

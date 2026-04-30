@@ -59,6 +59,20 @@ const mockMapInstance = {
       triggerMapMoveend = null;
     }
   }),
+  getContainer: vi.fn(() => {
+    const listeners: Record<string, EventListener[]> = {};
+    return {
+      addEventListener: vi.fn((event: string, handler: EventListener) => {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(handler);
+      }),
+      removeEventListener: vi.fn((event: string, handler: EventListener) => {
+        if (listeners[event]) {
+          listeners[event] = listeners[event].filter((h) => h !== handler);
+        }
+      }),
+    };
+  }),
 };
 const mockAuth = { userId: null as string | null };
 
@@ -111,6 +125,8 @@ vi.mock("../api/orvalClient", () => ({
     createConversation: mockCreateConversation,
     findSightingsByPost: mockFindSightingsByPost,
     logout: mockLogout,
+    getUnreadCount: vi.fn().mockResolvedValue({ count: 0 }),
+    getSighting: vi.fn(),
   }),
 }));
 
@@ -198,15 +214,17 @@ describe("Map", () => {
     });
   });
 
-  it("地図ページを開いた時、検索バーと種別フィルターが表示されること", async () => {
+  it("地図ページを開いた時、種別フィルターと下部ナビボタンが表示されること", async () => {
     renderMap();
 
-    expect(await screen.findByPlaceholderText("検索...")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "すべて" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "迷子" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "目撃" })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "迷い猫投稿" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "目撃を報告" })
     ).toBeInTheDocument();
   });
 
@@ -285,7 +303,7 @@ describe("Map", () => {
     const dialog = await screen.findByRole("dialog");
     expect(dialog).toBeInTheDocument();
     expect(
-      await screen.findByRole("heading", { name: "迷い猫投稿" })
+      await screen.findByRole("heading", { name: "迷子の投稿" })
     ).toBeInTheDocument();
     expect(await screen.findByText("画像なし")).toBeInTheDocument();
   });

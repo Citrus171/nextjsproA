@@ -25,7 +25,9 @@ import {
   type ConversationsControllerCreateMessageBody,
   sightingsControllerCreate,
   sightingsControllerFindByPost,
+  sightingsControllerFindOne,
   sightingsControllerRemove,
+  conversationsControllerGetUnreadCount,
 } from "./index";
 
 export type CreateSightingInput = {
@@ -200,6 +202,14 @@ export function createClient(options: ClientOptions) {
     },
     markAsRead: async (id: string) => {
       await conversationsControllerMarkAsRead(id);
+    },
+    getUnreadCount: async () => {
+      const r = await conversationsControllerGetUnreadCount();
+      return r.data;
+    },
+    getSighting: async (id: string) => {
+      const r = await sightingsControllerFindOne(id);
+      return r.data;
     },
     createSighting: async (data: CreateSightingInput) => {
       const r = await sightingsControllerCreate(data);

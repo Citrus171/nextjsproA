@@ -19,6 +19,7 @@ const mockPrisma = {
     create: jest.fn(),
     findMany: jest.fn(),
     updateMany: jest.fn(),
+    count: jest.fn(),
   },
 };
 
@@ -344,6 +345,76 @@ describe("ConversationsService", () => {
       await expect(service.findMessages("user-1", "conv-999")).rejects.toThrow(
         NotFoundException
       );
+    });
+  });
+
+  // ─── getUnreadCount ─────────────────────────────────────────
+  describe("getUnreadCount", () => {
+    it("ユーザーの全未読メッセージ数を返すこと", async () => {
+      mockPrisma.message.count.mockResolvedValue(5);
+
+      const result = await service.getUnreadCount("user-1");
+
+      expect(mockPrisma.message.count).toHaveBeenCalledWith({
+        where: {
+          senderId: { not: "user-1" },
+          readAt: null,
+          conversation: {
+            OR: [{ ownerId: "user-1" }, { sighterId: "user-1" }],
+          },
+        },
+      });
+      expect(result).toEqual({ count: 5 });
+    });
+
+    it("未読メッセージがない場合は 0 を返すこと", async () => {
+      mockPrisma.message.count.mockResolvedValue(0);
+
+      const result = await service.getUnreadCount("user-1");
+
+      expect(result).toEqual({ count: 0 });
+    });
+  });
+
+  // ─── findOneForUser ────────────────────────────────────────
+  describe("findOneForUser", () => {
+    const mockConv = {
+      id: "conv-1",
+      postId: "post-1",
+      sightingId: "sighting-1",
+      ownerId: "owner-1",
+      sighterId: "sighter-1",
+      createdAt: new Date("2024-01-01"),
+      post: { title: "迷子のネコ" },
+      owner: { nickname: "オーナー" },
+      sighter: { nickname: "目撃者" },
+      messages: [{ body: "最新メッセージ", createdAt: new Date("2024-01-02") }],
+      _count: { messages: 0 },
+    };
+
+    it("投稿者が会話を取得すると相手は目撃者のニックネームであること", async () => {
+      mockPrisma.conversation.findFirst.mockResolvedValue(mockConv);
+
+      const result = await service.findOneForUser("owner-1", "conv-1");
+
+      expect(result.partnerNickname).toBe("目撃者");
+      expect(result.postTitle).toBe("迷子のネコ");
+    });
+
+    it("目撃者が会話を取得すると相手は投稿者のニックネームであること", async () => {
+      mockPrisma.conversation.findFirst.mockResolvedValue(mockConv);
+
+      const result = await service.findOneForUser("sighter-1", "conv-1");
+
+      expect(result.partnerNickname).toBe("オーナー");
+    });
+
+    it("参加者以外が会話を取得するとNotFoundException", async () => {
+      mockPrisma.conversation.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.findOneForUser("stranger", "conv-1")
+      ).rejects.toThrow(NotFoundException);
     });
   });
 

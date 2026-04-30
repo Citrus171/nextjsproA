@@ -3,9 +3,11 @@ import { ConversationsController } from "./conversation.controller";
 const mockService = {
   create: jest.fn(),
   findAllForUser: jest.fn(),
+  findOneForUser: jest.fn(),
   createMessage: jest.fn(),
   findMessages: jest.fn(),
   markAsRead: jest.fn(),
+  getUnreadCount: jest.fn(),
 };
 
 const mockGateway = {
@@ -107,6 +109,18 @@ describe("ConversationsController", () => {
 
       expect(mockService.findMessages).toHaveBeenCalledWith("user-1", "conv-1");
       expect(result).toBe(messages);
+    });
+  });
+
+  // ─── getUnreadCount ─────────────────────────────────────────
+  describe("getUnreadCount", () => {
+    it("ユーザーの未読メッセージ数を返すこと", async () => {
+      mockService.getUnreadCount.mockResolvedValue({ count: 3 });
+
+      const result = await controller.getUnreadCount(req);
+
+      expect(mockService.getUnreadCount).toHaveBeenCalledWith("user-1");
+      expect(result).toEqual({ count: 3 });
     });
   });
 

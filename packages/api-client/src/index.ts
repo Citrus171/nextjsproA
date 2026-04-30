@@ -12,6 +12,10 @@ export type ConversationsControllerCreateMessageBody = {
   body: string;
 };
 
+export type ConversationsControllerGetUnreadCount200 = {
+  count?: number;
+};
+
 export type ConversationsControllerCreateBody = {
   postId: string;
   sightingId: string;
@@ -139,6 +143,8 @@ export interface ConversationListItemDto {
   partnerNickname: string;
   postId: string;
   /** @nullable */
+  postStatus: string | null;
+  /** @nullable */
   postTitle: string | null;
   sighterId: string;
   sightingId: string;
@@ -161,6 +167,11 @@ export interface SightingResponseDto {
   comment?: string | null;
   createdAt: string;
   id: string;
+  lat: number;
+  lng: number;
+  nickname?: string;
+  /** @nullable */
+  postId?: string | null;
   sightedAt: string;
   userId: string;
 }
@@ -193,20 +204,6 @@ export interface MapMarkerDto {
   userId?: string;
 }
 
-export interface LogoutResponseDto {
-  ok: boolean;
-}
-
-export interface AccessTokenResponseDto {
-  accessToken: string;
-}
-
-export interface LoginDto {
-  email: string;
-  /** @minLength 8 */
-  password: string;
-}
-
 export interface AddImagesResponseDto {
   images: ImageResponseDto[];
   remainingSlots: number;
@@ -228,6 +225,16 @@ export type UpdatePostDtoPostType =
 export const UpdatePostDtoPostType = {
   cat: "cat",
 } as const;
+
+export interface UpdatePostDto {
+  description?: string;
+  location?: UpdateLocationDto;
+  lostDate?: string;
+  petDetail?: UpdatePetDetailDto;
+  postType?: UpdatePostDtoPostType;
+  status?: UpdatePostDtoStatus;
+  title?: string;
+}
 
 export type UpdateLocationDtoPrefecture =
   (typeof UpdateLocationDtoPrefecture)[keyof typeof UpdateLocationDtoPrefecture];
@@ -268,14 +275,9 @@ export interface UpdatePetDetailDto {
   size?: string;
 }
 
-export interface UpdatePostDto {
-  description?: string;
-  location?: UpdateLocationDto;
-  lostDate?: string;
-  petDetail?: UpdatePetDetailDto;
-  postType?: UpdatePostDtoPostType;
-  status?: UpdatePostDtoStatus;
-  title?: string;
+export interface PostListResponseDto {
+  items: PostResponseDto[];
+  total: number;
 }
 
 export type PostResponseDtoPostType =
@@ -325,11 +327,6 @@ export interface PostResponseDto {
   userId: string;
 }
 
-export interface PostListResponseDto {
-  items: PostResponseDto[];
-  total: number;
-}
-
 export interface LocationResponseDto {
   address: string;
   city: string;
@@ -365,6 +362,43 @@ export interface UserResponseDto {
   id: string;
   nickname: string;
 }
+
+export interface LogoutResponseDto {
+  ok: boolean;
+}
+
+export interface AccessTokenResponseDto {
+  accessToken: string;
+}
+
+export interface LoginDto {
+  email: string;
+  /** @minLength 8 */
+  password: string;
+}
+
+export const authControllerLogin = <
+  TData = AxiosResponse<AccessTokenResponseDto>,
+>(
+  loginDto: LoginDto,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/auth/login`, loginDto, options);
+};
+
+export const authControllerRefresh = <
+  TData = AxiosResponse<AccessTokenResponseDto>,
+>(
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/auth/refresh`, undefined, options);
+};
+
+export const authControllerLogout = <TData = AxiosResponse<LogoutResponseDto>>(
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(`/api/auth/logout`, undefined, options);
+};
 
 export const usersControllerFindAll = <
   TData = AxiosResponse<UserResponseDto[]>,
@@ -488,29 +522,6 @@ export const postsControllerToggleFavorite = <
   return axios.post(`/api/posts/${id}/favorite`, undefined, options);
 };
 
-export const authControllerLogin = <
-  TData = AxiosResponse<AccessTokenResponseDto>,
->(
-  loginDto: LoginDto,
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/auth/login`, loginDto, options);
-};
-
-export const authControllerRefresh = <
-  TData = AxiosResponse<AccessTokenResponseDto>,
->(
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/auth/refresh`, undefined, options);
-};
-
-export const authControllerLogout = <TData = AxiosResponse<LogoutResponseDto>>(
-  options?: AxiosRequestConfig
-): Promise<TData> => {
-  return axios.post(`/api/auth/logout`, undefined, options);
-};
-
 export const mapControllerGetMarkers = <TData = AxiosResponse<MapMarkerDto[]>>(
   params?: MapControllerGetMarkersParams,
   options?: AxiosRequestConfig
@@ -544,6 +555,18 @@ export const sightingsControllerFindByPost = <
     ...options,
     params: { ...params, ...options?.params },
   });
+};
+
+/**
+ * @summary 目撃情報の詳細を取得する
+ */
+export const sightingsControllerFindOne = <
+  TData = AxiosResponse<SightingResponseDto>,
+>(
+  id: string,
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/sightings/${id}`, options);
 };
 
 /**
@@ -593,6 +616,17 @@ export const conversationsControllerFindAll = <
   options?: AxiosRequestConfig
 ): Promise<TData> => {
   return axios.get(`/api/conversations`, options);
+};
+
+/**
+ * @summary 未読メッセージの合計数を取得する
+ */
+export const conversationsControllerGetUnreadCount = <
+  TData = AxiosResponse<ConversationsControllerGetUnreadCount200>,
+>(
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/api/conversations/unread-count`, options);
 };
 
 /**
@@ -650,6 +684,9 @@ export const conversationsControllerMarkAsRead = <TData = AxiosResponse<void>>(
   );
 };
 
+export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>;
+export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>;
+export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>;
 export type UsersControllerFindAllResult = AxiosResponse<UserResponseDto[]>;
 export type UsersControllerRemoveResult = AxiosResponse<void>;
 export type UsersControllerRegisterResult = AxiosResponse<UserResponseDto>;
@@ -663,14 +700,13 @@ export type PostsControllerAddImagesResult =
 export type PostsControllerRemoveImageResult = AxiosResponse<ImageResponseDto>;
 export type PostsControllerToggleFavoriteResult =
   AxiosResponse<PostsControllerToggleFavorite201>;
-export type AuthControllerLoginResult = AxiosResponse<AccessTokenResponseDto>;
-export type AuthControllerRefreshResult = AxiosResponse<AccessTokenResponseDto>;
-export type AuthControllerLogoutResult = AxiosResponse<LogoutResponseDto>;
 export type MapControllerGetMarkersResult = AxiosResponse<MapMarkerDto[]>;
 export type SightingsControllerCreateResult = AxiosResponse<void>;
 export type SightingsControllerFindByPostResult = AxiosResponse<
   SightingResponseDto[]
 >;
+export type SightingsControllerFindOneResult =
+  AxiosResponse<SightingResponseDto>;
 export type SightingsControllerRemoveResult = AxiosResponse<void>;
 export type SightingsControllerToggleFavoriteResult =
   AxiosResponse<SightingsControllerToggleFavorite201>;
@@ -679,6 +715,8 @@ export type ConversationsControllerCreateResult =
 export type ConversationsControllerFindAllResult = AxiosResponse<
   ConversationListItemDto[]
 >;
+export type ConversationsControllerGetUnreadCountResult =
+  AxiosResponse<ConversationsControllerGetUnreadCount200>;
 export type ConversationsControllerFindOneResult =
   AxiosResponse<ConversationListItemDto>;
 export type ConversationsControllerCreateMessageResult =

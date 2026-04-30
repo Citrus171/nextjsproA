@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useApiClient } from "../api/orvalClient";
 import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
+import { toast } from "sonner";
 
 interface PickedLocation {
   lat: number;
@@ -17,6 +18,12 @@ interface SightingModalProps {
   onSelectFromMap?: () => void;
   pickedLocation?: PickedLocation | null;
   forceMount?: true;
+}
+
+interface FormErrors {
+  lat?: string;
+  lng?: string;
+  sightedAt?: string;
 }
 
 export default function SightingModal({
@@ -36,28 +43,37 @@ export default function SightingModal({
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+  const [hasLocationFromMap, setHasLocationFromMap] = useState(false);
 
   useEffect(() => {
     if (!pickedLocation) return;
     setLat(String(pickedLocation.lat));
     setLng(String(pickedLocation.lng));
+    setHasLocationFromMap(true);
     if (pickedLocation.address !== undefined)
       setAddress(pickedLocation.address);
     if (pickedLocation.geocodeError) setError(pickedLocation.geocodeError);
   }, [pickedLocation]);
 
+  const validate = (): boolean => {
+    const errors: FormErrors = {};
+    if (!lat.trim()) errors.lat = "緯度を入力してください";
+    if (!lng.trim()) errors.lng = "経度を入力してください";
+    if (!sightedAt) errors.sightedAt = "目撃日時を入力してください";
+    if (lat.trim() && isNaN(parseFloat(lat)))
+      errors.lat = "緯度は正しい数値を入力してください";
+    if (lng.trim() && isNaN(parseFloat(lng)))
+      errors.lng = "経度は正しい数値を入力してください";
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!lat || !lng || !sightedAt) {
-      setError("緯度・経度・目撃日時は必須です");
-      return;
-    }
+    if (!validate()) return;
     const latNum = parseFloat(lat);
     const lngNum = parseFloat(lng);
-    if (isNaN(latNum) || isNaN(lngNum)) {
-      setError("緯度・経度は正しい数値を入力してください");
-      return;
-    }
 
     setIsSubmitting(true);
     setError(null);
@@ -70,6 +86,7 @@ export default function SightingModal({
         ...(address ? { address } : {}),
         ...(comment ? { comment } : {}),
       });
+      toast.success("目撃情報を報告しました");
       onSuccess();
       onClose();
     } catch {
@@ -79,8 +96,18 @@ export default function SightingModal({
     }
   };
 
+  const handleClose = () => {
+    setFieldErrors({});
+    setError(null);
+    setHasLocationFromMap(false);
+    onClose();
+  };
+
   return (
-    <Sheet open={isOpen} onOpenChange={(open: boolean) => !open && onClose()}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open: boolean) => !open && handleClose()}
+    >
       <SheetContent
         side="bottom"
         forceMount={forceMount}
@@ -99,7 +126,7 @@ export default function SightingModal({
             <button
               type="button"
               aria-label="閉じる"
-              onClick={onClose}
+              onClick={handleClose}
               className="text-muted-foreground hover:text-foreground text-2xl leading-none"
             >
               ×
@@ -130,9 +157,13 @@ export default function SightingModal({
                 inputMode="decimal"
                 value={lat}
                 onChange={(e) => setLat(e.target.value)}
-                className="border rounded-lg px-3 py-2 text-sm"
+                readOnly={hasLocationFromMap}
+                className={`border rounded-lg px-3 py-2 text-sm ${hasLocationFromMap ? "bg-muted text-muted-foreground" : ""} ${fieldErrors.lat ? "border-destructive" : ""}`}
                 placeholder="例: 35.9062"
               />
+              {fieldErrors.lat && (
+                <p className="text-xs text-destructive">{fieldErrors.lat}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1">
@@ -149,9 +180,13 @@ export default function SightingModal({
                 inputMode="decimal"
                 value={lng}
                 onChange={(e) => setLng(e.target.value)}
-                className="border rounded-lg px-3 py-2 text-sm"
+                readOnly={hasLocationFromMap}
+                className={`border rounded-lg px-3 py-2 text-sm ${hasLocationFromMap ? "bg-muted text-muted-foreground" : ""} ${fieldErrors.lng ? "border-destructive" : ""}`}
                 placeholder="例: 139.6236"
               />
+              {fieldErrors.lng && (
+                <p className="text-xs text-destructive">{fieldErrors.lng}</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1">
@@ -168,8 +203,13 @@ export default function SightingModal({
                 required
                 value={sightedAt}
                 onChange={(e) => setSightedAt(e.target.value)}
-                className="border rounded-lg px-3 py-2 text-sm"
+                className={`border rounded-lg px-3 py-2 text-sm ${fieldErrors.sightedAt ? "border-destructive" : ""}`}
               />
+              {fieldErrors.sightedAt && (
+                <p className="text-xs text-destructive">
+                  {fieldErrors.sightedAt}
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col gap-1">

@@ -94,6 +94,7 @@ const mockConversation = (
   sighterId: "user-2",
   createdAt: "2024-01-01T00:00:00.000Z",
   postTitle: "迷子のネコ",
+  postStatus: null,
   partnerNickname: "相手ニック",
   lastMessage: null,
   unreadCount: 0,

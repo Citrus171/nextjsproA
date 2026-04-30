@@ -199,10 +199,17 @@ apps/api/src/
 │   │   │   ├── 会話参加者がメッセージ一覧を取得できること
 │   │   │   ├── 会話参加者以外のメッセージ一覧取得はForbiddenException
 │   │   │   └── 存在しない会話のメッセージ一覧はNotFoundException
-│   │   └── markAsRead
-│   │       ├── 相手が送ったunreadメッセージをすべて既読にすること
-│   │       ├── 会話参加者以外はForbiddenException
-│   │       └── 存在しない会話はNotFoundException
+│   │   ├── findOneForUser
+│   │   │   ├── 投稿者が会話を取得すると相手は目撃者のニックネームであること
+│   │   │   ├── 目撃者が会話を取得すると相手は投稿者のニックネームであること
+│   │   │   └── 参加者以外が会話を取得するとNotFoundException
+│   │   ├── markAsRead
+│   │   │   ├── 相手が送ったunreadメッセージをすべて既読にすること
+│   │   │   ├── 会話参加者以外はForbiddenException
+│   │   │   └── 存在しない会話はNotFoundException
+│   │   └── getUnreadCount
+│   │       ├── ユーザーの全未読メッセージ数を返すこと
+│   │       └── 未読メッセージがない場合は 0 を返すこと
 │   ├── conversations.gateway.spec.ts
 │   │   ├── handleConnection
 │   │   │   ├── トークンなしで接続した場合は切断される
@@ -223,8 +230,10 @@ apps/api/src/
 │       ├── createMessage
 │       │   ├── メッセージ作成後にbroadcastMessageを呼び出すこと
 │       │   └── サービスが例外を投げた場合はbroadcastMessageを呼ばないこと
-│       └── markAsRead
-│           └── 既読更新結果を返すこと
+│       ├── markAsRead
+│       │   └── 既読更新結果を返すこと
+│       └── getUnreadCount
+│           └── ユーザーの未読メッセージ数を返すこと
 ├── sightings/
 │   ├── dto/
 │   │   └── create-sighting.dto.spec.ts
@@ -240,6 +249,9 @@ apps/api/src/
 │   │   │   └── 存在しないPostにSightingを作成しようとすると NotFoundException
 │   │   ├── findByPost
 │   │   │   └── postIdに紐づくSighting一覧をcreatedAt降順で返すこと
+│   │   ├── findOne
+│   │   │   ├── 指定IDの目撃情報を報告者のニックネーム付きで返すこと
+│   │   │   └── 存在しないIDを指定するとNotFoundExceptionを送出すること
 │   │   ├── remove
 │   │   │   ├── 本人がSightingを削除できること
 │   │   │   ├── 他者が削除しようとすると ForbiddenException
@@ -251,6 +263,16 @@ apps/api/src/
 │   │       ├── お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException
 │   │       └── 存在しないSightingをお気に入りしようとすると NotFoundException
 │   └── sighting.controller.spec.ts
+│       ├── create
+│       │   └── 目撃情報を作成してサービスの結果を返すこと
+│       ├── findByPost
+│       │   └── postIdに紐づく目撃情報一覧を返すこと
+│       ├── findOne
+│       │   ├── 指定IDの目撃詳細を返すこと
+│       │   └── NotFoundException を伝播する
+│       ├── remove
+│       │   ├── 目撃情報を削除してサービスの結果を返すこと
+│       │   └── ForbiddenException を伝播する
 │       └── toggleFavorite
 │           ├── { favorited: true } を返す
 │           ├── { favorited: false } を返す（解除）

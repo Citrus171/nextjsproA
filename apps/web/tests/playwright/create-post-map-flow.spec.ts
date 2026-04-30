@@ -84,9 +84,13 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   const createResponse = await createResponsePromise;
   expect(createResponse.ok()).toBeTruthy();
 
-  await expect(page).toHaveURL(`${baseUrl}/posts`);
+  await page.waitForURL(
+    (url) => {
+      return url.pathname === "/" && url.searchParams.get("lat") !== null;
+    },
+    { timeout: 10000 }
+  );
 
-  await page.goto(`${baseUrl}/`);
   await expect(
     page.getByRole("group", { name: "地図フィルター" })
   ).toBeVisible();

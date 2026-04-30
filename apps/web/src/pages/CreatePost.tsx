@@ -242,7 +242,7 @@ export default function CreatePost() {
         }),
         images: images.length > 0 ? images : undefined,
       });
-      navigate("/posts");
+      navigate(`/?lat=${pinPos!.lat}&lng=${pinPos!.lng}`);
     } catch {
       toast.error("投稿に失敗しました。もう一度お試しください。");
     } finally {

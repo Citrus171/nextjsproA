@@ -56,6 +56,15 @@ export class SightingsController {
     return this.sightingsService.create(req.user.id, dto);
   }
 
+  @Get(":id")
+  @ApiOperation({ summary: "目撃情報の詳細を取得する" })
+  @ApiParam({ name: "id", example: OPENAPI_SIGHTING_ID_EXAMPLE })
+  @ApiResponse({ status: 200, type: SightingResponseDto })
+  @ApiResponse({ status: 404, description: "目撃情報が見つかりません" })
+  findOne(@Param("id") id: string) {
+    return this.sightingsService.findOne(id);
+  }
+
   @Get()
   @ApiOperation({ summary: "postId別の目撃情報一覧を取得する" })
   @ApiQuery({

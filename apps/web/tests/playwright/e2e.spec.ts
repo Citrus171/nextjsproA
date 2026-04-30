@@ -92,8 +92,15 @@ test("basic E2E flow: register → login → create post → view posts", async 
     `create post failed: ${createResponse.status()} ${createResponse.statusText()}`
   ).toBeTruthy();
 
-  // The create form returns to the posts page, where the new item should appear.
-  await page.waitForURL(`${baseUrl}/posts`);
+  await page.waitForURL(
+    (url) => {
+      return url.pathname === "/" || url.pathname === "/posts";
+    },
+    { timeout: 10000 }
+  );
+
+  // Navigate to posts page to verify the post
+  await page.goto(`${baseUrl}/posts`, { waitUntil: "networkidle" });
 
   // 4. Verify post appears in list (pet name is shown as heading)
   await expect(

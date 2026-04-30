@@ -85,9 +85,9 @@ describe("SightingModal", () => {
     await user.type(screen.getByLabelText("目撃日時"), "2026-04-26T10:00");
     await user.click(screen.getByRole("button", { name: "送信" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "緯度・経度は正しい数値を入力してください"
-    );
+    expect(
+      await screen.findByText("緯度は正しい数値を入力してください")
+    ).toBeInTheDocument();
     expect(mockCreateSighting).not.toHaveBeenCalled();
   });
 
