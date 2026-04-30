@@ -4,8 +4,9 @@ set -euo pipefail
 # =============================================================================
 # VPS デプロイスクリプト
 # =============================================================================
-# バックアップ → git pull → 依存インストール → Prisma 生成/マイグレーション
-# → API ビルド → PM2 再起動 → Web ビルド & rsync → Nginx リロード → ヘルスチェック
+# バックアップ → git pull → 依存インストール → bcrypt rebuild
+# → Prisma 生成/マイグレーション → API ビルド → PM2 再起動
+# → Web ビルド & rsync → Nginx リロード → ヘルスチェック
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -80,6 +81,11 @@ git pull --ff-only origin main
 echo ""
 echo "📦 Step 3/10: npm ci"
 npm ci --ignore-scripts
+
+# 3.5. bcrypt ネイティブバイナリのリビルド（--ignore-scripts でスキップされるため）
+echo ""
+echo "🔧 Step 3.5/10: bcrypt rebuild"
+(cd apps/api && npm rebuild bcrypt)
 
 # 4. Prisma 準備 ---------------------------------------------------------------------
 echo ""
