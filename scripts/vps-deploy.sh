@@ -85,7 +85,7 @@ npm ci
 echo ""
 echo "🔄 Step 4/10: Prisma generate & migrate deploy"
 npm run prisma:generate
-npx --prefix apps/api prisma migrate deploy
+(cd apps/api && npx prisma migrate deploy)
 
 # 5. API ビルド ----------------------------------------------------------------------
 echo ""
