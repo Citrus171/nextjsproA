@@ -84,6 +84,20 @@ export class ConversationsController {
     );
   }
 
+  @Get("unread-count")
+  @ApiOperation({ summary: "未読メッセージの合計数を取得する" })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      properties: { count: { type: "number", example: 3 } },
+    },
+  })
+  getUnreadCount(@Request() req: AuthenticatedRequest) {
+    return this.conversationsService.getUnreadCount(
+      this.getAuthenticatedUserId(req)
+    );
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "会話を取得する" })
   @ApiParam({ name: "id", example: OPENAPI_CONVERSATION_ID_EXAMPLE })

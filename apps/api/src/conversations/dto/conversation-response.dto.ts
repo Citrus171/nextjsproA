@@ -50,6 +50,9 @@ export class ConversationListItemDto {
   @ApiProperty({ nullable: true, type: String })
   postTitle: string | null;
 
+  @ApiProperty({ nullable: true, type: String })
+  postStatus: string | null;
+
   @ApiProperty()
   partnerNickname: string;
 

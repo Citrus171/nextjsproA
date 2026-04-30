@@ -105,7 +105,7 @@ export class ConversationsService {
         OR: [{ ownerId: userId }, { sighterId: userId }],
       },
       include: {
-        post: { select: { title: true } },
+        post: { select: { title: true, status: true } },
         owner: { select: { nickname: true } },
         sighter: { select: { nickname: true } },
         messages: {
@@ -123,6 +123,21 @@ export class ConversationsService {
 
     if (!conv) throw new NotFoundException("会話が見つかりません");
 
+    // eslint-disable-next-line no-console
+    console.log(
+      "[findOneForUser]",
+      "userId:",
+      userId,
+      "ownerId:",
+      conv.ownerId,
+      "sighterId:",
+      conv.sighterId,
+      "userId==ownerId:",
+      userId === conv.ownerId,
+      "userId==sighterId:",
+      userId === conv.sighterId
+    );
+
     return {
       id: conv.id,
       postId: conv.postId,
@@ -131,6 +146,7 @@ export class ConversationsService {
       sighterId: conv.sighterId,
       createdAt: conv.createdAt,
       postTitle: conv.post.title ?? null,
+      postStatus: conv.post.status ?? null,
       partnerNickname:
         conv.ownerId === userId
           ? (conv.sighter?.nickname ?? "Unknown")
@@ -185,6 +201,19 @@ export class ConversationsService {
       where: { conversationId },
       orderBy: { createdAt: "asc" },
     });
+  }
+
+  async getUnreadCount(userId: string) {
+    const count = await this.prisma.message.count({
+      where: {
+        senderId: { not: userId },
+        readAt: null,
+        conversation: {
+          OR: [{ ownerId: userId }, { sighterId: userId }],
+        },
+      },
+    });
+    return { count };
   }
 
   async markAsRead(userId: string, conversationId: string) {

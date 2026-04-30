@@ -60,7 +60,9 @@ export default function ConversationChat() {
     const socket = createConversationSocket(token);
 
     socket.on("newMessage", (msg: MessageResponseDto) => {
-      setMessages((prev) => [...prev, msg]);
+      setMessages((prev) =>
+        prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]
+      );
     });
 
     socket.on("disconnect", (reason) => {
@@ -154,6 +156,16 @@ export default function ConversationChat() {
           className="bg-destructive/10 text-destructive text-xs px-3 py-2 text-center font-medium shrink-0"
         >
           接続が切れました。再接続中…
+        </div>
+      )}
+
+      {/* Resolved Banner */}
+      {conversation?.postStatus === "resolved" && (
+        <div
+          role="status"
+          className="bg-muted text-muted-foreground text-xs px-3 py-2 text-center font-medium shrink-0"
+        >
+          この投稿は解決済みです
         </div>
       )}
 

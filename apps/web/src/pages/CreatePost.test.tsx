@@ -180,7 +180,7 @@ describe("CreatePost", () => {
     expect(location.lat).toBe(35.91);
     expect(location.lng).toBe(139.63);
 
-    expect(mockNavigate).toHaveBeenCalledWith("/posts");
+    expect(mockNavigate).toHaveBeenCalledWith("/?lat=35.91&lng=139.63");
   });
 
   it("投稿APIが失敗した時、エラートーストを表示して遷移しないこと", async () => {

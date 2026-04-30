@@ -156,6 +156,52 @@ describe("SightingsService", () => {
     });
   });
 
+  // ─── findOne ───────────────────────────────────────────────
+  describe("findOne", () => {
+    it("指定IDの目撃情報を報告者のニックネーム付きで返すこと", async () => {
+      const sighting = {
+        id: "s-1",
+        postId: "post-1",
+        userId: "user-1",
+        lat: 35.9,
+        lng: 139.6,
+        address: "埼玉県さいたま市浦和区",
+        sightedAt: new Date("2026-04-19T10:00:00.000Z"),
+        comment: "公園付近で目撃",
+        createdAt: new Date("2026-04-19T10:00:00.000Z"),
+        user: { nickname: "報告者ニックネーム" },
+      };
+      mockPrisma.sighting.findUnique.mockResolvedValue(sighting);
+
+      const result = await service.findOne("s-1");
+
+      expect(mockPrisma.sighting.findUnique).toHaveBeenCalledWith({
+        where: { id: "s-1" },
+        include: { user: { select: { nickname: true } } },
+      });
+      expect(result).toEqual({
+        id: "s-1",
+        postId: "post-1",
+        userId: "user-1",
+        lat: 35.9,
+        lng: 139.6,
+        address: "埼玉県さいたま市浦和区",
+        sightedAt: new Date("2026-04-19T10:00:00.000Z"),
+        comment: "公園付近で目撃",
+        createdAt: new Date("2026-04-19T10:00:00.000Z"),
+        nickname: "報告者ニックネーム",
+      });
+    });
+
+    it("存在しないIDを指定するとNotFoundExceptionを送出すること", async () => {
+      mockPrisma.sighting.findUnique.mockResolvedValue(null);
+
+      await expect(service.findOne("nonexistent")).rejects.toThrow(
+        NotFoundException
+      );
+    });
+  });
+
   // ─── remove ─────────────────────────────────────────────────
   describe("remove", () => {
     it("本人がSightingを削除できること", async () => {

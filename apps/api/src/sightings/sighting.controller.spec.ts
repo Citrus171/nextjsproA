@@ -9,6 +9,7 @@ import { SightingsService } from "./sighting.service";
 const mockSightingsService = {
   create: jest.fn(),
   findByPost: jest.fn(),
+  findOne: jest.fn(),
   remove: jest.fn(),
   toggleFavorite: jest.fn(),
 };
@@ -50,6 +51,38 @@ describe("SightingsController", () => {
 
       expect(mockSightingsService.findByPost).toHaveBeenCalledWith("p-1");
       expect(result).toBe(sightings);
+    });
+  });
+
+  // ─── findOne ──────────────────────────────────────────────────
+  describe("findOne", () => {
+    it("指定IDの目撃詳細を返すこと", async () => {
+      const sighting = {
+        id: "s-1",
+        postId: "post-1",
+        userId: "user-1",
+        lat: 35.9,
+        lng: 139.6,
+        address: "埼玉県さいたま市浦和区",
+        sightedAt: new Date("2026-04-19T10:00:00.000Z"),
+        comment: "公園付近で目撃",
+        createdAt: new Date("2026-04-19T10:00:00.000Z"),
+        nickname: "報告者",
+      };
+      mockSightingsService.findOne.mockResolvedValue(sighting);
+
+      const result = await controller.findOne("s-1");
+
+      expect(mockSightingsService.findOne).toHaveBeenCalledWith("s-1");
+      expect(result).toEqual(sighting);
+    });
+
+    it("NotFoundException を伝播する", async () => {
+      mockSightingsService.findOne.mockRejectedValue(new NotFoundException());
+
+      await expect(controller.findOne("nonexistent")).rejects.toThrow(
+        NotFoundException
+      );
     });
   });
 

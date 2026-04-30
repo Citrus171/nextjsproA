@@ -36,6 +36,16 @@ export class SightingsService {
     });
   }
 
+  async findOne(id: string) {
+    const sighting = await this.prisma.sighting.findUnique({
+      where: { id },
+      include: { user: { select: { nickname: true } } },
+    });
+    if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
+    const { user, ...rest } = sighting;
+    return { ...rest, nickname: user.nickname };
+  }
+
   async findByPost(postId: string) {
     return this.prisma.sighting.findMany({
       where: { postId },

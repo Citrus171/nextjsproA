@@ -18,6 +18,8 @@ vi.mock("../api/orvalClient", () => ({
 const sighting1: SightingResponseDto = {
   id: "s-1",
   userId: "user-1",
+  lat: 35.9,
+  lng: 139.6,
   address: "埼玉県さいたま市浦和区",
   sightedAt: "2026-04-20T10:00:00.000Z",
   comment: "公園で目撃しました",
@@ -27,6 +29,8 @@ const sighting1: SightingResponseDto = {
 const sighting2: SightingResponseDto = {
   id: "s-2",
   userId: "user-2",
+  lat: 35.9,
+  lng: 139.6,
   address: "埼玉県川口市",
   sightedAt: "2026-04-21T12:00:00.000Z",
   comment: null,
@@ -36,6 +40,8 @@ const sighting2: SightingResponseDto = {
 const sighting3: SightingResponseDto = {
   id: "s-3",
   userId: "user-1",
+  lat: 35.9,
+  lng: 139.6,
   address: "埼玉県熊谷市",
   sightedAt: "2026-04-22T09:00:00.000Z",
   comment: null,
