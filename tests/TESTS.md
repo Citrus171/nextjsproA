@@ -357,6 +357,10 @@
 - [x] ロールが一致しない場合は ForbiddenException をスローする
 - [x] ユーザーが未設定の場合は ForbiddenException をスローする
 
+### AppThrottlerGuard (`src/auth/throttler.guard.spec.ts`)
+
+- [x] 制限超過時に日本語メッセージ付き ThrottlerException をスローすること
+
 ---
 
 ### IdentityService (`src/identity/identity.service.spec.ts`)
@@ -450,6 +454,20 @@
 （その他既存テスト省略）
 
 ---
+
+---
+
+## レート制限 E2E (`test/throttler.e2e.ts`)
+
+### POST /api/auth/login のレート制限
+
+- [x] 制限内（2回）は 401 が返ること（認証失敗だがレート制限ではない）
+- [x] 制限超過（3回目）は 429 と日本語エラーメッセージが返ること
+
+### POST /api/users/register のレート制限
+
+- [x] 制限内（2回）は登録成功または重複エラーが返ること（429 ではない）
+- [x] 制限超過（3回目）は 429 と日本語エラーメッセージが返ること
 
 ---
 

@@ -9,6 +9,7 @@ import {
   Res,
 } from "@nestjs/common";
 import { ApiTags, ApiResponse } from "@nestjs/swagger";
+import { Throttle } from "@nestjs/throttler";
 import { IIdentityService } from "../identity/identity.service";
 import { LoginDto } from "./dto/login.dto";
 import {
@@ -23,6 +24,7 @@ export class AuthController {
   constructor(private readonly identity: IIdentityService) {}
 
   @Post("login")
+  @Throttle({ login: {} })
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, type: AccessTokenResponseDto })
   async login(
@@ -35,6 +37,7 @@ export class AuthController {
   }
 
   @Post("refresh")
+  @Throttle({ login: {} })
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, type: AccessTokenResponseDto })
   async refresh(

@@ -11,6 +11,7 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -69,6 +70,7 @@ export class UsersController {
   }
 
   @Post("register")
+  @Throttle({ register: {} })
   @ApiBody({
     schema: {
       type: "object",
