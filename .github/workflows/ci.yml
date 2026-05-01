@@ -290,11 +290,12 @@ jobs:
 
       - name: Run Schemathesis
         run: |
-          THRESHOLD=72
+          THRESHOLD=50
           schemathesis run \
             http://localhost:3000/api-json \
             --checks all \
             --max-examples 25 \
+            --method GET,POST,PUT,PATCH,DELETE \
             --continue-on-failure 2>&1 | tee /tmp/schemathesis.log || true
           FAILURES=$(grep -oP '\d+ unique failures' /tmp/schemathesis.log | grep -oP '^\d+' || echo 0)
           echo "Unique failures: ${FAILURES} (threshold: ${THRESHOLD})"
