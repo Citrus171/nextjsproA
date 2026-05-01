@@ -41,7 +41,7 @@ module.exports = [
     },
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
-      complexity: ["warn", { max: 10 }],
+      complexity: ["warn", { max: 7 }],
     },
   },
   {

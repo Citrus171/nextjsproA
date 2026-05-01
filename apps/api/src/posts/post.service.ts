@@ -18,8 +18,16 @@ import * as fs from "fs";
 import * as path from "path";
 import { v4 as uuidv4 } from "uuid";
 import * as sharp from "sharp";
-import { CreatePostDto } from "./dto/create-post.dto";
-import { UpdatePostDto } from "./dto/update-post.dto";
+import {
+  CreatePostDto,
+  CreatePetDetailDto,
+  CreateLocationDto,
+} from "./dto/create-post.dto";
+import {
+  UpdatePostDto,
+  UpdatePetDetailDto,
+  UpdateLocationDto,
+} from "./dto/update-post.dto";
 import {
   getImageUploadLimit,
   getMonthlyPostLimit,
@@ -43,6 +51,193 @@ function isTransactionConflict(error: unknown) {
     "code" in error &&
     (error as { code?: string }).code === "P2034"
   );
+}
+
+function applyStatusUpdate(data: Prisma.PostUpdateInput, status: string) {
+  data.status = status as PostStatus;
+  if (status === "resolved") data.resolvedAt = new Date();
+  else if (status === "lost") data.resolvedAt = null;
+}
+
+function buildPostUpdateData(dto: UpdatePostDto): Prisma.PostUpdateInput {
+  const data: Prisma.PostUpdateInput = {};
+  if (dto.title !== undefined) data.title = dto.title;
+  if (dto.description !== undefined) data.description = dto.description;
+  if (dto.lostDate !== undefined) data.lostDate = new Date(dto.lostDate);
+  if (dto.postType !== undefined) data.postType = dto.postType as PostType;
+  if (dto.status !== undefined) applyStatusUpdate(data, dto.status);
+  return data;
+}
+
+function buildPetDetailUpsertData(postId: string, pd: UpdatePetDetailDto) {
+  const create: Prisma.PetDetailUncheckedCreateInput = {
+    postId,
+    name: pd.name!,
+    color: pd.color!,
+    age: pd.age!,
+    features: pd.features!,
+  };
+  const update: Prisma.PetDetailUncheckedUpdateInput = {};
+
+  const optionalFields: Array<{
+    key: "gender" | "breed" | "size" | "collar" | "microchip" | "neutered";
+    transform?: (v: unknown) => unknown;
+  }> = [
+    { key: "gender", transform: (v) => v as Gender },
+    { key: "breed" },
+    { key: "size" },
+    { key: "collar" },
+    { key: "microchip" },
+    { key: "neutered" },
+  ];
+
+  for (const { key, transform } of optionalFields) {
+    const val = pd[key];
+    if (val !== undefined) {
+      const v = transform ? transform(val) : val;
+      (create as Record<string, unknown>)[key] = v;
+      (update as Record<string, unknown>)[key] = v;
+    }
+  }
+
+  for (const key of ["name", "color", "age", "features"] as const) {
+    if (pd[key] !== undefined)
+      (update as Record<string, unknown>)[key] = pd[key];
+  }
+
+  return { create, update };
+}
+
+function buildLocationUpsertData(postId: string, loc: UpdateLocationDto) {
+  const create: Prisma.LocationUncheckedCreateInput = {
+    postId,
+    prefecture: loc.prefecture! as Prefecture,
+    city: loc.city!,
+    address: loc.address!,
+    lat: loc.lat!,
+    lng: loc.lng!,
+  };
+  const update: Prisma.LocationUncheckedUpdateInput = {};
+  const fields: Array<{
+    key: keyof UpdateLocationDto;
+    transform?: (v: unknown) => unknown;
+  }> = [
+    { key: "prefecture", transform: (v) => v as Prefecture },
+    { key: "city" },
+    { key: "address" },
+    { key: "lat" },
+    { key: "lng" },
+  ];
+  for (const { key, transform } of fields) {
+    const val = loc[key];
+    if (val !== undefined) {
+      (update as Record<string, unknown>)[key] = transform
+        ? transform(val)
+        : val;
+    }
+  }
+  return { create, update };
+}
+
+function validateNewPetDetail(existing: unknown, pd: UpdatePetDetailDto) {
+  if (!existing && (!pd.name || !pd.color || !pd.age || !pd.features)) {
+    throw new BadRequestException(
+      "petDetailを新規作成する場合、name/color/age/featuresは必須です"
+    );
+  }
+}
+
+function validateNewLocation(existing: unknown, loc: UpdateLocationDto) {
+  if (
+    !existing &&
+    (!loc.prefecture ||
+      !loc.city ||
+      !loc.address ||
+      loc.lat === undefined ||
+      loc.lng === undefined)
+  ) {
+    throw new BadRequestException(
+      "locationを新規作成する場合、prefecture/city/address/lat/lngは必須です"
+    );
+  }
+}
+
+async function checkPlanLimits(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  fileCount: number
+) {
+  const user = await tx.user.findUnique({
+    where: { id: userId },
+    select: { plan: true },
+  });
+
+  if (!user) {
+    throw new NotFoundException("ユーザーが見つかりません");
+  }
+
+  const imageUploadLimit = getImageUploadLimit(user.plan);
+  if (fileCount > imageUploadLimit) {
+    throw new ForbiddenException(
+      `このプランでは画像は最大${imageUploadLimit}枚までです`
+    );
+  }
+
+  const monthlyPostLimit = getMonthlyPostLimit(user.plan);
+  if (monthlyPostLimit !== null) {
+    const { start, end } = getMonthRange();
+    const postCount = await tx.post.count({
+      where: {
+        userId,
+        createdAt: { gte: start, lt: end },
+      },
+    });
+
+    if (postCount >= monthlyPostLimit) {
+      throw new ForbiddenException("無料プランの月間投稿数上限に達しています");
+    }
+  }
+}
+
+function buildPetDetailCreateData(
+  postId: string,
+  pd: CreatePetDetailDto
+): Prisma.PetDetailUncheckedCreateInput {
+  const data: Prisma.PetDetailUncheckedCreateInput = {
+    postId,
+    name: pd.name,
+    color: pd.color,
+    age: pd.age,
+    features: pd.features,
+  };
+
+  if (pd.gender !== undefined)
+    (data as Record<string, unknown>).gender = pd.gender as Gender;
+  if (pd.breed !== undefined)
+    (data as Record<string, unknown>).breed = pd.breed;
+  if (pd.size !== undefined) (data as Record<string, unknown>).size = pd.size;
+  if (pd.collar !== undefined)
+    (data as Record<string, unknown>).collar = pd.collar;
+  if (pd.microchip !== undefined)
+    (data as Record<string, unknown>).microchip = pd.microchip;
+  if (pd.neutered !== undefined)
+    (data as Record<string, unknown>).neutered = pd.neutered;
+
+  return data;
+}
+
+function buildLocationCreateData(
+  postId: string,
+  loc: CreateLocationDto
+): Prisma.LocationUncheckedCreateInput {
+  return {
+    postId,
+    prefecture: loc.prefecture as Prefecture,
+    city: loc.city,
+    address: loc.address,
+    lat: loc.lat,
+    lng: loc.lng,
+  };
 }
 
 @Injectable()
@@ -97,47 +292,12 @@ export class PostsService {
     }
     const lostDate = new Date(dto.lostDate);
 
-    // Phase 1: Create post + relations in transaction (retry on Serializable conflict)
-    let createdPost: { id: string };
+    let createdPost!: { id: string };
     for (let attempt = 0; attempt < MAX_TRANSACTION_RETRIES; attempt += 1) {
       try {
         createdPost = await this.prisma.$transaction(
           async (tx) => {
-            const user = await tx.user.findUnique({
-              where: { id: userId },
-              select: { plan: true },
-            });
-
-            if (!user) {
-              throw new NotFoundException("ユーザーが見つかりません");
-            }
-
-            const imageUploadLimit = getImageUploadLimit(user.plan);
-            if (files.length > imageUploadLimit) {
-              throw new ForbiddenException(
-                `このプランでは画像は最大${imageUploadLimit}枚までです`
-              );
-            }
-
-            const monthlyPostLimit = getMonthlyPostLimit(user.plan);
-            if (monthlyPostLimit !== null) {
-              const { start, end } = getMonthRange();
-              const postCount = await tx.post.count({
-                where: {
-                  userId,
-                  createdAt: {
-                    gte: start,
-                    lt: end,
-                  },
-                },
-              });
-
-              if (postCount >= monthlyPostLimit) {
-                throw new ForbiddenException(
-                  "無料プランの月間投稿数上限に達しています"
-                );
-              }
-            }
+            await checkPlanLimits(tx, userId, files.length);
 
             const post = await tx.post.create({
               data: {
@@ -150,39 +310,14 @@ export class PostsService {
             });
 
             if (dto.petDetail) {
-              const pd = dto.petDetail;
               await tx.petDetail.create({
-                data: {
-                  postId: post.id,
-                  name: pd.name,
-                  color: pd.color,
-                  age: pd.age,
-                  features: pd.features,
-                  ...(pd.gender !== undefined && {
-                    gender: pd.gender as Gender,
-                  }),
-                  ...(pd.breed !== undefined && { breed: pd.breed }),
-                  ...(pd.size !== undefined && { size: pd.size }),
-                  ...(pd.collar !== undefined && { collar: pd.collar }),
-                  ...(pd.microchip !== undefined && {
-                    microchip: pd.microchip,
-                  }),
-                  ...(pd.neutered !== undefined && { neutered: pd.neutered }),
-                },
+                data: buildPetDetailCreateData(post.id, dto.petDetail),
               });
             }
 
             if (dto.location) {
-              const loc = dto.location;
               await tx.location.create({
-                data: {
-                  postId: post.id,
-                  prefecture: loc.prefecture as Prefecture,
-                  city: loc.city,
-                  address: loc.address,
-                  lat: loc.lat,
-                  lng: loc.lng,
-                },
+                data: buildLocationCreateData(post.id, dto.location),
               });
             }
 
@@ -201,28 +336,28 @@ export class PostsService {
       }
     }
 
-    if (!createdPost!) {
-      throw new Error("投稿作成の再試行に失敗しました");
-    }
+    return this.saveFilesAndBuildResponse(createdPost.id, files);
+  }
 
-    // Phase 2: Save files and create image records (outside transaction)
+  private async saveFilesAndBuildResponse(
+    postId: string,
+    files: Express.Multer.File[]
+  ) {
     const savedUrls: string[] = [];
     try {
       for (const file of files) {
-        const url = await this.saveFile(createdPost.id, file);
+        const url = await this.saveFile(postId, file);
         savedUrls.push(url);
       }
 
-      const newImages = await this.prisma.$transaction(async (tx) => {
+      await this.prisma.$transaction(async (tx) => {
         return Promise.all(
-          savedUrls.map((url) =>
-            tx.image.create({ data: { postId: createdPost.id, url } })
-          )
+          savedUrls.map((url) => tx.image.create({ data: { postId, url } }))
         );
       });
 
       const fullPost = await this.prisma.post.findUnique({
-        where: { id: createdPost.id },
+        where: { id: postId },
         include: { petDetail: true, location: true, images: true },
       });
 
@@ -240,7 +375,7 @@ export class PostsService {
         } catch {}
       }
       try {
-        await this.prisma.post.delete({ where: { id: createdPost.id } });
+        await this.prisma.post.delete({ where: { id: postId } });
       } catch {}
       throw e;
     }
@@ -327,7 +462,20 @@ export class PostsService {
       );
     }
 
-    // ファイルを先に保存し、DB作成失敗時はクリーンアップする
+    return this.saveImagesAndBuildResponse(
+      postId,
+      files,
+      imageUploadLimit,
+      currentCount
+    );
+  }
+
+  private async saveImagesAndBuildResponse(
+    postId: string,
+    files: Express.Multer.File[],
+    imageUploadLimit: number,
+    currentCount: number
+  ) {
     const savedUrls: string[] = [];
     try {
       for (const file of files) {
@@ -394,108 +542,27 @@ export class PostsService {
 
     return this.prisma
       .$transaction(async (tx) => {
-        const {
-          petDetail,
-          location,
-          lostDate,
-          status,
-          title,
-          description,
-          postType,
-        } = dto;
-
         await tx.post.update({
           where: { id },
-          data: {
-            ...(title !== undefined && { title }),
-            ...(description !== undefined && { description }),
-            ...(lostDate !== undefined && { lostDate: new Date(lostDate) }),
-            ...(postType !== undefined && { postType: postType as PostType }),
-            ...(status !== undefined && { status: status as PostStatus }),
-            ...(status === "resolved" && { resolvedAt: new Date() }),
-            ...(status === "lost" && { resolvedAt: null }),
-          },
+          data: buildPostUpdateData(dto),
         });
 
-        if (petDetail !== undefined) {
-          const pd = petDetail;
-          // petDetailが存在しない場合はcreateパスになるため、必須フィールドを検証する
-          if (
-            !post.petDetail &&
-            (!pd.name || !pd.color || !pd.age || !pd.features)
-          ) {
-            throw new BadRequestException(
-              "petDetailを新規作成する場合、name/color/age/featuresは必須です"
-            );
-          }
+        if (dto.petDetail !== undefined) {
+          validateNewPetDetail(post.petDetail, dto.petDetail);
           await tx.petDetail.upsert({
             where: { postId: id },
-            create: {
-              postId: id,
-              name: pd.name!,
-              color: pd.color!,
-              age: pd.age!,
-              features: pd.features!,
-              ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
-              ...(pd.breed !== undefined && { breed: pd.breed }),
-              ...(pd.size !== undefined && { size: pd.size }),
-              ...(pd.collar !== undefined && { collar: pd.collar }),
-              ...(pd.microchip !== undefined && { microchip: pd.microchip }),
-              ...(pd.neutered !== undefined && { neutered: pd.neutered }),
-            },
-            update: {
-              ...(pd.name !== undefined && { name: pd.name }),
-              ...(pd.color !== undefined && { color: pd.color }),
-              ...(pd.age !== undefined && { age: pd.age }),
-              ...(pd.features !== undefined && { features: pd.features }),
-              ...(pd.gender !== undefined && { gender: pd.gender as Gender }),
-              ...(pd.breed !== undefined && { breed: pd.breed }),
-              ...(pd.size !== undefined && { size: pd.size }),
-              ...(pd.collar !== undefined && { collar: pd.collar }),
-              ...(pd.microchip !== undefined && { microchip: pd.microchip }),
-              ...(pd.neutered !== undefined && { neutered: pd.neutered }),
-            },
+            ...buildPetDetailUpsertData(id, dto.petDetail),
           });
         }
 
-        if (location !== undefined) {
-          const loc = location;
-          // locationが存在しない場合はcreateパスになるため、必須フィールドを検証する
-          if (
-            !post.location &&
-            (!loc.prefecture ||
-              !loc.city ||
-              !loc.address ||
-              loc.lat === undefined ||
-              loc.lng === undefined)
-          ) {
-            throw new BadRequestException(
-              "locationを新規作成する場合、prefecture/city/address/lat/lngは必須です"
-            );
-          }
+        if (dto.location !== undefined) {
+          validateNewLocation(post.location, dto.location);
           await tx.location.upsert({
             where: { postId: id },
-            create: {
-              postId: id,
-              prefecture: loc.prefecture! as Prefecture,
-              city: loc.city!,
-              address: loc.address!,
-              lat: loc.lat!,
-              lng: loc.lng!,
-            },
-            update: {
-              ...(loc.prefecture !== undefined && {
-                prefecture: loc.prefecture as Prefecture,
-              }),
-              ...(loc.city !== undefined && { city: loc.city }),
-              ...(loc.address !== undefined && { address: loc.address }),
-              ...(loc.lat !== undefined && { lat: loc.lat }),
-              ...(loc.lng !== undefined && { lng: loc.lng }),
-            },
+            ...buildLocationUpsertData(id, dto.location),
           });
         }
 
-        // すべての更新後に include 付きで再取得してレスポンス形状を統一する
         return tx.post.findUnique({
           where: { id },
           include: { petDetail: true, location: true, images: true },

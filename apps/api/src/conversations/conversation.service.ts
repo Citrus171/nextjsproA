@@ -14,26 +14,11 @@ export class ConversationsService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: string, dto: CreateConversationDto) {
-    const post = await this.prisma.post.findUnique({
-      where: { id: dto.postId },
-    });
-    if (!post) throw new NotFoundException("投稿が見つかりません");
-
-    const sighting = await this.prisma.sighting.findUnique({
-      where: { id: dto.sightingId },
-    });
-    if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
-    if (sighting.postId == null || sighting.postId !== dto.postId) {
-      throw new NotFoundException(
-        "指定された投稿に紐づく目撃情報ではありません"
-      );
-    }
-
-    if (post.userId !== userId && sighting.userId !== userId) {
-      throw new ForbiddenException(
-        "会話を開始できるのは投稿者または目撃者のみです"
-      );
-    }
+    const { post, sighting } = await this.validateConversationAccess(
+      userId,
+      dto.postId,
+      dto.sightingId
+    );
 
     try {
       return await this.prisma.conversation.create({
@@ -56,6 +41,78 @@ export class ConversationsService {
       }
       throw e;
     }
+  }
+
+  private async validateConversationAccess(
+    userId: string,
+    postId: string,
+    sightingId: string
+  ) {
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+    });
+    if (!post) throw new NotFoundException("投稿が見つかりません");
+
+    const sighting = await this.prisma.sighting.findUnique({
+      where: { id: sightingId },
+    });
+    if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
+    if (sighting.postId == null || sighting.postId !== postId) {
+      throw new NotFoundException(
+        "指定された投稿に紐づく目撃情報ではありません"
+      );
+    }
+
+    if (post.userId !== userId && sighting.userId !== userId) {
+      throw new ForbiddenException(
+        "会話を開始できるのは投稿者または目撃者のみです"
+      );
+    }
+
+    return { post, sighting };
+  }
+
+  private getPartnerNickname(
+    conv: {
+      ownerId: string;
+      owner: { nickname: string | null } | null;
+      sighter: { nickname: string | null } | null;
+    },
+    userId: string
+  ): string {
+    return conv.ownerId === userId
+      ? (conv.sighter?.nickname ?? "Unknown")
+      : (conv.owner?.nickname ?? "Unknown");
+  }
+
+  private buildConversationItem(
+    conv: {
+      id: string;
+      postId: string;
+      sightingId: string;
+      ownerId: string;
+      sighterId: string;
+      createdAt: Date;
+      post: { title: string | null };
+      owner: { nickname: string | null } | null;
+      sighter: { nickname: string | null } | null;
+      messages: { body: string; createdAt: Date }[];
+      _count: { messages: number };
+    },
+    userId: string
+  ) {
+    return {
+      id: conv.id,
+      postId: conv.postId,
+      sightingId: conv.sightingId,
+      ownerId: conv.ownerId,
+      sighterId: conv.sighterId,
+      createdAt: conv.createdAt,
+      postTitle: conv.post.title ?? null,
+      partnerNickname: this.getPartnerNickname(conv, userId),
+      lastMessage: conv.messages[0] ?? null,
+      unreadCount: conv._count.messages,
+    };
   }
 
   async findAllForUser(userId: string) {
@@ -81,21 +138,9 @@ export class ConversationsService {
       orderBy: { createdAt: "desc" },
     });
 
-    return conversations.map((conv) => ({
-      id: conv.id,
-      postId: conv.postId,
-      sightingId: conv.sightingId,
-      ownerId: conv.ownerId,
-      sighterId: conv.sighterId,
-      createdAt: conv.createdAt,
-      postTitle: conv.post.title ?? null,
-      partnerNickname:
-        conv.ownerId === userId
-          ? (conv.sighter?.nickname ?? "Unknown")
-          : (conv.owner?.nickname ?? "Unknown"),
-      lastMessage: conv.messages[0] ?? null,
-      unreadCount: conv._count.messages,
-    }));
+    return conversations.map((conv) =>
+      this.buildConversationItem(conv, userId)
+    );
   }
 
   async findOneForUser(userId: string, conversationId: string) {
@@ -123,7 +168,6 @@ export class ConversationsService {
 
     if (!conv) throw new NotFoundException("会話が見つかりません");
 
-    // eslint-disable-next-line no-console
     console.log(
       "[findOneForUser]",
       "userId:",
@@ -139,20 +183,8 @@ export class ConversationsService {
     );
 
     return {
-      id: conv.id,
-      postId: conv.postId,
-      sightingId: conv.sightingId,
-      ownerId: conv.ownerId,
-      sighterId: conv.sighterId,
-      createdAt: conv.createdAt,
-      postTitle: conv.post.title ?? null,
+      ...this.buildConversationItem(conv, userId),
       postStatus: conv.post.status ?? null,
-      partnerNickname:
-        conv.ownerId === userId
-          ? (conv.sighter?.nickname ?? "Unknown")
-          : (conv.owner?.nickname ?? "Unknown"),
-      lastMessage: conv.messages[0] ?? null,
-      unreadCount: conv._count.messages,
     };
   }
 

@@ -8,16 +8,26 @@ export class MapService {
   constructor(private prisma: PrismaService) {}
 
   private toOptionalNumber(value: unknown): number | undefined {
-    if (value === undefined || value === null || value === "") return undefined;
+    if (value === null || value === undefined) return undefined;
     if (typeof value === "number")
       return Number.isFinite(value) ? value : undefined;
-    if (typeof value === "string") {
-      const trimmed = value.trim();
-      if (trimmed === "") return undefined;
-      const parsed = Number(trimmed);
-      return Number.isFinite(parsed) ? parsed : undefined;
-    }
-    return undefined;
+    const str = String(value).trim();
+    if (str === "") return undefined;
+    const parsed = Number(str);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  private setRangeFilter(
+    filter: Record<string, unknown>,
+    field: string,
+    op: string,
+    val: number | undefined
+  ) {
+    if (val === undefined) return;
+    filter[field] = {
+      ...((filter[field] as object) ?? {}),
+      [op]: val,
+    };
   }
 
   async getMarkers(query: GetMarkersQueryDto): Promise<MapMarkerDto[]> {
@@ -29,26 +39,10 @@ export class MapService {
 
     const bboxFilter = (latField: string, lngField: string) => {
       const filter: Record<string, unknown> = {};
-      if (minLat !== undefined)
-        filter[latField] = {
-          ...((filter[latField] as object) ?? {}),
-          gte: minLat,
-        };
-      if (maxLat !== undefined)
-        filter[latField] = {
-          ...((filter[latField] as object) ?? {}),
-          lte: maxLat,
-        };
-      if (minLng !== undefined)
-        filter[lngField] = {
-          ...((filter[lngField] as object) ?? {}),
-          gte: minLng,
-        };
-      if (maxLng !== undefined)
-        filter[lngField] = {
-          ...((filter[lngField] as object) ?? {}),
-          lte: maxLng,
-        };
+      this.setRangeFilter(filter, latField, "gte", minLat);
+      this.setRangeFilter(filter, latField, "lte", maxLat);
+      this.setRangeFilter(filter, lngField, "gte", minLng);
+      this.setRangeFilter(filter, lngField, "lte", maxLng);
       return filter;
     };
 
