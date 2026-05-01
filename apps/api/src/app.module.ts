@@ -14,12 +14,20 @@ import { AppThrottlerGuard } from "./auth/throttler.guard";
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
-      throttlers: [
-        { name: "default", ttl: 60_000, limit: 60 },
-        { name: "login", ttl: minutes(15), limit: 5 },
-        { name: "register", ttl: hours(1), limit: 3 },
-        { name: "public", ttl: 60_000, limit: 120 },
-      ],
+      throttlers:
+        process.env.NODE_ENV === "test"
+          ? [
+              { name: "default", ttl: 1_000, limit: 10_000 },
+              { name: "login", ttl: 1_000, limit: 10_000 },
+              { name: "register", ttl: 1_000, limit: 10_000 },
+              { name: "public", ttl: 1_000, limit: 10_000 },
+            ]
+          : [
+              { name: "default", ttl: 60_000, limit: 60 },
+              { name: "login", ttl: minutes(15), limit: 5 },
+              { name: "register", ttl: hours(1), limit: 3 },
+              { name: "public", ttl: 60_000, limit: 120 },
+            ],
     }),
     PrismaModule,
     IdentityModule,
