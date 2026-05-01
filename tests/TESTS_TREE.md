@@ -8,12 +8,15 @@ apps/api/src/
 │           ├── 用途別の OpenAPI 例示 ID が重複しないこと
 │           └── 汎用 ID 例示は投稿 ID 例示と一致すること
 ├── auth/
-│   └── roles.guard.spec.ts
-│       └── RolesGuard
-│           ├── @Roles デコレータがない場合は通す
-│           ├── ロールが一致する場合は通す
-│           ├── ロールが一致しない場合は ForbiddenException をスローする
-│           └── ユーザーが未設定の場合は ForbiddenException をスローする
+│   ├── roles.guard.spec.ts
+│   │   └── RolesGuard
+│   │       ├── @Roles デコレータがない場合は通す
+│   │       ├── ロールが一致する場合は通す
+│   │       ├── ロールが一致しない場合は ForbiddenException をスローする
+│   │       └── ユーザーが未設定の場合は ForbiddenException をスローする
+│   └── throttler.guard.spec.ts
+│       └── AppThrottlerGuard
+│           └── 制限超過時に日本語メッセージ付き ThrottlerException をスローすること
 ├── identity/
 │   ├── identity.service.spec.ts
 │   │   └── IdentityService
@@ -301,6 +304,13 @@ apps/api/
     └── packages/api-client/openapi.json と API 実装の契約を hook 経由で検証する
 
 apps/api/test/
+├── throttler.e2e.ts
+│   ├── POST /api/auth/login のレート制限
+│   │   ├── 制限内（2回）は 401 が返ること（認証失敗だがレート制限ではない）
+│   │   └── 制限超過（3回目）は 429 と日本語エラーメッセージが返ること
+│   └── POST /api/users/register のレート制限
+│       ├── 制限内（2回）は登録成功または重複エラーが返ること（429 ではない）
+│       └── 制限超過（3回目）は 429 と日本語エラーメッセージが返ること
 └── app.e2e.ts
     ├── POST /api/users/register
     │   ├── オーナーユーザーを登録できる (201)
