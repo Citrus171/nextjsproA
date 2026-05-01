@@ -105,7 +105,7 @@ export default function SightingList({
                     type="button"
                     aria-label="削除"
                     onClick={() => setDeletingId(s.id)}
-                    className="text-xs text-destructive hover:text-destructive/80 font-bold px-2 py-1 rounded-lg hover:bg-destructive/10"
+                    className="text-xs text-destructive hover:text-destructive/80 font-bold min-h-[44px] min-w-[44px] px-3 rounded-lg hover:bg-destructive/10 inline-flex items-center justify-center"
                   >
                     削除
                   </button>
@@ -118,7 +118,7 @@ export default function SightingList({
                       type="button"
                       aria-label="メッセージを送る"
                       onClick={() => onSendMessage(s.id)}
-                      className="text-xs text-primary hover:text-primary/80 font-bold px-2 py-1 rounded-lg hover:bg-primary/10"
+                      className="text-xs text-primary hover:text-primary/80 font-bold min-h-[44px] min-w-[44px] px-3 rounded-lg hover:bg-primary/10 inline-flex items-center justify-center"
                     >
                       💬
                     </button>

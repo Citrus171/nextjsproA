@@ -45,7 +45,7 @@ export default function LoginWithAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-background font-manrope flex flex-col">
+    <div className="min-h-dvh bg-background font-manrope flex flex-col">
       {/* ヘッダービジュアル */}
       <div className="flex flex-col items-center justify-center pt-16 pb-8 px-6">
         <div className="flex items-center gap-3 mb-3">
@@ -111,7 +111,7 @@ export default function LoginWithAuth() {
                   type="button"
                   aria-label="パスワードを表示"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />

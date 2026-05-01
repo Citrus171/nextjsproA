@@ -207,7 +207,7 @@ export default function ConversationChat() {
       {/* Input Area */}
       <div
         data-testid="chat-input"
-        className="sticky bottom-0 px-4 py-3 border-t border-border bg-card shrink-0"
+        className="sticky bottom-0 px-4 py-3 border-t border-border bg-card shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
       >
         <div className="flex items-center gap-2">
           <input

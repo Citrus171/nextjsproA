@@ -228,7 +228,7 @@ export default function PostDetailSheet({
                                   post.images.length
                               )
                             }
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <ChevronLeft size={18} />
                           </button>
@@ -240,7 +240,7 @@ export default function PostDetailSheet({
                                 (activeIdx + 1) % post.images.length
                               )
                             }
-                            className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <ChevronRight size={18} />
                           </button>
@@ -248,14 +248,14 @@ export default function PostDetailSheet({
                       )}
                     </div>
                     {post.images.length > 1 && (
-                      <div className="flex items-center justify-center gap-1.5 mt-2">
+                      <div className="flex items-center justify-center gap-1.5 mt-2 min-h-[44px]">
                         {post.images.map((_, i) => (
                           <button
                             key={i}
                             type="button"
                             aria-label={`画像${i + 1}を表示`}
                             onClick={() => scrollToImage(i)}
-                            className={`block w-1.5 h-1.5 rounded-full transition-colors ${
+                            className={`block w-2.5 h-2.5 rounded-full transition-colors ${
                               i === activeIdx
                                 ? "bg-primary"
                                 : "bg-border hover:bg-muted-foreground"

@@ -182,7 +182,7 @@ describe("PostDetailSheet", () => {
   it("画像が1枚のみの時、ドットインジケーターが表示されないこと", () => {
     renderSheet({ post: postWithDetail });
     const dots = document.querySelectorAll(
-      "[class*='w-1.5 h-1.5 rounded-full']"
+      "[class*='w-2.5 h-2.5 rounded-full']"
     );
     expect(dots.length).toBe(0);
   });
@@ -207,7 +207,7 @@ describe("PostDetailSheet", () => {
     };
     renderSheet({ post: postWithTwoImages });
     const dots = document.querySelectorAll(
-      "[class*='w-1.5 h-1.5 rounded-full']"
+      "[class*='w-2.5 h-2.5 rounded-full']"
     );
     expect(dots.length).toBe(2);
   });
