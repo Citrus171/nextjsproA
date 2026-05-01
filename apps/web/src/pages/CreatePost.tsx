@@ -584,7 +584,7 @@ export default function CreatePost() {
                 type="button"
                 onClick={handleCurrentLocation}
                 disabled={isLocating}
-                className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 disabled:opacity-50"
+                className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 disabled:opacity-50 min-h-[44px] min-w-[44px] px-2"
               >
                 <LocateFixed size={14} />
                 {isLocating ? "取得中…" : "現在地を使う"}

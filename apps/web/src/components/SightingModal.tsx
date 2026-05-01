@@ -127,7 +127,7 @@ export default function SightingModal({
               type="button"
               aria-label="閉じる"
               onClick={handleClose}
-              className="text-muted-foreground hover:text-foreground text-2xl leading-none"
+              className="text-muted-foreground hover:text-foreground text-2xl leading-none min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg hover:bg-muted"
             >
               ×
             </button>
@@ -138,7 +138,7 @@ export default function SightingModal({
               type="button"
               aria-label="地図から選択"
               onClick={onSelectFromMap}
-              className="w-full py-2 rounded-xl border border-primary text-primary font-bold text-sm hover:bg-accent"
+              className="w-full min-h-[44px] rounded-xl border border-primary text-primary font-bold text-sm hover:bg-accent"
             >
               地図から選択
             </button>

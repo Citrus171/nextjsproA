@@ -126,13 +126,13 @@ export default function Posts() {
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            className="inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 min-h-[44px] text-sm font-semibold text-foreground shadow-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             マップに戻る
           </button>
           <Link
             to="/create"
-            className="inline-flex items-center rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            className="inline-flex items-center rounded-full bg-primary px-5 py-2 min-h-[44px] text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             新規投稿
           </Link>
@@ -182,7 +182,7 @@ export default function Posts() {
                   <div className="flex items-center gap-2">
                     <Link
                       to={`/edit/${p.id}`}
-                      className="text-sm font-semibold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
+                      className="inline-flex items-center text-sm font-semibold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
                     >
                       編集
                     </Link>
@@ -191,7 +191,7 @@ export default function Posts() {
                         type="button"
                         onClick={() => resolveMutation.mutate(p.id)}
                         disabled={resolveMutation.isPending}
-                        className="text-sm font-semibold text-green-600 hover:text-green-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
+                        className="text-sm font-semibold text-green-600 hover:text-green-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
                       >
                         解決済みにする
                       </button>
@@ -210,7 +210,7 @@ export default function Posts() {
                       <AlertDialogTrigger asChild>
                         <button
                           type="button"
-                          className="text-sm font-semibold text-destructive hover:text-destructive/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded"
+                          className="text-sm font-semibold text-destructive hover:text-destructive/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
                         >
                           削除
                         </button>

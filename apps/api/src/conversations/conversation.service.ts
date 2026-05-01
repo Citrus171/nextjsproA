@@ -168,20 +168,6 @@ export class ConversationsService {
 
     if (!conv) throw new NotFoundException("会話が見つかりません");
 
-    console.log(
-      "[findOneForUser]",
-      "userId:",
-      userId,
-      "ownerId:",
-      conv.ownerId,
-      "sighterId:",
-      conv.sighterId,
-      "userId==ownerId:",
-      userId === conv.ownerId,
-      "userId==sighterId:",
-      userId === conv.sighterId
-    );
-
     return {
       ...this.buildConversationItem(conv, userId),
       postStatus: conv.post.status ?? null,
