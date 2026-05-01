@@ -259,7 +259,7 @@ export class PostsService {
         .resize({ width: 1200, withoutEnlargement: true })
         .jpeg({ quality: 80 })
         .toBuffer();
-    } catch (err) {
+    } catch (_err) {
       throw new BadRequestException(
         "画像処理に失敗しました。ファイルが破損または無効な形式です。"
       );

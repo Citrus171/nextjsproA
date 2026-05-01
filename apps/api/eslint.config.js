@@ -44,6 +44,10 @@ module.exports = [
       complexity: ["warn", { max: 7 }],
       "@typescript-eslint/no-floating-promises": "error",
       eqeqeq: ["error", "always"],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" },
+      ],
     },
   },
   {
