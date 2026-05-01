@@ -57,7 +57,7 @@ export class ConversationsService {
       where: { id: sightingId },
     });
     if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
-    if (sighting.postId == null || sighting.postId !== postId) {
+    if (sighting.postId === null || sighting.postId !== postId) {
       throw new NotFoundException(
         "指定された投稿に紐づく目撃情報ではありません"
       );

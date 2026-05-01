@@ -76,7 +76,7 @@ export class ConversationsGateway
       client.disconnect();
       return;
     }
-    client.join(`conversation:${conversationId}`);
+    void client.join(`conversation:${conversationId}`);
   }
 
   @SubscribeMessage("leaveConversation")
@@ -89,7 +89,7 @@ export class ConversationsGateway
       client.disconnect();
       return;
     }
-    client.leave(`conversation:${conversationId}`);
+    void client.leave(`conversation:${conversationId}`);
   }
 
   broadcastMessage(conversationId: string, message: Message) {

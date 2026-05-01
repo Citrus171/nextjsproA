@@ -42,6 +42,8 @@ module.exports = [
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
       complexity: ["warn", { max: 7 }],
+      "@typescript-eslint/no-floating-promises": "error",
+      eqeqeq: ["error", "always"],
     },
   },
   {
