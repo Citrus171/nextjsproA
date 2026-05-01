@@ -7,15 +7,16 @@ export function normalizeEmail(email: string): string {
 function deriveEncryptionKey(): Buffer {
   const raw = process.env.ENCRYPTION_KEY;
   if (!raw) {
-    throw new Error("ENCRYPTION_KEY is not set");
+    throw new Error("ENCRYPTION_KEY が設定されていません");
   }
-  let buf = Buffer.from(raw, "base64");
-  if (buf.length === 32) return buf;
-  buf = Buffer.from(raw, "hex");
-  if (buf.length === 32) return buf;
-  buf = Buffer.from(raw, "utf8");
-  if (buf.length >= 32) return buf.slice(0, 32);
-  throw new Error("ENCRYPTION_KEY must decode to 32 bytes (base64/hex/utf8)");
+  const buf = Buffer.from(raw, "base64");
+  if (buf.length !== 32) {
+    throw new Error(
+      `ENCRYPTION_KEY は base64 エンコードされた 32 バイトのキーである必要があります（現在: ${buf.length} バイト）。` +
+        "生成方法: openssl rand -base64 32"
+    );
+  }
+  return buf;
 }
 
 export function encryptEmail(plain: string): string {

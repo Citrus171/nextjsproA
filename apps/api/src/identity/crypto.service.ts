@@ -1,10 +1,14 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as crypto from "crypto";
 
 @Injectable()
-export class CryptoService {
+export class CryptoService implements OnModuleInit {
   constructor(private readonly config: ConfigService) {}
+
+  onModuleInit(): void {
+    this.deriveEncryptionKey();
+  }
 
   normalizeEmail(email: string): string {
     return email.toLowerCase().trim();
@@ -51,12 +55,13 @@ export class CryptoService {
 
   private deriveEncryptionKey(): Buffer {
     const raw = this.config.getOrThrow<string>("ENCRYPTION_KEY");
-    let buf = Buffer.from(raw, "base64");
-    if (buf.length === 32) return buf;
-    buf = Buffer.from(raw, "hex");
-    if (buf.length === 32) return buf;
-    buf = Buffer.from(raw, "utf8");
-    if (buf.length >= 32) return buf.slice(0, 32);
-    throw new Error("ENCRYPTION_KEY must decode to 32 bytes (base64/hex/utf8)");
+    const buf = Buffer.from(raw, "base64");
+    if (buf.length !== 32) {
+      throw new Error(
+        `ENCRYPTION_KEY は base64 エンコードされた 32 バイトのキーである必要があります（現在: ${buf.length} バイト）。` +
+          "生成方法: openssl rand -base64 32"
+      );
+    }
+    return buf;
   }
 }
