@@ -41,7 +41,7 @@ const mockCrypto = {
   encryptEmail: jest.fn().mockReturnValue("encrypted-email"),
   decryptEmail: jest.fn().mockReturnValue("user@example.com"),
   hmacEmail: jest.fn().mockReturnValue("hmac-hash"),
-  sha256Hex: jest.fn().mockReturnValue("sha256-hash"),
+  sha256Hex: jest.fn().mockReturnValue("token-hash"),
   generateSecureToken: jest.fn().mockReturnValue("a".repeat(96)),
 };
 
@@ -85,6 +85,20 @@ describe("IdentityService", () => {
       expect(result.setCookies[0].value).toBe("a".repeat(96));
       expect(result.setCookies[0].options.httpOnly).toBe(true);
       expect(result.setCookies[0].options.sameSite).toBe("lax");
+    });
+
+    it("DBにはtokenHashが保存され、平文トークンは保存されないこと", async () => {
+      const user = await makeUser();
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
+      mockPrisma.refreshToken.create.mockResolvedValueOnce({});
+
+      const result = await service.login("user@example.com", "password123");
+      const plainToken = result.setCookies[0].value;
+
+      const createCall = mockPrisma.refreshToken.create.mock.calls[0][0];
+      expect(createCall.data.tokenHash).toBe("token-hash");
+      expect(createCall.data).not.toHaveProperty("token");
+      expect(createCall.data.tokenHash).not.toBe(plainToken);
     });
 
     it("パスワード不一致でUnauthorizedExceptionを投げること", async () => {
@@ -149,7 +163,7 @@ describe("IdentityService", () => {
     it("有効なトークンで新しいAuthResultを返すこと", async () => {
       const ts = new Date(Date.now() + 86400000);
       mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
-        token: "old-refresh-token",
+        tokenHash: "token-hash",
         userId: "user-1",
         expiresAt: ts,
         user: { emailEncrypted: "enc-email", role: "user" },
@@ -160,8 +174,27 @@ describe("IdentityService", () => {
 
       expect(result.accessToken).toBe("access-token-jwt");
       expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({
-        where: { token: "old-refresh-token" },
+        where: { tokenHash: "token-hash" },
       });
+    });
+
+    it("ローテーション: 新しいトークンのハッシュがDBに保存されること", async () => {
+      const ts = new Date(Date.now() + 86400000);
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        tokenHash: "token-hash",
+        userId: "user-1",
+        expiresAt: ts,
+        user: { emailEncrypted: "enc-email", role: "user" },
+      });
+      mockPrisma.refreshToken.create.mockResolvedValueOnce({});
+
+      const result = await service.refresh("old-refresh-token");
+      const newPlainToken = result.setCookies[0].value;
+
+      const createCall = mockPrisma.refreshToken.create.mock.calls[0][0];
+      expect(createCall.data.tokenHash).toBe("token-hash");
+      expect(createCall.data).not.toHaveProperty("token");
+      expect(createCall.data.tokenHash).not.toBe(newPlainToken);
     });
 
     it("トークンが存在しない場合はUnauthorizedExceptionを投げること", async () => {
@@ -174,7 +207,7 @@ describe("IdentityService", () => {
 
     it("期限切れトークンはUnauthorizedExceptionを投げること", async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
-        token: "old-token",
+        tokenHash: "token-hash",
         userId: "user-1",
         expiresAt: new Date(Date.now() - 1000),
       });
@@ -183,16 +216,33 @@ describe("IdentityService", () => {
         UnauthorizedException
       );
     });
+
+    it("再利用検知: delete失敗時にUnauthorizedExceptionを投げること", async () => {
+      const ts = new Date(Date.now() + 86400000);
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        tokenHash: "token-hash",
+        userId: "user-1",
+        expiresAt: ts,
+        user: { emailEncrypted: "enc-email", role: "user" },
+      });
+      mockPrisma.refreshToken.delete.mockRejectedValueOnce(
+        new Error("already deleted")
+      );
+
+      await expect(service.refresh("old-refresh-token")).rejects.toThrow(
+        UnauthorizedException
+      );
+    });
   });
 
   describe("logout", () => {
-    it("リフレッシュトークンを削除すること", async () => {
+    it("リフレッシュトークンをハッシュで削除すること", async () => {
       mockPrisma.refreshToken.delete.mockResolvedValueOnce({});
 
       await service.logout("some-token");
 
       expect(mockPrisma.refreshToken.delete).toHaveBeenCalledWith({
-        where: { token: "some-token" },
+        where: { tokenHash: "token-hash" },
       });
     });
 

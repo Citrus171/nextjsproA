@@ -70,9 +70,10 @@ export class IdentityService extends IIdentityService {
       throw new UnauthorizedException("認証情報が正しくありません");
     }
     const refreshToken = this.crypto.generateSecureToken();
+    const tokenHash = this.crypto.sha256Hex(refreshToken);
     await this.prisma.refreshToken.create({
       data: {
-        token: refreshToken,
+        tokenHash,
         userId: user.id,
         expiresAt: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
       },
@@ -90,8 +91,9 @@ export class IdentityService extends IIdentityService {
   }
 
   async refresh(cookieToken: string): Promise<AuthResult> {
+    const tokenHash = this.crypto.sha256Hex(cookieToken);
     const rec = await this.prisma.refreshToken.findUnique({
-      where: { token: cookieToken },
+      where: { tokenHash },
       include: { user: { select: { emailEncrypted: true, role: true } } },
     });
     if (!rec || rec.expiresAt <= new Date()) {
@@ -99,15 +101,16 @@ export class IdentityService extends IIdentityService {
     }
     try {
       await this.prisma.refreshToken.delete({
-        where: { token: cookieToken },
+        where: { tokenHash },
       });
     } catch {
       throw new UnauthorizedException("無効なリフレッシュトークンです");
     }
     const newToken = this.crypto.generateSecureToken();
+    const newHash = this.crypto.sha256Hex(newToken);
     await this.prisma.refreshToken.create({
       data: {
-        token: newToken,
+        tokenHash: newHash,
         userId: rec.userId,
         expiresAt: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
       },
@@ -125,9 +128,10 @@ export class IdentityService extends IIdentityService {
   }
 
   async logout(cookieToken: string): Promise<void> {
+    const tokenHash = this.crypto.sha256Hex(cookieToken);
     try {
       await this.prisma.refreshToken.delete({
-        where: { token: cookieToken },
+        where: { tokenHash },
       });
     } catch {
       // ignore
