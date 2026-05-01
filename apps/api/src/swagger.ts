@@ -29,4 +29,4 @@ async function dump() {
   await app.close();
 }
 
-dump();
+void dump();

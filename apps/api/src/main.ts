@@ -49,4 +49,4 @@ async function bootstrap() {
   console.log("API listening on http://localhost:3000");
 }
 
-bootstrap();
+void bootstrap();

@@ -22,7 +22,7 @@
     "seed:clean": "npm run seed:clean --workspace=apps/api",
     "openapi": "npm run openapi --workspace=apps/api",
     "generate": "npm run generate --workspace=packages/api-client",
-    "lint:api": "eslint \"apps/api/{src,test}/**/*.ts\" --config apps/api/eslint.config.js",
+    "lint:api": "npm run lint --workspace=apps/api",
     "typecheck:api": "tsc --noEmit --project apps/api/tsconfig.json",
     "typecheck:web": "tsc --noEmit --project apps/web/tsconfig.json",
     "dredd": "npx dredd packages/api-client/openapi.json http://localhost:3000 --hookfiles=./dredd-hooks-jemini.js",
