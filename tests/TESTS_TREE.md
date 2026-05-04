@@ -76,6 +76,13 @@ apps/api/src/
 │           └── generateSecureToken
 │               ├── 96文字の16進数文字列を生成すること (48 bytes)
 │               └── 毎回異なるトークンを生成すること
+├── health/
+│   └── health.controller.spec.ts
+│       └── HealthController
+│           └── check()
+│               ├── 全チェックが正常なとき、status:okを返すこと
+│               ├── DBが異常なとき、status:errorを返すこと
+│               └── check()はHealthCheckService.check()を呼び出すこと
 ├── posts/
 │   ├── post.service.spec.ts
 │   │   ├── findAll
@@ -319,6 +326,12 @@ apps/api/
     └── packages/api-client/openapi.json と API 実装の契約を hook 経由で検証する
 
 apps/api/test/
+├── health.e2e.ts
+│   ├── GET /api/health 正常系
+│   │   ├── DBとディスクとuploadsが正常なとき、200とstatus:okを返すこと
+│   │   └── 認証なしでアクセスできること
+│   └── GET /api/health 異常系
+│       └── DB切断時に503を返すこと
 ├── throttler.e2e.ts
 │   ├── POST /api/auth/login のレート制限
 │   │   ├── 制限内（2回）は 401 が返ること（認証失敗だがレート制限ではない）

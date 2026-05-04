@@ -8,6 +8,7 @@ import { PostsModule } from "./posts/post.module";
 import { MapModule } from "./map/map.module";
 import { SightingsModule } from "./sightings/sighting.module";
 import { ConversationsModule } from "./conversations/conversation.module";
+import { HealthModule } from "./health/health.module";
 import { AppThrottlerGuard } from "./auth/throttler.guard";
 
 @Module({
@@ -30,6 +31,7 @@ import { AppThrottlerGuard } from "./auth/throttler.guard";
             ],
     }),
     PrismaModule,
+    HealthModule,
     IdentityModule,
     PostsModule,
     MapModule,

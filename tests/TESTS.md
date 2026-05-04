@@ -484,6 +484,29 @@
 
 ---
 
+## ヘルスチェック (`src/health/health.controller.spec.ts`)
+
+### check()
+
+- [x] 全チェックが正常なとき、status:okを返すこと
+- [x] DBが異常なとき、status:errorを返すこと
+- [x] check()はHealthCheckService.check()を呼び出すこと
+
+---
+
+## ヘルスチェック E2E (`test/health.e2e.ts`)
+
+### GET /api/health 正常系
+
+- [x] DBとディスクとuploadsが正常なとき、200とstatus:okを返すこと
+- [x] 認証なしでアクセスできること
+
+### GET /api/health 異常系
+
+- [x] DB切断時に503を返すこと
+
+---
+
 ## レート制限 E2E (`test/throttler.e2e.ts`)
 
 ### POST /api/auth/login のレート制限
