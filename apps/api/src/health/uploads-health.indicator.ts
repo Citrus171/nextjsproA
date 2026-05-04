@@ -6,7 +6,6 @@ import {
 } from "@nestjs/terminus";
 import * as fs from "fs";
 import * as path from "path";
-import * as os from "os";
 
 @Injectable()
 export class UploadsHealthIndicator extends HealthIndicator {
