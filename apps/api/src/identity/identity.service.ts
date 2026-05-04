@@ -61,7 +61,7 @@ export class IdentityService extends IIdentityService {
   async login(email: string, password: string): Promise<AuthResult> {
     const normalized = this.crypto.normalizeEmail(email);
     const hmac = this.crypto.hmacEmail(normalized);
-    const user = await this.findUserByHash(hmac, normalized);
+    const user = await this.findUserByHash(hmac);
     if (!user) {
       throw new UnauthorizedException("認証情報が正しくありません");
     }
@@ -222,27 +222,16 @@ export class IdentityService extends IIdentityService {
     };
   }
 
-  private async findUserByHash(
-    hmac: string,
-    normalized: string
-  ): Promise<{
+  private async findUserByHash(hmac: string): Promise<{
     id: string;
     password: string;
     emailEncrypted: string;
     role: string;
   } | null> {
-    let user = await this.prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { emailHash: hmac },
       select: { id: true, password: true, emailEncrypted: true, role: true },
     });
-    if (!user) {
-      const sha = this.crypto.sha256Hex(normalized);
-      user = await this.prisma.user.findUnique({
-        where: { emailHash: sha },
-        select: { id: true, password: true, emailEncrypted: true, role: true },
-      });
-    }
-    return user;
   }
 
   private decryptSafely(encrypted: string | null): string | null {

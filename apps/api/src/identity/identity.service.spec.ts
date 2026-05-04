@@ -118,15 +118,13 @@ describe("IdentityService", () => {
       );
     });
 
-    it("SHA256フォールバック: HMACで見つからなければSHA256で再検索すること", async () => {
+    it("HMACのみで検索し、SHA256フォールバックを行わないこと", async () => {
       const user = await makeUser();
-      mockPrisma.user.findUnique
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(user);
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
 
       await service.login("user@example.com", "password123");
 
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledTimes(2);
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledTimes(1);
     });
 
     it("production環境ではCookieのsecureとsameSiteが適切に設定されること", async () => {
