@@ -484,6 +484,14 @@
 
 ---
 
+## SentryFilter (`src/sentry/sentry.filter.spec.ts`)
+
+- [x] 5xx エラーの時、Sentry.captureException が呼ばれること
+- [x] 4xx HttpException の時、Sentry.captureException が呼ばれないこと
+- [x] HttpException 以外の Error の時、Sentry.captureException が呼ばれること
+
+---
+
 ## ヘルスチェック (`src/health/health.controller.spec.ts`)
 
 ### check()
@@ -789,6 +797,7 @@
 
 - [x] 正常レスポンスの時、method・url・statusCode・durationをログ出力すること
 - [x] 例外発生の時、errorログを出力すること
+- [x] 例外発生の時、Sentry.captureException が呼ばれること
 
 ## REDACT_PATHS — PII マスキング (`src/logger/logger.redact.spec.ts`)
 

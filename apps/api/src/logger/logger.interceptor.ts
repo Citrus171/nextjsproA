@@ -7,6 +7,7 @@ import {
 import { Observable, throwError } from "rxjs";
 import { tap, catchError } from "rxjs/operators";
 import { Logger } from "nestjs-pino";
+import * as Sentry from "@sentry/nestjs";
 
 @Injectable()
 export class LoggerInterceptor implements NestInterceptor {
@@ -39,6 +40,7 @@ export class LoggerInterceptor implements NestInterceptor {
           error: err.message,
           duration,
         });
+        Sentry.captureException(err);
         return throwError(() => err);
       })
     );

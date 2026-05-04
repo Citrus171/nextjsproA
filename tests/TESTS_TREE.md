@@ -76,6 +76,12 @@ apps/api/src/
 │           └── generateSecureToken
 │               ├── 96文字の16進数文字列を生成すること (48 bytes)
 │               └── 毎回異なるトークンを生成すること
+├── sentry/
+│   └── sentry.filter.spec.ts
+│       └── SentryFilter
+│           ├── 5xx エラーの時、Sentry.captureException が呼ばれること
+│           ├── 4xx HttpException の時、Sentry.captureException が呼ばれないこと
+│           └── HttpException 以外の Error の時、Sentry.captureException が呼ばれること
 ├── health/
 │   └── health.controller.spec.ts
 │       └── HealthController
@@ -615,7 +621,8 @@ apps/api/src/logger/
 ├── logger.interceptor.spec.ts
 │   └── LoggerInterceptor
 │       ├── 正常レスポンスの時、method・url・statusCode・durationをログ出力すること
-│       └── 例外発生の時、errorログを出力すること
+│       ├── 例外発生の時、errorログを出力すること
+│       └── 例外発生の時、Sentry.captureException が呼ばれること
 └── logger.redact.spec.ts
     └── REDACT_PATHS — PII マスキング
         ├── req.headers.authorization が [Redacted] になること
