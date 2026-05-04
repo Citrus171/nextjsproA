@@ -782,3 +782,18 @@
 ## Web E2E (`apps/web/tests/playwright/create-post-map-flow.spec.ts`)
 
 - [x] 画像3枚で迷い猫投稿し、マーカークリックで登録内容が表示されること
+
+---
+
+## LoggerInterceptor (`src/logger/logger.interceptor.spec.ts`)
+
+- [x] 正常レスポンスの時、method・url・statusCode・durationをログ出力すること
+- [x] 例外発生の時、errorログを出力すること
+
+## REDACT_PATHS — PII マスキング (`src/logger/logger.redact.spec.ts`)
+
+- [x] req.headers.authorization が [Redacted] になること
+- [x] req.headers.cookie が [Redacted] になること
+- [x] req.body.password が [Redacted] になること
+- [x] res.headers['set-cookie'] が [Redacted] になること
+- [x] lat/lng（位置情報）はマスクされないこと

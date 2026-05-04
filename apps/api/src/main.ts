@@ -5,9 +5,13 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
 import * as cookieParser from "cookie-parser";
 import * as path from "path";
+import { Logger } from "nestjs-pino";
 import { applyParameterExamples } from "./common/openapi-document";
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+  });
+  app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.setGlobalPrefix("api");
   app.useStaticAssets(path.join(__dirname, "..", "uploads"), {
@@ -46,7 +50,7 @@ async function bootstrap() {
   SwaggerModule.setup("api", app, document);
 
   await app.listen(3000);
-  console.log("API listening on http://localhost:3000");
+  app.get(Logger).log("API listening on http://localhost:3000");
 }
 
 void bootstrap();

@@ -611,4 +611,16 @@ apps/web/src/
 apps/web/tests/playwright/
 └── create-post-map-flow.spec.ts
     └── 画像3枚で迷い猫投稿し、マーカークリックで登録内容が表示されること
+apps/api/src/logger/
+├── logger.interceptor.spec.ts
+│   └── LoggerInterceptor
+│       ├── 正常レスポンスの時、method・url・statusCode・durationをログ出力すること
+│       └── 例外発生の時、errorログを出力すること
+└── logger.redact.spec.ts
+    └── REDACT_PATHS — PII マスキング
+        ├── req.headers.authorization が [Redacted] になること
+        ├── req.headers.cookie が [Redacted] になること
+        ├── req.body.password が [Redacted] になること
+        ├── res.headers['set-cookie'] が [Redacted] になること
+        └── lat/lng（位置情報）はマスクされないこと
 ```
