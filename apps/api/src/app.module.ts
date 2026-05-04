@@ -1,6 +1,8 @@
 import { Module } from "@nestjs/common";
-import { APP_GUARD } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
+import { SentryModule } from "@sentry/nestjs/setup";
+import { SentryFilter } from "./sentry/sentry.filter";
 import { ThrottlerModule, minutes, hours } from "@nestjs/throttler";
 import { PrismaModule } from "./prisma.module";
 import { IdentityModule } from "./identity/identity.module";
@@ -14,6 +16,7 @@ import { AppThrottlerGuard } from "./auth/throttler.guard";
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
       throttlers:
@@ -40,6 +43,9 @@ import { AppThrottlerGuard } from "./auth/throttler.guard";
     SightingsModule,
     ConversationsModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: AppThrottlerGuard }],
+  providers: [
+    { provide: APP_FILTER, useClass: SentryFilter },
+    { provide: APP_GUARD, useClass: AppThrottlerGuard },
+  ],
 })
 export class AppModule {}
