@@ -18,13 +18,28 @@ apps/api/src/
 │       └── AppThrottlerGuard
 │           └── 制限超過時に日本語メッセージ付き ThrottlerException をスローすること
 ├── identity/
+│   ├── email-hash-migration.spec.ts
+│   │   └── migrateEmailHashToHmac
+│   │       ├── 基本動作
+│   │       │   └── ユーザーが0件の時、全カウントが0の結果を返すこと
+│   │       ├── HMACへの更新
+│   │       │   ├── SHA256ハッシュのユーザーがHMACに更新されること
+│   │       │   └── 既にHMACのユーザーはスキップされること（冪等）
+│   │       ├── dry-runモード
+│   │       │   └── dry-runの時、DBを更新せず結果のみ返すこと
+│   │       ├── スキップケース
+│   │       │   ├── emailEncryptedがnullのユーザーはスキップされること
+│   │       │   └── 復号に失敗したユーザーはエラーカウントされること
+│   │       └── 複数ユーザー混在
+│   │           └── SHA256・HMAC済み・null混在の時、それぞれ正しくカウントされること
 │   ├── identity.service.spec.ts
 │   │   └── IdentityService
 │   │       ├── login
 │   │       │   ├── 正しいメールとパスワードでAuthResultを返すこと
+│   │       │   ├── DBにはtokenHashが保存され、平文トークンは保存されないこと
 │   │       │   ├── パスワード不一致でUnauthorizedExceptionを投げること
 │   │       │   ├── 存在しないメールアドレスでUnauthorizedExceptionを投げること
-│   │       │   ├── SHA256フォールバック: HMACで見つからなければSHA256で再検索すること
+│   │       │   ├── HMACのみで検索し、SHA256フォールバックを行わないこと
 │   │       │   └── production環境ではCookieのsecureとsameSiteが適切に設定されること
 │   │       ├── refresh
 │   │       │   ├── 有効なトークンで新しいAuthResultを返すこと

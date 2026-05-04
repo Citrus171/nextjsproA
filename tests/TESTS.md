@@ -368,9 +368,10 @@
 #### login
 
 - [x] 正しいメールとパスワードでAuthResultを返すこと
+- [x] DBにはtokenHashが保存され、平文トークンは保存されないこと
 - [x] パスワード不一致でUnauthorizedExceptionを投げること
 - [x] 存在しないメールアドレスでUnauthorizedExceptionを投げること
-- [x] SHA256フォールバック: HMACで見つからなければSHA256で再検索すること
+- [x] HMACのみで検索し、SHA256フォールバックを行わないこと
 - [x] production環境ではCookieのsecureとsameSiteが適切に設定されること
 
 #### refresh
@@ -397,6 +398,32 @@
 #### deleteUser
 
 - [x] ユーザーを削除しUserDtoを返すこと
+
+### emailHashマイグレーション (`src/identity/email-hash-migration.spec.ts`)
+
+#### 基本動作
+
+- [x] ユーザーが0件の時、全カウントが0の結果を返すこと
+
+#### HMACへの更新
+
+- [x] SHA256ハッシュのユーザーがHMACに更新されること
+- [x] 既にHMACのユーザーはスキップされること（冪等）
+
+#### dry-runモード
+
+- [x] dry-runの時、DBを更新せず結果のみ返すこと
+
+#### スキップケース
+
+- [x] emailEncryptedがnullのユーザーはスキップされること
+- [x] 復号に失敗したユーザーはエラーカウントされること
+
+#### 複数ユーザー混在
+
+- [x] SHA256・HMAC済み・null混在の時、それぞれ正しくカウントされること
+
+---
 
 ### CryptoService (`src/identity/crypto.service.spec.ts`)
 
