@@ -87,6 +87,7 @@ export class ConversationsController {
   }
 
   @Get("unread-count")
+  @SkipThrottle()
   @ApiOperation({ summary: "未読メッセージの合計数を取得する" })
   @ApiResponse({
     status: 200,
