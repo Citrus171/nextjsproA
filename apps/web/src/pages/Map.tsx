@@ -190,7 +190,7 @@ export default function Map() {
             setError(null);
           })
           .catch(() => setError("マーカーデータの取得に失敗しました"));
-      }, 500);
+      }, 1500);
     },
     [api]
   );
