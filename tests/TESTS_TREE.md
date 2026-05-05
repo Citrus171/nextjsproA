@@ -90,6 +90,24 @@ apps/api/src/
 │               ├── DBが異常なとき、status:errorを返すこと
 │               └── check()はHealthCheckService.check()を呼び出すこと
 ├── posts/
+│   ├── image-processing.service.spec.ts
+│   │   ├── processが処理済みBufferを返すこと
+│   │   ├── width=1200・withoutEnlargement=true でリサイズすること
+│   │   ├── quality=80 でJPEG変換すること
+│   │   └── sharpがエラーをスローした時、BadRequestExceptionになること
+│   ├── file-storage.service.spec.ts
+│   │   ├── saveFile
+│   │   │   ├── saveFileが uploads/{postId}/{uuid}.jpg 形式のURLを返すこと
+│   │   │   ├── saveFileがwriteFileSyncを呼ぶこと
+│   │   │   ├── ディレクトリが存在しない時、mkdirSyncを呼ぶこと
+│   │   │   ├── ディレクトリが存在する時、mkdirSyncを呼ばないこと
+│   │   │   ├── imageProcessing.processに入力Bufferを渡すこと
+│   │   │   ├── 保存ファイル名がUUID v4 + .jpg 形式になること
+│   │   │   ├── 元のファイル名（originalname）が保存パスに含まれないこと
+│   │   │   └── imageProcessingがエラーをスローした時、BadRequestExceptionが伝播すること
+│   │   └── deleteFile
+│   │       ├── ファイルが存在する時、unlinkSyncを呼ぶこと
+│   │       └── ファイルが存在しない場合、unlinkSyncを呼ばないこと
 │   ├── post.service.spec.ts
 │   │   ├── findAll
 │   │   │   ├── ページ1・perPage5 で skip=0 / take=5 を渡す
@@ -100,12 +118,7 @@ apps/api/src/
 │   │   ├── create
 │   │   │   ├── ファイルなしで投稿を作成する
 │   │   │   ├── postType 未指定の時、cat で保存して返す
-│   │   │   ├── ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
-│   │   │   ├── アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
-│   │   │   ├── 画像が sharp でリサイズ・JPEG変換されること
-│   │   │   ├── 保存ファイル名が UUID v4 + .jpg 形式になること
-│   │   │   ├── 元のファイル名（originalname）が保存パスに含まれないこと
-│   │   │   ├── 日本語ファイル名でも UUID v4 + .jpg で保存されること
+│   │   │   ├── ファイルありで投稿を作成する時、fileStorageService.saveFileが呼ばれること
 │   │   │   ├── 元のファイルの拡張子に関わらず保存拡張子が .jpg になること
 │   │   │   ├── 無料プランの画像が3枚を超えると ForbiddenException をスローする
 │   │   │   ├── premium ユーザーは画像を10枚まで添付できる
@@ -127,7 +140,6 @@ apps/api/src/
 │   │   │   └── DB作成失敗時に保存済みファイルを削除する
 │   │   ├── removeImage
 │   │   │   ├── オーナーが画像を削除できる
-│   │   │   ├── ファイルが存在しない場合 unlinkSync を呼ばない
 │   │   │   ├── オーナー以外は ForbiddenException
 │   │   │   ├── 存在しない投稿は NotFoundException
 │   │   │   └── 別の投稿に属する画像は NotFoundException

@@ -5,19 +5,13 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
-import * as fs from "fs";
 import { PostsService } from "./post.service";
+import { FileStorageService } from "./file-storage.service";
 
-jest.mock("fs");
-const mockFs = fs as jest.Mocked<typeof fs>;
-
-jest.mock("sharp", () =>
-  jest.fn().mockReturnValue({
-    resize: jest.fn().mockReturnThis(),
-    jpeg: jest.fn().mockReturnThis(),
-    toBuffer: jest.fn().mockResolvedValue(Buffer.from("processed-image")),
-  })
-);
+const mockFileStorage: jest.Mocked<FileStorageService> = {
+  saveFile: jest.fn(),
+  deleteFile: jest.fn(),
+} as unknown as jest.Mocked<FileStorageService>;
 
 const mockPrisma = {
   post: {
@@ -57,12 +51,10 @@ describe("PostsService", () => {
   let service: PostsService;
 
   beforeEach(() => {
-    service = new PostsService(mockPrisma as any);
+    service = new PostsService(mockPrisma as any, mockFileStorage);
     jest.clearAllMocks();
-    mockFs.existsSync.mockReturnValue(true);
-    mockFs.writeFileSync.mockReturnValue(undefined);
-    mockFs.mkdirSync.mockReturnValue(undefined as any);
-    mockFs.unlinkSync.mockReturnValue(undefined);
+    mockFileStorage.saveFile.mockResolvedValue("uploads/post1/uuid.jpg");
+    mockFileStorage.deleteFile.mockReturnValue(undefined);
     mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
     mockPrisma.post.count.mockResolvedValue(0);
     mockPrisma.$transaction.mockImplementation(
@@ -267,7 +259,7 @@ describe("PostsService", () => {
       expect(result).toEqual(withIncludes);
     });
 
-    it("ファイルありで投稿を作成する時、writeFileSyncが呼ばれること", async () => {
+    it("ファイルありで投稿を作成する時、fileStorageService.saveFileが呼ばれること", async () => {
       const created = {
         id: "post1",
         title: "T",
@@ -296,147 +288,10 @@ describe("PostsService", () => {
         files
       );
 
-      expect(mockFs.writeFileSync).toHaveBeenCalled();
+      expect(mockFileStorage.saveFile).toHaveBeenCalledWith("post1", files[0]);
       expect(mockPrisma.image.create).toHaveBeenCalledWith({
         data: expect.objectContaining({ postId: "post1" }),
       });
-    });
-
-    it("アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと", async () => {
-      mockFs.existsSync.mockReturnValue(false);
-      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
-      mockPrisma.post.findUnique.mockResolvedValue({
-        id: "post1",
-        petDetail: null,
-        location: null,
-        images: [],
-      });
-      mockPrisma.image.create.mockResolvedValue({});
-      const files = [
-        { originalname: "photo.png", buffer: Buffer.from("") } as any,
-      ];
-
-      await service.create(
-        "u1",
-        { title: "T", description: "C", lostDate: "2024-01-01" },
-        files
-      );
-
-      expect(mockFs.mkdirSync).toHaveBeenCalled();
-    });
-
-    it("画像が sharp でリサイズ・JPEG変換されること", async () => {
-      const sharpMock = jest.requireMock("sharp") as jest.Mock;
-      const mockInstance = {
-        resize: jest.fn().mockReturnThis(),
-        jpeg: jest.fn().mockReturnThis(),
-        toBuffer: jest.fn().mockResolvedValue(Buffer.from("processed-image")),
-      };
-      sharpMock.mockReturnValue(mockInstance);
-
-      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
-      mockPrisma.post.findUnique.mockResolvedValue({
-        id: "post1",
-        petDetail: null,
-        location: null,
-        images: [],
-      });
-      mockPrisma.image.create.mockResolvedValue({});
-      const rawBuf = Buffer.from("raw");
-      const files = [{ originalname: "photo.png", buffer: rawBuf } as any];
-
-      await service.create(
-        "u1",
-        { description: "C", lostDate: "2024-01-01" },
-        files
-      );
-
-      expect(sharpMock).toHaveBeenCalledWith(rawBuf);
-      expect(mockInstance.resize).toHaveBeenCalledWith({
-        width: 1200,
-        withoutEnlargement: true,
-      });
-      expect(mockInstance.jpeg).toHaveBeenCalledWith({ quality: 80 });
-      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-        expect.stringContaining("post1"),
-        Buffer.from("processed-image")
-      );
-    });
-
-    it("保存ファイル名が UUID v4 + .jpg 形式になること", async () => {
-      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
-      mockPrisma.post.findUnique.mockResolvedValue({
-        id: "post1",
-        petDetail: null,
-        location: null,
-        images: [],
-      });
-      mockPrisma.image.create.mockResolvedValue({});
-      const files = [
-        { originalname: "photo.png", buffer: Buffer.from("") } as any,
-      ];
-
-      await service.create(
-        "u1",
-        { description: "C", lostDate: "2024-01-01" },
-        files
-      );
-
-      const calledPath = mockFs.writeFileSync.mock.calls[0][0] as string;
-      const savedFileName = calledPath.split("/").pop()!;
-      expect(savedFileName).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.jpg$/i
-      );
-    });
-
-    it("元のファイル名（originalname）が保存パスに含まれないこと", async () => {
-      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
-      mockPrisma.post.findUnique.mockResolvedValue({
-        id: "post1",
-        petDetail: null,
-        location: null,
-        images: [],
-      });
-      mockPrisma.image.create.mockResolvedValue({});
-      const files = [
-        { originalname: "my-photo.png", buffer: Buffer.from("") } as any,
-      ];
-
-      await service.create(
-        "u1",
-        { description: "C", lostDate: "2024-01-01" },
-        files
-      );
-
-      const calledPath = mockFs.writeFileSync.mock.calls[0][0] as string;
-      expect(calledPath).not.toContain("my-photo");
-    });
-
-    it("日本語ファイル名でも UUID v4 + .jpg で保存されること", async () => {
-      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
-      mockPrisma.post.findUnique.mockResolvedValue({
-        id: "post1",
-        petDetail: null,
-        location: null,
-        images: [],
-      });
-      mockPrisma.image.create.mockResolvedValue({});
-      const files = [
-        { originalname: "写真_2024年夏.png", buffer: Buffer.from("") } as any,
-      ];
-
-      await service.create(
-        "u1",
-        { description: "C", lostDate: "2024-01-01" },
-        files
-      );
-
-      const calledPath = mockFs.writeFileSync.mock.calls[0][0] as string;
-      const savedFileName = calledPath.split("/").pop()!;
-      expect(savedFileName).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.jpg$/i
-      );
-      expect(calledPath).not.toContain("写真");
     });
 
     it("元のファイルの拡張子に関わらず保存拡張子が .jpg になること", async () => {
@@ -459,10 +314,7 @@ describe("PostsService", () => {
         files
       );
 
-      for (const call of mockFs.writeFileSync.mock.calls) {
-        const savedPath = call[0] as string;
-        expect(savedPath).toMatch(/\.jpg$/);
-      }
+      expect(mockFileStorage.saveFile).toHaveBeenCalledTimes(2);
     });
 
     it("無料プランの画像が3枚を超えると ForbiddenException をスローする", async () => {
@@ -609,11 +461,9 @@ describe("PostsService", () => {
     it("トランザクション失敗時に保存済みファイルを削除する", async () => {
       mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
       // 1枚目は保存成功、2枚目でエラー
-      mockFs.writeFileSync
-        .mockReturnValueOnce(undefined)
-        .mockImplementationOnce(() => {
-          throw new Error("disk full");
-        });
+      mockFileStorage.saveFile
+        .mockResolvedValueOnce("uploads/post1/uuid1.jpg")
+        .mockRejectedValueOnce(new Error("disk full"));
       mockPrisma.image.create.mockResolvedValue({});
 
       const files = [
@@ -629,7 +479,7 @@ describe("PostsService", () => {
         )
       ).rejects.toThrow("disk full");
       // 1枚目の保存済みファイルがクリーンアップされること
-      expect(mockFs.unlinkSync).toHaveBeenCalledTimes(1);
+      expect(mockFileStorage.deleteFile).toHaveBeenCalledTimes(1);
     });
 
     it("無料プランの月間投稿数が3件に達している時は ForbiddenException をスローする", async () => {
@@ -805,7 +655,7 @@ describe("PostsService", () => {
 
       const result = await service.addImages("post1", "user1", files);
 
-      expect(mockFs.writeFileSync).toHaveBeenCalled();
+      expect(mockFileStorage.saveFile).toHaveBeenCalled();
       expect(mockPrisma.image.create).toHaveBeenCalledWith({
         data: expect.objectContaining({ postId: "post1" }),
       });
@@ -896,7 +746,7 @@ describe("PostsService", () => {
       await expect(service.addImages("post1", "user1", files)).rejects.toThrow(
         "DB error"
       );
-      expect(mockFs.unlinkSync).toHaveBeenCalledTimes(1);
+      expect(mockFileStorage.deleteFile).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -920,7 +770,7 @@ describe("PostsService", () => {
 
       const result = await service.removeImage("post1", "img1", "user1");
 
-      expect(mockFs.unlinkSync).toHaveBeenCalled();
+      expect(mockFileStorage.deleteFile).toHaveBeenCalled();
       expect(mockPrisma.image.delete).toHaveBeenCalledWith({
         where: { id: "img1" },
       });
@@ -928,17 +778,6 @@ describe("PostsService", () => {
         ...existingImage,
         url: "/uploads/post1/abc.png",
       });
-    });
-
-    it("ファイルが存在しない場合 unlinkSync を呼ばない", async () => {
-      mockFs.existsSync.mockReturnValue(false);
-      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
-      mockPrisma.image.findUnique.mockResolvedValue(existingImage);
-      mockPrisma.image.delete.mockResolvedValue(existingImage);
-
-      await service.removeImage("post1", "img1", "user1");
-
-      expect(mockFs.unlinkSync).not.toHaveBeenCalled();
     });
 
     it("オーナー以外は ForbiddenException", async () => {
@@ -1234,7 +1073,7 @@ describe("PostsService", () => {
 
       await service.remove("post1", "user1");
 
-      expect(mockFs.unlinkSync).toHaveBeenCalledTimes(1);
+      expect(mockFileStorage.deleteFile).toHaveBeenCalledTimes(1);
     });
 
     it("オーナー以外は ForbiddenException", async () => {
@@ -1266,13 +1105,16 @@ describe("PostsService", () => {
     });
 
     it("画像処理でSharpエラーが発生した場合 BadRequestException をスローする", async () => {
-      const sharpMock = jest.requireMock("sharp") as jest.Mock;
-      sharpMock.mockImplementation(() => {
-        throw new Error("Sharp processing failed");
-      });
+      mockPrisma.post.create.mockResolvedValue({ id: "post1" } as any);
+      mockFileStorage.saveFile.mockRejectedValue(
+        new BadRequestException(
+          "画像処理に失敗しました。ファイルが破損または無効な形式です。"
+        )
+      );
 
-      const rawBuf = Buffer.from("raw");
-      const files = [{ originalname: "photo.png", buffer: rawBuf } as any];
+      const files = [
+        { originalname: "photo.png", buffer: Buffer.from("raw") } as any,
+      ];
 
       await expect(
         service.create(

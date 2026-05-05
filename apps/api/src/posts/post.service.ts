@@ -14,10 +14,7 @@ import {
   type Gender,
   type Prefecture,
 } from "@prisma/client";
-import * as fs from "fs";
-import * as path from "path";
-import { v4 as uuidv4 } from "uuid";
-import * as sharp from "sharp";
+import { FileStorageService } from "./file-storage.service";
 import {
   CreatePostDto,
   CreatePetDetailDto,
@@ -242,44 +239,13 @@ function buildLocationCreateData(
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
-
-  private async saveFile(
-    postId: string,
-    file: Express.Multer.File
-  ): Promise<string> {
-    const uploadDir = path.join(__dirname, "../../uploads", postId);
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    let processedBuffer: Buffer;
-    try {
-      processedBuffer = await sharp(file.buffer)
-        .resize({ width: 1200, withoutEnlargement: true })
-        .jpeg({ quality: 80 })
-        .toBuffer();
-    } catch (_err) {
-      throw new BadRequestException(
-        "画像処理に失敗しました。ファイルが破損または無効な形式です。"
-      );
-    }
-
-    const fileName = `${uuidv4()}.jpg`;
-    // 書き込みエラー（例: disk full）はここでそのまま例外として伝播させる
-    fs.writeFileSync(path.join(uploadDir, fileName), processedBuffer);
-    return `uploads/${postId}/${fileName}`;
-  }
+  constructor(
+    private prisma: PrismaService,
+    private fileStorage: FileStorageService
+  ) {}
 
   private prefixImageUrl(url: string): string {
     return `/${url}`;
-  }
-
-  private deleteFile(url: string): void {
-    const filePath = path.join(__dirname, "../../", url);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
   }
 
   async create(
@@ -346,7 +312,7 @@ export class PostsService {
     const savedUrls: string[] = [];
     try {
       for (const file of files) {
-        const url = await this.saveFile(postId, file);
+        const url = await this.fileStorage.saveFile(postId, file);
         savedUrls.push(url);
       }
 
@@ -371,7 +337,7 @@ export class PostsService {
     } catch (e) {
       for (const url of savedUrls) {
         try {
-          this.deleteFile(url);
+          this.fileStorage.deleteFile(url);
         } catch {}
       }
       try {
@@ -479,7 +445,7 @@ export class PostsService {
     const savedUrls: string[] = [];
     try {
       for (const file of files) {
-        const url = await this.saveFile(postId, file);
+        const url = await this.fileStorage.saveFile(postId, file);
         savedUrls.push(url);
       }
 
@@ -499,7 +465,7 @@ export class PostsService {
     } catch (error) {
       for (const url of savedUrls) {
         try {
-          this.deleteFile(url);
+          this.fileStorage.deleteFile(url);
         } catch {}
       }
       throw error;
@@ -518,7 +484,7 @@ export class PostsService {
     if (!image || image.postId !== postId)
       throw new NotFoundException("画像が見つかりません");
 
-    this.deleteFile(image.url);
+    this.fileStorage.deleteFile(image.url);
     const deleted = await this.prisma.image.delete({ where: { id: imageId } });
     return { ...deleted, url: this.prefixImageUrl(deleted.url) };
   }
@@ -616,7 +582,7 @@ export class PostsService {
     }
 
     for (const image of post.images) {
-      this.deleteFile(image.url);
+      this.fileStorage.deleteFile(image.url);
     }
 
     return this.prisma.post.delete({ where: { id } });
