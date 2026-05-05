@@ -31,6 +31,45 @@ interface MigrationPrisma {
   };
 }
 
+async function processUser(
+  user: {
+    id: string;
+    emailEncrypted: string | null;
+    emailHash: string | null;
+  },
+  crypto: MigrationCrypto,
+  prisma: MigrationPrisma,
+  result: MigrationResult,
+  dryRun: boolean
+): Promise<void> {
+  if (!user.emailEncrypted) {
+    result.skipped++;
+    return;
+  }
+
+  const plain = crypto.decryptEmail(user.emailEncrypted);
+  if (!plain) {
+    result.errors++;
+    return;
+  }
+
+  const normalized = crypto.normalizeEmail(plain);
+  const hmac = crypto.hmacEmail(normalized);
+
+  if (user.emailHash === hmac) {
+    result.skipped++;
+    return;
+  }
+
+  if (!dryRun) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { emailHash: hmac },
+    });
+  }
+  result.migrated++;
+}
+
 export async function migrateEmailHashToHmac(
   prisma: MigrationPrisma,
   crypto: MigrationCrypto,
@@ -50,32 +89,7 @@ export async function migrateEmailHashToHmac(
   result.total = users.length;
 
   for (const user of users) {
-    if (!user.emailEncrypted) {
-      result.skipped++;
-      continue;
-    }
-
-    const plain = crypto.decryptEmail(user.emailEncrypted);
-    if (!plain) {
-      result.errors++;
-      continue;
-    }
-
-    const normalized = crypto.normalizeEmail(plain);
-    const hmac = crypto.hmacEmail(normalized);
-
-    if (user.emailHash === hmac) {
-      result.skipped++;
-      continue;
-    }
-
-    if (!dryRun) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { emailHash: hmac },
-      });
-    }
-    result.migrated++;
+    await processUser(user, crypto, prisma, result, dryRun);
   }
 
   return result;

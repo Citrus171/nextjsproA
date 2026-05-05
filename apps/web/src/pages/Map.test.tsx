@@ -495,6 +495,10 @@ describe("Map", () => {
 
       triggerMapClick?.(35.91, 139.61);
 
+      await waitFor(() => {
+        expect(mockReverseGeocode).toHaveBeenCalledWith(35.91, 139.61);
+      });
+
       expect(
         await screen.findByRole("heading", { name: "目撃を報告する" })
       ).toBeInTheDocument();

@@ -23,12 +23,7 @@
 
 - [x] ファイルなしで投稿を作成する
 - [x] postType 未指定の時、cat で保存して返す
-- [x] ファイルありで投稿を作成する時、writeFileSyncが呼ばれること
-- [x] アップロードディレクトリが存在しない時、mkdirSyncを呼ぶこと
-- [x] 画像が sharp でリサイズ・JPEG変換されること
-- [x] 保存ファイル名が UUID v4 + .jpg 形式になること
-- [x] 元のファイル名（originalname）が保存パスに含まれないこと
-- [x] 日本語ファイル名でも UUID v4 + .jpg で保存されること
+- [x] ファイルありで投稿を作成する時、fileStorageService.saveFileが呼ばれること
 - [x] 元のファイルの拡張子に関わらず保存拡張子が .jpg になること
 - [x] 無料プランの画像が3枚を超えると ForbiddenException をスローする
 - [x] premium ユーザーは画像を10枚まで添付できる
@@ -38,9 +33,9 @@
 - [x] petDetail と location を含む時、トランザクションで一括作成する
 - [x] lostDate を指定して作成できる
 - [x] トランザクション失敗時に保存済みファイルを削除する
-  - [x] 無料プランの月間投稿数が3件に達している時は ForbiddenException をスローする
-  - [x] 翌月になると無料プランの投稿数はリセットされる
-  - [x] premium ユーザーは月間投稿数の制限を受けない
+- [x] 無料プランの月間投稿数が3件に達している時は ForbiddenException をスローする
+- [x] 翌月になると無料プランの投稿数はリセットされる
+- [x] premium ユーザーは月間投稿数の制限を受けない
 
 #### addImages
 
@@ -54,10 +49,34 @@
 #### removeImage
 
 - [x] オーナーが画像を削除できる
-- [x] ファイルが存在しない場合 unlinkSync を呼ばない
 - [x] オーナー以外は ForbiddenException
 - [x] 存在しない投稿は NotFoundException
 - [x] 別の投稿に属する画像は NotFoundException
+
+### ImageProcessingService (`src/posts/image-processing.service.spec.ts`)
+
+- [x] processが処理済みBufferを返すこと
+- [x] width=1200・withoutEnlargement=true でリサイズすること
+- [x] quality=80 でJPEG変換すること
+- [x] sharpがエラーをスローした時、BadRequestExceptionになること
+
+### FileStorageService (`src/posts/file-storage.service.spec.ts`)
+
+#### saveFile
+
+- [x] saveFileが uploads/{postId}/{uuid}.jpg 形式のURLを返すこと
+- [x] saveFileがwriteFileSyncを呼ぶこと
+- [x] ディレクトリが存在しない時、mkdirSyncを呼ぶこと
+- [x] ディレクトリが存在する時、mkdirSyncを呼ばないこと
+- [x] imageProcessing.processに入力Bufferを渡すこと
+- [x] 保存ファイル名がUUID v4 + .jpg 形式になること
+- [x] 元のファイル名（originalname）が保存パスに含まれないこと
+- [x] imageProcessingがエラーをスローした時、BadRequestExceptionが伝播すること
+
+#### deleteFile
+
+- [x] ファイルが存在する時、unlinkSyncを呼ぶこと
+- [x] ファイルが存在しない場合、unlinkSyncを呼ばないこと
 
 #### update
 
