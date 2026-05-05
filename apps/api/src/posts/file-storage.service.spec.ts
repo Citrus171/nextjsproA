@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import * as path from "path";
 import { BadRequestException } from "@nestjs/common";
 import { FileStorageService } from "./file-storage.service";
 import { ImageProcessingService } from "./image-processing.service";
