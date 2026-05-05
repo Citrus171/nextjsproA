@@ -339,6 +339,18 @@
 - [x] 切断時に userSocketMap から該当エントリが削除されること
 - [x] 別のソケットで上書きされている場合は削除しないこと
 
+#### 定期JWT検証（issue#140）
+
+- [x] トークンが期限切れの場合、60秒後に定期チェックで切断されること
+- [x] 有効なトークンを保持している場合、60秒経過後も切断されないこと
+- [x] 切断時に定期チェックのタイマーが解除されること
+
+#### refreshToken（issue#140）
+
+- [x] 有効なトークンで client.data.token が更新され、tokenRefreshed が emit されること
+- [x] 無効なトークンで tokenRefreshed の失敗が emit されること
+- [x] Bearer プレフィックス付きトークンも処理できること
+
 #### broadcastMessage
 
 - [x] 最小化されたペイロードのみemitする（readAtを含まない）
