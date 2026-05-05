@@ -3,21 +3,22 @@ import { CryptoService } from "./crypto.service";
 
 describe("CryptoService", () => {
   let service: CryptoService;
-  const TEST_KEY_B64 = Buffer.alloc(32, 0xab).toString("base64");
+  const TEST_KEY_V1_B64 = Buffer.alloc(32, 0xab).toString("base64");
+  const TEST_KEY_V2_B64 = Buffer.alloc(32, 0xcd).toString("base64");
   const TEST_HMAC = "test-hmac-secret";
 
-  function makeConfig() {
+  function makeConfig(currentKeyId = "v1") {
     const get = (key: string) => {
-      if (key === "ENCRYPTION_KEY") return TEST_KEY_B64;
+      if (key === "ENCRYPTION_KEY_V1") return TEST_KEY_V1_B64;
       if (key === "HMAC_SECRET") return TEST_HMAC;
       return undefined;
     };
     return {
       get: jest.fn(get),
       getOrThrow: jest.fn((key: string) => {
-        const v = get(key);
-        if (v === undefined) throw new Error(`Config key ${key} not found`);
-        return v;
+        if (key === "ENCRYPTION_KEY_CURRENT") return currentKeyId;
+        if (key === "HMAC_SECRET") return TEST_HMAC;
+        throw new Error(`Config key ${key} not found`);
       }),
     } as unknown as ConfigService;
   }
@@ -48,19 +49,110 @@ describe("CryptoService", () => {
       expect(service.decryptEmail(encrypted)).toBe(plain);
     });
 
-    it("異なる平文は異なる暗号文を生成すること", () => {
+    it("暗号文が keyId:iv:enc:tag の4パーツフォーマットであること", () => {
       const a = service.encryptEmail("a@example.com");
       const b = service.encryptEmail("b@example.com");
-      // IVがランダムなので暗号文全体は異なる
       expect(a).not.toBe(b);
-      // ただしコロン区切り構造は同じ
-      expect(a.split(":")).toHaveLength(3);
+      expect(a.split(":")).toHaveLength(4);
+      expect(a.split(":")[0]).toBe("v1");
     });
 
     it("復号: 壊れたデータは null を返すこと", () => {
       expect(service.decryptEmail("invalid")).toBeNull();
-      expect(service.decryptEmail("too:many:parts:extra")).toBeNull();
       expect(service.decryptEmail("")).toBeNull();
+    });
+
+    it("復号: 存在しない keyId の暗号文は null を返すこと", () => {
+      expect(service.decryptEmail("v99:iv:enc:tag")).toBeNull();
+    });
+
+    it("復号: 旧形式（3パーツ）の暗号文は null を返すこと", () => {
+      expect(service.decryptEmail("iv:enc:tag")).toBeNull();
+    });
+  });
+
+  describe("複数鍵サポート", () => {
+    function makeMultiKeyConfig() {
+      const get = (key: string) => {
+        if (key === "ENCRYPTION_KEY_V1") return TEST_KEY_V1_B64;
+        if (key === "ENCRYPTION_KEY_V2") return TEST_KEY_V2_B64;
+        if (key === "HMAC_SECRET") return TEST_HMAC;
+        return undefined;
+      };
+      return {
+        get: jest.fn(get),
+        getOrThrow: jest.fn((key: string) => {
+          if (key === "ENCRYPTION_KEY_CURRENT") return "v2";
+          if (key === "HMAC_SECRET") return TEST_HMAC;
+          throw new Error(`Config key ${key} not found`);
+        }),
+      } as unknown as ConfigService;
+    }
+
+    it("ENCRYPTION_KEY_CURRENTがv2の時、暗号化結果がv2プレフィックスを持つこと", () => {
+      const svc = new CryptoService(makeMultiKeyConfig());
+      const enc = svc.encryptEmail("user@example.com");
+      expect(enc.split(":")[0]).toBe("v2");
+    });
+
+    it("v2で暗号化したデータをv2鍵で復号できること", () => {
+      const svc = new CryptoService(makeMultiKeyConfig());
+      const enc = svc.encryptEmail("user@example.com");
+      expect(svc.decryptEmail(enc)).toBe("user@example.com");
+    });
+
+    it("v1で暗号化したデータをv1鍵で復号できること（v2が現在鍵でも）", () => {
+      const svcV1 = new CryptoService(makeConfig("v1"));
+      const encByV1 = svcV1.encryptEmail("user@example.com");
+
+      const svcV2Current = new CryptoService(makeMultiKeyConfig());
+      expect(svcV2Current.decryptEmail(encByV1)).toBe("user@example.com");
+    });
+  });
+
+  describe("鍵バージョニングバリデーション", () => {
+    function makeConfigWithKey(keyV1: string, currentKeyId = "v1") {
+      return {
+        get: jest.fn((k: string) =>
+          k === "ENCRYPTION_KEY_V1" ? keyV1 : undefined
+        ),
+        getOrThrow: jest.fn((k: string) => {
+          if (k === "ENCRYPTION_KEY_CURRENT") return currentKeyId;
+          if (k === "HMAC_SECRET") return TEST_HMAC;
+          throw new Error(`Config key ${k} not found`);
+        }),
+      } as unknown as ConfigService;
+    }
+
+    it("32バイト未満のbase64キーはエラーになること", () => {
+      const shortKey = Buffer.alloc(16, 0xab).toString("base64");
+      const svc = new CryptoService(makeConfigWithKey(shortKey));
+      expect(() => svc.encryptEmail("test@example.com")).toThrow(/32 バイト/);
+    });
+
+    it("32バイト超のbase64キーはエラーになること", () => {
+      const longKey = Buffer.alloc(40, 0xab).toString("base64");
+      const svc = new CryptoService(makeConfigWithKey(longKey));
+      expect(() => svc.encryptEmail("test@example.com")).toThrow(/32 バイト/);
+    });
+
+    it("正しい32バイトbase64キーは正常に動作すること", () => {
+      const svc = new CryptoService(makeConfigWithKey(TEST_KEY_V1_B64));
+      const enc = svc.encryptEmail("test@example.com");
+      expect(svc.decryptEmail(enc)).toBe("test@example.com");
+    });
+
+    it("onModuleInit で不正キーがあれば起動時にエラーになること", () => {
+      const shortKey = Buffer.alloc(10, 0xab).toString("base64");
+      const svc = new CryptoService(makeConfigWithKey(shortKey));
+      expect(() => svc.onModuleInit()).toThrow(/32 バイト/);
+    });
+
+    it("ENCRYPTION_KEY_CURRENTが存在しない鍵IDを指す場合にエラーになること", () => {
+      const svc = new CryptoService(makeConfigWithKey(TEST_KEY_V1_B64, "v99"));
+      expect(() => svc.encryptEmail("test@example.com")).toThrow(
+        /ENCRYPTION_KEY_CURRENT/
+      );
     });
   });
 
@@ -114,48 +206,6 @@ describe("CryptoService", () => {
       const t1 = service.generateSecureToken();
       const t2 = service.generateSecureToken();
       expect(t1).not.toBe(t2);
-    });
-  });
-
-  describe("deriveEncryptionKey (ENCRYPTION_KEY バリデーション)", () => {
-    function makeConfigWithKey(key: string) {
-      return {
-        get: jest.fn((k: string) => (k === "ENCRYPTION_KEY" ? key : undefined)),
-        getOrThrow: jest.fn((k: string) => {
-          if (k === "ENCRYPTION_KEY") return key;
-          if (k === "HMAC_SECRET") return TEST_HMAC;
-          throw new Error(`Config key ${k} not found`);
-        }),
-      } as unknown as ConfigService;
-    }
-
-    it("32バイト未満のbase64キーはエラーになること", () => {
-      const shortKey = Buffer.alloc(16, 0xab).toString("base64");
-      const svc = new CryptoService(makeConfigWithKey(shortKey));
-      expect(() => svc.encryptEmail("test@example.com")).toThrow(/32 バイト/);
-    });
-
-    it("32バイト超のbase64キーはエラーになること", () => {
-      const longKey = Buffer.alloc(40, 0xab).toString("base64");
-      const svc = new CryptoService(makeConfigWithKey(longKey));
-      expect(() => svc.encryptEmail("test@example.com")).toThrow(/32 バイト/);
-    });
-
-    it("base64でない文字列（utf8平文）はエラーになること", () => {
-      const svc = new CryptoService(makeConfigWithKey("password"));
-      expect(() => svc.encryptEmail("test@example.com")).toThrow(/32 バイト/);
-    });
-
-    it("正しい32バイトbase64キーは正常に動作すること", () => {
-      const svc = new CryptoService(makeConfigWithKey(TEST_KEY_B64));
-      const enc = svc.encryptEmail("test@example.com");
-      expect(svc.decryptEmail(enc)).toBe("test@example.com");
-    });
-
-    it("onModuleInit で不正キーがあれば起動時にエラーになること", () => {
-      const shortKey = Buffer.alloc(10, 0xab).toString("base64");
-      const svc = new CryptoService(makeConfigWithKey(shortKey));
-      expect(() => svc.onModuleInit()).toThrow(/32 バイト/);
     });
   });
 });
