@@ -40,18 +40,28 @@ apps/api/src/
 │   │       │   ├── パスワード不一致でUnauthorizedExceptionを投げること
 │   │       │   ├── 存在しないメールアドレスでUnauthorizedExceptionを投げること
 │   │       │   ├── HMACのみで検索し、SHA256フォールバックを行わないこと
-│   │       │   └── production環境ではCookieのsecureとsameSiteが適切に設定されること
+│   │       │   ├── production環境ではCookieのsecureとsameSiteが適切に設定されること
+│   │       │   ├── ログイン成功時に auth.login.success イベントをログ出力すること
+│   │       │   ├── パスワード不一致時に auth.login.failure イベントをログ出力すること
+│   │       │   └── メールアドレス未登録時に auth.login.failure イベントをログ出力すること
 │   │       ├── refresh
 │   │       │   ├── 有効なトークンで新しいAuthResultを返すこと
 │   │       │   ├── トークンが存在しない場合はUnauthorizedExceptionを投げること
-│   │       │   └── 期限切れトークンはUnauthorizedExceptionを投げること
+│   │       │   ├── 期限切れトークンはUnauthorizedExceptionを投げること
+│   │       │   ├── ローテーション: 新しいトークンのハッシュがDBに保存されること
+│   │       │   ├── 再利用検知: delete失敗時にUnauthorizedExceptionを投げること
+│   │       │   ├── リフレッシュ成功時に auth.refresh.success イベントをログ出力すること
+│   │       │   └── 再利用検知時に auth.refresh.reuse イベントをログ出力すること
 │   │       ├── logout
 │   │       │   ├── リフレッシュトークンを削除すること
-│   │       │   └── 存在しないトークンでもエラーを投げないこと
+│   │       │   ├── 存在しないトークンでもエラーを投げないこと
+│   │       │   ├── ログアウト成功時に auth.logout イベントをログ出力すること
+│   │       │   └── 存在しないトークンのログアウトではログ出力しないこと
 │   │       ├── register
 │   │       │   ├── 正常にユーザーを登録しUserDtoを返すこと
 │   │       │   ├── メールアドレス重複でConflictExceptionを投げること
-│   │       │   └── ニックネーム重複でConflictExceptionを投げること
+│   │       │   ├── ニックネーム重複でConflictExceptionを投げること
+│   │       │   └── 登録成功時に auth.register.success イベントをログ出力すること
 │   │       ├── findAll
 │   │       │   └── 全ユーザーをパスワードなしで返すこと
 │   │       └── deleteUser

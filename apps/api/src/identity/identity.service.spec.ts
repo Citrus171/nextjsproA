@@ -2,6 +2,7 @@ import { ConflictException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
+import { Logger } from "nestjs-pino";
 import { IdentityService } from "./identity.service";
 import { CryptoService } from "./crypto.service";
 
@@ -45,6 +46,15 @@ const mockCrypto = {
   generateSecureToken: jest.fn().mockReturnValue("a".repeat(96)),
 };
 
+const mockLogger: jest.Mocked<Logger> = {
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  verbose: jest.fn(),
+  fatal: jest.fn(),
+} as unknown as jest.Mocked<Logger>;
+
 async function makeUser(overrides: Record<string, unknown> = {}) {
   return {
     id: "user-1",
@@ -67,7 +77,8 @@ describe("IdentityService", () => {
       mockPrisma as any,
       mockJwt as unknown as JwtService,
       mockConfig,
-      mockCrypto as unknown as CryptoService
+      mockCrypto as unknown as CryptoService,
+      mockLogger
     );
   });
 
@@ -85,6 +96,20 @@ describe("IdentityService", () => {
       expect(result.setCookies[0].value).toBe("a".repeat(96));
       expect(result.setCookies[0].options.httpOnly).toBe(true);
       expect(result.setCookies[0].options.sameSite).toBe("lax");
+    });
+
+    it("ログイン成功時に auth.login.success イベントをログ出力すること", async () => {
+      const user = await makeUser();
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
+      mockPrisma.refreshToken.create.mockResolvedValueOnce({});
+
+      await service.login("user@example.com", "password123");
+
+      expect(mockLogger.log).toHaveBeenCalledWith("auth.login.success", {
+        event: "auth.login.success",
+        userId: "user-1",
+        email: "user@example.com",
+      });
     });
 
     it("DBにはtokenHashが保存され、平文トークンは保存されないこと", async () => {
@@ -110,12 +135,41 @@ describe("IdentityService", () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
+    it("パスワード不一致時に auth.login.failure イベントをログ出力すること", async () => {
+      const user = await makeUser();
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
+
+      await expect(
+        service.login("user@example.com", "wrongpassword")
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(mockLogger.warn).toHaveBeenCalledWith("auth.login.failure", {
+        event: "auth.login.failure",
+        email: "user@example.com",
+        reason: "password mismatch",
+      });
+    });
+
     it("存在しないメールアドレスでUnauthorizedExceptionを投げること", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce(null);
 
       await expect(service.login("no@example.com", "password")).rejects.toThrow(
         UnauthorizedException
       );
+    });
+
+    it("メールアドレス未登録時に auth.login.failure イベントをログ出力すること", async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(service.login("no@example.com", "password")).rejects.toThrow(
+        UnauthorizedException
+      );
+
+      expect(mockLogger.warn).toHaveBeenCalledWith("auth.login.failure", {
+        event: "auth.login.failure",
+        email: "no@example.com",
+        reason: "email not found",
+      });
     });
 
     it("HMACのみで検索し、SHA256フォールバックを行わないこと", async () => {
@@ -144,7 +198,8 @@ describe("IdentityService", () => {
         mockPrisma as any,
         mockJwt as unknown as JwtService,
         prodConfig,
-        mockCrypto as unknown as CryptoService
+        mockCrypto as unknown as CryptoService,
+        mockLogger
       );
 
       const user = await makeUser();
@@ -195,6 +250,24 @@ describe("IdentityService", () => {
       expect(createCall.data.tokenHash).not.toBe(newPlainToken);
     });
 
+    it("リフレッシュ成功時に auth.refresh.success イベントをログ出力すること", async () => {
+      const ts = new Date(Date.now() + 86400000);
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        tokenHash: "token-hash",
+        userId: "user-1",
+        expiresAt: ts,
+        user: { emailEncrypted: "enc-email", role: "user" },
+      });
+      mockPrisma.refreshToken.create.mockResolvedValueOnce({});
+
+      await service.refresh("old-refresh-token");
+
+      expect(mockLogger.log).toHaveBeenCalledWith("auth.refresh.success", {
+        event: "auth.refresh.success",
+        userId: "user-1",
+      });
+    });
+
     it("トークンが存在しない場合はUnauthorizedExceptionを投げること", async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValueOnce(null);
 
@@ -231,6 +304,29 @@ describe("IdentityService", () => {
         UnauthorizedException
       );
     });
+
+    it("再利用検知時に auth.refresh.reuse イベントをログ出力すること", async () => {
+      const ts = new Date(Date.now() + 86400000);
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        tokenHash: "token-hash",
+        userId: "user-1",
+        expiresAt: ts,
+        user: { emailEncrypted: "enc-email", role: "user" },
+      });
+      mockPrisma.refreshToken.delete.mockRejectedValueOnce(
+        new Error("already deleted")
+      );
+
+      await expect(service.refresh("old-refresh-token")).rejects.toThrow(
+        UnauthorizedException
+      );
+
+      expect(mockLogger.warn).toHaveBeenCalledWith("auth.refresh.reuse", {
+        event: "auth.refresh.reuse",
+        userId: "user-1",
+        reason: "token already used",
+      });
+    });
   });
 
   describe("logout", () => {
@@ -250,6 +346,29 @@ describe("IdentityService", () => {
       );
 
       await expect(service.logout("nonexistent")).resolves.toBeUndefined();
+    });
+
+    it("ログアウト成功時に auth.logout イベントをログ出力すること", async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        tokenHash: "token-hash",
+        userId: "user-1",
+      });
+      mockPrisma.refreshToken.delete.mockResolvedValueOnce({});
+
+      await service.logout("valid-token");
+
+      expect(mockLogger.log).toHaveBeenCalledWith("auth.logout", {
+        event: "auth.logout",
+        userId: "user-1",
+      });
+    });
+
+    it("存在しないトークンのログアウトではログ出力しないこと", async () => {
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce(null);
+
+      await service.logout("nonexistent");
+
+      expect(mockLogger.log).not.toHaveBeenCalled();
     });
   });
 
@@ -291,6 +410,19 @@ describe("IdentityService", () => {
       await expect(
         service.register("a@example.com", "pass", "dup")
       ).rejects.toThrow(ConflictException);
+    });
+
+    it("登録成功時に auth.register.success イベントをログ出力すること", async () => {
+      const createdUser = await makeUser();
+      mockPrisma.user.create.mockResolvedValueOnce(createdUser);
+
+      await service.register("user@example.com", "password123", "Alice");
+
+      expect(mockLogger.log).toHaveBeenCalledWith("auth.register.success", {
+        event: "auth.register.success",
+        userId: "user-1",
+        email: "user@example.com",
+      });
     });
   });
 
