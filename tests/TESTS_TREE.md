@@ -247,6 +247,9 @@ apps/api/src/
 │   │   │   ├── 無効なトークンで接続した場合は切断される
 │   │   │   ├── 有効なトークンで接続した場合はsocket.data.userIdが設定される
 │   │   │   └── Authorizationヘッダー（Bearer形式）でも認証できる
+│   │   ├── JWT 再検証
+│   │   │   ├── joinConversation 時にトークンが期限切れの場合は切断されること
+│   │   │   └── leaveConversation 時にトークンが期限切れの場合は切断されること
 │   │   ├── handleJoin
 │   │   │   ├── userIdがない場合は切断されjoinしない
 │   │   │   ├── 会話参加権限がない場合は切断されjoinしない
@@ -255,6 +258,9 @@ apps/api/src/
 │   │   ├── handleLeave
 │   │   │   ├── userIdがない場合は切断されleaveしない
 │   │   │   └── userIdがある場合は指定した会話ルームからleaveすること
+│   │   ├── handleDisconnect
+│   │   │   ├── 切断時に userSocketMap から該当エントリが削除されること
+│   │   │   └── 別のソケットで上書きされている場合は削除しないこと
 │   │   └── broadcastMessage
 │   │       └── 最小化されたペイロードのみemitする（readAtを含まない）
 │   └── conversation.controller.spec.ts
