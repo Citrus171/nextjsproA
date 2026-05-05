@@ -30,15 +30,29 @@ export default function LoginWithAuth() {
         setAuthError("ログインに失敗しました");
       }
     } catch (err: unknown) {
+      const status =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { status?: number } }).response?.status
+          : undefined;
       const msg =
         err && typeof err === "object" && "message" in err
           ? String((err as { message: unknown }).message)
           : String(err);
-      setAuthError(
-        msg === "Unauthorized"
-          ? "メールアドレスまたはパスワードが正しくありません"
-          : `エラー: ${msg}`
-      );
+      if (status === 429) {
+        setAuthError(
+          "リクエスト回数が多すぎます。しばらく待ってから再試行してください。"
+        );
+      } else if (status === 500 || status === 502 || status === 503) {
+        setAuthError(
+          "サーバーに接続できません。APIサーバーが起動しているか確認してください。"
+        );
+      } else {
+        setAuthError(
+          msg === "Unauthorized"
+            ? "メールアドレスまたはパスワードが正しくありません"
+            : `エラー: ${msg}`
+        );
+      }
     } finally {
       setSubmitting(false);
     }

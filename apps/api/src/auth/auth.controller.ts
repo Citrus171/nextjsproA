@@ -37,7 +37,7 @@ export class AuthController {
   }
 
   @Post("refresh")
-  @Throttle({ login: {} })
+  @Throttle({ default: {} })
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, type: AccessTokenResponseDto })
   async refresh(

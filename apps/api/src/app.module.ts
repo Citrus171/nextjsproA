@@ -20,7 +20,8 @@ import { AppThrottlerGuard } from "./auth/throttler.guard";
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot({
       throttlers:
-        process.env.NODE_ENV === "test"
+        process.env.NODE_ENV === "test" ||
+        process.env.NODE_ENV === "development"
           ? [
               { name: "default", ttl: 1_000, limit: 10_000 },
               { name: "login", ttl: 1_000, limit: 10_000 },
