@@ -6,6 +6,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
+import { Logger } from "nestjs-pino";
 import { PrismaService } from "../prisma.service";
 import { CryptoService } from "./crypto.service";
 
@@ -53,7 +54,8 @@ export class IdentityService extends IIdentityService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
-    private readonly crypto: CryptoService
+    private readonly crypto: CryptoService,
+    private readonly logger: Logger
   ) {
     super();
   }
@@ -63,10 +65,20 @@ export class IdentityService extends IIdentityService {
     const hmac = this.crypto.hmacEmail(normalized);
     const user = await this.findUserByHash(hmac);
     if (!user) {
+      this.logger.warn("auth.login.failure", {
+        event: "auth.login.failure",
+        email: normalized,
+        reason: "email not found",
+      });
       throw new UnauthorizedException("認証情報が正しくありません");
     }
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
+      this.logger.warn("auth.login.failure", {
+        event: "auth.login.failure",
+        email: normalized,
+        reason: "password mismatch",
+      });
       throw new UnauthorizedException("認証情報が正しくありません");
     }
     const refreshToken = this.crypto.generateSecureToken();
@@ -84,6 +96,11 @@ export class IdentityService extends IIdentityService {
       role: user.role,
     };
     const accessToken = this.jwt.sign(payload);
+    this.logger.log("auth.login.success", {
+      event: "auth.login.success",
+      userId: user.id,
+      email: this.decryptSafely(user.emailEncrypted),
+    });
     return {
       accessToken,
       setCookies: [this.buildRefreshCookie(refreshToken)],
@@ -104,6 +121,11 @@ export class IdentityService extends IIdentityService {
         where: { tokenHash },
       });
     } catch {
+      this.logger.warn("auth.refresh.reuse", {
+        event: "auth.refresh.reuse",
+        userId: rec.userId,
+        reason: "token already used",
+      });
       throw new UnauthorizedException("無効なリフレッシュトークンです");
     }
     const newToken = this.crypto.generateSecureToken();
@@ -121,6 +143,10 @@ export class IdentityService extends IIdentityService {
       role: rec.user.role,
     };
     const accessToken = this.jwt.sign(payload);
+    this.logger.log("auth.refresh.success", {
+      event: "auth.refresh.success",
+      userId: rec.userId,
+    });
     return {
       accessToken,
       setCookies: [this.buildRefreshCookie(newToken)],
@@ -129,6 +155,16 @@ export class IdentityService extends IIdentityService {
 
   async logout(cookieToken: string): Promise<void> {
     const tokenHash = this.crypto.sha256Hex(cookieToken);
+    const rec = await this.prisma.refreshToken.findUnique({
+      where: { tokenHash },
+      select: { userId: true },
+    });
+    if (rec) {
+      this.logger.log("auth.logout", {
+        event: "auth.logout",
+        userId: rec.userId,
+      });
+    }
     try {
       await this.prisma.refreshToken.delete({
         where: { tokenHash },
@@ -156,6 +192,11 @@ export class IdentityService extends IIdentityService {
           password: hashed,
           nickname,
         },
+      });
+      this.logger.log("auth.register.success", {
+        event: "auth.register.success",
+        userId: user.id,
+        email: normalized,
       });
       return {
         id: user.id,

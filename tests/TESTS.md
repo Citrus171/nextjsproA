@@ -414,23 +414,33 @@
 - [x] 存在しないメールアドレスでUnauthorizedExceptionを投げること
 - [x] HMACのみで検索し、SHA256フォールバックを行わないこと
 - [x] production環境ではCookieのsecureとsameSiteが適切に設定されること
+- [x] ログイン成功時に auth.login.success イベントをログ出力すること
+- [x] パスワード不一致時に auth.login.failure イベントをログ出力すること
+- [x] メールアドレス未登録時に auth.login.failure イベントをログ出力すること
 
 #### refresh
 
 - [x] 有効なトークンで新しいAuthResultを返すこと
 - [x] トークンが存在しない場合はUnauthorizedExceptionを投げること
 - [x] 期限切れトークンはUnauthorizedExceptionを投げること
+- [x] ローテーション: 新しいトークンのハッシュがDBに保存されること
+- [x] 再利用検知: delete失敗時にUnauthorizedExceptionを投げること
+- [x] リフレッシュ成功時に auth.refresh.success イベントをログ出力すること
+- [x] 再利用検知時に auth.refresh.reuse イベントをログ出力すること
 
 #### logout
 
 - [x] リフレッシュトークンを削除すること
 - [x] 存在しないトークンでもエラーを投げないこと
+- [x] ログアウト成功時に auth.logout イベントをログ出力すること
+- [x] 存在しないトークンのログアウトではログ出力しないこと
 
 #### register
 
 - [x] 正常にユーザーを登録しUserDtoを返すこと
 - [x] メールアドレス重複でConflictExceptionを投げること
 - [x] ニックネーム重複でConflictExceptionを投げること
+- [x] 登録成功時に auth.register.success イベントをログ出力すること
 
 #### findAll
 
