@@ -4,18 +4,17 @@ import * as path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { ImageProcessingService } from "./image-processing.service";
 
-const SAFE_ID_RE = /^[a-zA-Z0-9_-]+$/;
-const SAFE_URL_RE = /^uploads\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\.jpg$/;
-
 @Injectable()
 export class FileStorageService {
+  private readonly uploadsBase = path.resolve(__dirname, "../../uploads");
+
   constructor(private imageProcessing: ImageProcessingService) {}
 
   async saveFile(postId: string, file: Express.Multer.File): Promise<string> {
-    if (!SAFE_ID_RE.test(postId)) {
+    const uploadDir = path.resolve(this.uploadsBase, postId);
+    if (!uploadDir.startsWith(this.uploadsBase + path.sep)) {
       throw new BadRequestException("不正なpostIdです");
     }
-    const uploadDir = path.join(__dirname, "../../uploads", postId);
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -23,15 +22,19 @@ export class FileStorageService {
     const processedBuffer = await this.imageProcessing.process(file.buffer);
 
     const fileName = `${uuidv4()}.jpg`;
-    fs.writeFileSync(path.join(uploadDir, fileName), processedBuffer);
+    const filePath = path.resolve(uploadDir, fileName);
+    if (!filePath.startsWith(this.uploadsBase + path.sep)) {
+      throw new BadRequestException("不正なファイルパスです");
+    }
+    fs.writeFileSync(filePath, processedBuffer);
     return `uploads/${postId}/${fileName}`;
   }
 
   deleteFile(url: string): void {
-    if (!SAFE_URL_RE.test(url)) {
+    const filePath = path.resolve(__dirname, "../../", url);
+    if (!filePath.startsWith(this.uploadsBase + path.sep)) {
       return;
     }
-    const filePath = path.join(__dirname, "../../", url);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
