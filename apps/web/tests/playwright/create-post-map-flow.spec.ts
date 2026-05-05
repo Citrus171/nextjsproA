@@ -108,13 +108,13 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   await expect(
     page.getByRole("group", { name: "地図フィルター" })
   ).toBeVisible();
-  await expect(page.locator(".map-marker-icon").first()).toBeVisible();
+  await expect(page.locator(".map-marker--pin").first()).toBeVisible();
 
-  const markerCount = await page.locator(".map-marker-icon").count();
+  const markerCount = await page.locator(".map-marker--pin").count();
   let found = false;
 
   for (let i = 0; i < markerCount; i += 1) {
-    await page.locator(".map-marker-icon").nth(i).click();
+    await page.locator(".map-marker--pin").nth(i).click();
     const detailDialog = page.getByRole("dialog");
     await expect(detailDialog).toBeVisible();
     await expect(detailDialog.locator("text=読み込み中")).not.toBeVisible({
