@@ -136,7 +136,7 @@ describe("API E2E", () => {
 
   // ─── ログイン ────────────────────────────────────────────────
   describe("POST /api/auth/login", () => {
-    it("オーナー: accessToken を返す (200)", async () => {
+    it("オーナー: accessToken と refreshToken cookie を返す (200)", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/auth/login")
         .send({ email: OWNER_EMAIL, password: PASSWORD });
@@ -150,6 +150,18 @@ describe("API E2E", () => {
         ? (cookies.find((c: string) => c.startsWith("refreshToken=")) ?? "")
         : "";
       expect(refreshCookie).toContain("refreshToken=");
+      expect(refreshCookie).toContain("HttpOnly");
+      expect(refreshCookie).toContain("Path=/");
+    });
+
+    it("JWT ペイロードに sub / email / role が含まれること", async () => {
+      const payload = JSON.parse(
+        Buffer.from(ownerToken.split(".")[1], "base64").toString()
+      );
+      expect(payload.sub).toBeDefined();
+      expect(payload.sub).toBe(ownerId);
+      expect(payload.email).toBe(OWNER_EMAIL);
+      expect(payload.role).toBeDefined();
     });
 
     it("非オーナー: accessToken を返す (200)", async () => {
@@ -161,10 +173,52 @@ describe("API E2E", () => {
       otherToken = res.body.accessToken;
     });
 
-    it("誤パスワードは 400 を返す", async () => {
+    it("誤パスワード（8文字以上）は 401 を返す", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/auth/login")
-        .send({ email: OWNER_EMAIL, password: "wrong" });
+        .send({ email: OWNER_EMAIL, password: "wrongpass123" });
+
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe("Unauthorized");
+    });
+
+    it("存在しないメールアドレスは 401 を返す", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({ email: "no-such-user@example.com", password: PASSWORD });
+
+      expect(res.status).toBe(401);
+      expect(res.body.error).toBe("Unauthorized");
+    });
+
+    it("不正なメール形式は 400 を返す", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({ email: "not-an-email", password: PASSWORD });
+
+      expect(res.status).toBe(400);
+    });
+
+    it("8文字未満のパスワードは 400 を返す", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({ email: OWNER_EMAIL, password: "short" });
+
+      expect(res.status).toBe(400);
+    });
+
+    it("必須フィールド不足は 400 を返す", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({});
+
+      expect(res.status).toBe(400);
+    });
+
+    it("ログイン成功時に mail 欠落のフィールドのみ指定しても 400 を返す", async () => {
+      const res = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({ password: PASSWORD });
 
       expect(res.status).toBe(400);
     });

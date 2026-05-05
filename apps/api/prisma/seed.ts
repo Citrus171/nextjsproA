@@ -59,29 +59,37 @@ function loadEnvFile() {
 }
 
 async function deleteSeedData() {
+  const seedUserIds = [ids.adminUser, ids.ownerUser, ids.sighterUser];
   await prisma.$transaction([
-    prisma.message.deleteMany({
-      where: { id: ids.message, conversationId: ids.conversation },
-    }),
-    prisma.conversation.deleteMany({ where: { id: ids.conversation } }),
-    prisma.sightingFavorite.deleteMany({
-      where: { sightingId: ids.sighting },
-    }),
-    prisma.sightingImage.deleteMany({ where: { sightingId: ids.sighting } }),
-    prisma.sighting.deleteMany({ where: { id: ids.sighting } }),
-    prisma.postFavorite.deleteMany({ where: { postId: ids.post } }),
-    prisma.image.deleteMany({ where: { id: ids.image, postId: ids.post } }),
-    prisma.location.deleteMany({ where: { postId: ids.post } }),
-    prisma.petDetail.deleteMany({ where: { postId: ids.post } }),
-    prisma.post.deleteMany({ where: { id: ids.post } }),
-    prisma.refreshToken.deleteMany({
+    prisma.message.deleteMany({ where: { senderId: { in: seedUserIds } } }),
+    prisma.conversation.deleteMany({
       where: {
-        userId: { in: [ids.adminUser, ids.ownerUser, ids.sighterUser] },
+        OR: [
+          { ownerId: { in: seedUserIds } },
+          { sighterId: { in: seedUserIds } },
+        ],
       },
     }),
-    prisma.user.deleteMany({
-      where: { id: { in: [ids.adminUser, ids.ownerUser, ids.sighterUser] } },
+    prisma.sightingFavorite.deleteMany({
+      where: { userId: { in: seedUserIds } },
     }),
+    prisma.postFavorite.deleteMany({ where: { userId: { in: seedUserIds } } }),
+    prisma.sightingImage.deleteMany({
+      where: { sighting: { userId: { in: seedUserIds } } },
+    }),
+    prisma.sighting.deleteMany({ where: { userId: { in: seedUserIds } } }),
+    prisma.image.deleteMany({
+      where: { post: { userId: { in: seedUserIds } } },
+    }),
+    prisma.location.deleteMany({
+      where: { post: { userId: { in: seedUserIds } } },
+    }),
+    prisma.petDetail.deleteMany({
+      where: { post: { userId: { in: seedUserIds } } },
+    }),
+    prisma.post.deleteMany({ where: { userId: { in: seedUserIds } } }),
+    prisma.refreshToken.deleteMany({ where: { userId: { in: seedUserIds } } }),
+    prisma.user.deleteMany({ where: { id: { in: seedUserIds } } }),
   ]);
 }
 

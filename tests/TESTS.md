@@ -594,9 +594,15 @@
 
 ### POST /api/auth/login
 
-- [x] オーナー: accessToken を返す (200)
+- [x] オーナー: accessToken と refreshToken cookie を返す (200)
+- [x] JWT ペイロードに sub / email / role が含まれること
 - [x] 非オーナー: accessToken を返す (200)
-- [x] 誤パスワードは 400 を返す
+- [x] 誤パスワード（8文字以上）は 401 を返す
+- [x] 存在しないメールアドレスは 401 を返す
+- [x] 不正なメール形式は 400 を返す
+- [x] 8文字未満のパスワードは 400 を返す
+- [x] 必須フィールド不足は 400 を返す
+- [x] mail 欠落のフィールドのみ指定しても 400 を返す
 
 ### POST /api/posts
 
