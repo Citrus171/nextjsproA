@@ -64,6 +64,39 @@ describe("ConversationsGateway", () => {
     });
   });
 
+  // ─── JWT 再検証 ─────────────────────────────────────────────
+  describe("JWT 再検証", () => {
+    it("joinConversation 時にトークンが期限切れの場合は切断されること", async () => {
+      jwtService.verify
+        .mockReturnValueOnce({ sub: "user-1", email: "a@b.com" })
+        .mockImplementationOnce(() => {
+          throw new Error("jwt expired");
+        });
+      const client = makeSocket(undefined, "token");
+      gateway.handleConnection(client);
+
+      await gateway.handleJoin("conv-1", client);
+
+      expect(client.disconnect).toHaveBeenCalled();
+      expect(client.join).not.toHaveBeenCalled();
+    });
+
+    it("leaveConversation 時にトークンが期限切れの場合は切断されること", () => {
+      jwtService.verify
+        .mockReturnValueOnce({ sub: "user-1", email: "a@b.com" })
+        .mockImplementationOnce(() => {
+          throw new Error("jwt expired");
+        });
+      const client = makeSocket(undefined, "token");
+      gateway.handleConnection(client);
+
+      gateway.handleLeave("conv-1", client);
+
+      expect(client.disconnect).toHaveBeenCalled();
+      expect(client.leave).not.toHaveBeenCalled();
+    });
+  });
+
   // ─── handleJoin ────────────────────────────────────────────
   describe("handleJoin", () => {
     it("userIdがない場合は切断されjoinしない", async () => {
@@ -96,9 +129,10 @@ describe("ConversationsGateway", () => {
     });
 
     it("会話参加権限がある場合は指定した会話ルームにjoinすること", async () => {
+      jwtService.verify.mockReturnValue({ sub: "user-1", email: "a@b.com" });
       conversationsService.findOneForUser.mockResolvedValue({} as never);
-      const client = makeSocket();
-      client.data.userId = "user-1";
+      const client = makeSocket(undefined, "valid.token");
+      gateway.handleConnection(client);
       await gateway.handleJoin("conv-1", client);
       expect(client.disconnect).not.toHaveBeenCalled();
       expect(client.join).toHaveBeenCalledWith("conversation:conv-1");
@@ -115,11 +149,80 @@ describe("ConversationsGateway", () => {
     });
 
     it("userIdがある場合は指定した会話ルームからleaveすること", () => {
-      const client = makeSocket();
-      client.data.userId = "user-1";
+      jwtService.verify.mockReturnValue({ sub: "user-1", email: "a@b.com" });
+      const client = makeSocket(undefined, "valid.token");
+      gateway.handleConnection(client);
       gateway.handleLeave("conv-1", client);
       expect(client.disconnect).not.toHaveBeenCalled();
       expect(client.leave).toHaveBeenCalledWith("conversation:conv-1");
+    });
+  });
+
+  // ─── handleDisconnect ─────────────────────────────────────
+  describe("handleDisconnect", () => {
+    it("切断時に userSocketMap から該当エントリが削除されること", () => {
+      jwtService.verify.mockReturnValue({ sub: "user-1", email: "a@b.com" });
+      const client = makeSocket(undefined, "valid.token");
+      gateway.handleConnection(client);
+
+      gateway.handleDisconnect(client);
+
+      // broadcastMessage で senderSocketId が undefined になることで検証
+      const emitMock = jest.fn();
+      const toMock = jest.fn().mockReturnValue({ emit: emitMock });
+      gateway.server = { to: toMock } as never;
+      gateway.broadcastMessage("conv-1", {
+        id: "m1",
+        conversationId: "conv-1",
+        senderId: "user-1",
+        body: "hi",
+        createdAt: new Date(),
+      } as import("@prisma/client").Message);
+      // except は呼ばれず to のみで emit されること（マップから削除済みのため）
+      expect(toMock).toHaveBeenCalledWith("conversation:conv-1");
+    });
+
+    it("別のソケットで上書きされている場合は削除しないこと", () => {
+      jwtService.verify.mockReturnValue({ sub: "user-1", email: "a@b.com" });
+      const client1 = makeSocket(undefined, "valid.token");
+      const client2 = {
+        ...makeSocket(undefined, "valid.token"),
+        id: "other-socket-id",
+      } as jest.Mocked<Socket>;
+      gateway.handleConnection(client1);
+      gateway.handleConnection(client2);
+
+      // client1 が切断してもclient2のエントリは残る
+      gateway.handleDisconnect(client1);
+
+      const emitMock = jest.fn();
+      const exceptMock = jest.fn().mockReturnValue({ emit: emitMock });
+      const toMock = jest
+        .fn()
+        .mockReturnValue({ emit: emitMock, except: exceptMock });
+      gateway.server = {
+        to: toMock,
+        except: jest.fn().mockReturnValue({ to: toMock }),
+      } as never;
+      // マップにまだ user-1 のエントリが残っていること（client2 の socketId）
+      // broadcastMessage が except を使う = マップにエントリあり
+      const exceptServer = {
+        to: jest.fn().mockReturnValue({ emit: emitMock }),
+      };
+      gateway.server = {
+        to: toMock,
+        except: jest.fn().mockReturnValue(exceptServer),
+      } as never;
+      gateway.broadcastMessage("conv-1", {
+        id: "m2",
+        conversationId: "conv-1",
+        senderId: "user-1",
+        body: "hi",
+        createdAt: new Date(),
+      } as import("@prisma/client").Message);
+      expect(
+        (gateway.server as never as { except: jest.Mock }).except
+      ).toHaveBeenCalled();
     });
   });
 

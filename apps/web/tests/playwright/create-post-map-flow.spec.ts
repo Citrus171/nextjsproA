@@ -76,6 +76,15 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
 
   await page.fill('input[placeholder="例：白猫のミケを探しています"]', title);
 
+  // マップページ遷移後のマーカーフェッチ完了を待つため、
+  // POST 送信前にリスナーを登録しておく
+  const markersResponsePromise = page.waitForResponse(
+    (res) =>
+      res.url().includes("/api/map/markers") &&
+      res.request().method() === "GET",
+    { timeout: 30000 }
+  );
+
   const createResponsePromise = page.waitForResponse(
     (res) =>
       res.url().includes("/api/posts") && res.request().method() === "POST"
@@ -91,16 +100,21 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
     { timeout: 10000 }
   );
 
+  // マーカー API レスポンスを待ち、さらに flyTo アニメーション後の
+  // デバウンス再フェッチ（500ms）が落ち着くまで待機
+  await markersResponsePromise;
+  await page.waitForTimeout(1500);
+
   await expect(
     page.getByRole("group", { name: "地図フィルター" })
   ).toBeVisible();
-  await expect(page.locator(".map-marker-icon").first()).toBeVisible();
+  await expect(page.locator(".map-marker--pin").first()).toBeVisible();
 
-  const markerCount = await page.locator(".map-marker-icon").count();
+  const markerCount = await page.locator(".map-marker--pin").count();
   let found = false;
 
   for (let i = 0; i < markerCount; i += 1) {
-    await page.locator(".map-marker-icon").nth(i).dispatchEvent("click");
+    await page.locator(".map-marker--pin").nth(i).click({ force: true });
     const detailDialog = page.getByRole("dialog");
     await expect(detailDialog).toBeVisible();
     await expect(detailDialog.locator("text=読み込み中")).not.toBeVisible({
@@ -113,7 +127,9 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
       break;
     }
 
-    await page.getByRole("button", { name: "閉じる" }).first().click();
+    const closeBtn = page.getByRole("button", { name: "閉じる" }).first();
+    await closeBtn.click();
+    await expect(detailDialog).not.toBeVisible({ timeout: 3000 });
   }
 
   expect(found).toBeTruthy();

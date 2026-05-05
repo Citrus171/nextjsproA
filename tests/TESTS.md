@@ -298,6 +298,11 @@
 - [x] 有効なトークンで接続した場合はsocket.data.userIdが設定される
 - [x] Authorizationヘッダー（Bearer形式）でも認証できる
 
+#### JWT 再検証
+
+- [x] joinConversation 時にトークンが期限切れの場合は切断されること
+- [x] leaveConversation 時にトークンが期限切れの場合は切断されること
+
 #### handleJoin
 
 - [x] userIdがない場合は切断されjoinしない
@@ -309,6 +314,11 @@
 
 - [x] userIdがない場合は切断されleaveしない
 - [x] userIdがある場合は指定した会話ルームからleaveすること
+
+#### handleDisconnect
+
+- [x] 切断時に userSocketMap から該当エントリが削除されること
+- [x] 別のソケットで上書きされている場合は削除しないこと
 
 #### broadcastMessage
 

@@ -47,9 +47,27 @@ export class ConversationsGateway
       const token = raw.startsWith("Bearer ") ? raw.slice(7) : raw;
       const payload = this.jwtService.verify<JwtPayload>(token);
       client.data.userId = payload.sub;
+      client.data.token = token;
       this.userSocketMap.set(payload.sub, client.id);
     } catch {
       client.disconnect();
+    }
+  }
+
+  private reVerifyOrDisconnect(client: Socket): boolean {
+    const token = client.data.token as string | undefined;
+    if (!token) {
+      client.disconnect();
+      return false;
+    }
+    try {
+      this.jwtService.verify<JwtPayload>(token);
+      return true;
+    } catch {
+      const userId = client.data.userId as string | undefined;
+      console.warn(`[WS] JWT期限切れのため切断: userId=${userId ?? "unknown"}`);
+      client.disconnect();
+      return false;
     }
   }
 
@@ -65,6 +83,7 @@ export class ConversationsGateway
     @MessageBody() conversationId: string,
     @ConnectedSocket() client: Socket
   ) {
+    if (!this.reVerifyOrDisconnect(client)) return;
     const userId = client.data.userId as string | undefined;
     if (!userId) {
       client.disconnect();
@@ -84,6 +103,7 @@ export class ConversationsGateway
     @MessageBody() conversationId: string,
     @ConnectedSocket() client: Socket
   ) {
+    if (!this.reVerifyOrDisconnect(client)) return;
     const userId = client.data.userId as string | undefined;
     if (!userId) {
       client.disconnect();
