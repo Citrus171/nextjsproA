@@ -63,7 +63,7 @@ export class ConversationsGateway
     try {
       this.jwtService.verify<JwtPayload>(token);
       return true;
-    } catch (err) {
+    } catch {
       const userId = client.data.userId as string | undefined;
       console.warn(`[WS] JWT期限切れのため切断: userId=${userId ?? "unknown"}`);
       client.disconnect();
