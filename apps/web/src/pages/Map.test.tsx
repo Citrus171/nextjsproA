@@ -498,7 +498,9 @@ describe("Map", () => {
       expect(
         await screen.findByRole("heading", { name: "目撃を報告する" })
       ).toBeInTheDocument();
-      expect(screen.getByLabelText("緯度")).toHaveValue("35.91");
+      await waitFor(() => {
+        expect(screen.getByLabelText("緯度")).toHaveValue("35.91");
+      });
       expect(await screen.findByRole("alert")).toHaveTextContent(
         "住所の自動取得に失敗しました。手動で入力してください"
       );
