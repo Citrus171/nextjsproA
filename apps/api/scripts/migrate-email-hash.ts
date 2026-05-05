@@ -34,7 +34,8 @@ async function main() {
   cryptoService.onModuleInit();
 
   try {
-    const result = await migrateEmailHashToHmac(prisma, cryptoService, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await migrateEmailHashToHmac(prisma as any, cryptoService, {
       dryRun,
     });
     console.log("マイグレーション完了:");
