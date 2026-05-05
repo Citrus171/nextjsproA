@@ -273,8 +273,16 @@ apps/api/src/
 │   │   ├── handleDisconnect
 │   │   │   ├── 切断時に userSocketMap から該当エントリが削除されること
 │   │   │   └── 別のソケットで上書きされている場合は削除しないこと
-│   │   └── broadcastMessage
-│   │       └── 最小化されたペイロードのみemitする（readAtを含まない）
+    │   │   ├── 定期JWT検証
+    │   │   │   ├── トークンが期限切れの場合、60秒後に定期チェックで切断されること
+    │   │   │   ├── 有効なトークンを保持している場合、60秒経過後も切断されないこと
+    │   │   │   └── 切断時に定期チェックのタイマーが解除されること
+    │   │   ├── refreshToken
+    │   │   │   ├── 有効なトークンで client.data.token が更新され、tokenRefreshed が emit されること
+    │   │   │   ├── 無効なトークンで tokenRefreshed の失敗が emit されること
+    │   │   │   └── Bearer プレフィックス付きトークンも処理できること
+    │   │   └── broadcastMessage
+    │   │       └── 最小化されたペイロードのみemitする（readAtを含まない）
 │   └── conversation.controller.spec.ts
 │       ├── createMessage
 │       │   ├── メッセージ作成後にbroadcastMessageを呼び出すこと

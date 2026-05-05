@@ -49,6 +49,15 @@ export class ConversationsGateway
       client.data.userId = payload.sub;
       client.data.token = token;
       this.userSocketMap.set(payload.sub, client.id);
+      const interval = setInterval(() => {
+        try {
+          this.jwtService.verify<JwtPayload>(client.data.token);
+        } catch {
+          clearInterval(interval);
+          client.disconnect();
+        }
+      }, 60000);
+      client.data.tokenCheckInterval = interval;
     } catch {
       client.disconnect();
     }
@@ -72,6 +81,12 @@ export class ConversationsGateway
   }
 
   handleDisconnect(client: Socket) {
+    const interval = client.data.tokenCheckInterval as
+      | ReturnType<typeof setInterval>
+      | undefined;
+    if (interval) {
+      clearInterval(interval);
+    }
     const userId = client.data.userId as string | undefined;
     if (userId && this.userSocketMap.get(userId) === client.id) {
       this.userSocketMap.delete(userId);
@@ -110,6 +125,22 @@ export class ConversationsGateway
       return;
     }
     void client.leave(`conversation:${conversationId}`);
+  }
+
+  @SubscribeMessage("refreshToken")
+  handleRefreshToken(
+    @MessageBody() rawToken: string,
+    @ConnectedSocket() client: Socket
+  ) {
+    const token = rawToken.startsWith("Bearer ") ? rawToken.slice(7) : rawToken;
+    try {
+      const payload = this.jwtService.verify<JwtPayload>(token);
+      client.data.token = token;
+      client.data.userId = payload.sub;
+      client.emit("tokenRefreshed", { success: true });
+    } catch {
+      client.emit("tokenRefreshed", { success: false });
+    }
   }
 
   broadcastMessage(conversationId: string, message: Message) {
