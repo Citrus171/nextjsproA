@@ -420,6 +420,12 @@ export default function PostDetailSheet({
                 <SightingDetailSection sighting={sightingDetail} />
               )}
             </>
+          ) : markerType === "sighting" ? (
+            sightingDetail ? (
+              <SightingDetailSection sighting={sightingDetail} />
+            ) : (
+              <p className="text-muted-foreground mt-6">読み込み中…</p>
+            )
           ) : (
             <p className="text-muted-foreground mt-6">
               詳細情報を取得できませんでした
