@@ -1,6 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
 import * as fs from "fs";
-import * as path from "path";
 import { ConversationFileStorageService } from "./conversation-file-storage.service";
 import { ImageProcessingService } from "./image-processing.service";
 
