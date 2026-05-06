@@ -259,6 +259,16 @@
 
 ---
 
+### CreateMessageDto (`src/conversations/dto/create-message.dto.spec.ts`)
+
+- [x] bodyもimageUrlも両方nullの場合、バリデーションエラーになること
+- [x] bodyのみ指定でバリデーションが通過すること
+- [x] imageUrlのみ指定でバリデーションが通過すること
+- [x] bodyとimageUrl両方指定でバリデーションが通過すること
+- [x] bodyが1000文字を超える場合はバリデーションエラーになること
+
+---
+
 ### ConversationsService (`src/conversations/conversation.service.spec.ts`)
 
 #### create
@@ -282,6 +292,8 @@
 - [x] bodyが1000文字超過はBadRequestException
 - [x] 会話参加者以外のメッセージ送信はForbiddenException
 - [x] 存在しない会話へのメッセージはNotFoundException
+- [x] imageUrlのみ指定でメッセージを送信できること
+- [x] bodyとimageUrl両方指定でメッセージを送信できること
 
 #### findMessages
 

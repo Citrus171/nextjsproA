@@ -258,6 +258,13 @@ apps/api/src/
 │           ├── 空白文字列と非有限数はbboxフィルタに含めないこと
 │           └── フィルタなしで全マーカー（Post+Sighting）が返ること
 ├── conversations/
+│   ├── dto/
+│   │   └── create-message.dto.spec.ts
+│   │       ├── bodyもimageUrlも両方nullの場合、バリデーションエラーになること
+│   │       ├── bodyのみ指定でバリデーションが通過すること
+│   │       ├── imageUrlのみ指定でバリデーションが通過すること
+│   │       ├── bodyとimageUrl両方指定でバリデーションが通過すること
+│   │       └── bodyが1000文字を超える場合はバリデーションエラーになること
 │   ├── conversation.service.spec.ts
 │   │   ├── create
 │   │   │   ├── 有効なデータで会話を作成できること
@@ -274,7 +281,9 @@ apps/api/src/
 │   │   │   ├── 会話参加者がメッセージを送信できること
 │   │   │   ├── bodyが1000文字超過はBadRequestException
 │   │   │   ├── 会話参加者以外のメッセージ送信はForbiddenException
-│   │   │   └── 存在しない会話へのメッセージはNotFoundException
+│   │   │   ├── 存在しない会話へのメッセージはNotFoundException
+│   │   │   ├── imageUrlのみ指定でメッセージを送信できること
+│   │   │   └── bodyとimageUrl両方指定でメッセージを送信できること
 │   │   ├── findMessages
 │   │   │   ├── 会話参加者がメッセージ一覧を取得できること
 │   │   │   ├── 会話参加者以外のメッセージ一覧取得はForbiddenException

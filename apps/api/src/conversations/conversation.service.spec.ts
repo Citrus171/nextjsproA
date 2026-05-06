@@ -277,6 +277,7 @@ describe("ConversationsService", () => {
           conversationId: "conv-1",
           senderId: "user-1",
           body: "こんにちは",
+          imageUrl: null,
         },
       });
       expect(result).toMatchObject({ id: "msg-1" });
@@ -304,6 +305,59 @@ describe("ConversationsService", () => {
       await expect(
         service.createMessage("user-1", "conv-999", { body: "test" })
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it("imageUrlのみ指定でメッセージを送信できること", async () => {
+      mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
+      mockPrisma.message.create.mockResolvedValue({
+        id: "msg-2",
+        conversationId: "conv-1",
+        senderId: "user-1",
+        body: null,
+        imageUrl: "/uploads/conversations/conv-1/uuid.jpg",
+        readAt: null,
+      });
+
+      const result = await service.createMessage("user-1", "conv-1", {
+        imageUrl: "/uploads/conversations/conv-1/uuid.jpg",
+      });
+
+      expect(mockPrisma.message.create).toHaveBeenCalledWith({
+        data: {
+          conversationId: "conv-1",
+          senderId: "user-1",
+          body: null,
+          imageUrl: "/uploads/conversations/conv-1/uuid.jpg",
+        },
+      });
+      expect(result).toMatchObject({ id: "msg-2" });
+    });
+
+    it("bodyとimageUrl両方指定でメッセージを送信できること", async () => {
+      mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
+      mockPrisma.message.create.mockResolvedValue({
+        id: "msg-3",
+        conversationId: "conv-1",
+        senderId: "user-1",
+        body: "写真を送ります",
+        imageUrl: "/uploads/conversations/conv-1/uuid.jpg",
+        readAt: null,
+      });
+
+      const result = await service.createMessage("user-1", "conv-1", {
+        body: "写真を送ります",
+        imageUrl: "/uploads/conversations/conv-1/uuid.jpg",
+      });
+
+      expect(mockPrisma.message.create).toHaveBeenCalledWith({
+        data: {
+          conversationId: "conv-1",
+          senderId: "user-1",
+          body: "写真を送ります",
+          imageUrl: "/uploads/conversations/conv-1/uuid.jpg",
+        },
+      });
+      expect(result).toMatchObject({ id: "msg-3" });
     });
   });
 
