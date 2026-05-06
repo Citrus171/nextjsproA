@@ -479,7 +479,9 @@ function SightingDetailSection({
             <span className="text-muted-foreground text-xs font-bold">
               コメント
             </span>
-            <p className="text-sm text-foreground mt-1">{sighting.comment}</p>
+            <p className="text-sm text-foreground mt-1 whitespace-pre-wrap">
+              {sighting.comment}
+            </p>
           </div>
         )}
         {sighting.nickname && (
