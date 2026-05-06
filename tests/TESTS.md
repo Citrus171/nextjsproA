@@ -366,6 +366,24 @@
 #### broadcastMessage
 
 - [x] 最小化されたペイロードのみemitする（readAtを含まない）
+- [x] imageUrlがある場合はペイロードに含まれること
+
+---
+
+### ConversationFileStorageService (`src/conversations/conversation-file-storage.service.spec.ts`)
+
+#### saveFile
+
+- [x] 画像を処理してuploads/conversations/{conversationId}/{uuid}.jpgに保存し、URLを返すこと
+- [x] ディレクトリが存在しない場合はmkdirSyncで作成すること
+- [x] ディレクトリが既に存在する場合はmkdirSyncを呼ばないこと
+- [x] 不正なconversationIdでパストラバーサルを防ぐこと
+
+#### deleteFile
+
+- [x] ファイルが存在する場合は削除すること
+- [x] ファイルが存在しない場合は何もしないこと
+- [x] 不正なパスでパストラバーサルを防ぐこと
 
 ---
 
@@ -375,6 +393,9 @@
 
 - [x] メッセージ作成後にbroadcastMessageを呼び出すこと
 - [x] サービスが例外を投げた場合はbroadcastMessageを呼ばないこと
+- [x] 画像ファイルが添付された場合はfileStorageに保存してimageUrlを含むDTOでcreateMessageを呼ぶこと
+- [x] JPEG・PNG以外のファイルは400エラーになること
+- [x] 2MB超のファイルは400エラーになること
 
 #### markAsRead
 

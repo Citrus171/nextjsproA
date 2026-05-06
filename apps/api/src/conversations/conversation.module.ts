@@ -4,6 +4,8 @@ import { JwtModule } from "@nestjs/jwt";
 import { ConversationsController } from "./conversation.controller";
 import { ConversationsService } from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
+import { ImageProcessingService } from "./image-processing.service";
+import { ConversationFileStorageService } from "./conversation-file-storage.service";
 import { IdentityModule } from "../identity/identity.module";
 
 @Module({
@@ -17,6 +19,11 @@ import { IdentityModule } from "../identity/identity.module";
     }),
   ],
   controllers: [ConversationsController],
-  providers: [ConversationsService, ConversationsGateway],
+  providers: [
+    ConversationsService,
+    ConversationsGateway,
+    ImageProcessingService,
+    ConversationFileStorageService,
+  ],
 })
 export class ConversationsModule {}

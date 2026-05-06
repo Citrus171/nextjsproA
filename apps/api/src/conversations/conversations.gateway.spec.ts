@@ -332,6 +332,7 @@ describe("ConversationsGateway", () => {
         conversationId: "conv-1",
         senderId: "user-1",
         body: "hello",
+        imageUrl: null,
         createdAt: new Date("2026-01-01"),
         readAt: new Date("2026-01-02"),
       } as import("@prisma/client").Message;
@@ -344,11 +345,33 @@ describe("ConversationsGateway", () => {
         conversationId: "conv-1",
         senderId: "user-1",
         body: "hello",
+        imageUrl: null,
         createdAt: message.createdAt,
       });
       // readAt は含まれないこと
       const emitted = emitMock.mock.calls[0][1] as Record<string, unknown>;
       expect(emitted).not.toHaveProperty("readAt");
+    });
+
+    it("imageUrlがある場合はペイロードに含まれること", () => {
+      const emitMock = jest.fn();
+      const toMock = jest.fn().mockReturnValue({ emit: emitMock });
+      gateway.server = { to: toMock } as never;
+
+      const message = {
+        id: "msg-2",
+        conversationId: "conv-1",
+        senderId: "user-1",
+        body: null,
+        imageUrl: "/uploads/conversations/conv-1/abc.jpg",
+        createdAt: new Date("2026-01-01"),
+        readAt: null,
+      } as import("@prisma/client").Message;
+
+      gateway.broadcastMessage("conv-1", message);
+
+      const emitted = emitMock.mock.calls[0][1] as Record<string, unknown>;
+      expect(emitted.imageUrl).toBe("/uploads/conversations/conv-1/abc.jpg");
     });
   });
 });

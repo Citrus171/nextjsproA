@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -7,11 +8,16 @@ import {
   Patch,
   Post,
   Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { memoryStorage } from "multer";
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -33,7 +39,11 @@ import {
 import { MessageResponseDto } from "./dto/message-response.dto";
 import { ConversationsService } from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
+import { ConversationFileStorageService } from "./conversation-file-storage.service";
 import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
+
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png"];
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
 @ApiTags("conversations")
 @Controller("conversations")
@@ -43,7 +53,8 @@ import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.i
 export class ConversationsController {
   constructor(
     private readonly conversationsService: ConversationsService,
-    private readonly conversationsGateway: ConversationsGateway
+    private readonly conversationsGateway: ConversationsGateway,
+    private readonly conversationFileStorage: ConversationFileStorageService
   ) {}
 
   private getAuthenticatedUserId(req: AuthenticatedRequest): string {
@@ -113,30 +124,52 @@ export class ConversationsController {
   }
 
   @Post(":id/messages")
-  @ApiOperation({ summary: "メッセージを送信する" })
+  @ApiConsumes("multipart/form-data", "application/json")
+  @ApiOperation({ summary: "メッセージを送信する（テキストまたは画像）" })
   @ApiParam({ name: "id", example: OPENAPI_CONVERSATION_ID_EXAMPLE })
   @ApiBody({
     schema: {
       type: "object",
-      required: ["body"],
-      example: {
-        body: "こんにちは、見つかりましたか？",
-      },
       properties: {
         body: {
           type: "string",
           maxLength: 1000,
           example: "こんにちは、見つかりましたか？",
         },
+        image: {
+          type: "string",
+          format: "binary",
+          description: "JPEG/PNG、2MB以下",
+        },
       },
     },
   })
   @ApiResponse({ status: 201, type: MessageResponseDto })
+  @UseInterceptors(
+    FileInterceptor("image", {
+      storage: memoryStorage(),
+      limits: { fileSize: MAX_FILE_SIZE },
+    })
+  )
   async createMessage(
     @Request() req: AuthenticatedRequest,
     @Param("id") id: string,
-    @Body() dto: CreateMessageDto
+    @Body() dto: CreateMessageDto,
+    @UploadedFile() file?: Express.Multer.File
   ) {
+    if (file) {
+      if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+        throw new BadRequestException(
+          `未対応のファイル形式です: ${file.mimetype}。JPEG または PNG を使用してください。`
+        );
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        throw new BadRequestException("ファイルサイズは2MB以内にしてください");
+      }
+      const savedUrl = await this.conversationFileStorage.saveFile(id, file);
+      dto = { imageUrl: `/${savedUrl}` };
+    }
+
     const message = await this.conversationsService.createMessage(
       this.getAuthenticatedUserId(req),
       id,

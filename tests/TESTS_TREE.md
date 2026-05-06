@@ -328,11 +328,25 @@ apps/api/src/
     │   │   │   ├── 無効なトークンで tokenRefreshed の失敗が emit されること
     │   │   │   └── Bearer プレフィックス付きトークンも処理できること
     │   │   └── broadcastMessage
-    │   │       └── 最小化されたペイロードのみemitする（readAtを含まない）
+    │   │       ├── 最小化されたペイロードのみemitする（readAtを含まない）
+    │   │       └── imageUrlがある場合はペイロードに含まれること
+│   ├── conversation-file-storage.service.spec.ts
+│   │   ├── saveFile
+│   │   │   ├── 画像を処理してuploads/conversations/{conversationId}/{uuid}.jpgに保存し、URLを返すこと
+│   │   │   ├── ディレクトリが存在しない場合はmkdirSyncで作成すること
+│   │   │   ├── ディレクトリが既に存在する場合はmkdirSyncを呼ばないこと
+│   │   │   └── 不正なconversationIdでパストラバーサルを防ぐこと
+│   │   └── deleteFile
+│   │       ├── ファイルが存在する場合は削除すること
+│   │       ├── ファイルが存在しない場合は何もしないこと
+│   │       └── 不正なパスでパストラバーサルを防ぐこと
 │   └── conversation.controller.spec.ts
 │       ├── createMessage
 │       │   ├── メッセージ作成後にbroadcastMessageを呼び出すこと
-│       │   └── サービスが例外を投げた場合はbroadcastMessageを呼ばないこと
+│       │   ├── サービスが例外を投げた場合はbroadcastMessageを呼ばないこと
+│       │   ├── 画像ファイルが添付された場合はfileStorageに保存してimageUrlを含むDTOでcreateMessageを呼ぶこと
+│       │   ├── JPEG・PNG以外のファイルは400エラーになること
+│       │   └── 2MB超のファイルは400エラーになること
 │       ├── markAsRead
 │       │   └── 既読更新結果を返すこと
 │       └── getUnreadCount

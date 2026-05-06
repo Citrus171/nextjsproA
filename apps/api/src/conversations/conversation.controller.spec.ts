@@ -1,4 +1,6 @@
+import { BadRequestException } from "@nestjs/common";
 import { ConversationsController } from "./conversation.controller";
+import { ConversationFileStorageService } from "./conversation-file-storage.service";
 
 const mockService = {
   create: jest.fn(),
@@ -14,6 +16,11 @@ const mockGateway = {
   broadcastMessage: jest.fn(),
 };
 
+const mockFileStorage: jest.Mocked<ConversationFileStorageService> = {
+  saveFile: jest.fn(),
+  deleteFile: jest.fn(),
+} as unknown as jest.Mocked<ConversationFileStorageService>;
+
 const req = {
   user: { id: "user-1", email: "test@test.com", role: "user" as const },
 };
@@ -24,7 +31,8 @@ describe("ConversationsController", () => {
   beforeEach(() => {
     controller = new ConversationsController(
       mockService as never,
-      mockGateway as never
+      mockGateway as never,
+      mockFileStorage
     );
     jest.clearAllMocks();
   });
@@ -96,6 +104,66 @@ describe("ConversationsController", () => {
       ).rejects.toThrow("forbidden");
 
       expect(mockGateway.broadcastMessage).not.toHaveBeenCalled();
+    });
+
+    it("画像ファイルが添付された場合はfileStorageに保存してimageUrlを含むDTOでcreateMessageを呼ぶこと", async () => {
+      const file = {
+        buffer: Buffer.from("image"),
+        originalname: "photo.jpg",
+        mimetype: "image/jpeg",
+        size: 100,
+      } as Express.Multer.File;
+      mockFileStorage.saveFile.mockResolvedValue(
+        "uploads/conversations/conv-1/uuid.jpg"
+      );
+      const message = {
+        id: "msg-2",
+        conversationId: "conv-1",
+        senderId: "user-1",
+        body: null,
+        imageUrl: "/uploads/conversations/conv-1/uuid.jpg",
+        createdAt: new Date(),
+        readAt: null,
+      };
+      mockService.createMessage.mockResolvedValue(message);
+
+      const result = await controller.createMessage(req, "conv-1", {}, file);
+
+      expect(mockFileStorage.saveFile).toHaveBeenCalledWith("conv-1", file);
+      expect(mockService.createMessage).toHaveBeenCalledWith(
+        "user-1",
+        "conv-1",
+        {
+          imageUrl: "/uploads/conversations/conv-1/uuid.jpg",
+        }
+      );
+      expect(result).toBe(message);
+    });
+
+    it("JPEG・PNG以外のファイルは400エラーになること", async () => {
+      const file = {
+        buffer: Buffer.from("gif"),
+        originalname: "anim.gif",
+        mimetype: "image/gif",
+        size: 100,
+      } as Express.Multer.File;
+
+      await expect(
+        controller.createMessage(req, "conv-1", {}, file)
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it("2MB超のファイルは400エラーになること", async () => {
+      const file = {
+        buffer: Buffer.alloc(3 * 1024 * 1024),
+        originalname: "big.jpg",
+        mimetype: "image/jpeg",
+        size: 3 * 1024 * 1024,
+      } as Express.Multer.File;
+
+      await expect(
+        controller.createMessage(req, "conv-1", {}, file)
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
