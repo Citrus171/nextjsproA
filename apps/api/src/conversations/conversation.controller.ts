@@ -18,6 +18,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { SkipThrottle } from "@nestjs/throttler";
 import {
   OPENAPI_CONVERSATION_ID_EXAMPLE,
   OPENAPI_POST_ID_EXAMPLE,
@@ -85,6 +86,7 @@ export class ConversationsController {
   }
 
   @Get("unread-count")
+  @SkipThrottle({ default: true, public: true })
   @ApiOperation({ summary: "未読メッセージの合計数を取得する" })
   @ApiResponse({
     status: 200,

@@ -100,10 +100,10 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
     { timeout: 10000 }
   );
 
-  // マーカー API レスポンスを待ち、さらに flyTo アニメーション後の
-  // デバウンス再フェッチ（500ms）が落ち着くまで待機
+  // 初期マーカーフェッチを待ち、さらに flyTo アニメーション後の
+  // デバウンス再フェッチ（1500ms）が落ち着くまで待機
   await markersResponsePromise;
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(3000);
 
   await expect(
     page.getByRole("group", { name: "地図フィルター" })

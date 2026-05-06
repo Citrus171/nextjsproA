@@ -29,7 +29,7 @@ import { AppThrottlerGuard } from "./auth/throttler.guard";
               { name: "public", ttl: 1_000, limit: 10_000 },
             ]
           : [
-              { name: "default", ttl: 60_000, limit: 60 },
+              { name: "default", ttl: 60_000, limit: 300 },
               { name: "login", ttl: minutes(15), limit: 5 },
               { name: "register", ttl: hours(1), limit: 3 },
               { name: "public", ttl: 60_000, limit: 120 },
