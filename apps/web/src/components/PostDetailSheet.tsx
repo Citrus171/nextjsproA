@@ -358,7 +358,7 @@ export default function PostDetailSheet({
                       <span className="w-1 h-5 bg-primary rounded-full inline-block" />
                       特徴・性格
                     </h3>
-                    <p className="text-sm leading-relaxed text-foreground bg-muted p-4 rounded-2xl">
+                    <p className="text-sm leading-relaxed text-foreground bg-muted p-4 rounded-2xl whitespace-pre-wrap">
                       {post.petDetail.features}
                     </p>
                   </div>
@@ -372,7 +372,7 @@ export default function PostDetailSheet({
                     <span className="w-1 h-5 bg-primary rounded-full inline-block" />
                     詳しい説明
                   </h3>
-                  <p className="text-sm leading-relaxed text-foreground bg-muted p-4 rounded-2xl">
+                  <p className="text-sm leading-relaxed text-foreground bg-muted p-4 rounded-2xl whitespace-pre-wrap">
                     {post.description}
                   </p>
                 </div>
