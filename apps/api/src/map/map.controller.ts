@@ -11,7 +11,7 @@ export class MapController {
   constructor(private readonly mapService: MapService) {}
 
   @Get("markers")
-  @SkipThrottle()
+  @SkipThrottle({ default: true, public: true })
   @ApiResponse({ status: 200, type: MapMarkerDto, isArray: true })
   getMarkers(@Query() query: GetMarkersQueryDto): Promise<MapMarkerDto[]> {
     return this.mapService.getMarkers(query);
