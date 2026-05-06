@@ -144,7 +144,7 @@ export class ConversationsGateway
   }
 
   broadcastMessage(conversationId: string, message: Message) {
-    const { id, senderId, body, createdAt } = message;
+    const { id, senderId, body, imageUrl, createdAt } = message;
     const senderSocketId = this.userSocketMap.get(senderId);
     const target = senderSocketId
       ? this.server.except(senderSocketId).to(`conversation:${conversationId}`)
@@ -154,6 +154,7 @@ export class ConversationsGateway
       conversationId,
       senderId,
       body,
+      imageUrl,
       createdAt,
     });
   }
