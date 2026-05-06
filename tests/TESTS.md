@@ -863,6 +863,17 @@
 - [x] ConversationChat でローディング表示が統一されたスタイルであること
 - [x] ConversationChat でメッセージ取得エラー時は「メッセージの取得に失敗しました」が統一されたスタイルで表示されること
 - [x] ConversationChat でエラー表示が統一されたスタイルであること
+- [x] ConversationChat で入力エリアに画像選択ボタンが表示されること
+- [x] ConversationChat で画像選択後、プレビュー画像が表示されること
+- [x] ConversationChat で画像のみ選択して送信する時、image を含む mutate が呼ばれること
+- [x] ConversationChat で画像選択後、テキストなし・画像のみでも送信ボタンが有効であること
+- [x] ConversationChat でプレビューのキャンセルボタンをクリックした時、プレビューが消えること
+- [x] ConversationChat で imageUrl を持つメッセージにサムネイルが表示されること
+- [x] ConversationChat でサムネイルをクリックした時、フルサイズモーダルが表示されること
+- [x] ConversationChat でモーダルの外側をクリックした時、モーダルが閉じること
+- [x] ConversationChat で bodyがあり imageUrl もあるメッセージ、両方表示されること
+- [x] ConversationChat で WebSocket で imageUrl を含むメッセージが届いた時、サムネイルが表示されること
+- [x] ConversationChat で imageUrl がない通常メッセージが正常に表示されること
 
 ### Layout (`src/components/Layout.test.tsx`)
 

@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ImageIcon, X } from "lucide-react";
 import { createConversationSocket } from "../lib/conversationSocket";
 import { useApiClient } from "../api/orvalClient";
 import { useAuth } from "../auth/AuthProvider";
 import type { MessageResponseDto } from "../../../../packages/api-client/src/index";
+
+type SendMessageInput = { body?: string; image?: File };
 
 export default function ConversationChat() {
   const { id } = useParams<{ id: string }>();
@@ -14,8 +16,14 @@ export default function ConversationChat() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<MessageResponseDto[]>([]);
   const [inputValue, setInputValue] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | undefined>(
+    undefined
+  );
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   const [socketDisconnected, setSocketDisconnected] = useState(false);
   const fetchMessagesRef = useRef<(() => void) | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: conversation } = useQuery({
     queryKey: ["conversation", id],
@@ -95,12 +103,33 @@ export default function ConversationChat() {
   }, [id, token]);
 
   const { mutate: sendMessage } = useMutation({
-    mutationFn: (body: string) => client.sendMessage(id!, { body }),
+    mutationFn: ({ body, image }: SendMessageInput) =>
+      client.sendMessage(id!, { body, image }),
     onSuccess: (data) => {
       setMessages((prev) => [...prev, data]);
       setInputValue("");
+      setSelectedImage(undefined);
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
     },
   });
+
+  function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setSelectedImage(file);
+    setPreviewUrl(URL.createObjectURL(file));
+    e.target.value = "";
+  }
+
+  function cancelImage() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setSelectedImage(undefined);
+    setPreviewUrl(null);
+  }
 
   if (isLoading)
     return (
@@ -118,6 +147,7 @@ export default function ConversationChat() {
     );
 
   const isOverLimit = inputValue.length > 1000;
+  const canSend = !isOverLimit && (inputValue.length > 0 || !!selectedImage);
 
   return (
     <div className="max-w-2xl mx-auto h-[100dvh] flex flex-col font-manrope">
@@ -186,7 +216,20 @@ export default function ConversationChat() {
                   : "bg-muted text-foreground rounded-[1.25rem] rounded-bl-sm mr-auto"
               }`}
             >
-              {msg.body}
+              {msg.body && <p>{msg.body}</p>}
+              {msg.imageUrl && (
+                <button
+                  type="button"
+                  onClick={() => setModalImageUrl(msg.imageUrl!)}
+                  className="mt-1 block"
+                >
+                  <img
+                    src={msg.imageUrl}
+                    alt="送信画像"
+                    className="max-w-[200px] rounded-lg cursor-pointer"
+                  />
+                </button>
+              )}
               <div
                 className={`text-xs mt-1 ${
                   isSelf
@@ -204,12 +247,54 @@ export default function ConversationChat() {
         })}
       </div>
 
+      {/* Image Preview */}
+      {previewUrl && (
+        <div className="px-4 py-2 border-t border-border bg-card shrink-0 flex items-center gap-2">
+          <img
+            src={(() => {
+              try {
+                return new URL(previewUrl).protocol === "blob:"
+                  ? previewUrl
+                  : undefined;
+              } catch {
+                return undefined;
+              }
+            })()}
+            alt="送信画像プレビュー"
+            className="h-16 w-16 object-cover rounded-lg"
+          />
+          <button
+            type="button"
+            aria-label="画像をキャンセル"
+            onClick={cancelImage}
+            className="flex items-center justify-center w-6 h-6 rounded-full bg-muted hover:bg-destructive/20 transition-colors"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Input Area */}
       <div
         data-testid="chat-input"
         className="sticky bottom-0 px-4 py-3 border-t border-border bg-card shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
       >
         <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png"
+            className="hidden"
+            onChange={handleImageSelect}
+          />
+          <button
+            type="button"
+            aria-label="画像を選択"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none transition-colors shrink-0"
+          >
+            <ImageIcon size={20} className="text-muted-foreground" />
+          </button>
           <input
             type="text"
             value={inputValue}
@@ -219,10 +304,15 @@ export default function ConversationChat() {
           />
           <button
             type="button"
-            disabled={isOverLimit || inputValue.length === 0}
-            onClick={() => sendMessage(inputValue)}
+            disabled={!canSend}
+            onClick={() =>
+              sendMessage({
+                body: inputValue || undefined,
+                image: selectedImage,
+              })
+            }
             className={`h-12 px-6 rounded-full text-sm font-bold transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
-              isOverLimit || inputValue.length === 0
+              !canSend
                 ? "bg-muted text-muted-foreground"
                 : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"
             }`}
@@ -236,6 +326,23 @@ export default function ConversationChat() {
           </p>
         )}
       </div>
+
+      {/* Full-size Image Modal */}
+      {modalImageUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+          onClick={() => setModalImageUrl(null)}
+        >
+          <img
+            src={modalImageUrl}
+            alt="フルサイズ画像"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

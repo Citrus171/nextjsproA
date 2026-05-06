@@ -9,7 +9,8 @@ import axios from "axios";
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 export type ConversationsControllerCreateMessageBody = {
   /** @maxLength 1000 */
-  body: string;
+  body?: string | null;
+  image?: Blob | null;
 };
 
 export type ConversationsControllerGetUnreadCount200 = {
@@ -115,10 +116,13 @@ export type UsersControllerRegisterBody =
     });
 
 export interface MessageResponseDto {
-  body: string;
+  /** @nullable */
+  body: string | null;
   conversationId: string;
   createdAt: string;
   id: string;
+  /** @nullable */
+  imageUrl: string | null;
   /** @nullable */
   readAt: string | null;
   senderId: string;
@@ -651,11 +655,14 @@ export const conversationsControllerCreateMessage = <
   conversationsControllerCreateMessageBody: ConversationsControllerCreateMessageBody,
   options?: AxiosRequestConfig
 ): Promise<TData> => {
-  return axios.post(
-    `/api/conversations/${id}/messages`,
-    conversationsControllerCreateMessageBody,
-    options
-  );
+  const formData = new FormData();
+  if (conversationsControllerCreateMessageBody.body != null) {
+    formData.append("body", conversationsControllerCreateMessageBody.body);
+  }
+  if (conversationsControllerCreateMessageBody.image != null) {
+    formData.append("image", conversationsControllerCreateMessageBody.image);
+  }
+  return axios.post(`/api/conversations/${id}/messages`, formData, options);
 };
 
 /**
