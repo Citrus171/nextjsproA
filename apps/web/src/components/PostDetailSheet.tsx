@@ -35,6 +35,16 @@ const STATUS_COLOR: Record<string, string> = {
   resolved: "bg-muted-foreground text-primary-foreground",
 };
 
+const POST_TYPE_LABELS: Record<string, string> = {
+  cat: "猫",
+};
+
+const GENDER_LABELS: Record<string, string> = {
+  male: "オス",
+  female: "メス",
+  unknown: "不明",
+};
+
 export default function PostDetailSheet({
   isOpen,
   onClose,
@@ -278,6 +288,35 @@ export default function PostDetailSheet({
               {post.petDetail && (
                 <>
                   <div className="mt-6 grid grid-cols-2 gap-3">
+                    {post.petDetail.name && (
+                      <div className="bg-muted p-3 rounded-xl col-span-2">
+                        <span className="text-xs font-bold text-muted-foreground uppercase">
+                          お名前
+                        </span>
+                        <p className="text-sm font-bold text-foreground mt-0.5">
+                          {post.petDetail.name}
+                        </p>
+                      </div>
+                    )}
+                    <div className="bg-muted p-3 rounded-xl">
+                      <span className="text-xs font-bold text-muted-foreground uppercase">
+                        種類
+                      </span>
+                      <p className="text-sm font-bold text-foreground mt-0.5">
+                        {POST_TYPE_LABELS[post.postType] ?? post.postType}
+                      </p>
+                    </div>
+                    <div className="bg-muted p-3 rounded-xl">
+                      <span className="text-xs font-bold text-muted-foreground uppercase">
+                        性別
+                      </span>
+                      <p className="text-sm font-bold text-foreground mt-0.5">
+                        {post.petDetail.gender
+                          ? (GENDER_LABELS[post.petDetail.gender] ??
+                            post.petDetail.gender)
+                          : "不明"}
+                      </p>
+                    </div>
                     <div className="bg-muted p-3 rounded-xl">
                       <span className="text-xs font-bold text-muted-foreground uppercase">
                         毛色
@@ -324,6 +363,37 @@ export default function PostDetailSheet({
                     </p>
                   </div>
                 </>
+              )}
+
+              {/* 詳しい説明セクション */}
+              {post.description && (
+                <div className="mt-4">
+                  <h3 className="text-base font-extrabold text-foreground mb-2 flex items-center gap-2">
+                    <span className="w-1 h-5 bg-primary rounded-full inline-block" />
+                    詳しい説明
+                  </h3>
+                  <p className="text-sm leading-relaxed text-foreground bg-muted p-4 rounded-2xl">
+                    {post.description}
+                  </p>
+                </div>
+              )}
+
+              {/* いなくなった日時 */}
+              {post.lostDate && (
+                <div className="mt-4 bg-muted p-3 rounded-xl">
+                  <span className="text-xs font-bold text-muted-foreground uppercase">
+                    いなくなった日時
+                  </span>
+                  <p className="text-sm font-bold text-foreground mt-0.5">
+                    {new Date(post.lostDate).toLocaleString("ja-JP", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
               )}
 
               {/* location セクション */}
