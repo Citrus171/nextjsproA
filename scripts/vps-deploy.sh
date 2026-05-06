@@ -161,7 +161,7 @@ git pull --ff-only origin main
 # 3. 依存インストール ----------------------------------------------------------------
 echo ""
 echo "Step 3/10: npm ci"
-npm ci --ignore-scripts
+NODE_ENV=development npm ci --ignore-scripts
 
 # 3.5. bcrypt ネイティブバイナリのリビルド（--ignore-scripts でスキップされるため）
 echo ""
