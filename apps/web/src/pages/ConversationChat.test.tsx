@@ -108,6 +108,7 @@ const mockMessage = (
   conversationId: "conv-1",
   senderId: "user-1",
   body: "こんにちは",
+  imageUrl: null,
   createdAt: "2024-01-01T00:00:00.000Z",
   readAt: null,
   ...overrides,
@@ -417,7 +418,10 @@ describe("ConversationChat", () => {
       });
       fireEvent.click(screen.getByRole("button", { name: /送信/ }));
 
-      expect(mockMutate).toHaveBeenCalledWith("test message");
+      expect(mockMutate).toHaveBeenCalledWith({
+        body: "test message",
+        image: undefined,
+      });
     });
 
     it("1000文字超の入力は送信ボタンが無効になること", () => {
@@ -431,6 +435,209 @@ describe("ConversationChat", () => {
       });
 
       expect(screen.getByRole("button", { name: /送信/ })).toBeDisabled();
+    });
+  });
+
+  describe("画像送信", () => {
+    it("入力エリアに画像選択ボタンが表示されること", () => {
+      setupQueryMocks({ messages: [] });
+
+      render(<ConversationChat />);
+
+      expect(
+        screen.getByRole("button", { name: /画像を選択/ })
+      ).toBeInTheDocument();
+    });
+
+    it("画像選択後、プレビュー画像が表示されること", () => {
+      setupQueryMocks({ messages: [] });
+
+      render(<ConversationChat />);
+
+      const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
+      const input = document.querySelector(
+        "input[type='file']"
+      ) as HTMLInputElement;
+      fireEvent.change(input, { target: { files: [file] } });
+
+      expect(screen.getByAltText("送信画像プレビュー")).toBeInTheDocument();
+    });
+
+    it("画像のみ選択して送信する時、image を含む mutate が呼ばれること", () => {
+      const mockMutate = vi.fn();
+      setupQueryMocks({ messages: [] });
+      vi.mocked(useMutation).mockReturnValue({
+        mutate: mockMutate,
+        isPending: false,
+      } as unknown as ReturnType<typeof useMutation>);
+
+      render(<ConversationChat />);
+
+      const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
+      const input = document.querySelector(
+        "input[type='file']"
+      ) as HTMLInputElement;
+      fireEvent.change(input, { target: { files: [file] } });
+
+      fireEvent.click(screen.getByRole("button", { name: /送信/ }));
+
+      expect(mockMutate).toHaveBeenCalledWith({
+        body: undefined,
+        image: file,
+      });
+    });
+
+    it("画像選択後、テキストなし・画像のみでも送信ボタンが有効であること", () => {
+      setupQueryMocks({ messages: [] });
+
+      render(<ConversationChat />);
+
+      const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
+      const input = document.querySelector(
+        "input[type='file']"
+      ) as HTMLInputElement;
+      fireEvent.change(input, { target: { files: [file] } });
+
+      expect(screen.getByRole("button", { name: /送信/ })).not.toBeDisabled();
+    });
+
+    it("プレビューのキャンセルボタンをクリックした時、プレビューが消えること", () => {
+      setupQueryMocks({ messages: [] });
+
+      render(<ConversationChat />);
+
+      const file = new File(["dummy"], "test.jpg", { type: "image/jpeg" });
+      const input = document.querySelector(
+        "input[type='file']"
+      ) as HTMLInputElement;
+      fireEvent.change(input, { target: { files: [file] } });
+      expect(screen.getByAltText("送信画像プレビュー")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("button", { name: /画像をキャンセル/ }));
+
+      expect(
+        screen.queryByAltText("送信画像プレビュー")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("画像メッセージ表示", () => {
+    it("imageUrl を持つメッセージにサムネイルが表示されること", () => {
+      setupQueryMocks({
+        messages: [
+          mockMessage({
+            id: "msg-img",
+            body: null,
+            imageUrl: "/uploads/conversations/conv-1/abc.jpg",
+          }),
+        ],
+      });
+
+      render(<ConversationChat />);
+
+      const thumbnail = screen.getByAltText("送信画像");
+      expect(thumbnail).toBeInTheDocument();
+      expect(thumbnail).toHaveAttribute(
+        "src",
+        "/uploads/conversations/conv-1/abc.jpg"
+      );
+    });
+
+    it("サムネイルをクリックした時、フルサイズモーダルが表示されること", () => {
+      setupQueryMocks({
+        messages: [
+          mockMessage({
+            id: "msg-img",
+            body: null,
+            imageUrl: "/uploads/conversations/conv-1/abc.jpg",
+          }),
+        ],
+      });
+
+      render(<ConversationChat />);
+
+      fireEvent.click(screen.getByAltText("送信画像"));
+
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(screen.getByAltText("フルサイズ画像")).toHaveAttribute(
+        "src",
+        "/uploads/conversations/conv-1/abc.jpg"
+      );
+    });
+
+    it("モーダルの外側をクリックした時、モーダルが閉じること", () => {
+      setupQueryMocks({
+        messages: [
+          mockMessage({
+            id: "msg-img",
+            body: null,
+            imageUrl: "/uploads/conversations/conv-1/abc.jpg",
+          }),
+        ],
+      });
+
+      render(<ConversationChat />);
+
+      fireEvent.click(screen.getByAltText("送信画像"));
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole("dialog"));
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("bodyがあり imageUrl もあるメッセージ、両方表示されること", () => {
+      setupQueryMocks({
+        messages: [
+          mockMessage({
+            id: "msg-both",
+            body: "テキストと画像",
+            imageUrl: "/uploads/conversations/conv-1/abc.jpg",
+          }),
+        ],
+      });
+
+      render(<ConversationChat />);
+
+      expect(screen.getByText("テキストと画像")).toBeInTheDocument();
+      expect(screen.getByAltText("送信画像")).toBeInTheDocument();
+    });
+
+    it("WebSocket で imageUrl を含むメッセージが届いた時、サムネイルが表示されること", async () => {
+      setupQueryMocks({ messages: [] });
+
+      render(<ConversationChat />);
+
+      const newMsg = mockMessage({
+        id: "msg-ws",
+        body: null,
+        imageUrl: "/uploads/conversations/conv-1/ws.jpg",
+      });
+      act(() => {
+        listeners["newMessage"](newMsg);
+      });
+
+      expect(await screen.findByAltText("送信画像")).toHaveAttribute(
+        "src",
+        "/uploads/conversations/conv-1/ws.jpg"
+      );
+    });
+
+    it("imageUrl がない通常メッセージが正常に表示されること", () => {
+      setupQueryMocks({
+        messages: [
+          mockMessage({
+            id: "msg-text",
+            body: "普通のテキスト",
+            imageUrl: null,
+          }),
+        ],
+      });
+
+      render(<ConversationChat />);
+
+      expect(screen.getByText("普通のテキスト")).toBeInTheDocument();
+      expect(screen.queryByAltText("送信画像")).not.toBeInTheDocument();
     });
   });
 
