@@ -158,7 +158,8 @@ model Message {
   conversationId String
   sender         User         @relation(fields: [senderId], references: [id])
   senderId       String
-  body           String
+  body           String?
+  imageUrl       String?
   readAt         DateTime?
   createdAt      DateTime     @default(now())
 }

@@ -10,8 +10,11 @@ export class MessageResponseDto {
   @ApiProperty()
   senderId: string;
 
-  @ApiProperty()
-  body: string;
+  @ApiProperty({ nullable: true, type: String })
+  body: string | null;
+
+  @ApiProperty({ nullable: true, type: String })
+  imageUrl: string | null;
 
   @ApiProperty({ nullable: true, type: String, format: "date-time" })
   readAt: Date | null;

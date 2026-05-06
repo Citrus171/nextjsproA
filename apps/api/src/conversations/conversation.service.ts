@@ -179,7 +179,7 @@ export class ConversationsService {
     conversationId: string,
     dto: CreateMessageDto
   ) {
-    if (dto.body.length > 1000) {
+    if (dto.body && dto.body.length > 1000) {
       throw new BadRequestException(
         "メッセージは1000文字以内で入力してください"
       );
@@ -200,7 +200,8 @@ export class ConversationsService {
       data: {
         conversationId,
         senderId: userId,
-        body: dto.body,
+        body: dto.body ?? null,
+        imageUrl: dto.imageUrl ?? null,
       },
     });
   }
