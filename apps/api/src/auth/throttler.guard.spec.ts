@@ -5,7 +5,6 @@ describe("AppThrottlerGuard", () => {
   let guard: AppThrottlerGuard;
 
   beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     guard = new AppThrottlerGuard(
       { throttlers: [] } as any,
       {} as never,
