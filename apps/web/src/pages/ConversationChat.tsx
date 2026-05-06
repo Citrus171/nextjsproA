@@ -251,7 +251,7 @@ export default function ConversationChat() {
       {previewUrl && (
         <div className="px-4 py-2 border-t border-border bg-card shrink-0 flex items-center gap-2">
           <img
-            src={previewUrl}
+            src={previewUrl.startsWith("blob:") ? previewUrl : undefined}
             alt="送信画像プレビュー"
             className="h-16 w-16 object-cover rounded-lg"
           />
