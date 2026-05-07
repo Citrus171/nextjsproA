@@ -92,6 +92,8 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   await page.getByRole("button", { name: "この内容で報告する" }).click();
   const createResponse = await createResponsePromise;
   expect(createResponse.ok()).toBeTruthy();
+  const createdPost = (await createResponse.json()) as { id: string };
+  const postId = createdPost.id;
 
   await page.waitForURL(
     (url) => {
@@ -111,37 +113,22 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
       { timeout: 10000 }
     )
     .catch(() => {});
-  await page.waitForTimeout(1000);
 
   await expect(
     page.getByRole("group", { name: "地図フィルター" })
   ).toBeVisible();
-  await expect(page.locator(".map-marker--pin").first()).toBeVisible();
 
-  const markerCount = await page.locator(".map-marker--pin").count();
-  let found = false;
+  // 新規投稿のマーカーを data-marker-id で特定して待機
+  const newMarker = page.locator(`[data-marker-id="${postId}"]`);
+  await expect(newMarker).toBeVisible({ timeout: 15000 });
+  await newMarker.click({ force: true });
 
-  for (let i = 0; i < markerCount; i += 1) {
-    await page.locator(".map-marker--pin").nth(i).click({ force: true });
-    const detailDialog = page.getByRole("dialog");
-    await expect(detailDialog).toBeVisible({ timeout: 5000 });
-    await expect(detailDialog.locator("text=読み込み中")).not.toBeVisible({
-      timeout: 5000,
-    });
-
-    const titleEl = detailDialog.locator(`text=${uniqueToken}`);
-    if ((await titleEl.count()) > 0) {
-      found = true;
-      break;
-    }
-
-    const closeBtn = page.getByRole("button", { name: "閉じる" }).first();
-    await closeBtn.click();
-    await expect(detailDialog).not.toBeVisible({ timeout: 3000 });
-  }
-
-  if (!found) {
-    console.log(`DEBUG: markerCount=${markerCount}, uniqueToken=${uniqueToken}`);
-  }
-  expect(found).toBeTruthy();
+  const detailDialog = page.getByRole("dialog");
+  await expect(detailDialog).toBeVisible({ timeout: 5000 });
+  await expect(detailDialog.locator("text=読み込み中")).not.toBeVisible({
+    timeout: 5000,
+  });
+  await expect(
+    detailDialog.locator(`text=${uniqueToken}`).first()
+  ).toBeVisible();
 });
