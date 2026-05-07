@@ -450,6 +450,7 @@
 - [x] ログイン成功時に auth.login.success イベントをログ出力すること
 - [x] パスワード不一致時に auth.login.failure イベントをログ出力すること
 - [x] メールアドレス未登録時に auth.login.failure イベントをログ出力すること
+- [x] ログイン成功時、JWTペイロードにnicknameが含まれること
 
 #### refresh
 
@@ -460,6 +461,7 @@
 - [x] 再利用検知: delete失敗時にUnauthorizedExceptionを投げること
 - [x] リフレッシュ成功時に auth.refresh.success イベントをログ出力すること
 - [x] 再利用検知時に auth.refresh.reuse イベントをログ出力すること
+- [x] リフレッシュ成功時、JWTペイロードにnicknameが含まれること
 
 #### logout
 
@@ -750,6 +752,11 @@
 
 ## Web Unit (`apps/web/src/**/*.test.tsx`)
 
+### AuthProvider (`src/auth/AuthProvider.test.tsx`)
+
+- [x] JWTにnicknameが含まれる場合、AuthProviderがnicknameを公開すること
+- [x] nicknameを含まないJWTの場合、nicknameがnullを返すこと
+
 - [x] App で未認証で /posts にアクセスしたとき、Posts ページが表示されること
 - [x] App で未認証で /create にアクセスしたとき、/login にリダイレクトされること
 - [x] CreatePost で必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し /posts へ戻る
@@ -834,6 +841,10 @@
 - [x] Map で「地図から選択」クリック後、「タップして場所を選択」バナーが表示されること
 - [x] Map で地図クリックで lat/lng・住所が SightingModal にセットされ再表示されること
 - [x] Map で Nominatim 失敗時、lat/lng セット済みでモーダルが再表示されエラーメッセージが表示されること
+- [x] createMarkerIcon で isOwn=trueの時、map-marker--ownクラスが付与されること
+- [x] createMarkerIcon で isOwn=falseの時、map-marker--ownクラスが付与されないこと
+- [x] createMarkerIcon で解決済みの自分のマーカーにもmap-marker--ownクラスが付与されること
+- [x] createMarkerIcon で自分の目撃投稿マーカーにもmap-marker--ownクラスが付与されること
 - [x] reverseGeocode で正常時、Nominatim から住所文字列を返すこと
 - [x] reverseGeocode で HTTP エラー時、geocodeError を返すこと
 - [x] reverseGeocode でネットワークエラー時、geocodeError を返すこと

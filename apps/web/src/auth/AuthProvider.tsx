@@ -11,18 +11,18 @@ import { authControllerRefresh } from "../../../../packages/api-client/src/index
 type AuthContextValue = {
   token: string | null;
   userId: string | null;
+  nickname: string | null;
   isRestoring: boolean;
   setToken: (t: string | null) => void;
   clearToken: () => void;
 };
 
-function decodeUserId(token: string | null): string | null {
+function decodePayload(token: string | null): Record<string, unknown> | null {
   if (!token) return null;
   try {
-    const payload = JSON.parse(
+    return JSON.parse(
       atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
-    );
-    return (payload.sub as string) ?? null;
+    ) as Record<string, unknown>;
   } catch {
     return null;
   }
@@ -62,11 +62,13 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     navigate("/login");
   };
 
-  const userId = decodeUserId(token);
+  const payload = decodePayload(token);
+  const userId = (payload?.sub as string) ?? null;
+  const nickname = (payload?.nickname as string) ?? null;
 
   return (
     <AuthContext.Provider
-      value={{ token, userId, isRestoring, setToken, clearToken }}
+      value={{ token, userId, nickname, isRestoring, setToken, clearToken }}
     >
       {children}
     </AuthContext.Provider>
