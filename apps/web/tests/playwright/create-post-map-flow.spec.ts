@@ -128,5 +128,7 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   await expect(detailDialog.locator("text=読み込み中")).not.toBeVisible({
     timeout: 5000,
   });
-  await expect(detailDialog.locator(`text=${uniqueToken}`)).toBeVisible();
+  await expect(
+    detailDialog.locator(`text=${uniqueToken}`).first()
+  ).toBeVisible();
 });
