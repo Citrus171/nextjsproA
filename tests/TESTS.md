@@ -53,7 +53,7 @@
 - [x] 存在しない投稿は NotFoundException
 - [x] 別の投稿に属する画像は NotFoundException
 
-### ImageProcessingService (`src/posts/image-processing.service.spec.ts`)
+### ImageProcessingService (`src/shared/image-processing.service.spec.ts`)
 
 - [x] processが処理済みBufferを返すこと
 - [x] width=1200・withoutEnlargement=true でリサイズすること

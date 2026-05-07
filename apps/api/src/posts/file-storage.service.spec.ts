@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { BadRequestException } from "@nestjs/common";
 import { FileStorageService } from "./file-storage.service";
-import { ImageProcessingService } from "./image-processing.service";
+import { ImageProcessingService } from "../shared/image-processing.service";
 
 jest.mock("fs");
 const mockFs = fs as jest.Mocked<typeof fs>;
