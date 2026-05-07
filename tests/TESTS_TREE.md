@@ -58,7 +58,8 @@ apps/api/src/
 │   │       │   ├── production環境ではCookieのsecureとsameSiteが適切に設定されること
 │   │       │   ├── ログイン成功時に auth.login.success イベントをログ出力すること
 │   │       │   ├── パスワード不一致時に auth.login.failure イベントをログ出力すること
-│   │       │   └── メールアドレス未登録時に auth.login.failure イベントをログ出力すること
+│   │       │   ├── メールアドレス未登録時に auth.login.failure イベントをログ出力すること
+│   │       │   └── ログイン成功時、JWTペイロードにnicknameが含まれること
 │   │       ├── refresh
 │   │       │   ├── 有効なトークンで新しいAuthResultを返すこと
 │   │       │   ├── トークンが存在しない場合はUnauthorizedExceptionを投げること
@@ -66,7 +67,8 @@ apps/api/src/
 │   │       │   ├── ローテーション: 新しいトークンのハッシュがDBに保存されること
 │   │       │   ├── 再利用検知: delete失敗時にUnauthorizedExceptionを投げること
 │   │       │   ├── リフレッシュ成功時に auth.refresh.success イベントをログ出力すること
-│   │       │   └── 再利用検知時に auth.refresh.reuse イベントをログ出力すること
+│   │       │   ├── 再利用検知時に auth.refresh.reuse イベントをログ出力すること
+│   │       │   └── リフレッシュ成功時、JWTペイロードにnicknameが含まれること
 │   │       ├── logout
 │   │       │   ├── リフレッシュトークンを削除すること
 │   │       │   ├── 存在しないトークンでもエラーを投げないこと
@@ -491,6 +493,10 @@ apps/api/test/
     └── POST /api/auth/logout
         └── ログアウトで Cookie が削除される (200)
 apps/web/src/
+├── auth/AuthProvider.test.tsx
+│   └── AuthProvider
+│       ├── JWTにnicknameが含まれる場合、AuthProviderがnicknameを公開すること
+│       └── nicknameを含まないJWTの場合、nicknameがnullを返すこと
 ├── App.test.tsx
 │   └── App
 │       ├── 未認証で /posts にアクセスしたとき、Posts ページが表示されること
@@ -525,6 +531,11 @@ apps/web/src/
     │           ├── 「地図から選択」クリック後、「タップして場所を選択」バナーが表示されること
     │           ├── 選択モード中に地図クリックで lat/lng・住所が SightingModal にセットされ再表示されること
     │           └── Nominatim 失敗時、lat/lng セット済みでモーダルが再表示されエラーメッセージが表示されること
+    │   └── createMarkerIcon
+    │       ├── isOwn=trueの時、map-marker--ownクラスが付与されること
+    │       ├── isOwn=falseの時、map-marker--ownクラスが付与されないこと
+    │       ├── 解決済みの自分のマーカーにもmap-marker--ownクラスが付与されること
+    │       └── 自分の目撃投稿マーカーにもmap-marker--ownクラスが付与されること
     ├── components/PostDetailSheet.test.tsx
     │   └── PostDetailSheet
     │       ├── isOpen=true の時、ダイアログが表示されること

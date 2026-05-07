@@ -182,6 +182,18 @@ describe("IdentityService", () => {
       expect(mockPrisma.user.findUnique).toHaveBeenCalledTimes(1);
     });
 
+    it("ログイン成功時、JWTペイロードにnicknameが含まれること", async () => {
+      const user = await makeUser();
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
+      mockPrisma.refreshToken.create.mockResolvedValueOnce({});
+
+      await service.login("user@example.com", "password123");
+
+      expect(mockJwt.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ nickname: "Alice" })
+      );
+    });
+
     it("production環境ではCookieのsecureとsameSiteが適切に設定されること", async () => {
       const prodConfig = {
         get: jest.fn((key: string) => {
@@ -220,7 +232,7 @@ describe("IdentityService", () => {
         tokenHash: "token-hash",
         userId: "user-1",
         expiresAt: ts,
-        user: { emailEncrypted: "enc-email", role: "user" },
+        user: { emailEncrypted: "enc-email", role: "user", nickname: "Alice" },
       });
       mockPrisma.refreshToken.create.mockResolvedValueOnce({});
 
@@ -238,7 +250,7 @@ describe("IdentityService", () => {
         tokenHash: "token-hash",
         userId: "user-1",
         expiresAt: ts,
-        user: { emailEncrypted: "enc-email", role: "user" },
+        user: { emailEncrypted: "enc-email", role: "user", nickname: "Alice" },
       });
       mockPrisma.refreshToken.create.mockResolvedValueOnce({});
 
@@ -257,7 +269,7 @@ describe("IdentityService", () => {
         tokenHash: "token-hash",
         userId: "user-1",
         expiresAt: ts,
-        user: { emailEncrypted: "enc-email", role: "user" },
+        user: { emailEncrypted: "enc-email", role: "user", nickname: "Alice" },
       });
       mockPrisma.refreshToken.create.mockResolvedValueOnce({});
 
@@ -295,7 +307,7 @@ describe("IdentityService", () => {
         tokenHash: "token-hash",
         userId: "user-1",
         expiresAt: ts,
-        user: { emailEncrypted: "enc-email", role: "user" },
+        user: { emailEncrypted: "enc-email", role: "user", nickname: "Alice" },
       });
       mockPrisma.refreshToken.delete.mockRejectedValueOnce(
         new Error("already deleted")
@@ -312,7 +324,7 @@ describe("IdentityService", () => {
         tokenHash: "token-hash",
         userId: "user-1",
         expiresAt: ts,
-        user: { emailEncrypted: "enc-email", role: "user" },
+        user: { emailEncrypted: "enc-email", role: "user", nickname: "Alice" },
       });
       mockPrisma.refreshToken.delete.mockRejectedValueOnce(
         new Error("already deleted")
@@ -327,6 +339,23 @@ describe("IdentityService", () => {
         userId: "user-1",
         reason: "token already used",
       });
+    });
+
+    it("リフレッシュ成功時、JWTペイロードにnicknameが含まれること", async () => {
+      const ts = new Date(Date.now() + 86400000);
+      mockPrisma.refreshToken.findUnique.mockResolvedValueOnce({
+        tokenHash: "token-hash",
+        userId: "user-1",
+        expiresAt: ts,
+        user: { emailEncrypted: "enc-email", role: "user", nickname: "Alice" },
+      });
+      mockPrisma.refreshToken.create.mockResolvedValueOnce({});
+
+      await service.refresh("old-refresh-token");
+
+      expect(mockJwt.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ nickname: "Alice" })
+      );
     });
   });
 

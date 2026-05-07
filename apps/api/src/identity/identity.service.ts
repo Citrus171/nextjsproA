@@ -95,6 +95,7 @@ export class IdentityService extends IIdentityService {
       sub: user.id,
       email: this.decryptSafely(user.emailEncrypted),
       role: user.role,
+      nickname: user.nickname,
     };
     const accessToken = this.jwt.sign(payload);
     this.logger.log("auth.login.success", {
@@ -112,7 +113,9 @@ export class IdentityService extends IIdentityService {
     const tokenHash = this.crypto.sha256Hex(cookieToken);
     const rec = await this.prisma.refreshToken.findUnique({
       where: { tokenHash },
-      include: { user: { select: { emailEncrypted: true, role: true } } },
+      include: {
+        user: { select: { emailEncrypted: true, role: true, nickname: true } },
+      },
     });
     if (!rec || rec.expiresAt <= new Date()) {
       throw new UnauthorizedException("無効なリフレッシュトークンです");
@@ -142,6 +145,7 @@ export class IdentityService extends IIdentityService {
       sub: rec.userId,
       email: this.decryptSafely(rec.user.emailEncrypted),
       role: rec.user.role,
+      nickname: rec.user.nickname,
     };
     const accessToken = this.jwt.sign(payload);
     this.logger.log("auth.refresh.success", {
@@ -269,10 +273,17 @@ export class IdentityService extends IIdentityService {
     password: string;
     emailEncrypted: string;
     role: string;
+    nickname: string;
   } | null> {
     return this.prisma.user.findUnique({
       where: { emailHash: hmac },
-      select: { id: true, password: true, emailEncrypted: true, role: true },
+      select: {
+        id: true,
+        password: true,
+        emailEncrypted: true,
+        role: true,
+        nickname: true,
+      },
     });
   }
 
