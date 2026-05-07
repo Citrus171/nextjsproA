@@ -592,8 +592,7 @@
 #### remove
 
 - [x] 管理者がユーザーを削除できる
-- [x] 存在しないユーザーIDはP2025エラーを404に変換する
-- [x] P2025以外のエラーは再スローされる
+- [x] deleteUserがエラーを投げたとき、そのエラーが伝播すること
 
 ### Dredd 契約テスト
 
@@ -608,6 +607,24 @@
 （その他既存テスト省略）
 
 ---
+
+---
+
+---
+
+## PrismaClientExceptionFilter (`src/filters/prisma-client-exception.filter.spec.ts`)
+
+### P2025（レコード不在）
+
+- [x] NotFoundException に変換すること
+
+### P2002（一意制約違反）
+
+- [x] ConflictException に変換すること
+
+### 不明なPrismaエラーコード
+
+- [x] そのまま再スローすること
 
 ---
 

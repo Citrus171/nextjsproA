@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ConflictException,
-  HttpException,
-  HttpStatus,
-} from "@nestjs/common";
+import { BadRequestException, ConflictException } from "@nestjs/common";
 import { UsersController } from "./user.controller";
 import { RegisterDto } from "./dto/register.dto";
 
@@ -113,24 +108,7 @@ describe("UsersController", () => {
       expect(result).toBe(deleted);
     });
 
-    it("存在しないユーザーIDはP2025エラーを404に変換する", async () => {
-      mockIdentityService.deleteUser.mockRejectedValue({ code: "P2025" });
-
-      await expect(controller.remove("nonexistent")).rejects.toThrow(
-        HttpException
-      );
-
-      try {
-        await controller.remove("nonexistent");
-      } catch (e) {
-        expect(e).toBeInstanceOf(HttpException);
-        expect((e as HttpException).getStatus()).toBe(HttpStatus.NOT_FOUND);
-        const body = (e as HttpException).getResponse() as { error: string };
-        expect(body.error).toBe("ユーザーが見つかりません");
-      }
-    });
-
-    it("P2025以外のエラーは再スローされる", async () => {
+    it("deleteUserがエラーを投げたとき、そのエラーが伝播すること", async () => {
       const dbError = new Error("DB接続エラー");
       mockIdentityService.deleteUser.mockRejectedValue(dbError);
 

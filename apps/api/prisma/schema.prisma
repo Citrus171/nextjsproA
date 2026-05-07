@@ -74,6 +74,9 @@ model Post {
   favorites   PostFavorite[]
   createdAt   DateTime   @default(now()) @db.Timestamptz(3)
   updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model PetDetail {
@@ -126,6 +129,8 @@ model Sighting {
   conversations Conversation[]
   favorites SightingFavorite[]
   createdAt DateTime         @default(now())
+
+  @@index([postId])
 }
 
 model SightingImage {
@@ -150,6 +155,8 @@ model Conversation {
   createdAt DateTime  @default(now())
 
   @@unique([postId, sightingId])
+  @@index([ownerId])
+  @@index([sighterId])
 }
 
 model Message {
@@ -162,6 +169,8 @@ model Message {
   imageUrl       String?
   readAt         DateTime?
   createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
 }
 
 model PostFavorite {

@@ -113,6 +113,15 @@ apps/api/src/
 │           └── generateSecureToken
 │               ├── 96文字の16進数文字列を生成すること (48 bytes)
 │               └── 毎回異なるトークンを生成すること
+├── filters/
+│   └── prisma-client-exception.filter.spec.ts
+│       └── PrismaClientExceptionFilter
+│           ├── P2025（レコード不在）
+│           │   └── NotFoundException に変換すること
+│           ├── P2002（一意制約違反）
+│           │   └── ConflictException に変換すること
+│           └── 不明なPrismaエラーコード
+│               └── そのまま再スローすること
 ├── sentry/
 │   └── sentry.filter.spec.ts
 │       └── SentryFilter
@@ -403,10 +412,9 @@ apps/api/src/
     │       ├── ConflictException はそのまま伝播する
     │       ├── nickname があれば service に渡す
     │       ├── nickname がなくても name を後方互換で使う
-    │       └── remove
-    │           ├── 管理者がユーザーを削除できる
-    │           ├── 存在しないユーザーIDはP2025エラーを404に変換する
-    │           └── P2025以外のエラーは再スローされる
+│       └── remove
+│           ├── 管理者がユーザーを削除できる
+│           └── deleteUserがエラーを投げたとき、そのエラーが伝播すること
     └── dto/
         └── register.dto.spec.ts
             └── RegisterDto

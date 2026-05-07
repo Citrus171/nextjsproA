@@ -6,8 +6,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../prisma.service";
 import { CreateSightingDto } from "./dto/create-sighting.dto";
-
-const MAX_FAVORITES_LIMIT = 20;
+import { MAX_FAVORITES_LIMIT } from "../common/constants";
 
 @Injectable()
 export class SightingsService {

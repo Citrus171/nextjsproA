@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { APP_FILTER, APP_GUARD } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { SentryModule } from "@sentry/nestjs/setup";
 import { SentryFilter } from "./sentry/sentry.filter";
@@ -13,6 +13,8 @@ import { ConversationsModule } from "./conversations/conversation.module";
 import { HealthModule } from "./health/health.module";
 import { LoggerModule } from "./logger/logger.module";
 import { AppThrottlerGuard } from "./auth/throttler.guard";
+import { LoggerInterceptor } from "./logger/logger.interceptor";
+import { PrismaClientExceptionFilter } from "./filters/prisma-client-exception.filter";
 
 @Module({
   imports: [
@@ -46,7 +48,9 @@ import { AppThrottlerGuard } from "./auth/throttler.guard";
   ],
   providers: [
     { provide: APP_FILTER, useClass: SentryFilter },
+    { provide: APP_FILTER, useClass: PrismaClientExceptionFilter },
     { provide: APP_GUARD, useClass: AppThrottlerGuard },
+    { provide: APP_INTERCEPTOR, useClass: LoggerInterceptor },
   ],
 })
 export class AppModule {}

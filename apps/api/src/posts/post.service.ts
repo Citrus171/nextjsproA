@@ -27,8 +27,7 @@ import {
   getImageUploadLimit,
   getMonthlyPostLimit,
 } from "../common/plan-limits";
-
-const MAX_FAVORITES_LIMIT = 20;
+import { MAX_FAVORITES_LIMIT } from "../common/constants";
 const MAX_TRANSACTION_RETRIES = 3;
 
 function getMonthRange(date = new Date()) {
