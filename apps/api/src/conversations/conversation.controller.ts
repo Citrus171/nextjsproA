@@ -167,7 +167,7 @@ export class ConversationsController {
         throw new BadRequestException("ファイルサイズは2MB以内にしてください");
       }
       const savedUrl = await this.conversationFileStorage.saveFile(id, file);
-      dto = { imageUrl: `/${savedUrl}` };
+      dto = { ...dto, imageUrl: `/${savedUrl}` };
     }
 
     const message = await this.conversationsService.createMessage(
