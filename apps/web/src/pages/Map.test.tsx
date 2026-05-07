@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { vi } from "vitest";
@@ -243,14 +243,35 @@ describe("Map", () => {
     ).toBeInTheDocument();
   });
 
-  describe("アカウントボタン", () => {
+  describe("ヘッダーUI", () => {
+    it("ヘッダーに「さいたまマップ」テキストが表示されること", () => {
+      renderMap();
+      expect(screen.getByText("さいたまマップ")).toBeInTheDocument();
+    });
+
+    it("旧「メニュー」ボタン（≡）が表示されないこと", () => {
+      renderMap();
+      expect(
+        screen.queryByRole("button", { name: "メニュー" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("旧「アカウント」ボタン（◯）が表示されないこと", () => {
+      renderMap();
+      expect(
+        screen.queryByRole("button", { name: "アカウント" })
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("ログアウトボタン", () => {
     it("未認証でクリックした時、ログアウト確認ダイアログが表示されないこと", async () => {
       const user = userEvent.setup();
       mockAuth.userId = null;
 
       renderMap();
 
-      await user.click(screen.getByRole("button", { name: "アカウント" }));
+      await user.click(screen.getByRole("button", { name: "ログアウト" }));
 
       expect(
         screen.queryByText("ログアウトしますか？")
@@ -265,7 +286,7 @@ describe("Map", () => {
 
       renderMap();
 
-      await user.click(screen.getByRole("button", { name: "アカウント" }));
+      await user.click(screen.getByRole("button", { name: "ログアウト" }));
 
       expect(
         await screen.findByText("ログアウトしますか？")
@@ -281,7 +302,7 @@ describe("Map", () => {
 
       renderMap();
 
-      await user.click(screen.getByRole("button", { name: "アカウント" }));
+      await user.click(screen.getByRole("button", { name: "ログアウト" }));
       await screen.findByText("ログアウトしますか？");
       await user.click(screen.getByRole("button", { name: "キャンセル" }));
 
@@ -289,15 +310,20 @@ describe("Map", () => {
       expect(mockClearToken).not.toHaveBeenCalled();
     });
 
-    it("ダイアログでOK押下時、ログアウト処理が実行されること", async () => {
+    it("ダイアログの実行ボタンが「ログアウト」と表示され、押下時にログアウト処理が実行されること", async () => {
       const user = userEvent.setup();
       mockAuth.userId = "user-1";
 
       renderMap();
 
-      await user.click(screen.getByRole("button", { name: "アカウント" }));
-      await screen.findByText("ログアウトしますか？");
-      await user.click(screen.getByRole("button", { name: "OK" }));
+      await user.click(screen.getByRole("button", { name: "ログアウト" }));
+      const dialog = await screen.findByRole("alertdialog");
+      expect(
+        within(dialog).getByRole("button", { name: "ログアウト" })
+      ).toBeInTheDocument();
+      await user.click(
+        within(dialog).getByRole("button", { name: "ログアウト" })
+      );
 
       expect(mockLogout).toHaveBeenCalledTimes(1);
       expect(mockClearToken).toHaveBeenCalledTimes(1);
@@ -464,7 +490,7 @@ describe("Map", () => {
 
       renderMap();
 
-      await screen.findByRole("button", { name: "アカウント" });
+      await screen.findByRole("button", { name: "ログアウト" });
       expect(screen.queryByText(/様/)).not.toBeInTheDocument();
     });
   });

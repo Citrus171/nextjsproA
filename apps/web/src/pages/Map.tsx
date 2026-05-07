@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { LogOut } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { Map as LeafletMap, LeafletMouseEvent } from "leaflet";
@@ -299,33 +300,26 @@ export default function Map() {
     <div className="relative w-full min-h-dvh overflow-hidden map-page">
       <header className="fixed top-0 left-0 right-0 z-[1300] px-4 pt-4 md:px-5 md:pt-5 pointer-events-none">
         <div className="flex items-center gap-2.5 p-2.5 rounded-[20px] bg-white/[0.98] shadow-[0_8px_26px_rgba(15,23,42,0.18)] backdrop-blur-[12px] pointer-events-auto md:max-w-[640px]">
-          <button
-            className="inline-flex items-center justify-center w-11 h-11 border-0 rounded-full bg-transparent text-[#5f6368] cursor-pointer flex-shrink-0 outline-none hover:bg-black/[0.06] focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
-            type="button"
-            aria-label="メニュー"
-            onClick={() => {
-              if (!currentUserId) return;
-              setShowLogoutDialog(true);
-            }}
-          >
-            <MenuIcon />
-          </button>
-          <div className="flex items-center gap-1.5 ml-auto">
+          <span className="text-sm font-bold text-[#3c4043] flex-1">
+            さいたまマップ
+          </span>
+          <div className="flex items-center gap-1.5">
             {nickname && (
               <span className="text-xs text-[#5f6368] font-medium">
                 {nickname} 様
               </span>
             )}
             <button
-              className="inline-flex items-center justify-center w-11 h-11 border-0 rounded-full bg-primary text-white cursor-pointer flex-shrink-0 outline-none hover:bg-primary/90 focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
+              className="inline-flex items-center gap-1.5 px-3 h-9 border-0 rounded-full bg-transparent text-[#5f6368] text-sm cursor-pointer flex-shrink-0 outline-none hover:bg-black/[0.06] focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
               type="button"
-              aria-label="アカウント"
+              aria-label="ログアウト"
               onClick={() => {
                 if (!currentUserId) return;
                 setShowLogoutDialog(true);
               }}
             >
-              <UserIcon />
+              <LogOut size={16} aria-hidden="true" />
+              ログアウト
             </button>
           </div>
         </div>
@@ -615,7 +609,7 @@ export default function Map() {
                 clearToken();
               }}
             >
-              OK
+              ログアウト
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -667,14 +661,6 @@ export default function Map() {
       </Sheet>
     </div>
   );
-}
-
-function MenuIcon() {
-  return <span aria-hidden="true">≡</span>;
-}
-
-function UserIcon() {
-  return <span aria-hidden="true">◯</span>;
 }
 
 function PlusIcon() {
