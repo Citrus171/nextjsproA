@@ -42,9 +42,12 @@ describe("PrismaClientExceptionFilter", () => {
     });
   });
 
-  describe("Prisma 以外のエラー", () => {
+  describe("不明なPrismaエラーコード", () => {
     it("そのまま再スローすること", () => {
-      const err = new Error("予期しないエラー");
+      const err = new Prisma.PrismaClientKnownRequestError(
+        "Some other prisma error",
+        { code: "P2014", clientVersion: "5.0.0" }
+      );
       const host = makeHost();
 
       expect(() => filter.catch(err, host)).toThrow(err);

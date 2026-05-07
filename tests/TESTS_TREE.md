@@ -120,7 +120,7 @@ apps/api/src/
 │           │   └── NotFoundException に変換すること
 │           ├── P2002（一意制約違反）
 │           │   └── ConflictException に変換すること
-│           └── Prisma 以外のエラー
+│           └── 不明なPrismaエラーコード
 │               └── そのまま再スローすること
 ├── sentry/
 │   └── sentry.filter.spec.ts

@@ -622,7 +622,7 @@
 
 - [x] ConflictException に変換すること
 
-### Prisma 以外のエラー
+### 不明なPrismaエラーコード
 
 - [x] そのまま再スローすること
 
