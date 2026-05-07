@@ -1,7 +1,5 @@
 import {
   Injectable,
-  HttpException,
-  HttpStatus,
   ForbiddenException,
   BadRequestException,
   NotFoundException,
@@ -500,7 +498,7 @@ export class PostsService {
       include: { petDetail: true, location: true },
     });
     if (!post) {
-      throw new HttpException("投稿が見つかりません", HttpStatus.NOT_FOUND);
+      throw new NotFoundException("投稿が見つかりません");
     }
     if (post.userId !== userId && !isAdmin) {
       throw new ForbiddenException("投稿のオーナーではありません");
@@ -575,7 +573,7 @@ export class PostsService {
       include: { images: true },
     });
     if (!post) {
-      throw new HttpException("投稿が見つかりません", HttpStatus.NOT_FOUND);
+      throw new NotFoundException("投稿が見つかりません");
     }
     if (post.userId !== userId && !isAdmin) {
       throw new ForbiddenException("投稿のオーナーではありません");

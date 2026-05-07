@@ -126,12 +126,13 @@ apps/api/src/
 │               ├── 全チェックが正常なとき、status:okを返すこと
 │               ├── DBが異常なとき、status:errorを返すこと
 │               └── check()はHealthCheckService.check()を呼び出すこと
+├── shared/
+│   └── image-processing.service.spec.ts
+│       ├── processが処理済みBufferを返すこと
+│       ├── width=1200・withoutEnlargement=true でリサイズすること
+│       ├── quality=80 でJPEG変換すること
+│       └── sharpがエラーをスローした時、BadRequestExceptionになること
 ├── posts/
-│   ├── image-processing.service.spec.ts
-│   │   ├── processが処理済みBufferを返すこと
-│   │   ├── width=1200・withoutEnlargement=true でリサイズすること
-│   │   ├── quality=80 でJPEG変換すること
-│   │   └── sharpがエラーをスローした時、BadRequestExceptionになること
 │   ├── file-storage.service.spec.ts
 │   │   ├── saveFile
 │   │   │   ├── saveFileが uploads/{postId}/{uuid}.jpg 形式のURLを返すこと

@@ -1,7 +1,7 @@
 import { BadRequestException } from "@nestjs/common";
 import * as fs from "fs";
 import { ConversationFileStorageService } from "./conversation-file-storage.service";
-import { ImageProcessingService } from "./image-processing.service";
+import { ImageProcessingService } from "../shared/image-processing.service";
 
 jest.mock("fs");
 jest.mock("uuid", () => ({ v4: () => "test-uuid" }));

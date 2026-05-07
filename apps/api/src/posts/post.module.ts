@@ -3,11 +3,11 @@ import { PostsService } from "./post.service";
 import { PostsController } from "./post.controller";
 import { IdentityModule } from "../identity/identity.module";
 import { FileStorageService } from "./file-storage.service";
-import { ImageProcessingService } from "./image-processing.service";
+import { SharedModule } from "../shared/shared.module";
 
 @Module({
-  imports: [IdentityModule],
-  providers: [PostsService, FileStorageService, ImageProcessingService],
+  imports: [IdentityModule, SharedModule],
+  providers: [PostsService, FileStorageService],
   controllers: [PostsController],
 })
 export class PostsModule {}

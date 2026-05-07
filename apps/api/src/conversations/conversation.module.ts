@@ -4,13 +4,14 @@ import { JwtModule } from "@nestjs/jwt";
 import { ConversationsController } from "./conversation.controller";
 import { ConversationsService } from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
-import { ImageProcessingService } from "./image-processing.service";
 import { ConversationFileStorageService } from "./conversation-file-storage.service";
 import { IdentityModule } from "../identity/identity.module";
+import { SharedModule } from "../shared/shared.module";
 
 @Module({
   imports: [
     IdentityModule,
+    SharedModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -22,7 +23,6 @@ import { IdentityModule } from "../identity/identity.module";
   providers: [
     ConversationsService,
     ConversationsGateway,
-    ImageProcessingService,
     ConversationFileStorageService,
   ],
 })
