@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useApiClient } from "../api/orvalClient";
+import { useAuth } from "../auth/AuthProvider";
 import { ChevronLeft } from "lucide-react";
 import type { ConversationListItemDto } from "../../../../packages/api-client/src/index";
 
@@ -22,6 +23,7 @@ export function formatDate(dateStr: string): string {
 export default function Conversations() {
   const client = useApiClient();
   const navigate = useNavigate();
+  const { nickname } = useAuth();
 
   const {
     data: conversations,
@@ -67,6 +69,11 @@ export default function Conversations() {
         <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
           会話一覧
         </h1>
+        {nickname && (
+          <span className="ml-auto text-sm text-muted-foreground">
+            {nickname} 様
+          </span>
+        )}
       </div>
       {!conversations || conversations.length === 0 ? (
         <div className="text-center py-12">

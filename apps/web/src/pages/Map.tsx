@@ -98,7 +98,7 @@ export function createMarkerIcon(marker: MapMarkerDto, isOwn: boolean) {
 
 export default function Map() {
   const api = useApiClient();
-  const { userId: currentUserId, clearToken } = useAuth();
+  const { userId: currentUserId, nickname, clearToken } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [markers, setMarkers] = useState<MapMarkerDto[]>([]);
@@ -311,6 +311,11 @@ export default function Map() {
             <MenuIcon />
           </button>
           <div className="flex items-center gap-1.5 ml-auto">
+            {nickname && (
+              <span className="text-xs text-[#5f6368] font-medium">
+                {nickname} 様
+              </span>
+            )}
             <button
               className="inline-flex items-center justify-center w-11 h-11 border-0 rounded-full bg-primary text-white cursor-pointer flex-shrink-0 outline-none hover:bg-primary/90 focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
               type="button"

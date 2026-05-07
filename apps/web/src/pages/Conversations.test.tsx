@@ -5,6 +5,13 @@ import type { ConversationListItemDto } from "../../../../packages/api-client/sr
 
 const mockNavigate = vi.fn();
 const mockListConversations = vi.fn();
+const mockAuth = { nickname: null as string | null };
+
+vi.mock("../auth/AuthProvider", () => ({
+  useAuth: () => ({
+    nickname: mockAuth.nickname,
+  }),
+}));
 
 vi.mock("react-router-dom", async () => {
   const actual =
@@ -59,6 +66,7 @@ const mockConversation = (
 describe("Conversations", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockAuth.nickname = null;
   });
 
   describe("会話一覧の表示", () => {
@@ -178,6 +186,34 @@ describe("Conversations", () => {
       render(<Conversations />);
 
       expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("ニックネーム表示", () => {
+    it("nicknameがある時、ヘッダーに「nickname 様」が表示されること", () => {
+      mockAuth.nickname = "Alice";
+      vi.mocked(useQuery).mockReturnValue({
+        data: [],
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      expect(screen.getByText("Alice 様")).toBeInTheDocument();
+    });
+
+    it("nicknameがnullの時、「様」が表示されないこと", () => {
+      mockAuth.nickname = null;
+      vi.mocked(useQuery).mockReturnValue({
+        data: [],
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      expect(screen.queryByText(/様/)).not.toBeInTheDocument();
     });
   });
 

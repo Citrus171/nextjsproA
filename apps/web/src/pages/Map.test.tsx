@@ -74,7 +74,10 @@ const mockMapInstance = {
     };
   }),
 };
-const mockAuth = { userId: null as string | null };
+const mockAuth = {
+  userId: null as string | null,
+  nickname: null as string | null,
+};
 
 vi.mock("react-leaflet", () => ({
   MapContainer: ({ children }: { children: ReactNode }) => (
@@ -134,6 +137,7 @@ vi.mock("../auth/AuthProvider", () => ({
   useAuth: () => ({
     token: null,
     userId: mockAuth.userId,
+    nickname: mockAuth.nickname,
     setToken: vi.fn(),
     clearToken: mockClearToken,
   }),
@@ -201,6 +205,7 @@ describe("Map", () => {
 
   beforeEach(() => {
     mockAuth.userId = null;
+    mockAuth.nickname = null;
     mockNavigate.mockReset();
     mockClearToken.mockReset();
     mockLogout.mockReset();
@@ -440,6 +445,27 @@ describe("Map", () => {
       expect(
         await screen.findByRole("heading", { name: "目撃を報告する" })
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("ニックネーム表示", () => {
+    it("認証済みでnicknameがある時、ヘッダーに「nickname 様」が表示されること", async () => {
+      mockAuth.userId = "user-1";
+      mockAuth.nickname = "Alice";
+
+      renderMap();
+
+      expect(await screen.findByText("Alice 様")).toBeInTheDocument();
+    });
+
+    it("nicknameがnullの時、「様」が表示されないこと", async () => {
+      mockAuth.userId = "user-1";
+      mockAuth.nickname = null;
+
+      renderMap();
+
+      await screen.findByRole("button", { name: "アカウント" });
+      expect(screen.queryByText(/様/)).not.toBeInTheDocument();
     });
   });
 

@@ -786,6 +786,8 @@
 - [x] Map のログアウト確認ダイアログで OK 押下時、ログアウト処理が実行されること
 - [x] Map で未認証のまま「目撃を報告する」をクリックした時、/login にリダイレクトされること
 - [x] Map で認証済みかつ他者のPostで「目撃を報告する」をクリックした時、SightingModal が開くこと
+- [x] Map で認証済みでnicknameがある時、ヘッダーに「nickname 様」が表示されること
+- [x] Map でnicknameがnullの時、「様」が表示されないこと
 - [x] Map で未認証で「目撃投稿」ボタンをクリックした時、/login にリダイレクトされること
 - [x] Map で認証済みで「目撃投稿」ボタンをクリックした時、SightingModal が開くこと
 - [x] PostDetailSheet で isOpen=true の時、ダイアログが表示されること
@@ -857,6 +859,8 @@
 - [x] Conversations でunreadCountが1以上の時、未読バッジが表示されること
 - [x] Conversations でunreadCountが1以上の時、未読バッジが青色の丸スタイルで表示されること
 - [x] Conversations でunreadCountが0の時、未読バッジが表示されないこと
+- [x] Conversations でnicknameがある時、ヘッダーに「nickname 様」が表示されること
+- [x] Conversations でnicknameがnullの時、「様」が表示されないこと
 - [x] Conversations で← Map ボタンをクリックした時、/ に遷移すること
 - [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
 - [x] Conversations で5秒間隔でポーリングするようにuseQueryが呼ばれること
