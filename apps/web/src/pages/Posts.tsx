@@ -206,36 +206,38 @@ export default function Posts() {
                     >
                       <MapPinned size={18} aria-hidden="true" />
                     </button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <button
-                          type="button"
-                          className="text-sm font-semibold text-destructive hover:text-destructive/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
-                        >
-                          削除
-                        </button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            投稿を削除しますか？
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            この操作は取り消せません。関連する会話と目撃情報も削除されます。
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>キャンセル</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => {
-                              handleDelete(p.id);
-                            }}
+                    {userId === p.userId && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            type="button"
+                            className="text-sm font-semibold text-destructive hover:text-destructive/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
                           >
-                            削除する
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            削除
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              投稿を削除しますか？
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              この操作は取り消せません。関連する会話と目撃情報も削除されます。
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => {
+                                handleDelete(p.id);
+                              }}
+                            >
+                              削除する
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
                 </div>
               </div>
