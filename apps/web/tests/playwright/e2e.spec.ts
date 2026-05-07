@@ -109,10 +109,10 @@ test("basic E2E flow: register → login → create post → view posts", async 
 
   // 5. Logout from map page
   await page.goto(`${baseUrl}/`);
-  await page.getByRole("button", { name: "アカウント" }).click();
+  await page.getByRole("button", { name: "ログアウト" }).click();
   await page
     .getByRole("alertdialog")
-    .getByRole("button", { name: "OK" })
+    .getByRole("button", { name: "ログアウト" })
     .click();
 
   // Verify redirected to login page
