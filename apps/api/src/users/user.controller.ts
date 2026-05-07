@@ -7,10 +7,12 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
   UseGuards,
 } from "@nestjs/common";
+import { isPrismaKnownError } from "../shared/prisma-error";
 import { Throttle } from "@nestjs/throttler";
 import {
   ApiBearerAuth,
@@ -58,12 +60,8 @@ export class UsersController {
     try {
       return await this.identity.deleteUser(id);
     } catch (e: unknown) {
-      const err = e as { code?: string };
-      if (err?.code === "P2025") {
-        throw new HttpException(
-          { error: "ユーザーが見つかりません" },
-          HttpStatus.NOT_FOUND
-        );
+      if (isPrismaKnownError(e) && e.code === "P2025") {
+        throw new NotFoundException({ error: "ユーザーが見つかりません" });
       }
       throw e;
     }

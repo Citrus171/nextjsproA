@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { ConversationsService } from "./conversation.service";
+import { PrismaService } from "../prisma.service";
 
 const mockPrisma = {
   post: { findUnique: jest.fn() },
@@ -27,7 +28,7 @@ describe("ConversationsService", () => {
   let service: ConversationsService;
 
   beforeEach(() => {
-    service = new ConversationsService(mockPrisma as any);
+    service = new ConversationsService(mockPrisma as unknown as PrismaService);
     jest.clearAllMocks();
   });
 

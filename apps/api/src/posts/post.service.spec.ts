@@ -7,6 +7,7 @@ import {
 import { Prisma } from "@prisma/client";
 import { PostsService } from "./post.service";
 import { FileStorageService } from "./file-storage.service";
+import { PrismaService } from "../prisma.service";
 
 const mockFileStorage: jest.Mocked<FileStorageService> = {
   saveFile: jest.fn(),
@@ -51,7 +52,10 @@ describe("PostsService", () => {
   let service: PostsService;
 
   beforeEach(() => {
-    service = new PostsService(mockPrisma as any, mockFileStorage);
+    service = new PostsService(
+      mockPrisma as unknown as PrismaService,
+      mockFileStorage
+    );
     jest.clearAllMocks();
     mockFileStorage.saveFile.mockResolvedValue("uploads/post1/uuid.jpg");
     mockFileStorage.deleteFile.mockReturnValue(undefined);
