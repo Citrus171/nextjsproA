@@ -1,5 +1,9 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { HealthCheckService, HealthCheckResult } from "@nestjs/terminus";
+import {
+  HealthCheckService,
+  HealthCheckResult,
+  MemoryHealthIndicator,
+} from "@nestjs/terminus";
 import { HealthController } from "./health.controller";
 import { PrismaHealthIndicator } from "./prisma-health.indicator";
 import { UploadsHealthIndicator } from "./uploads-health.indicator";
@@ -11,12 +15,14 @@ const makeHealthyResult = (): HealthCheckResult => ({
     database: { status: "up" },
     disk: { status: "up" },
     uploads: { status: "up" },
+    memory_heap: { status: "up" },
   },
   error: {},
   details: {
     database: { status: "up" },
     disk: { status: "up" },
     uploads: { status: "up" },
+    memory_heap: { status: "up" },
   },
 });
 
@@ -38,6 +44,9 @@ describe("HealthController", () => {
     const mockPrismaHealth = { pingCheck: jest.fn() };
     const mockDisk = { checkStorage: jest.fn() };
     const mockUploads = { isHealthy: jest.fn() };
+    const mockMemory = { checkHeap: jest.fn() };
+
+    jest.spyOn(process, "uptime").mockReturnValue(12345.678);
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [HealthController],
@@ -46,11 +55,16 @@ describe("HealthController", () => {
         { provide: PrismaHealthIndicator, useValue: mockPrismaHealth },
         { provide: DiskHealthIndicator, useValue: mockDisk },
         { provide: UploadsHealthIndicator, useValue: mockUploads },
+        { provide: MemoryHealthIndicator, useValue: mockMemory },
       ],
     }).compile();
 
     controller = module.get(HealthController);
     healthCheckService = module.get(HealthCheckService);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe("check()", () => {
@@ -64,6 +78,7 @@ describe("HealthController", () => {
       expect(res.info?.database?.status).toBe("up");
       expect(res.info?.disk?.status).toBe("up");
       expect(res.info?.uploads?.status).toBe("up");
+      expect(res.info?.memory_heap?.status).toBe("up");
     });
 
     it("DBが異常なとき、status:errorを返すこと", async () => {
@@ -82,6 +97,15 @@ describe("HealthController", () => {
       await controller.check();
 
       expect(healthCheckService.check).toHaveBeenCalledTimes(1);
+    });
+
+    it("レスポンスにuptime（秒）が含まれること", async () => {
+      healthCheckService.check.mockResolvedValue(makeHealthyResult());
+
+      const res = await controller.check();
+
+      expect(typeof res.uptime).toBe("number");
+      expect(res.uptime).toBeGreaterThan(0);
     });
   });
 });

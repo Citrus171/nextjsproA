@@ -643,6 +643,7 @@
 - [x] 全チェックが正常なとき、status:okを返すこと
 - [x] DBが異常なとき、status:errorを返すこと
 - [x] check()はHealthCheckService.check()を呼び出すこと
+- [x] レスポンスにuptime（秒）が含まれること
 
 ---
 
