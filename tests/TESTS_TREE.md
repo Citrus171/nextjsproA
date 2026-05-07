@@ -134,7 +134,8 @@ apps/api/src/
 │           └── check()
 │               ├── 全チェックが正常なとき、status:okを返すこと
 │               ├── DBが異常なとき、status:errorを返すこと
-│               └── check()はHealthCheckService.check()を呼び出すこと
+│               ├── check()はHealthCheckService.check()を呼び出すこと
+│               └── レスポンスにuptime（秒）が含まれること
 ├── shared/
 │   └── image-processing.service.spec.ts
 │       ├── processが処理済みBufferを返すこと
