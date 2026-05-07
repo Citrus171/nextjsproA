@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, MaxLength, ValidateIf } from "class-validator";
+import { IsOptional, IsString, MaxLength } from "class-validator";
 
 export class CreateMessageDto {
   @ApiProperty({
@@ -8,7 +8,7 @@ export class CreateMessageDto {
     required: false,
     nullable: true,
   })
-  @ValidateIf((o) => !o.imageUrl)
+  @IsOptional()
   @IsString()
   @MaxLength(1000)
   body?: string | null;
@@ -18,7 +18,7 @@ export class CreateMessageDto {
     nullable: true,
     example: "/uploads/conversations/conv-1/uuid.jpg",
   })
-  @ValidateIf((o) => !o.body)
+  @IsOptional()
   @IsString()
   imageUrl?: string | null;
 }
