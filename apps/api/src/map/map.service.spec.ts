@@ -222,5 +222,21 @@ describe("MapService", () => {
         expect.arrayContaining(["post", "sighting"])
       );
     });
+
+    it("Postマーカーに投稿者のuserIdが含まれること", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([
+        {
+          id: "post-1",
+          userId: "user-abc",
+          status: "lost",
+          location: { lat: 35.9, lng: 139.6 },
+        },
+      ]);
+      mockPrisma.sighting.findMany.mockResolvedValue([]);
+
+      const result = await service.getMarkers({});
+
+      expect(result[0]).toMatchObject({ type: "post", userId: "user-abc" });
+    });
   });
 });
