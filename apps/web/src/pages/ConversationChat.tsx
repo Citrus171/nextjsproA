@@ -1,13 +1,30 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ChevronLeft, ImageIcon, X } from "lucide-react";
+import { ChevronLeft, ImageIcon, X, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { createConversationSocket } from "../lib/conversationSocket";
 import { useApiClient } from "../api/orvalClient";
 import { useAuth } from "../auth/AuthProvider";
 import type { MessageResponseDto } from "../../../../packages/api-client/src/index";
 
 type SendMessageInput = { body?: string; image?: File };
+
+function formatDateLabel(date: Date): string {
+  return date.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function isSameDay(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
 
 export default function ConversationChat() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +41,8 @@ export default function ConversationChat() {
   const [socketDisconnected, setSocketDisconnected] = useState(false);
   const fetchMessagesRef = useRef<(() => void) | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: conversation } = useQuery({
     queryKey: ["conversation", id],
@@ -102,7 +121,11 @@ export default function ConversationChat() {
     };
   }, [id, token]);
 
-  const { mutate: sendMessage } = useMutation({
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView?.({ behavior: "smooth" });
+  }, [messages]);
+
+  const { mutate: sendMessage, isPending } = useMutation({
     mutationFn: ({ body, image }: SendMessageInput) =>
       client.sendMessage(id!, { body, image }),
     onSuccess: (data) => {
@@ -113,6 +136,12 @@ export default function ConversationChat() {
         URL.revokeObjectURL(previewUrl);
         setPreviewUrl(null);
       }
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+      }
+    },
+    onError: () => {
+      toast.error("メッセージの送信に失敗しました。再度お試しください。");
     },
   });
 
@@ -131,6 +160,28 @@ export default function ConversationChat() {
     setPreviewUrl(null);
   }
 
+  function handleTextareaChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setInputValue(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    // スマホ（タッチのみ）ではEnterを改行として扱い、送信はボタンのみ
+    const isPointerFine = window.matchMedia("(pointer: fine)").matches;
+    if (
+      e.key === "Enter" &&
+      !e.shiftKey &&
+      !e.nativeEvent.isComposing &&
+      isPointerFine
+    ) {
+      e.preventDefault();
+      if (canSend && !isPending) {
+        sendMessage({ body: inputValue || undefined, image: selectedImage });
+      }
+    }
+  }
+
   if (isLoading)
     return (
       <div className="max-w-2xl mx-auto p-4 sm:p-8 text-center h-screen flex items-center justify-center">
@@ -147,7 +198,8 @@ export default function ConversationChat() {
     );
 
   const isOverLimit = inputValue.length > 1000;
-  const canSend = !isOverLimit && (inputValue.length > 0 || !!selectedImage);
+  const canSend =
+    !isOverLimit && (inputValue.trim().length > 0 || !!selectedImage);
 
   return (
     <div className="max-w-2xl mx-auto h-[100dvh] flex flex-col font-manrope">
@@ -204,47 +256,63 @@ export default function ConversationChat() {
         data-testid="message-list"
         className="flex-1 overflow-y-auto p-4 space-y-1"
       >
-        {messages.map((msg) => {
+        {messages.map((msg, index) => {
           const isSelf = msg.senderId === userId;
+          const msgDate = new Date(msg.createdAt);
+          const prevDate =
+            index > 0 ? new Date(messages[index - 1].createdAt) : null;
+          const showDateSeparator = !prevDate || !isSameDay(prevDate, msgDate);
+
           return (
-            <div
-              key={msg.id}
-              data-sender={isSelf ? "self" : "other"}
-              className={`max-w-[75%] px-4 py-2 ${
-                isSelf
-                  ? "bg-primary text-primary-foreground rounded-[1.25rem] rounded-br-sm ml-auto"
-                  : "bg-muted text-foreground rounded-[1.25rem] rounded-bl-sm mr-auto"
-              }`}
-            >
-              {msg.body && <p>{msg.body}</p>}
-              {msg.imageUrl && (
-                <button
-                  type="button"
-                  onClick={() => setModalImageUrl(msg.imageUrl!)}
-                  className="mt-1 block"
-                >
-                  <img
-                    src={msg.imageUrl}
-                    alt="送信画像"
-                    className="max-w-[200px] rounded-lg cursor-pointer"
-                  />
-                </button>
+            <div key={msg.id}>
+              {showDateSeparator && (
+                <div className="flex items-center gap-3 my-4">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {formatDateLabel(msgDate)}
+                  </span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
               )}
               <div
-                className={`text-xs mt-1 ${
+                data-sender={isSelf ? "self" : "other"}
+                className={`max-w-[75%] px-4 py-2 break-words ${
                   isSelf
-                    ? "text-primary-foreground/70"
-                    : "text-muted-foreground"
+                    ? "bg-primary text-primary-foreground rounded-[1.25rem] rounded-br-sm ml-auto"
+                    : "bg-muted text-foreground rounded-[1.25rem] rounded-bl-sm mr-auto"
                 }`}
               >
-                {new Date(msg.createdAt).toLocaleTimeString("ja-JP", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {msg.body && <p className="whitespace-pre-wrap">{msg.body}</p>}
+                {msg.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setModalImageUrl(msg.imageUrl!)}
+                    className="mt-1 block"
+                  >
+                    <img
+                      src={msg.imageUrl}
+                      alt="送信画像"
+                      className="max-w-[200px] rounded-lg cursor-pointer"
+                    />
+                  </button>
+                )}
+                <div
+                  className={`text-xs mt-1 ${
+                    isSelf
+                      ? "text-primary-foreground/70"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {msgDate.toLocaleTimeString("ja-JP", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
               </div>
             </div>
           );
         })}
+        <div ref={bottomRef} />
       </div>
 
       {/* Image Preview */}
@@ -279,7 +347,7 @@ export default function ConversationChat() {
         data-testid="chat-input"
         className="sticky bottom-0 px-4 py-3 border-t border-border bg-card shrink-0 pb-[calc(0.75rem+env(safe-area-inset-bottom))]"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-end gap-2">
           <input
             ref={fileInputRef}
             type="file"
@@ -291,32 +359,36 @@ export default function ConversationChat() {
             type="button"
             aria-label="画像を選択"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none transition-colors shrink-0"
+            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none transition-colors shrink-0 mb-1"
           >
-            <ImageIcon size={20} className="text-muted-foreground" />
+            <ImageIcon size={20} className="text-foreground" />
           </button>
-          <input
-            type="text"
+          <textarea
+            ref={textareaRef}
+            rows={1}
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="flex-1 h-12 px-4 bg-muted rounded-full text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onChange={handleTextareaChange}
+            onKeyDown={handleKeyDown}
+            enterKeyHint="enter"
+            className="flex-1 min-h-[44px] max-h-[120px] px-4 py-3 bg-muted rounded-2xl text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring resize-none leading-snug"
             placeholder="メッセージを入力"
           />
           <button
             type="button"
-            disabled={!canSend}
+            disabled={!canSend || isPending}
             onClick={() =>
               sendMessage({
                 body: inputValue || undefined,
                 image: selectedImage,
               })
             }
-            className={`h-12 px-6 rounded-full text-sm font-bold transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${
-              !canSend
+            className={`h-10 px-5 rounded-full text-sm font-bold transition-all focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none shrink-0 mb-1 flex items-center gap-1 ${
+              !canSend || isPending
                 ? "bg-muted text-muted-foreground"
                 : "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]"
             }`}
           >
+            {isPending && <Loader2 size={14} className="animate-spin" />}
             送信
           </button>
         </div>
@@ -335,6 +407,14 @@ export default function ConversationChat() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
           onClick={() => setModalImageUrl(null)}
         >
+          <button
+            type="button"
+            aria-label="閉じる"
+            onClick={() => setModalImageUrl(null)}
+            className="absolute top-4 right-4 flex items-center justify-center w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+          >
+            <X size={20} className="text-white" />
+          </button>
           <img
             src={modalImageUrl}
             alt="フルサイズ画像"
