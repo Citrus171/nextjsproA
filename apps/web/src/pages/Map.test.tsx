@@ -140,13 +140,21 @@ vi.mock("../auth/AuthProvider", () => ({
 }));
 
 const sampleMarkers = [
-  { id: "post-1", type: "post", status: "lost", lat: 35.9, lng: 139.6 },
+  {
+    id: "post-1",
+    type: "post",
+    status: "lost",
+    lat: 35.9,
+    lng: 139.6,
+    userId: "user-1",
+  },
   {
     id: "post-2",
     type: "post",
     status: "resolved",
     lat: 35.905,
     lng: 139.605,
+    userId: "user-2",
   },
   {
     id: "sighting-1",
@@ -154,6 +162,7 @@ const sampleMarkers = [
     status: "lost",
     lat: 35.91,
     lng: 139.61,
+    userId: "user-1",
   },
 ] as const;
 
@@ -173,7 +182,8 @@ const samplePost = {
   location: null,
 };
 
-import Map from "./Map";
+import Map, { createMarkerIcon } from "./Map";
+import type { MapMarkerDto } from "../../../../packages/api-client/src/index";
 
 describe("Map", () => {
   function renderMap() {
@@ -509,5 +519,59 @@ describe("Map", () => {
         "住所の自動取得に失敗しました。手動で入力してください"
       );
     });
+  });
+});
+
+describe("createMarkerIcon", () => {
+  it("isOwn=trueの時、map-marker--ownクラスが付与されること", () => {
+    const marker: MapMarkerDto = {
+      id: "post-1",
+      type: "post",
+      status: "lost",
+      lat: 35.9,
+      lng: 139.6,
+      userId: "user-1",
+    };
+    const icon = createMarkerIcon(marker, true);
+    expect(icon.options.html).toContain("map-marker--own");
+  });
+
+  it("isOwn=falseの時、map-marker--ownクラスが付与されないこと", () => {
+    const marker: MapMarkerDto = {
+      id: "post-2",
+      type: "post",
+      status: "lost",
+      lat: 35.9,
+      lng: 139.6,
+      userId: "user-2",
+    };
+    const icon = createMarkerIcon(marker, false);
+    expect(icon.options.html).not.toContain("map-marker--own");
+  });
+
+  it("解決済みの自分のマーカーにもmap-marker--ownクラスが付与されること", () => {
+    const marker: MapMarkerDto = {
+      id: "post-3",
+      type: "post",
+      status: "resolved",
+      lat: 35.9,
+      lng: 139.6,
+      userId: "user-1",
+    };
+    const icon = createMarkerIcon(marker, true);
+    expect(icon.options.html).toContain("map-marker--own");
+  });
+
+  it("自分の目撃投稿マーカーにもmap-marker--ownクラスが付与されること", () => {
+    const marker: MapMarkerDto = {
+      id: "sighting-1",
+      type: "sighting",
+      status: "lost",
+      lat: 35.9,
+      lng: 139.6,
+      userId: "user-1",
+    };
+    const icon = createMarkerIcon(marker, true);
+    expect(icon.options.html).toContain("map-marker--own");
   });
 });

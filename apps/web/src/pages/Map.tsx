@@ -75,16 +75,17 @@ function getMarkerTone(marker: MapMarkerDto) {
   return { fill: "#1a73e8", edge: "#185abc" };
 }
 
-function createMarkerIcon(marker: MapMarkerDto) {
+export function createMarkerIcon(marker: MapMarkerDto, isOwn: boolean) {
   const tone = getMarkerTone(marker);
   const shapeClass =
     marker.type === "post" ? "map-marker--pin" : "map-marker--circle";
+  const ownClass = isOwn ? " map-marker--own" : "";
 
   const label = getMarkerLabel(marker);
   return L.divIcon({
     className: "map-marker-icon",
     html: `
-      <span class="map-marker ${shapeClass}" role="button" tabindex="0" aria-label="${label}" data-marker-id="${marker.id}" style="--marker-fill:${tone.fill};--marker-edge:${tone.edge};">
+      <span class="map-marker ${shapeClass}${ownClass}" role="button" tabindex="0" aria-label="${label}" data-marker-id="${marker.id}" style="--marker-fill:${tone.fill};--marker-edge:${tone.edge};">
         <span class="map-marker__core"></span>
       </span>
       <span class="map-marker-label" aria-hidden="true">${label}</span>
@@ -421,7 +422,7 @@ export default function Map() {
               <Marker
                 key={`${marker.type}-${marker.id}`}
                 position={[marker.lat, marker.lng]}
-                icon={createMarkerIcon(marker)}
+                icon={createMarkerIcon(marker, marker.userId === currentUserId)}
                 title={marker.type === "post" ? "迷子投稿" : "目撃情報"}
                 eventHandlers={{
                   click: () => setSelectedMarker(marker),
