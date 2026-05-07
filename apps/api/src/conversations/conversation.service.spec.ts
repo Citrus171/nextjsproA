@@ -284,6 +284,12 @@ describe("ConversationsService", () => {
       expect(result).toMatchObject({ id: "msg-1" });
     });
 
+    it("bodyもimageUrlも両方なしはBadRequestException", async () => {
+      await expect(
+        service.createMessage("user-1", "conv-1", {})
+      ).rejects.toThrow(BadRequestException);
+    });
+
     it("bodyが1000文字超過はBadRequestException", async () => {
       mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
 

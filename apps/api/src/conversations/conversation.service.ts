@@ -179,6 +179,11 @@ export class ConversationsService {
     conversationId: string,
     dto: CreateMessageDto
   ) {
+    if (!dto.body && !dto.imageUrl) {
+      throw new BadRequestException(
+        "メッセージ本文または画像のいずれかは必須です"
+      );
+    }
     if (dto.body && dto.body.length > 1000) {
       throw new BadRequestException(
         "メッセージは1000文字以内で入力してください"

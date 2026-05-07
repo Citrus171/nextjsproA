@@ -3,10 +3,10 @@ import { plainToInstance } from "class-transformer";
 import { CreateMessageDto } from "./create-message.dto";
 
 describe("CreateMessageDto", () => {
-  it("bodyもimageUrlも両方nullの場合、バリデーションエラーになること", async () => {
+  it("bodyもimageUrlも両方指定なしでもDTOバリデーションは通過すること（空メッセージチェックはサービス層で行う）", async () => {
     const dto = plainToInstance(CreateMessageDto, {});
     const errors = await validate(dto);
-    expect(errors.length).toBeGreaterThan(0);
+    expect(errors.length).toBe(0);
   });
 
   it("bodyのみ指定でバリデーションが通過すること", async () => {
