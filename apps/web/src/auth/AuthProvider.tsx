@@ -20,9 +20,12 @@ type AuthContextValue = {
 function decodePayload(token: string | null): Record<string, unknown> | null {
   if (!token) return null;
   try {
-    return JSON.parse(
-      atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
-    ) as Record<string, unknown>;
+    const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes)) as Record<
+      string,
+      unknown
+    >;
   } catch {
     return null;
   }
