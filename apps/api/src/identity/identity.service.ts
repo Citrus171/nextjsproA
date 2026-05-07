@@ -3,6 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import { isPrismaKnownError } from "../shared/prisma-error";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
@@ -206,10 +207,10 @@ export class IdentityService extends IIdentityService {
         createdAt: user.createdAt,
       };
     } catch (e: unknown) {
-      const err = e as { code?: string; meta?: { target?: unknown[] } };
-      if (err?.code === "P2002") {
-        const target = Array.isArray(err.meta?.target)
-          ? err.meta.target.map(String).join(" ").toLowerCase()
+      if (isPrismaKnownError(e) && e.code === "P2002") {
+        const rawTarget = e.meta?.target;
+        const target = Array.isArray(rawTarget)
+          ? rawTarget.map(String).join(" ").toLowerCase()
           : "";
         if (target.includes("nickname")) {
           throw new ConflictException(

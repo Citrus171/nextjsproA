@@ -5,6 +5,7 @@ import * as bcrypt from "bcrypt";
 import { Logger } from "nestjs-pino";
 import { IdentityService } from "./identity.service";
 import { CryptoService } from "./crypto.service";
+import { PrismaService } from "../prisma.service";
 
 const mockPrisma = {
   user: {
@@ -74,7 +75,7 @@ describe("IdentityService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new IdentityService(
-      mockPrisma as any,
+      mockPrisma as unknown as PrismaService,
       mockJwt as unknown as JwtService,
       mockConfig,
       mockCrypto as unknown as CryptoService,

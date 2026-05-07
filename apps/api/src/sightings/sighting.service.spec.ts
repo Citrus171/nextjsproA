@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { SightingsService } from "./sighting.service";
+import { PrismaService } from "../prisma.service";
 
 const mockPrisma = {
   post: { findUnique: jest.fn() },
@@ -26,7 +27,7 @@ describe("SightingsService", () => {
   let service: SightingsService;
 
   beforeEach(() => {
-    service = new SightingsService(mockPrisma as any);
+    service = new SightingsService(mockPrisma as unknown as PrismaService);
     jest.clearAllMocks();
     mockPrisma.$transaction.mockImplementation(
       async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => fn(mockPrisma)

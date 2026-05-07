@@ -1,4 +1,5 @@
 import { MapService } from "./map.service";
+import { PrismaService } from "../prisma.service";
 
 const mockPrisma = {
   post: {
@@ -13,7 +14,7 @@ describe("MapService", () => {
   let service: MapService;
 
   beforeEach(() => {
-    service = new MapService(mockPrisma as any);
+    service = new MapService(mockPrisma as unknown as PrismaService);
     jest.clearAllMocks();
   });
 
