@@ -60,6 +60,7 @@ export class MapService {
       where: postWhere,
       select: {
         id: true,
+        userId: true,
         status: true,
         location: { select: { lat: true, lng: true } },
       },
@@ -87,6 +88,7 @@ export class MapService {
       .map((p) => ({
         type: "post",
         id: p.id,
+        userId: p.userId,
         lat: p.location!.lat,
         lng: p.location!.lng,
         status: p.status,
