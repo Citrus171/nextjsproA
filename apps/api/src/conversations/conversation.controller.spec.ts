@@ -140,11 +140,11 @@ describe("ConversationsController", () => {
       expect(result).toBe(message);
     });
 
-    it("JPEG・PNG以外のファイルは400エラーになること", async () => {
+    it("未対応のファイル形式（HEIC等）は400エラーになること", async () => {
       const file = {
-        buffer: Buffer.from("gif"),
-        originalname: "anim.gif",
-        mimetype: "image/gif",
+        buffer: Buffer.from("heic"),
+        originalname: "photo.heic",
+        mimetype: "image/heic",
         size: 100,
       } as Express.Multer.File;
 
@@ -153,12 +153,27 @@ describe("ConversationsController", () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it("2MB超のファイルは400エラーになること", async () => {
+    it("GIF・WebP は許容されること", async () => {
+      for (const mimetype of ["image/gif", "image/webp"]) {
+        const file = {
+          buffer: Buffer.from("data"),
+          originalname: "image",
+          mimetype,
+          size: 100,
+        } as Express.Multer.File;
+
+        await expect(
+          controller.createMessage(req, "conv-1", {}, file)
+        ).resolves.not.toThrow();
+      }
+    });
+
+    it("20MB超のファイルは400エラーになること", async () => {
       const file = {
-        buffer: Buffer.alloc(3 * 1024 * 1024),
+        buffer: Buffer.alloc(0),
         originalname: "big.jpg",
         mimetype: "image/jpeg",
-        size: 3 * 1024 * 1024,
+        size: 21 * 1024 * 1024,
       } as Express.Multer.File;
 
       await expect(
