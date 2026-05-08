@@ -807,6 +807,11 @@ function MapContextMenuHandler({
     };
 
     const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        clearTimer();
+        startPos.current = null;
+        return;
+      }
       const touch = e.touches[0];
       startPos.current = { x: touch.clientX, y: touch.clientY };
       timerRef.current = setTimeout(() => {
@@ -815,6 +820,11 @@ function MapContextMenuHandler({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        clearTimer();
+        startPos.current = null;
+        return;
+      }
       if (!startPos.current) return;
       const touch = e.touches[0];
       const dx = touch.clientX - startPos.current.x;
