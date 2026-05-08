@@ -874,7 +874,8 @@
 - [x] Conversations でunreadCountが0の時、未読バッジが表示されないこと
 - [x] Conversations でnicknameがある時、ヘッダーに「nickname 様」が表示されること
 - [x] Conversations でnicknameがnullの時、「様」が表示されないこと
-- [x] Conversations で← Map ボタンをクリックした時、/ に遷移すること
+- [x] Conversations でBottomNavが表示されること
+- [x] Conversations でMapに戻るボタンが表示されないこと
 - [x] Conversations で会話セルをクリックした時、/conversations/:idへ遷移すること
 - [x] Conversations で5秒間隔でポーリングするようにuseQueryが呼ばれること
 - [x] Conversations でエラー時はポーリングが停止すること
@@ -945,6 +946,12 @@
 
 ### Posts (`src/pages/Posts.test.tsx`)
 
+- [x] Posts でlistPostsがmine:trueで呼び出されること
+- [x] Posts で自分の投稿（userId一致）には編集リンクが表示されること
+- [x] Posts で他人の投稿（userId不一致）には編集リンクが表示されないこと
+- [x] Posts でstatus=lostの投稿に「迷子中」バッジが表示されること
+- [x] Posts でstatus=resolvedの投稿に「解決済み」バッジが表示されること
+- [x] Posts でニックネームを使って「{nickname}様の投稿」が表示されること
 - [x] Posts でデータ取得中はローディングスピナーが表示されること
 - [x] Posts で投稿データがカード形式で表示されること
 - [x] Posts で画像がない時は「画像がありません」と表示されること

@@ -28,7 +28,7 @@ export default function Posts() {
   const api = useApiClient();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { userId } = useAuth();
+  const { userId, nickname } = useAuth();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -42,7 +42,7 @@ export default function Posts() {
   } = useInfiniteQuery({
     queryKey: ["posts", "infinite"],
     queryFn: ({ pageParam }: { pageParam: number }) =>
-      api.listPosts(pageParam, PER_PAGE),
+      api.listPosts(pageParam, PER_PAGE, true),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
       const totalFetched = allPages.reduce(
@@ -130,6 +130,11 @@ export default function Posts() {
           >
             マップに戻る
           </button>
+          {nickname && (
+            <span className="text-sm font-semibold text-foreground">
+              {nickname}様の投稿
+            </span>
+          )}
           <Link
             to="/create"
             className="inline-flex items-center rounded-full bg-primary px-5 py-2 min-h-[44px] text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
@@ -163,9 +168,20 @@ export default function Posts() {
 
               {/* カード本文 */}
               <div className="p-4">
-                <h3 className="mb-1 text-lg font-bold text-foreground">
-                  {p.petDetail?.name ?? "名前不明"}
-                </h3>
+                <div className="mb-2 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-foreground">
+                    {p.petDetail?.name ?? "名前不明"}
+                  </h3>
+                  {p.status === "lost" ? (
+                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                      迷子中
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
+                      解決済み
+                    </span>
+                  )}
+                </div>
                 <p className="mb-2 text-sm text-muted-foreground">
                   {p.location?.city ?? ""}
                   {p.location?.address ? `・${p.location.address}` : ""}
@@ -180,12 +196,14 @@ export default function Posts() {
                 {/* アクションボタン */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Link
-                      to={`/edit/${p.id}`}
-                      className="inline-flex items-center text-sm font-semibold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
-                    >
-                      編集
-                    </Link>
+                    {userId === p.userId && (
+                      <Link
+                        to={`/edit/${p.id}`}
+                        className="inline-flex items-center text-sm font-semibold text-primary hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
+                      >
+                        編集
+                      </Link>
+                    )}
                     {userId === p.userId && p.status === "lost" && (
                       <button
                         type="button"
