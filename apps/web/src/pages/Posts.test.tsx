@@ -181,7 +181,7 @@ describe("Posts", () => {
           isFetchingNextPage: false,
           hasNextPage: false,
           fetchNextPage: vi.fn(),
-        } as ReturnType<typeof useInfiniteQuery>;
+        } as unknown as ReturnType<typeof useInfiniteQuery>;
       });
       render(<Posts />, { wrapper: createWrapper() });
       await waitFor(() => {
