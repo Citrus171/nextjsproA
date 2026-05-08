@@ -47,11 +47,11 @@ test("basic E2E flow: register → login → create post → view posts", async 
     `login failed: ${loginResponse.status()} ${loginResponse.statusText()}`
   ).toBeTruthy();
 
-  // Login now returns to the posts page so the shared header remains available.
-  await expect(page).toHaveURL(`${baseUrl}/posts`, { timeout: 15000 });
+  // Login redirects to map page.
+  await expect(page).toHaveURL(`${baseUrl}/`, { timeout: 15000 });
 
-  // 3. Create post from the posts page so the shared header is available.
-  await page.click('a[href="/create"]');
+  // 3. Create post from the map page via bottom nav button.
+  await page.getByRole("button", { name: "投稿アクション" }).click();
   await page.waitForURL(`${baseUrl}/create`);
   await page.fill('input[placeholder="例：レオ"]', "ミケ");
   await page.fill('input[placeholder="例：推定2歳"]', "2歳");
