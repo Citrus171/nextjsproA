@@ -3,6 +3,7 @@ import { ImageProcessingService } from "./image-processing.service";
 
 jest.mock("sharp", () =>
   jest.fn().mockReturnValue({
+    rotate: jest.fn().mockReturnThis(),
     resize: jest.fn().mockReturnThis(),
     jpeg: jest.fn().mockReturnThis(),
     toBuffer: jest.fn().mockResolvedValue(Buffer.from("processed")),
@@ -17,6 +18,7 @@ describe("ImageProcessingService", () => {
     jest.clearAllMocks();
     const sharpMock = jest.requireMock("sharp") as jest.Mock;
     sharpMock.mockReturnValue({
+      rotate: jest.fn().mockReturnThis(),
       resize: jest.fn().mockReturnThis(),
       jpeg: jest.fn().mockReturnThis(),
       toBuffer: jest.fn().mockResolvedValue(Buffer.from("processed")),
@@ -36,6 +38,7 @@ describe("ImageProcessingService", () => {
     const jpegMock = jest.fn().mockReturnThis();
     const toBufferMock = jest.fn().mockResolvedValue(Buffer.from("processed"));
     sharpMock.mockReturnValue({
+      rotate: jest.fn().mockReturnThis(),
       resize: resizeMock,
       jpeg: jpegMock,
       toBuffer: toBufferMock,
@@ -55,6 +58,7 @@ describe("ImageProcessingService", () => {
     const jpegMock = jest.fn().mockReturnThis();
     const toBufferMock = jest.fn().mockResolvedValue(Buffer.from("processed"));
     sharpMock.mockReturnValue({
+      rotate: jest.fn().mockReturnThis(),
       resize: resizeMock,
       jpeg: jpegMock,
       toBuffer: toBufferMock,
@@ -65,9 +69,25 @@ describe("ImageProcessingService", () => {
     expect(jpegMock).toHaveBeenCalledWith({ quality: 80 });
   });
 
+  it("EXIFの向き補正のためrotateを引数なしで呼ぶこと", async () => {
+    const sharpMock = jest.requireMock("sharp") as jest.Mock;
+    const rotateMock = jest.fn().mockReturnThis();
+    sharpMock.mockReturnValue({
+      rotate: rotateMock,
+      resize: jest.fn().mockReturnThis(),
+      jpeg: jest.fn().mockReturnThis(),
+      toBuffer: jest.fn().mockResolvedValue(Buffer.from("processed")),
+    });
+
+    await service.process(Buffer.from("raw"));
+
+    expect(rotateMock).toHaveBeenCalledWith();
+  });
+
   it("sharpがエラーをスローした時、BadRequestExceptionになること", async () => {
     const sharpMock = jest.requireMock("sharp") as jest.Mock;
     sharpMock.mockReturnValue({
+      rotate: jest.fn().mockReturnThis(),
       resize: jest.fn().mockReturnThis(),
       jpeg: jest.fn().mockReturnThis(),
       toBuffer: jest.fn().mockRejectedValue(new Error("corrupt image")),
