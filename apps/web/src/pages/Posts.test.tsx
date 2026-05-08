@@ -32,6 +32,7 @@ vi.mock("react-router-dom", async () => {
 vi.mock("../auth/AuthProvider", () => ({
   useAuth: () => ({
     userId: "user-1",
+    nickname: "テストユーザー",
     token: null,
     clearToken: vi.fn(),
     setToken: vi.fn(),
@@ -43,6 +44,7 @@ vi.mock("../api/orvalClient", () => ({
     listPosts: mockListPosts,
     deletePost: mockDeletePost,
     updatePost: vi.fn(),
+    logout: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 
@@ -165,11 +167,84 @@ describe("Posts", () => {
     vi.unstubAllGlobals();
   });
 
+  describe("データ取得", () => {
+    it("listPostsがmine:trueで呼び出されること", async () => {
+      mockListPosts.mockResolvedValue({ items: [], total: 0 });
+      vi.mocked(useInfiniteQuery).mockImplementationOnce((options) => {
+        (options.queryFn as (ctx: { pageParam: number }) => unknown)({
+          pageParam: 1,
+        });
+        return {
+          data: undefined,
+          isLoading: false,
+          isError: false,
+          isFetchingNextPage: false,
+          hasNextPage: false,
+          fetchNextPage: vi.fn(),
+        } as ReturnType<typeof useInfiniteQuery>;
+      });
+      render(<Posts />, { wrapper: createWrapper() });
+      await waitFor(() => {
+        expect(mockListPosts).toHaveBeenCalledWith(1, 5, true);
+      });
+    });
+  });
+
   describe("読み込み状態", () => {
     it("データ取得中はローディングスピナーが表示されること", () => {
       mockInfiniteQuery({ isLoading: true });
       render(<Posts />, { wrapper: createWrapper() });
       expect(screen.getByTestId("posts-loading-spinner")).toBeInTheDocument();
+    });
+  });
+
+  describe("編集リンク表示制御", () => {
+    it("自分の投稿（userId一致）には編集リンクが表示されること", () => {
+      mockInfiniteQuery({
+        data: {
+          pages: [{ items: [postFactory({ userId: "user-1" })], total: 1 }],
+          pageParams: [1],
+        },
+      });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(screen.getByRole("link", { name: "編集" })).toBeInTheDocument();
+    });
+
+    it("他人の投稿（userId不一致）には編集リンクが表示されないこと", () => {
+      mockInfiniteQuery({
+        data: {
+          pages: [{ items: [postFactory({ userId: "other-user" })], total: 1 }],
+          pageParams: [1],
+        },
+      });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(
+        screen.queryByRole("link", { name: "編集" })
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("ステータスバッジ", () => {
+    it("status=lostの投稿に「迷子中」バッジが表示されること", () => {
+      mockInfiniteQuery({
+        data: {
+          pages: [{ items: [postFactory({ status: "lost" })], total: 1 }],
+          pageParams: [1],
+        },
+      });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(screen.getByText("迷子中")).toBeInTheDocument();
+    });
+
+    it("status=resolvedの投稿に「解決済み」バッジが表示されること", () => {
+      mockInfiniteQuery({
+        data: {
+          pages: [{ items: [postFactory({ status: "resolved" })], total: 1 }],
+          pageParams: [1],
+        },
+      });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(screen.getByText("解決済み")).toBeInTheDocument();
     });
   });
 
@@ -341,6 +416,16 @@ describe("Posts", () => {
         screen.getByRole("button", { name: "みけの位置を開く" })
       );
       expect(mockNavigate).toHaveBeenCalledWith("/?postId=post-1");
+    });
+  });
+
+  describe("ヘッダー", () => {
+    it("ニックネームを使って「{nickname}様の投稿」が表示されること", () => {
+      mockInfiniteQuery({
+        data: { pages: [{ items: [], total: 0 }], pageParams: [1] },
+      });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(screen.getByText("テストユーザー様の投稿")).toBeInTheDocument();
     });
   });
 
