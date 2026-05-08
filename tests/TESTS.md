@@ -965,7 +965,31 @@
 - [x] Posts でAlertDialogで削除を確認した時、投稿が削除され削除完了トーストが表示されること
 - [x] Posts で削除が失敗した時、エラートーストが表示されること
 - [x] Posts で地図アイコンボタンをクリックした時、/?postId=xxx に遷移すること
-- [x] Posts で← Map ボタンをクリックした時、/ に遷移すること
+- [x] Posts でBottomNavが表示されること
+- [x] Posts でマップに戻るボタンが表示されないこと
+
+---
+
+## Web Unit — BottomNav (`apps/web/src/components/BottomNav.test.tsx`)
+
+### タブ表示
+
+- [x] currentPath=/posts の時、「自分の投稿」タブがアクティブ状態で表示されること
+- [x] currentPath=/conversations の時、「会話」タブがアクティブ状態で表示されること
+- [x] ログアウトアイコンタブが表示されること
+
+### ナビゲーション
+
+- [x] マップタブをクリックした時、/ に遷移すること
+- [x] 自分の投稿タブをクリックした時、/posts に遷移すること
+- [x] 会話タブをクリックした時、/conversations に遷移すること
+
+### ログアウト
+
+- [x] ログアウトアイコンをクリックした時、確認ダイアログが表示されること
+- [x] 確認ダイアログでログアウトを実行した時、logout API と clearToken が呼ばれること
+- [x] 確認ダイアログでキャンセルした時、ログアウトが実行されないこと
+- [x] logout API が失敗した時でも clearToken が呼ばれること
 
 ---
 

@@ -430,14 +430,32 @@ describe("Posts", () => {
   });
 
   describe("ナビゲーション", () => {
-    it("← Map ボタンをクリックした時、/ に遷移すること", async () => {
+    it("BottomNavが表示されること", () => {
       mockInfiniteQuery({
         data: { pages: [{ items: [], total: 0 }], pageParams: [1] },
       });
       render(<Posts />, { wrapper: createWrapper() });
-      const user = userEvent.setup();
-      await user.click(screen.getByRole("button", { name: "マップに戻る" }));
-      expect(mockNavigate).toHaveBeenCalledWith("/");
+      expect(screen.getByRole("navigation")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "マップ" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "自分の投稿" })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "会話" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "ログアウト" })
+      ).toBeInTheDocument();
+    });
+
+    it("マップに戻るボタンが表示されないこと", () => {
+      mockInfiniteQuery({
+        data: { pages: [{ items: [], total: 0 }], pageParams: [1] },
+      });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(
+        screen.queryByRole("button", { name: "マップに戻る" })
+      ).not.toBeInTheDocument();
     });
   });
 });

@@ -650,6 +650,8 @@ apps/web/src/
     │       │   ├── unreadCountが1以上の時、未読バッジが青色の丸スタイルで表示されること
     │       │   └── unreadCountが0の時、未読バッジが表示されないこと
     │       ├── ナビゲーション
+    │       │   ├── BottomNavが表示されること
+    │       │   ├── Mapに戻るボタンが表示されないこと
     │       │   └── 会話セルをクリックした時、/conversations/:idへ遷移すること
     │       └── ポーリング設定
     │           ├── 5秒間隔でポーリングするようにuseQueryが呼ばれること
@@ -670,6 +672,21 @@ apps/web/src/
     │       ├── open=falseの時、子要素が表示されないこと
     │       ├── snapPointsが反映されること
     │       └── Closeコンポーネントがクリックされた時onOpenChangeが呼ばれること
+    ├── components/BottomNav.test.tsx
+    │   └── BottomNav
+    │       ├── タブ表示
+    │       │   ├── currentPath=/posts の時、「自分の投稿」タブがアクティブ状態で表示されること
+    │       │   ├── currentPath=/conversations の時、「会話」タブがアクティブ状態で表示されること
+    │       │   └── ログアウトアイコンタブが表示されること
+    │       ├── ナビゲーション
+    │       │   ├── マップタブをクリックした時、/ に遷移すること
+    │       │   ├── 自分の投稿タブをクリックした時、/posts に遷移すること
+    │       │   └── 会話タブをクリックした時、/conversations に遷移すること
+    │       └── ログアウト
+    │           ├── ログアウトアイコンをクリックした時、確認ダイアログが表示されること
+    │           ├── 確認ダイアログでログアウトを実行した時、logout API と clearToken が呼ばれること
+    │           ├── 確認ダイアログでキャンセルした時、ログアウトが実行されないこと
+    │           └── logout API が失敗した時でも clearToken が呼ばれること
     ├── ConversationChat.test.tsx
     │   └── ConversationChat
     │       ├── ヘッダー表示
@@ -757,7 +774,8 @@ apps/web/src/
             ├── Map導線
             │   └── 地図アイコンボタンをクリックした時、/?postId=xxx に遷移すること
             └── ナビゲーション
-                └── ← Map ボタンをクリックした時、/ に遷移すること
+                ├── BottomNavが表示されること
+                └── マップに戻るボタンが表示されないこと
 apps/web/tests/playwright/
 └── create-post-map-flow.spec.ts
     └── 画像3枚で迷い猫投稿し、マーカークリックで登録内容が表示されること
