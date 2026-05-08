@@ -10,6 +10,10 @@ const mockAuth = { nickname: null as string | null };
 vi.mock("../auth/AuthProvider", () => ({
   useAuth: () => ({
     nickname: mockAuth.nickname,
+    clearToken: vi.fn(),
+    token: "test-token",
+    userId: "user-1",
+    setToken: vi.fn(),
   }),
 }));
 
@@ -27,6 +31,7 @@ vi.mock("react-router-dom", async () => {
 vi.mock("../api/orvalClient", () => ({
   useApiClient: () => ({
     listConversations: mockListConversations,
+    logout: vi.fn().mockResolvedValue(undefined),
   }),
 }));
 
@@ -218,8 +223,7 @@ describe("Conversations", () => {
   });
 
   describe("ナビゲーション", () => {
-    it("← Map ボタンをクリックした時、/ に遷移すること", async () => {
-      const user = userEvent.setup();
+    it("BottomNavが表示されること", () => {
       vi.mocked(useQuery).mockReturnValue({
         data: [],
         isLoading: false,
@@ -228,9 +232,31 @@ describe("Conversations", () => {
 
       render(<Conversations />);
 
-      await user.click(screen.getByRole("button", { name: "Mapに戻る" }));
+      expect(screen.getByRole("navigation")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "マップ" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "自分の投稿" })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "会話" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "ログアウト" })
+      ).toBeInTheDocument();
+    });
 
-      expect(mockNavigate).toHaveBeenCalledWith("/");
+    it("Mapに戻るボタンが表示されないこと", () => {
+      vi.mocked(useQuery).mockReturnValue({
+        data: [],
+        isLoading: false,
+        error: null,
+      } as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      expect(
+        screen.queryByRole("button", { name: "Mapに戻る" })
+      ).not.toBeInTheDocument();
     });
 
     it("会話セルをクリックした時、/conversations/:idへ遷移すること", async () => {

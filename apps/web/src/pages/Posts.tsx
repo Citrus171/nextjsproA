@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { MapPinned } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
+import BottomNav from "../components/BottomNav";
 
 const PER_PAGE = 5;
 
@@ -120,16 +121,9 @@ export default function Posts() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-4xl px-4 py-6">
+      <div className="mx-auto max-w-4xl px-4 py-6 pb-24">
         {/* ヘッダー */}
         <div className="mb-6 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="inline-flex items-center gap-1 rounded-full bg-card px-4 py-2 min-h-[44px] text-sm font-semibold text-foreground shadow-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-          >
-            マップに戻る
-          </button>
           {nickname && (
             <span className="text-sm font-semibold text-foreground">
               {nickname}様の投稿
@@ -290,6 +284,8 @@ export default function Posts() {
 
         {/* IntersectionObserver センチネル */}
         <div ref={sentinelRef} className="h-4" />
+
+        <BottomNav currentPath="/posts" />
       </div>
     </div>
   );
