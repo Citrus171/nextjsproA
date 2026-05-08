@@ -344,12 +344,14 @@ export class PostsService {
     }
   }
 
-  async findAll(page = 1, perPage = 10) {
+  async findAll(page = 1, perPage = 10, userId?: string) {
     const skip = (page - 1) * perPage;
+    const where = userId ? { userId } : {};
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
         skip,
         take: perPage,
+        where,
         orderBy: { createdAt: "desc" },
         include: {
           petDetail: true,
@@ -358,7 +360,7 @@ export class PostsService {
           user: { select: { nickname: true } },
         },
       }),
-      this.prisma.post.count(),
+      this.prisma.post.count({ where }),
     ]);
 
     return {

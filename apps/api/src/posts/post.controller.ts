@@ -9,6 +9,7 @@ import {
   Post as HttpPost,
   Query,
   Req,
+  UnauthorizedException,
   UseGuards,
   UseInterceptors,
   UploadedFiles,
@@ -32,7 +33,7 @@ import {
 import { CreatePostDto } from "./dto/create-post.dto";
 import { UpdatePostDto } from "./dto/update-post.dto";
 import { PostsService } from "./post.service";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { JwtAuthGuard, OptionalJwtAuthGuard } from "../auth/jwt-auth.guard";
 import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
 import { Plan } from "@prisma/client";
 import { PLAN_LIMITS } from "../common/plan-limits";
@@ -144,10 +145,22 @@ export class PostsController {
   }
 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiResponse({ status: 200, type: PostListResponseDto })
-  async list(@Query("page") page = "1", @Query("perPage") perPage = "10") {
+  async list(
+    @Query("page") page = "1",
+    @Query("perPage") perPage = "10",
+    @Query("mine") mine?: string,
+    @Req() req?: AuthenticatedRequest
+  ) {
     const p = parseInt(page, 10) || 1;
     const pp = parseInt(perPage, 10) || 10;
+    if (mine === "true") {
+      if (!req?.user) {
+        throw new UnauthorizedException("認証が必要です");
+      }
+      return this.posts.findAll(p, pp, req.user.id);
+    }
     return this.posts.findAll(p, pp);
   }
 
