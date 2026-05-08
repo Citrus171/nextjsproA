@@ -265,19 +265,20 @@ describe("Map", () => {
   });
 
   describe("ログアウトボタン", () => {
-    it("未認証でクリックした時、ログアウト確認ダイアログが表示されないこと", async () => {
-      const user = userEvent.setup();
+    it("未認証時、ログアウトボタンが表示されないこと", () => {
       mockAuth.userId = null;
-
       renderMap();
-
-      await user.click(screen.getByRole("button", { name: "ログアウト" }));
-
       expect(
-        screen.queryByText("ログアウトしますか？")
+        screen.queryByRole("button", { name: "ログアウト" })
       ).not.toBeInTheDocument();
-      expect(mockLogout).not.toHaveBeenCalled();
-      expect(mockClearToken).not.toHaveBeenCalled();
+    });
+
+    it("認証済み時、ボトムナビにログアウトアイコンボタンが表示されること", () => {
+      mockAuth.userId = "user-1";
+      renderMap();
+      expect(
+        screen.getByRole("button", { name: "ログアウト" })
+      ).toBeInTheDocument();
     });
 
     it("認証済みでクリックした時、ログアウト確認ダイアログが表示されること", async () => {
@@ -310,7 +311,7 @@ describe("Map", () => {
       expect(mockClearToken).not.toHaveBeenCalled();
     });
 
-    it("ダイアログの実行ボタンが「ログアウト」と表示され、押下時にログアウト処理が実行されること", async () => {
+    it("ダイアログの実行ボタンが押下時にログアウト処理が実行されること", async () => {
       const user = userEvent.setup();
       mockAuth.userId = "user-1";
 
@@ -318,15 +319,40 @@ describe("Map", () => {
 
       await user.click(screen.getByRole("button", { name: "ログアウト" }));
       const dialog = await screen.findByRole("alertdialog");
-      expect(
-        within(dialog).getByRole("button", { name: "ログアウト" })
-      ).toBeInTheDocument();
       await user.click(
         within(dialog).getByRole("button", { name: "ログアウト" })
       );
 
       expect(mockLogout).toHaveBeenCalledTimes(1);
       expect(mockClearToken).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("自分の投稿ボタン", () => {
+    it("認証済み時、ボトムナビに「自分の投稿」ボタンが表示されること", () => {
+      mockAuth.userId = "user-1";
+      renderMap();
+      expect(
+        screen.getByRole("button", { name: "自分の投稿" })
+      ).toBeInTheDocument();
+    });
+
+    it("未認証時、「自分の投稿」ボタンが表示されないこと", () => {
+      mockAuth.userId = null;
+      renderMap();
+      expect(
+        screen.queryByRole("button", { name: "自分の投稿" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("認証済みで「自分の投稿」ボタンをクリックした時、/posts に遷移すること", async () => {
+      const user = userEvent.setup();
+      mockAuth.userId = "user-1";
+      renderMap();
+
+      await user.click(screen.getByRole("button", { name: "自分の投稿" }));
+
+      expect(mockNavigate).toHaveBeenCalledWith("/posts");
     });
   });
 

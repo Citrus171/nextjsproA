@@ -62,7 +62,7 @@ describe("LoginWithAuth", () => {
     expect(passwordInput).toHaveAttribute("type", "password");
   });
 
-  it("正常ログイン時、投稿一覧（/posts）にリダイレクトすること", async () => {
+  it("正常ログイン時、マップ画面（/）にリダイレクトすること", async () => {
     mockLogin.mockResolvedValue({ accessToken: "test-token" });
     const user = userEvent.setup();
     render(<LoginWithAuth />);
@@ -76,7 +76,7 @@ describe("LoginWithAuth", () => {
 
     await waitFor(() => {
       expect(mockSetToken).toHaveBeenCalledWith("test-token");
-      expect(mockNavigate).toHaveBeenCalledWith("/posts");
+      expect(mockNavigate).toHaveBeenCalledWith("/");
     });
   });
 
