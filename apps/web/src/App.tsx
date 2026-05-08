@@ -23,7 +23,14 @@ export default function App() {
       <Sonner position="top-center" richColors />
       <Routes>
         <Route path="/" element={<Map />} />
-        <Route path="/posts" element={<Posts />} />
+        <Route
+          path="/posts"
+          element={
+            <PrivateRoute>
+              <Posts />
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/create"
           element={

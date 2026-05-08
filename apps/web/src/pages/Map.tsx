@@ -303,25 +303,11 @@ export default function Map() {
           <span className="text-sm font-bold text-[#3c4043] flex-1">
             さいたまマップ
           </span>
-          <div className="flex items-center gap-1.5">
-            {nickname && (
-              <span className="text-xs text-[#5f6368] font-medium">
-                {nickname} 様
-              </span>
-            )}
-            <button
-              className="inline-flex items-center gap-1.5 px-3 h-9 border-0 rounded-full bg-transparent text-[#5f6368] text-sm cursor-pointer flex-shrink-0 outline-none hover:bg-black/[0.06] focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]"
-              type="button"
-              aria-label="ログアウト"
-              onClick={() => {
-                if (!currentUserId) return;
-                setShowLogoutDialog(true);
-              }}
-            >
-              <LogOut size={16} aria-hidden="true" />
-              ログアウト
-            </button>
-          </div>
+          {nickname && (
+            <span className="text-xs text-[#5f6368] font-medium">
+              {nickname} 様
+            </span>
+          )}
         </div>
 
         <div
@@ -466,7 +452,7 @@ export default function Map() {
       </main>
 
       <nav
-        className={`fixed left-0 right-0 bottom-0 z-[1300] grid gap-2 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-white via-white/[0.94] to-white/[0.02] md:left-4 md:right-4 md:bottom-4 md:max-w-[720px] md:mx-auto md:rounded-3xl md:shadow-[0_12px_32px_rgba(15,23,42,0.18)] ${currentUserId ? "grid-cols-3" : "grid-cols-2"}`}
+        className={`fixed left-0 right-0 bottom-0 z-[1300] grid gap-2 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-white via-white/[0.94] to-white/[0.02] md:left-4 md:right-4 md:bottom-4 md:max-w-[720px] md:mx-auto md:rounded-3xl md:shadow-[0_12px_32px_rgba(15,23,42,0.18)] ${currentUserId ? "grid-cols-5" : "grid-cols-2"}`}
         aria-label="投稿アクション"
       >
         <button
@@ -501,19 +487,38 @@ export default function Map() {
           <span>目撃を報告</span>
         </button>
         {currentUserId && (
-          <button
-            type="button"
-            className="relative inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#202124] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
-            onClick={() => navigate("/conversations")}
-          >
-            <ChatIcon />
-            <span>会話</span>
-            {unreadData && (unreadData.count ?? 0) > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-extrabold leading-none">
-                {(unreadData.count ?? 0) > 99 ? "99+" : unreadData.count}
-              </span>
-            )}
-          </button>
+          <>
+            <button
+              type="button"
+              className="relative inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#202124] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+              onClick={() => navigate("/conversations")}
+            >
+              <ChatIcon />
+              <span>会話</span>
+              {unreadData && (unreadData.count ?? 0) > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-extrabold leading-none">
+                  {(unreadData.count ?? 0) > 99 ? "99+" : unreadData.count}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#202124] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+              aria-label="自分の投稿"
+              onClick={() => navigate("/posts")}
+            >
+              <ListIcon />
+              <span>自分の投稿</span>
+            </button>
+            <button
+              type="button"
+              className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#5f6368] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+              aria-label="ログアウト"
+              onClick={() => setShowLogoutDialog(true)}
+            >
+              <LogOut size={18} aria-hidden="true" />
+            </button>
+          </>
         )}
       </nav>
 
@@ -673,6 +678,10 @@ function EyeIcon() {
 
 function ChatIcon() {
   return <span aria-hidden="true">💬</span>;
+}
+
+function ListIcon() {
+  return <span aria-hidden="true">📋</span>;
 }
 
 function LocationIcon({ loading }: { loading: boolean }) {

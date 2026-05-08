@@ -50,7 +50,7 @@ const createWrapper = (
 };
 
 describe("App", () => {
-  it("未認証で /posts にアクセスしたとき、Posts ページが表示されること", async () => {
+  it("未認証で /posts にアクセスしたとき、/login にリダイレクトされること", async () => {
     const Wrapper = createWrapper(null, "/posts");
     render(
       <Wrapper>
@@ -59,7 +59,20 @@ describe("App", () => {
     );
 
     expect(
-      await screen.findByRole("button", { name: "マップに戻る" })
+      await screen.findByRole("button", { name: "ログイン" })
+    ).toBeInTheDocument();
+  });
+
+  it("認証済みで /posts にアクセスしたとき、Posts ページが表示されること", async () => {
+    const Wrapper = createWrapper("mock-token", "/posts");
+    render(
+      <Wrapper>
+        <App />
+      </Wrapper>
+    );
+
+    expect(
+      await screen.findByRole("link", { name: "新規投稿" })
     ).toBeInTheDocument();
   });
 
