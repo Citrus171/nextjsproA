@@ -38,7 +38,7 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   ]);
   await expect(page).toHaveURL(`${baseUrl}/`);
 
-  await page.getByRole("button", { name: "投稿アクション" }).click();
+  await page.getByRole("button", { name: "迷い猫投稿" }).click();
   await expect(page).toHaveURL(`${baseUrl}/create`);
 
   await page.fill('input[placeholder="例：レオ"]', "ミケ");

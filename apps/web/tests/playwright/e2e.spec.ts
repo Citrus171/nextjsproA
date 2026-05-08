@@ -51,7 +51,7 @@ test("basic E2E flow: register → login → create post → view posts", async 
   await expect(page).toHaveURL(`${baseUrl}/`, { timeout: 15000 });
 
   // 3. Create post from the map page via bottom nav button.
-  await page.getByRole("button", { name: "投稿アクション" }).click();
+  await page.getByRole("button", { name: "迷い猫投稿" }).click();
   await page.waitForURL(`${baseUrl}/create`);
   await page.fill('input[placeholder="例：レオ"]', "ミケ");
   await page.fill('input[placeholder="例：推定2歳"]', "2歳");
