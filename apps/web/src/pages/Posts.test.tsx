@@ -323,13 +323,17 @@ describe("Posts", () => {
       expect(screen.getByTestId("posts-no-more")).toBeInTheDocument();
     });
 
-    it("投稿が0件の時は「投稿がありません」と表示されること", () => {
+    it("投稿が0件の時は新規投稿を促す案内メッセージが表示されること", () => {
       mockInfiniteQuery({
         data: { pages: [{ items: [], total: 0 }], pageParams: [1] },
         hasNextPage: false,
       });
       render(<Posts />, { wrapper: createWrapper() });
-      expect(screen.getByText("投稿がありません")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "まだ投稿がありません。新規投稿ボタンから投稿を作成してみましょう。"
+        )
+      ).toBeInTheDocument();
     });
   });
 

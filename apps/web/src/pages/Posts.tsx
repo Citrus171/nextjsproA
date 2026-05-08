@@ -278,7 +278,7 @@ export default function Posts() {
 
         {!hasNextPage && allItems.length === 0 && (
           <p className="mt-12 text-center text-muted-foreground">
-            投稿がありません
+            まだ投稿がありません。新規投稿ボタンから投稿を作成してみましょう。
           </p>
         )}
 
