@@ -77,6 +77,7 @@ describe("PostsService", () => {
       expect(mockPrisma.post.findMany).toHaveBeenCalledWith({
         skip: 0,
         take: 5,
+        where: {},
         orderBy: { createdAt: "desc" },
         include: {
           petDetail: true,
@@ -138,6 +139,47 @@ describe("PostsService", () => {
           },
         ],
         total: 1,
+      });
+    });
+
+    it("userId 指定時は where に userId を含めて検索する", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.post.count.mockResolvedValue(0);
+
+      await service.findAll(1, 10, "user1");
+
+      expect(mockPrisma.post.findMany).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        where: { userId: "user1" },
+        orderBy: { createdAt: "desc" },
+        include: {
+          petDetail: true,
+          location: true,
+          images: true,
+          user: { select: { nickname: true } },
+        },
+      });
+      expect(mockPrisma.post.count).toHaveBeenCalledWith({
+        where: { userId: "user1" },
+      });
+    });
+
+    it("userId 指定時でもページネーションが正しく機能する", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.post.count.mockResolvedValue(5);
+
+      await service.findAll(2, 5, "user1");
+
+      expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 5,
+          take: 5,
+          where: { userId: "user1" },
+        })
+      );
+      expect(mockPrisma.post.count).toHaveBeenCalledWith({
+        where: { userId: "user1" },
       });
     });
   });

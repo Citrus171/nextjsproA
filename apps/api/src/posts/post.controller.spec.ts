@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   HttpException,
   NotFoundException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { PostsController, imageFileFilter } from "./post.controller";
 import { PostsService } from "./post.service";
@@ -76,6 +77,34 @@ describe("PostsController", () => {
       const result = await controller.list("1", "10");
 
       expect(result).toEqual({ items: posts, total: 1 });
+    });
+
+    it("mine=true の時、req.user.id を userId として findAll に渡す", async () => {
+      mockPostsService.findAll.mockResolvedValue({ items: [], total: 0 });
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
+
+      await controller.list("1", "10", "true", req);
+
+      expect(mockPostsService.findAll).toHaveBeenCalledWith(1, 10, "user1");
+    });
+
+    it("mine=true でもページネーションが正しく機能する", async () => {
+      mockPostsService.findAll.mockResolvedValue({ items: [], total: 0 });
+      const req = {
+        user: { id: "user1", email: "test@test.com", role: "user" as const },
+      };
+
+      await controller.list("3", "5", "true", req);
+
+      expect(mockPostsService.findAll).toHaveBeenCalledWith(3, 5, "user1");
+    });
+
+    it("mine=true 未認証の時、UnauthorizedException をスローする", async () => {
+      await expect(
+        controller.list("1", "10", "true", {} as any)
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 

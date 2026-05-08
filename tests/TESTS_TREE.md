@@ -162,7 +162,9 @@ apps/api/src/
 │   │   ├── findAll
 │   │   │   ├── ページ1・perPage5 で skip=0 / take=5 を渡す
 │   │   │   ├── ページ3・perPage5 で skip=10 を渡す
-│   │   │   └── items と total を返し、投稿者名を authorNickname に詰める
+│   │   │   ├── items と total を返し、投稿者名を authorNickname に詰める
+│   │   │   ├── userId 指定時は where に userId を含めて検索する
+│   │   │   └── userId 指定時でもページネーションが正しく機能する
 │   │   ├── findById
 │   │   │   └── petDetail/location/images と user.nickname を取得し authorNickname を返す
 │   │   ├── create
@@ -222,7 +224,10 @@ apps/api/src/
 │       │   ├── デフォルト（page=1, perPage=10）で findAll を呼ぶ
 │       │   ├── 文字列クエリを数値に変換して渡す
 │       │   ├── 不正な文字列は 1 / 10 にフォールバックする
-│       │   └── items と total を返す
+│       │   ├── items と total を返す
+│       │   ├── mine=true の時、req.user.id を userId として findAll に渡す
+│       │   ├── mine=true でもページネーションが正しく機能する
+│       │   └── mine=true 未認証の時、UnauthorizedException をスローする
 │       ├── get
 │       │   └── 指定 ID の投稿を返す
 │       ├── create

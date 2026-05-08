@@ -138,8 +138,10 @@ export function createClient(options: ClientOptions) {
     refresh: async () => {
       return doRefresh();
     },
-    listPosts: async (page = 1, perPage = 10) => {
-      const r = await postsControllerList({ params: { page, perPage } });
+    listPosts: async (page = 1, perPage = 10, mine?: boolean) => {
+      const params: Record<string, string | number> = { page, perPage };
+      if (mine) params.mine = "true";
+      const r = await postsControllerList({ params });
       return r.data;
     },
     createPost: async (data: PostsControllerCreateBody) => {

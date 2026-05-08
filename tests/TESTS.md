@@ -14,6 +14,8 @@
 - [x] ページ1・perPage5 で skip=0 / take=5 を渡す
 - [x] ページ3・perPage5 で skip=10 を渡す
 - [x] items と total を返し、投稿者名を authorNickname に詰める
+- [x] userId 指定時は where に userId を含めて検索する
+- [x] userId 指定時でもページネーションが正しく機能する
 
 #### findById
 
@@ -118,6 +120,9 @@
 - [x] 文字列クエリを数値に変換して渡す
 - [x] 不正な文字列は 1 / 10 にフォールバックする
 - [x] items と total を返す
+- [x] mine=true の時、req.user.id を userId として findAll に渡す
+- [x] mine=true でもページネーションが正しく機能する
+- [x] mine=true 未認証の時、UnauthorizedException をスローする
 
 #### get
 
