@@ -42,8 +42,13 @@ import { ConversationsGateway } from "./conversations.gateway";
 import { ConversationFileStorageService } from "./conversation-file-storage.service";
 import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
 
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png"];
-const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+];
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB（sharp で圧縮するため生ファイルは大きくても許容）
 
 @ApiTags("conversations")
 @Controller("conversations")
@@ -160,11 +165,11 @@ export class ConversationsController {
     if (file) {
       if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
         throw new BadRequestException(
-          `未対応のファイル形式です: ${file.mimetype}。JPEG または PNG を使用してください。`
+          `未対応のファイル形式です: ${file.mimetype}。JPEG、PNG、GIF、WebP を使用してください。`
         );
       }
       if (file.size > MAX_FILE_SIZE) {
-        throw new BadRequestException("ファイルサイズは2MB以内にしてください");
+        throw new BadRequestException("ファイルサイズは20MB以内にしてください");
       }
       const savedUrl = await this.conversationFileStorage.saveFile(id, file);
       dto = { ...dto, imageUrl: `/${savedUrl}` };
