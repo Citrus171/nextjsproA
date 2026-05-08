@@ -244,9 +244,9 @@ describe("Map", () => {
   });
 
   describe("ヘッダーUI", () => {
-    it("ヘッダーに「さいたまマップ」テキストが表示されること", () => {
+    it("ヘッダーに「ねこ探しマップ」テキストが表示されること", () => {
       renderMap();
-      expect(screen.getByText("さいたまマップ")).toBeInTheDocument();
+      expect(screen.getByText("ねこ探しマップ")).toBeInTheDocument();
     });
 
     it("旧「メニュー」ボタン（≡）が表示されないこと", () => {

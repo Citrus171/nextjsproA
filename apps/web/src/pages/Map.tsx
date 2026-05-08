@@ -301,7 +301,7 @@ export default function Map() {
       <header className="fixed top-0 left-0 right-0 z-[1300] px-4 pt-4 md:px-5 md:pt-5 pointer-events-none">
         <div className="flex items-center gap-2.5 p-2.5 rounded-[20px] bg-white/[0.98] shadow-[0_8px_26px_rgba(15,23,42,0.18)] backdrop-blur-[12px] pointer-events-auto md:max-w-[640px]">
           <span className="text-sm font-bold text-[#3c4043] flex-1">
-            さいたまマップ
+            ねこ探しマップ
           </span>
           {nickname && (
             <span className="text-xs text-[#5f6368] font-medium">
