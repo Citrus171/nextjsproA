@@ -179,6 +179,23 @@ echo ""
 echo "Step 5/10: API ビルド"
 npm run build --workspace=apps/api
 
+# 5.5. 必須環境変数チェック ----------------------------------------------------------
+echo ""
+echo "Step 5.5/10: 必須環境変数チェック"
+required_vars=(DATABASE_URL JWT_SECRET ENCRYPTION_KEY_CURRENT HMAC_SECRET)
+missing=()
+for var in "${required_vars[@]}"; do
+  if ! grep -q "^${var}=" "$PROJECT_DIR/apps/api/.env" 2>/dev/null; then
+    missing+=("$var")
+  fi
+done
+if [[ ${#missing[@]} -gt 0 ]]; then
+  echo "❌ apps/api/.env に必須変数が不足しています: ${missing[*]}"
+  echo "   デプロイを中断します。.env を更新してから再実行してください。"
+  exit 1
+fi
+echo "  必須環境変数: すべて確認済み"
+
 # 6. PM2 再起動 ----------------------------------------------------------------------
 echo ""
 echo "Step 6/10: PM2 再起動 ($PM2_NAME)"
