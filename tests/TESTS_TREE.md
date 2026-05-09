@@ -516,10 +516,19 @@ apps/api/test/
     └── POST /api/auth/logout
         └── ログアウトで Cookie が削除される (200)
 apps/web/src/
+├── api/client.test.ts
+│   ├── createClient
+│   │   ├── createClient を呼び出した後、axios.defaults.withCredentials が true になること
+│   │   └── baseURL オプション指定時も withCredentials が true になること
+│   └── createClient - refreshToken 注入
+│       ├── refreshToken が注入されている時、client.refresh() が refreshToken を呼ぶこと（authControllerRefresh は呼ばない）
+│       └── refreshToken が未設定の時、client.refresh() が authControllerRefresh を呼ぶこと
 ├── auth/AuthProvider.test.tsx
 │   └── AuthProvider
 │       ├── JWTにnicknameが含まれる場合、AuthProviderがnicknameを公開すること
-│       └── nicknameを含まないJWTの場合、nicknameがnullを返すこと
+│       ├── nicknameを含まないJWTの場合、nicknameがnullを返すこと
+│       ├── refresh() が context 経由で呼び出せること
+│       └── refresh() が同時に複数回呼ばれた時、authControllerRefresh は1回だけ呼ばれること
 ├── App.test.tsx
 │   └── App
 │       ├── 未認証で /posts にアクセスしたとき、/login にリダイレクトされること

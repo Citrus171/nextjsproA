@@ -796,10 +796,19 @@
 
 ## Web Unit (`apps/web/src/**/*.test.tsx`)
 
+### createClient (`src/api/client.test.ts`)
+
+- [x] createClient を呼び出した後、axios.defaults.withCredentials が true になること
+- [x] baseURL オプション指定時も withCredentials が true になること
+- [x] refreshToken が注入されている時、client.refresh() が refreshToken を呼ぶこと（authControllerRefresh は呼ばない）
+- [x] refreshToken が未設定の時、client.refresh() が authControllerRefresh を呼ぶこと
+
 ### AuthProvider (`src/auth/AuthProvider.test.tsx`)
 
 - [x] JWTにnicknameが含まれる場合、AuthProviderがnicknameを公開すること
 - [x] nicknameを含まないJWTの場合、nicknameがnullを返すこと
+- [x] refresh() が context 経由で呼び出せること
+- [x] refresh() が同時に複数回呼ばれた時、authControllerRefresh は1回だけ呼ばれること
 
 - [x] App で未認証で /posts にアクセスしたとき、/login にリダイレクトされること
 - [x] App で認証済みで /posts にアクセスしたとき、Posts ページが表示されること
