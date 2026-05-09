@@ -8,6 +8,7 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { CreateConversationDto } from "./dto/create-conversation.dto";
 import { CreateMessageDto } from "./dto/create-message.dto";
+import { ERROR_CODES } from "../common/error-codes";
 
 @Injectable()
 export class ConversationsService {
@@ -51,22 +52,32 @@ export class ConversationsService {
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
     });
-    if (!post) throw new NotFoundException("投稿が見つかりません");
+    if (!post)
+      throw new NotFoundException({
+        code: ERROR_CODES.POST_NOT_FOUND,
+        message: "投稿が見つかりません",
+      });
 
     const sighting = await this.prisma.sighting.findUnique({
       where: { id: sightingId },
     });
-    if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
+    if (!sighting)
+      throw new NotFoundException({
+        code: ERROR_CODES.SIGHTING_NOT_FOUND,
+        message: "目撃情報が見つかりません",
+      });
     if (sighting.postId === null || sighting.postId !== postId) {
-      throw new NotFoundException(
-        "指定された投稿に紐づく目撃情報ではありません"
-      );
+      throw new NotFoundException({
+        code: ERROR_CODES.CONV_SIGHTING_NOT_LINKED,
+        message: "指定された投稿に紐づく目撃情報ではありません",
+      });
     }
 
     if (post.userId !== userId && sighting.userId !== userId) {
-      throw new ForbiddenException(
-        "会話を開始できるのは投稿者または目撃者のみです"
-      );
+      throw new ForbiddenException({
+        code: ERROR_CODES.CONV_CREATE_FORBIDDEN,
+        message: "会話を開始できるのは投稿者または目撃者のみです",
+      });
     }
 
     return { post, sighting };
@@ -166,7 +177,11 @@ export class ConversationsService {
       },
     });
 
-    if (!conv) throw new NotFoundException("会話が見つかりません");
+    if (!conv)
+      throw new NotFoundException({
+        code: ERROR_CODES.CONV_NOT_FOUND,
+        message: "会話が見つかりません",
+      });
 
     return {
       ...this.buildConversationItem(conv, userId),
@@ -180,25 +195,32 @@ export class ConversationsService {
     dto: CreateMessageDto
   ) {
     if (!dto.body && !dto.imageUrl) {
-      throw new BadRequestException(
-        "メッセージ本文または画像のいずれかは必須です"
-      );
+      throw new BadRequestException({
+        code: ERROR_CODES.CONV_CONTENT_REQUIRED,
+        message: "メッセージ本文または画像のいずれかは必須です",
+      });
     }
     if (dto.body && dto.body.length > 1000) {
-      throw new BadRequestException(
-        "メッセージは1000文字以内で入力してください"
-      );
+      throw new BadRequestException({
+        code: ERROR_CODES.CONV_CONTENT_TOO_LONG,
+        message: "メッセージは1000文字以内で入力してください",
+      });
     }
 
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
     });
-    if (!conversation) throw new NotFoundException("会話が見つかりません");
+    if (!conversation)
+      throw new NotFoundException({
+        code: ERROR_CODES.CONV_NOT_FOUND,
+        message: "会話が見つかりません",
+      });
 
     if (conversation.ownerId !== userId && conversation.sighterId !== userId) {
-      throw new ForbiddenException(
-        "この会話にメッセージを送る権限がありません"
-      );
+      throw new ForbiddenException({
+        code: ERROR_CODES.CONV_MESSAGE_FORBIDDEN,
+        message: "この会話にメッセージを送る権限がありません",
+      });
     }
 
     return this.prisma.message.create({
@@ -215,10 +237,17 @@ export class ConversationsService {
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
     });
-    if (!conversation) throw new NotFoundException("会話が見つかりません");
+    if (!conversation)
+      throw new NotFoundException({
+        code: ERROR_CODES.CONV_NOT_FOUND,
+        message: "会話が見つかりません",
+      });
 
     if (conversation.ownerId !== userId && conversation.sighterId !== userId) {
-      throw new ForbiddenException("この会話を閲覧する権限がありません");
+      throw new ForbiddenException({
+        code: ERROR_CODES.CONV_NOT_PARTICIPANT,
+        message: "この会話を閲覧する権限がありません",
+      });
     }
 
     return this.prisma.message.findMany({
@@ -244,10 +273,17 @@ export class ConversationsService {
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
     });
-    if (!conversation) throw new NotFoundException("会話が見つかりません");
+    if (!conversation)
+      throw new NotFoundException({
+        code: ERROR_CODES.CONV_NOT_FOUND,
+        message: "会話が見つかりません",
+      });
 
     if (conversation.ownerId !== userId && conversation.sighterId !== userId) {
-      throw new ForbiddenException("この会話を閲覧する権限がありません");
+      throw new ForbiddenException({
+        code: ERROR_CODES.CONV_NOT_PARTICIPANT,
+        message: "この会話を閲覧する権限がありません",
+      });
     }
 
     return this.prisma.message.updateMany({

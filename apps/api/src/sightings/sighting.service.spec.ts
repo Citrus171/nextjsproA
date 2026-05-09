@@ -109,9 +109,17 @@ describe("SightingsService", () => {
 
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.create("other-user", dtoWithEmptyPostId as never)
-      ).rejects.toThrow(NotFoundException);
+      try {
+        await service.create("other-user", dtoWithEmptyPostId as never);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
 
       expect(mockPrisma.post.findUnique).toHaveBeenCalledWith({
         where: { id: "" },
@@ -124,17 +132,33 @@ describe("SightingsService", () => {
         userId: "owner-1",
       });
 
-      await expect(service.create("owner-1", dto)).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.create("owner-1", dto);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_SIGHTING_SELF_CREATE",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しないPostにSightingを作成しようとすると NotFoundException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(service.create("other-user", dto)).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.create("other-user", dto);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 
@@ -197,9 +221,17 @@ describe("SightingsService", () => {
     it("存在しないIDを指定するとNotFoundExceptionを送出すること", async () => {
       mockPrisma.sighting.findUnique.mockResolvedValue(null);
 
-      await expect(service.findOne("nonexistent")).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.findOne("nonexistent");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_SIGHTING_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 
@@ -224,17 +256,33 @@ describe("SightingsService", () => {
         userId: "user-1",
       });
 
-      await expect(service.remove("other-user", "s-1")).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.remove("other-user", "s-1");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_SIGHTING_NOT_OWNER",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しないSightingを削除しようとすると NotFoundException", async () => {
       mockPrisma.sighting.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove("user-1", "s-1")).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.remove("user-1", "s-1");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_SIGHTING_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("管理者は他者のSightingを削除できること", async () => {
@@ -290,9 +338,17 @@ describe("SightingsService", () => {
         userId,
       });
 
-      await expect(service.toggleFavorite(userId, sightingId)).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.toggleFavorite(userId, sightingId);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_SIGHTING_SELF_FAVORITE",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException", async () => {
@@ -300,17 +356,33 @@ describe("SightingsService", () => {
       mockPrisma.sightingFavorite.findUnique.mockResolvedValue(null);
       mockPrisma.sightingFavorite.count.mockResolvedValue(20);
 
-      await expect(service.toggleFavorite(userId, sightingId)).rejects.toThrow(
-        BadRequestException
-      );
+      try {
+        await service.toggleFavorite(userId, sightingId);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_SIGHTING_FAVORITE_LIMIT",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しないSightingをお気に入りしようとすると NotFoundException", async () => {
       mockPrisma.sighting.findUnique.mockResolvedValue(null);
 
-      await expect(service.toggleFavorite(userId, sightingId)).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.toggleFavorite(userId, sightingId);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_SIGHTING_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 });

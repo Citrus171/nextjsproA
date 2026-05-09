@@ -65,7 +65,9 @@ DB スキーマ: `apps/api/prisma/schema.prisma`（User / Post / RefreshToken）
 
 Kilo と Claude Code の並列作業時にファイル編集競合を防ぐため、以下のルールに従う。
 
-### タスク開始時
+### タスク開始時（必須）
+
+**すべての実装タスクにおいて、コード変更前に必ず以下を実行すること。**
 
 1. `docs/tasks/agent-kilocode.md` に `## [IN_PROGRESS] タスク名` セクションを追記し、`編集予定ファイル` をリストアップする
 2. `docs/tasks/agent-claude.md` を読み込み、`## [IN_PROGRESS]` セクションがあれば `編集予定ファイル` を確認する
@@ -92,6 +94,8 @@ Kilo と Claude Code の並列作業時にファイル編集競合を防ぐた�
 - 開始: YYYY-MM-DD HH:MM
 - 終了: YYYY-MM-DD HH:MM
 - 状態: DONE
+- コミット: `abc1234`
+- PR: #123
 - 編集ファイル:
   - `path/to/file.ts`
 ```

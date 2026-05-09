@@ -37,6 +37,7 @@ import { JwtAuthGuard, OptionalJwtAuthGuard } from "../auth/jwt-auth.guard";
 import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
 import { Plan } from "@prisma/client";
 import { PLAN_LIMITS } from "../common/plan-limits";
+import { ERROR_CODES } from "../common/error-codes";
 import {
   OPENAPI_IMAGE_ID_EXAMPLE,
   OPENAPI_POST_ID_EXAMPLE,
@@ -157,7 +158,10 @@ export class PostsController {
     const pp = parseInt(perPage, 10) || 10;
     if (mine === "true") {
       if (!req?.user) {
-        throw new UnauthorizedException("認証が必要です");
+        throw new UnauthorizedException({
+          code: ERROR_CODES.AUTH_REQUIRED,
+          message: "認証が必要です",
+        });
       }
       return this.posts.findAll(p, pp, req.user.id);
     }

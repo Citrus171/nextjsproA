@@ -27,6 +27,7 @@ import { OPENAPI_USER_ID_EXAMPLE } from "../common/openapi-examples";
 import { RegisterDto } from "./dto/register.dto";
 import { UserResponseDto } from "./dto/user-response.dto";
 import { IIdentityService } from "../identity/identity.service";
+import { ERROR_CODES } from "../common/error-codes";
 
 @ApiTags("users")
 @Controller("users")
@@ -92,7 +93,10 @@ export class UsersController {
   async register(@Body() dto: RegisterDto) {
     const nickname = dto.nickname ?? dto.name;
     if (!nickname) {
-      throw new BadRequestException({ error: "ニックネームは必須です" });
+      throw new BadRequestException({
+        code: ERROR_CODES.USER_NICKNAME_REQUIRED,
+        message: "ニックネームは必須です",
+      });
     }
     try {
       const user = await this.identity.register(
@@ -111,7 +115,10 @@ export class UsersController {
         throw e;
       }
       throw new HttpException(
-        { error: "内部サーバーエラーが発生しました" },
+        {
+          code: ERROR_CODES.INTERNAL,
+          message: "内部サーバーエラーが発生しました",
+        },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }

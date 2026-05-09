@@ -55,8 +55,8 @@ describe("GET /api/health (E2E)", () => {
       const res = await request(app.getHttpServer()).get("/api/health");
 
       expect(res.status).toBe(503);
-      expect(res.body.status).toBe("error");
-      expect(res.body.error.database.status).toBe("down");
+      expect(res.body.code).toBe("E_UNKNOWN");
+      expect(res.body.details.database.status).toBe("down");
 
       jest.restoreAllMocks();
     });

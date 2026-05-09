@@ -28,6 +28,7 @@ import {
   getMonthlyPostLimit,
 } from "../common/plan-limits";
 import { MAX_FAVORITES_LIMIT } from "../common/constants";
+import { ERROR_CODES } from "../common/error-codes";
 const MAX_TRANSACTION_RETRIES = 3;
 
 function getMonthRange(date = new Date()) {
@@ -135,9 +136,10 @@ function buildLocationUpsertData(postId: string, loc: UpdateLocationDto) {
 
 function validateNewPetDetail(existing: unknown, pd: UpdatePetDetailDto) {
   if (!existing && (!pd.name || !pd.color || !pd.age || !pd.features)) {
-    throw new BadRequestException(
-      "petDetailを新規作成する場合、name/color/age/featuresは必須です"
-    );
+    throw new BadRequestException({
+      code: ERROR_CODES.POST_PET_DETAIL_REQUIRED,
+      message: "petDetailを新規作成する場合、name/color/age/featuresは必須です",
+    });
   }
 }
 
@@ -150,9 +152,11 @@ function validateNewLocation(existing: unknown, loc: UpdateLocationDto) {
       loc.lat === undefined ||
       loc.lng === undefined)
   ) {
-    throw new BadRequestException(
-      "locationを新規作成する場合、prefecture/city/address/lat/lngは必須です"
-    );
+    throw new BadRequestException({
+      code: ERROR_CODES.POST_LOCATION_REQUIRED,
+      message:
+        "locationを新規作成する場合、prefecture/city/address/lat/lngは必須です",
+    });
   }
 }
 
@@ -167,14 +171,18 @@ async function checkPlanLimits(
   });
 
   if (!user) {
-    throw new NotFoundException("ユーザーが見つかりません");
+    throw new NotFoundException({
+      code: ERROR_CODES.USER_NOT_FOUND,
+      message: "ユーザーが見つかりません",
+    });
   }
 
   const imageUploadLimit = getImageUploadLimit(user.plan);
   if (fileCount > imageUploadLimit) {
-    throw new ForbiddenException(
-      `このプランでは画像は最大${imageUploadLimit}枚までです`
-    );
+    throw new ForbiddenException({
+      code: ERROR_CODES.POST_IMAGE_LIMIT,
+      message: `このプランでは画像は最大${imageUploadLimit}枚までです`,
+    });
   }
 
   const monthlyPostLimit = getMonthlyPostLimit(user.plan);
@@ -188,7 +196,10 @@ async function checkPlanLimits(
     });
 
     if (postCount >= monthlyPostLimit) {
-      throw new ForbiddenException("無料プランの月間投稿数上限に達しています");
+      throw new ForbiddenException({
+        code: ERROR_CODES.POST_PLAN_LIMIT,
+        message: "無料プランの月間投稿数上限に達しています",
+      });
     }
   }
 }
@@ -251,7 +262,10 @@ export class PostsService {
     files: Express.Multer.File[] = []
   ) {
     if (!dto.lostDate) {
-      throw new BadRequestException("lostDateは必須です");
+      throw new BadRequestException({
+        code: ERROR_CODES.POST_LOST_DATE_REQUIRED,
+        message: "lostDateは必須です",
+      });
     }
     const lostDate = new Date(dto.lostDate);
 
@@ -386,7 +400,11 @@ export class PostsService {
         user: { select: { nickname: true } },
       },
     });
-    if (!post) throw new NotFoundException("投稿が見つかりません");
+    if (!post)
+      throw new NotFoundException({
+        code: ERROR_CODES.POST_NOT_FOUND,
+        message: "投稿が見つかりません",
+      });
 
     const { user, ...rest } = post;
     return {
@@ -409,22 +427,34 @@ export class PostsService {
       where: { id: postId },
       include: { images: true },
     });
-    if (!post) throw new NotFoundException("投稿が見つかりません");
+    if (!post)
+      throw new NotFoundException({
+        code: ERROR_CODES.POST_NOT_FOUND,
+        message: "投稿が見つかりません",
+      });
     if (post.userId !== userId && !isAdmin)
-      throw new ForbiddenException("投稿のオーナーではありません");
+      throw new ForbiddenException({
+        code: ERROR_CODES.POST_NOT_OWNER,
+        message: "投稿のオーナーではありません",
+      });
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { plan: true },
     });
-    if (!user) throw new NotFoundException("ユーザーが見つかりません");
+    if (!user)
+      throw new NotFoundException({
+        code: ERROR_CODES.USER_NOT_FOUND,
+        message: "ユーザーが見つかりません",
+      });
 
     const currentCount = post.images.length;
     const imageUploadLimit = getImageUploadLimit(user.plan);
     if (currentCount + files.length > imageUploadLimit) {
-      throw new ForbiddenException(
-        `画像は最大${imageUploadLimit}枚です（現在${currentCount}枚、追加可能: ${imageUploadLimit - currentCount}枚）`
-      );
+      throw new ForbiddenException({
+        code: ERROR_CODES.POST_IMAGE_LIMIT,
+        message: `画像は最大${imageUploadLimit}枚です（現在${currentCount}枚、追加可能: ${imageUploadLimit - currentCount}枚）`,
+      });
     }
 
     return this.saveImagesAndBuildResponse(
@@ -473,15 +503,25 @@ export class PostsService {
 
   async removeImage(postId: string, imageId: string, userId: string) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
-    if (!post) throw new NotFoundException("投稿が見つかりません");
+    if (!post)
+      throw new NotFoundException({
+        code: ERROR_CODES.POST_NOT_FOUND,
+        message: "投稿が見つかりません",
+      });
     if (post.userId !== userId)
-      throw new ForbiddenException("投稿のオーナーではありません");
+      throw new ForbiddenException({
+        code: ERROR_CODES.POST_NOT_OWNER,
+        message: "投稿のオーナーではありません",
+      });
 
     const image = await this.prisma.image.findUnique({
       where: { id: imageId },
     });
     if (!image || image.postId !== postId)
-      throw new NotFoundException("画像が見つかりません");
+      throw new NotFoundException({
+        code: ERROR_CODES.POST_IMAGE_NOT_FOUND,
+        message: "画像が見つかりません",
+      });
 
     this.fileStorage.deleteFile(image.url);
     const deleted = await this.prisma.image.delete({ where: { id: imageId } });
@@ -499,10 +539,16 @@ export class PostsService {
       include: { petDetail: true, location: true },
     });
     if (!post) {
-      throw new NotFoundException("投稿が見つかりません");
+      throw new NotFoundException({
+        code: ERROR_CODES.POST_NOT_FOUND,
+        message: "投稿が見つかりません",
+      });
     }
     if (post.userId !== userId && !isAdmin) {
-      throw new ForbiddenException("投稿のオーナーではありません");
+      throw new ForbiddenException({
+        code: ERROR_CODES.POST_NOT_OWNER,
+        message: "投稿のオーナーではありません",
+      });
     }
 
     return this.prisma
@@ -544,9 +590,16 @@ export class PostsService {
 
   async toggleFavorite(userId: string, postId: string) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
-    if (!post) throw new NotFoundException("投稿が見つかりません");
+    if (!post)
+      throw new NotFoundException({
+        code: ERROR_CODES.POST_NOT_FOUND,
+        message: "投稿が見つかりません",
+      });
     if (post.userId === userId)
-      throw new ForbiddenException("自分の投稿はお気に入りできません");
+      throw new ForbiddenException({
+        code: ERROR_CODES.POST_SELF_FAVORITE,
+        message: "自分の投稿はお気に入りできません",
+      });
 
     const existing = await this.prisma.postFavorite.findUnique({
       where: { userId_postId: { userId, postId } },
@@ -562,7 +615,10 @@ export class PostsService {
     await this.prisma.$transaction(async (tx) => {
       const count = await tx.postFavorite.count({ where: { userId } });
       if (count >= MAX_FAVORITES_LIMIT)
-        throw new BadRequestException("お気に入りは20件までです");
+        throw new BadRequestException({
+          code: ERROR_CODES.POST_FAVORITE_LIMIT,
+          message: "お気に入りは20件までです",
+        });
       await tx.postFavorite.create({ data: { userId, postId } });
     });
     return { favorited: true };
@@ -574,10 +630,16 @@ export class PostsService {
       include: { images: true },
     });
     if (!post) {
-      throw new NotFoundException("投稿が見つかりません");
+      throw new NotFoundException({
+        code: ERROR_CODES.POST_NOT_FOUND,
+        message: "投稿が見つかりません",
+      });
     }
     if (post.userId !== userId && !isAdmin) {
-      throw new ForbiddenException("投稿のオーナーではありません");
+      throw new ForbiddenException({
+        code: ERROR_CODES.POST_NOT_OWNER,
+        message: "投稿のオーナーではありません",
+      });
     }
 
     for (const image of post.images) {

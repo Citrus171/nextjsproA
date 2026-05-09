@@ -21,7 +21,17 @@ describe("UsersController", () => {
       password: "password123",
     } as RegisterDto;
 
-    await expect(controller.register(dto)).rejects.toThrow(BadRequestException);
+    try {
+      await controller.register(dto);
+      fail("例外がスローされるべき");
+    } catch (e) {
+      expect(e).toBeInstanceOf(BadRequestException);
+      const response = (e as BadRequestException).getResponse();
+      expect(response).toMatchObject({
+        code: "E_USER_NICKNAME_REQUIRED",
+        message: expect.any(String),
+      });
+    }
     expect(mockIdentityService.register).not.toHaveBeenCalled();
   });
 

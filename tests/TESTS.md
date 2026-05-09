@@ -2,6 +2,15 @@
 
 ## apps/api
 
+## エラーコード体系 (`src/common/error-codes.ts`)
+
+- [x] 40種のエラーコード定数を定義 (`E_AUTH_*`, `E_POST_*`, `E_USER_*`, `E_CONV_*`, `E_SIGHTING_*`, `E_RESOURCE_*`, `E_FILE_*`, `E_IMAGE_*`, `E_RATE_LIMIT`, `E_VALIDATION`, `E_INTERNAL`)
+- [x] 全60件の例外スローにコードを付与
+- [x] 59件のテストでエラーコード検証を追加
+- [x] AllExceptionsFilter: 429→`E_RATE_LIMIT` 自動検出
+
+---
+
 ### openapi-examples (`src/common/openapi-examples.spec.ts`)
 
 - [x] 用途別の OpenAPI 例示 ID が重複しないこと
@@ -623,15 +632,45 @@
 
 ### P2025（レコード不在）
 
-- [x] NotFoundException に変換すること
+- [x] code=E_RESOURCE_NOT_FOUND の NotFoundException に変換すること
 
 ### P2002（一意制約違反）
 
-- [x] ConflictException に変換すること
+- [x] code=E_RESOURCE_DUPLICATE の ConflictException に変換すること
 
 ### 不明なPrismaエラーコード
 
 - [x] そのまま再スローすること
+
+---
+
+## AllExceptionsFilter (`src/filters/all-exceptions.filter.spec.ts`)
+
+### HttpException（文字列メッセージ）の時
+
+- [x] statusCode / code / message を含むエンベロープを返すこと
+- [x] 4xx の時 Sentry.captureException が呼ばれないこと
+- [x] 5xx の時 Sentry.captureException が呼ばれること
+
+### HttpException（code 付きオブジェクト）の時
+
+- [x] 指定された code をそのまま返すこと
+
+### バリデーションエラー（message が配列）の時
+
+- [x] E_VALIDATION コードと details を返すこと
+
+### HttpException 以外の例外の時
+
+- [x] 500 ステータスと E_UNKNOWN を返し、Sentry に送信すること
+
+### details 付き例外の時
+
+- [x] details フィールドを含めて返すこと
+
+### message フィールドが文字列でない場合のフォールバック
+
+- [x] error フィールドを message として使うこと
 
 ---
 

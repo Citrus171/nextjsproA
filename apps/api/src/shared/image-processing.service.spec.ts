@@ -93,8 +93,16 @@ describe("ImageProcessingService", () => {
       toBuffer: jest.fn().mockRejectedValue(new Error("corrupt image")),
     });
 
-    await expect(service.process(Buffer.from("bad"))).rejects.toThrow(
-      BadRequestException
-    );
+    try {
+      await service.process(Buffer.from("bad"));
+      fail("例外がスローされるべき");
+    } catch (e) {
+      expect(e).toBeInstanceOf(BadRequestException);
+      const response = (e as BadRequestException).getResponse();
+      expect(response).toMatchObject({
+        code: "E_IMAGE_PROCESSING_ERROR",
+        message: expect.any(String),
+      });
+    }
   });
 });

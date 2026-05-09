@@ -219,9 +219,17 @@ describe("PostsService", () => {
     it("存在しない投稿は NotFoundException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(service.findById("no-such")).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.findById("no-such");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 
@@ -377,13 +385,21 @@ describe("PostsService", () => {
         () => ({ originalname: "p.png", buffer: Buffer.from("") }) as any
       );
 
-      await expect(
-        service.create(
+      try {
+        await service.create(
           "u1",
           { description: "C", lostDate: "2024-01-01" },
           files
-        )
-      ).rejects.toThrow(ForbiddenException);
+        );
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_IMAGE_LIMIT",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("premium ユーザーは画像を10枚まで添付できる", async () => {
@@ -412,9 +428,17 @@ describe("PostsService", () => {
     });
 
     it("lostDate なしは BadRequestException をスローする", async () => {
-      await expect(
-        service.create("u1", { description: "C" } as any)
-      ).rejects.toThrow(BadRequestException);
+      try {
+        await service.create("u1", { description: "C" } as any);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_LOST_DATE_REQUIRED",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("無料プランの画像が4枚を超えると ForbiddenException をスローする", async () => {
@@ -424,13 +448,21 @@ describe("PostsService", () => {
         () => ({ originalname: "p.png", buffer: Buffer.from("") }) as any
       );
 
-      await expect(
-        service.create(
+      try {
+        await service.create(
           "u1",
           { description: "C", lostDate: "2024-01-01" },
           files
-        )
-      ).rejects.toThrow(ForbiddenException);
+        );
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_IMAGE_LIMIT",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("petDetail と location を含む時、トランザクションで一括作成する", async () => {
@@ -541,12 +573,20 @@ describe("PostsService", () => {
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
       );
 
-      await expect(
-        service.create("u1", {
+      try {
+        await service.create("u1", {
           description: "C",
           lostDate: "2026-04-21",
-        })
-      ).rejects.toThrow(ForbiddenException);
+        });
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_PLAN_LIMIT",
+          message: expect.any(String),
+        });
+      }
 
       expect(mockPrisma.post.count).toHaveBeenCalledWith({
         where: {
@@ -721,9 +761,17 @@ describe("PostsService", () => {
       mockPrisma.user.findUnique.mockResolvedValue({ plan: "free" });
       const files = [{ originalname: "a.png", buffer: Buffer.from("") } as any];
 
-      await expect(service.addImages("post1", "user1", files)).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.addImages("post1", "user1", files);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_IMAGE_LIMIT",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("premium ユーザーは10枚まで追加できる", async () => {
@@ -753,17 +801,33 @@ describe("PostsService", () => {
     it("オーナー以外は ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
 
-      await expect(
-        service.addImages("post1", "other-user", [])
-      ).rejects.toThrow(ForbiddenException);
+      try {
+        await service.addImages("post1", "other-user", []);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_OWNER",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しない投稿は NotFoundException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(service.addImages("no-such", "user1", [])).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.addImages("no-such", "user1", []);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("追加後の合計が上限を超える場合は ForbiddenException", async () => {
@@ -778,9 +842,17 @@ describe("PostsService", () => {
         { originalname: "c.png", buffer: Buffer.from("") } as any,
       ];
 
-      await expect(service.addImages("post1", "user1", files)).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.addImages("post1", "user1", files);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_IMAGE_LIMIT",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("DB作成失敗時に保存済みファイルを削除する", async () => {
@@ -829,17 +901,33 @@ describe("PostsService", () => {
     it("オーナー以外は ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
 
-      await expect(
-        service.removeImage("post1", "img1", "other-user")
-      ).rejects.toThrow(ForbiddenException);
+      try {
+        await service.removeImage("post1", "img1", "other-user");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_OWNER",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しない投稿は NotFoundException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.removeImage("no-such", "img1", "user1")
-      ).rejects.toThrow(NotFoundException);
+      try {
+        await service.removeImage("no-such", "img1", "user1");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("別の投稿に属する画像は NotFoundException", async () => {
@@ -849,9 +937,17 @@ describe("PostsService", () => {
         postId: "other-post",
       });
 
-      await expect(
-        service.removeImage("post1", "img1", "user1")
-      ).rejects.toThrow(NotFoundException);
+      try {
+        await service.removeImage("post1", "img1", "user1");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_IMAGE_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 
@@ -919,17 +1015,33 @@ describe("PostsService", () => {
     it("オーナー以外は ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
 
-      await expect(
-        service.update("post1", "other-user", { title: "Hacked" })
-      ).rejects.toThrow(ForbiddenException);
+      try {
+        await service.update("post1", "other-user", { title: "Hacked" });
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_OWNER",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しない投稿は HttpException (404)", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.update("no-such-post", "user1", { title: "X" })
-      ).rejects.toThrow(HttpException);
+      try {
+        await service.update("no-such-post", "user1", { title: "X" });
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpException);
+        const response = (e as HttpException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("lostDate を更新できる", async () => {
@@ -1030,17 +1142,35 @@ describe("PostsService", () => {
     it("petDetail 未存在かつ必須フィールドなしは BadRequestException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
 
-      await expect(
-        service.update("post1", "user1", { petDetail: { name: "Mimi" } })
-      ).rejects.toThrow(BadRequestException);
+      try {
+        await service.update("post1", "user1", { petDetail: { name: "Mimi" } });
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_PET_DETAIL_REQUIRED",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("location 未存在かつ必須フィールドなしは BadRequestException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
 
-      await expect(
-        service.update("post1", "user1", { location: { city: "さいたま市" } })
-      ).rejects.toThrow(BadRequestException);
+      try {
+        await service.update("post1", "user1", {
+          location: { city: "さいたま市" },
+        });
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_LOCATION_REQUIRED",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("location を upsert できる", async () => {
@@ -1125,17 +1255,33 @@ describe("PostsService", () => {
     it("オーナー以外は ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
 
-      await expect(service.remove("post1", "other-user")).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.remove("post1", "other-user");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_OWNER",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しない投稿は HttpException (404)", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove("no-such-post", "user1")).rejects.toThrow(
-        HttpException
-      );
+      try {
+        await service.remove("no-such-post", "user1");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(HttpException);
+        const response = (e as HttpException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("管理者は他人の投稿を削除できる", async () => {
@@ -1162,13 +1308,19 @@ describe("PostsService", () => {
         { originalname: "photo.png", buffer: Buffer.from("raw") } as any,
       ];
 
-      await expect(
-        service.create(
+      try {
+        await service.create(
           "u1",
           { description: "C", lostDate: "2024-01-01" },
           files
-        )
-      ).rejects.toThrow(BadRequestException);
+        );
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        expect((e as BadRequestException).message).toBe(
+          "画像処理に失敗しました。ファイルが破損または無効な形式です。"
+        );
+      }
     });
   });
 
@@ -1209,9 +1361,17 @@ describe("PostsService", () => {
     it("自分の投稿をお気に入りしようとすると ForbiddenException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(existingPost);
 
-      await expect(service.toggleFavorite(postOwner, postId)).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.toggleFavorite(postOwner, postId);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_SELF_FAVORITE",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("お気に入りが20件の状態でtoggleFavoriteを呼ぶと BadRequestException", async () => {
@@ -1219,17 +1379,33 @@ describe("PostsService", () => {
       mockPrisma.postFavorite.findUnique.mockResolvedValue(null);
       mockPrisma.postFavorite.count.mockResolvedValue(20);
 
-      await expect(service.toggleFavorite(otherUser, postId)).rejects.toThrow(
-        BadRequestException
-      );
+      try {
+        await service.toggleFavorite(otherUser, postId);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_FAVORITE_LIMIT",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しない投稿をお気に入りしようとすると NotFoundException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(service.toggleFavorite(otherUser, postId)).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.toggleFavorite(otherUser, postId);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 });

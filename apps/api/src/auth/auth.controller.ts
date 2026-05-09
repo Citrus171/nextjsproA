@@ -47,7 +47,8 @@ export class AuthController {
     const token = req.cookies?.refreshToken;
     if (!token)
       throw new UnauthorizedException({
-        error: "リフレッシュトークンがありません",
+        code: "E_AUTH_NO_REFRESH_TOKEN",
+        message: "リフレッシュトークンがありません",
       });
     const result = await this.identity.refresh(token);
     this.applyCookies(res, result.setCookies);

@@ -33,15 +33,31 @@ describe("RolesGuard", () => {
 
   it("ロールが一致しない場合は ForbiddenException をスローする", () => {
     jest.spyOn(reflector, "getAllAndOverride").mockReturnValue(["admin"]);
-    expect(() => guard.canActivate(makeContext("user"))).toThrow(
-      ForbiddenException
-    );
+    try {
+      guard.canActivate(makeContext("user"));
+      fail("例外がスローされるべき");
+    } catch (e) {
+      expect(e).toBeInstanceOf(ForbiddenException);
+      const response = (e as ForbiddenException).getResponse();
+      expect(response).toMatchObject({
+        code: "E_AUTH_ADMIN_REQUIRED",
+        message: expect.any(String),
+      });
+    }
   });
 
   it("ユーザーが未設定の場合は ForbiddenException をスローする", () => {
     jest.spyOn(reflector, "getAllAndOverride").mockReturnValue(["admin"]);
-    expect(() => guard.canActivate(makeContext(undefined))).toThrow(
-      ForbiddenException
-    );
+    try {
+      guard.canActivate(makeContext(undefined));
+      fail("例外がスローされるべき");
+    } catch (e) {
+      expect(e).toBeInstanceOf(ForbiddenException);
+      const response = (e as ForbiddenException).getResponse();
+      expect(response).toMatchObject({
+        code: "E_AUTH_ADMIN_REQUIRED",
+        message: expect.any(String),
+      });
+    }
   });
 });
