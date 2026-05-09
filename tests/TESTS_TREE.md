@@ -516,6 +516,10 @@ apps/api/test/
     └── POST /api/auth/logout
         └── ログアウトで Cookie が削除される (200)
 apps/web/src/
+├── api/client.test.ts
+│   └── createClient
+│       ├── createClient を呼び出した後、axios.defaults.withCredentials が true になること
+│       └── baseURL オプション指定時も withCredentials が true になること
 ├── auth/AuthProvider.test.tsx
 │   └── AuthProvider
 │       ├── JWTにnicknameが含まれる場合、AuthProviderがnicknameを公開すること
