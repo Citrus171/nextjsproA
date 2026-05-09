@@ -796,6 +796,11 @@
 
 ## Web Unit (`apps/web/src/**/*.test.tsx`)
 
+### createClient (`src/api/client.test.ts`)
+
+- [x] createClient を呼び出した後、axios.defaults.withCredentials が true になること
+- [x] baseURL オプション指定時も withCredentials が true になること
+
 ### AuthProvider (`src/auth/AuthProvider.test.tsx`)
 
 - [x] JWTにnicknameが含まれる場合、AuthProviderがnicknameを公開すること
