@@ -164,10 +164,10 @@ describe("SightingsService", () => {
 
   // ─── findByPost ─────────────────────────────────────────────
   describe("findByPost", () => {
-    it("postIdに紐づくSighting一覧をcreatedAt降順で返すこと", async () => {
+    it("postIdに紐づくSighting一覧をニックネーム付きで返すこと", async () => {
       const sightings = [
-        { id: "s-2", postId: "post-1" },
-        { id: "s-1", postId: "post-1" },
+        { id: "s-2", postId: "post-1", user: { nickname: "ニック2" } },
+        { id: "s-1", postId: "post-1", user: { nickname: "ニック1" } },
       ];
       mockPrisma.sighting.findMany.mockResolvedValue(sightings);
 
@@ -176,8 +176,11 @@ describe("SightingsService", () => {
       expect(mockPrisma.sighting.findMany).toHaveBeenCalledWith({
         where: { postId: "post-1" },
         orderBy: { createdAt: "desc" },
+        include: { user: { select: { nickname: true } } },
       });
       expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({ id: "s-2", nickname: "ニック2" });
+      expect(result[1]).toMatchObject({ id: "s-1", nickname: "ニック1" });
     });
   });
 

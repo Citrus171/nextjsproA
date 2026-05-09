@@ -99,6 +99,11 @@ export default function SightingList({
                     {s.comment}
                   </p>
                 )}
+                {s.nickname && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    報告者: {s.nickname}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {currentUserId === s.userId && (
