@@ -59,10 +59,15 @@ export class SightingsService {
   }
 
   async findByPost(postId: string) {
-    return this.prisma.sighting.findMany({
+    const sightings = await this.prisma.sighting.findMany({
       where: { postId },
       orderBy: { createdAt: "desc" },
+      include: { user: { select: { nickname: true } } },
     });
+    return sightings.map(({ user, ...rest }) => ({
+      ...rest,
+      nickname: user.nickname,
+    }));
   }
 
   async toggleFavorite(userId: string, sightingId: string) {

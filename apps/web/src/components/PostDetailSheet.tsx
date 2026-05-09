@@ -194,6 +194,13 @@ export default function PostDetailSheet({
                 </p>
               )}
 
+              {/* 投稿者 */}
+              {post.authorNickname && (
+                <p className="text-xs text-muted-foreground mb-2">
+                  投稿者: {post.authorNickname}
+                </p>
+              )}
+
               {/* ステータスバッジ */}
               {post.status && (
                 <span

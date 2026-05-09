@@ -209,7 +209,7 @@
 
 #### findByPost
 
-- [x] postIdに紐づくSighting一覧をcreatedAt降順で返すこと
+- [x] postIdに紐づくSighting一覧をニックネーム付きで返すこと
 
 #### remove
 

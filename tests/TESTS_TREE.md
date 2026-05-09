@@ -401,7 +401,7 @@ apps/api/src/
 │   │   │   ├── 投稿者本人が自分のPostにSightingを作成しようとすると ForbiddenException
 │   │   │   └── 存在しないPostにSightingを作成しようとすると NotFoundException
 │   │   ├── findByPost
-│   │   │   └── postIdに紐づくSighting一覧をcreatedAt降順で返すこと
+│   │   │   └── postIdに紐づくSighting一覧をニックネーム付きで返すこと
 │   │   ├── findOne
 │   │   │   ├── 指定IDの目撃情報を報告者のニックネーム付きで返すこと
 │   │   │   └── 存在しないIDを指定するとNotFoundExceptionを送出すること
