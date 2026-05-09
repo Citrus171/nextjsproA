@@ -48,6 +48,7 @@ export type ClientOptions = {
 
 export function createClient(options: ClientOptions) {
   if (options.baseURL) axios.defaults.baseURL = options.baseURL;
+  axios.defaults.withCredentials = true;
 
   const reqId = axios.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
