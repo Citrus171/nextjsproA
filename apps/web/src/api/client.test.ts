@@ -52,3 +52,36 @@ describe("createClient", () => {
     client.dispose();
   });
 });
+
+describe("createClient - refreshToken 注入", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("refreshToken が注入されている時、client.refresh() が refreshToken を呼ぶこと（authControllerRefresh は呼ばない）", async () => {
+    const { authControllerRefresh } =
+      await import("../../../../packages/api-client/src/index");
+    const mockRefreshToken = vi.fn().mockResolvedValue("new-access-token");
+    const client = createClient({ refreshToken: mockRefreshToken });
+
+    await client.refresh();
+
+    expect(mockRefreshToken).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(authControllerRefresh)).not.toHaveBeenCalled();
+    client.dispose();
+  });
+
+  it("refreshToken が未設定の時、client.refresh() が authControllerRefresh を呼ぶこと", async () => {
+    const { authControllerRefresh } =
+      await import("../../../../packages/api-client/src/index");
+    vi.mocked(authControllerRefresh).mockResolvedValueOnce({
+      data: { accessToken: "token-from-server" },
+    } as never);
+    const client = createClient({});
+
+    await client.refresh();
+
+    expect(vi.mocked(authControllerRefresh)).toHaveBeenCalledTimes(1);
+    client.dispose();
+  });
+});

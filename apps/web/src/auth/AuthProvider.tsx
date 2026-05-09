@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -15,6 +16,7 @@ type AuthContextValue = {
   isRestoring: boolean;
   setToken: (t: string | null) => void;
   clearToken: () => void;
+  refresh: () => Promise<string | null>;
 };
 
 function decodePayload(token: string | null): Record<string, unknown> | null {
@@ -40,24 +42,39 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   const [isRestoring, setIsRestoring] = useState(true);
   const navigate = useNavigate();
   const refreshCalledRef = useRef(false);
+  const isRefreshingRef = useRef(false);
+  const refreshQueueRef = useRef<Array<(t: string | null) => void>>([]);
+
+  const refresh = useCallback(async (): Promise<string | null> => {
+    if (isRefreshingRef.current) {
+      return new Promise<string | null>((res) =>
+        refreshQueueRef.current.push(res)
+      );
+    }
+    isRefreshingRef.current = true;
+    try {
+      const res = await authControllerRefresh();
+      const t =
+        (res as { data?: { accessToken?: string } }).data?.accessToken ?? null;
+      setTokenState(t);
+      refreshQueueRef.current.forEach((cb) => cb(t));
+      refreshQueueRef.current = [];
+      return t;
+    } catch {
+      // setTokenState(null) しない: 登録直後のトークンを競合で上書きするのを防ぐ
+      refreshQueueRef.current.forEach((cb) => cb(null));
+      refreshQueueRef.current = [];
+      return null;
+    } finally {
+      isRefreshingRef.current = false;
+    }
+  }, []);
 
   useEffect(() => {
     if (refreshCalledRef.current) return;
     refreshCalledRef.current = true;
-    authControllerRefresh()
-      .then((res) => {
-        const t =
-          (res as { data?: { accessToken?: string } }).data?.accessToken ??
-          null;
-        setTokenState(t);
-      })
-      .catch(() => {
-        // setTokenState(null) しない: 登録直後のトークンを競合で上書きするのを防ぐ
-      })
-      .finally(() => {
-        setIsRestoring(false);
-      });
-  }, []);
+    refresh().finally(() => setIsRestoring(false));
+  }, [refresh]);
 
   const setToken = (t: string | null) => setTokenState(t);
   const clearToken = () => {
@@ -71,7 +88,15 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
 
   return (
     <AuthContext.Provider
-      value={{ token, userId, nickname, isRestoring, setToken, clearToken }}
+      value={{
+        token,
+        userId,
+        nickname,
+        isRestoring,
+        setToken,
+        clearToken,
+        refresh,
+      }}
     >
       {children}
     </AuthContext.Provider>
