@@ -8,23 +8,25 @@ const Posts = React.lazy(() => import("./pages/Posts"));
 const CreatePost = React.lazy(() => import("./pages/CreatePost"));
 const EditPost = React.lazy(() => import("./pages/EditPost"));
 const Conversations = React.lazy(() => import("./pages/Conversations"));
-const ConversationChat = React.lazy(
-  () => import("./pages/ConversationChat")
-);
+const ConversationChat = React.lazy(() => import("./pages/ConversationChat"));
 const Login = React.lazy(() => import("./pages/LoginWithAuth"));
 const Register = React.lazy(() => import("./pages/Register"));
 
 function PageFallback() {
   return (
     <div className="flex h-screen items-center justify-center bg-background">
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-muted border-t-primary" />
+      <div
+        role="status"
+        aria-label="読み込み中"
+        className="h-10 w-10 animate-spin rounded-full border-4 border-muted border-t-primary"
+      />
     </div>
   );
 }
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { token, isRestoring } = useAuth();
-  if (isRestoring) return null;
+  if (isRestoring) return <PageFallback />;
   return token ? <>{children}</> : <Navigate to="/login" replace />;
 }
 

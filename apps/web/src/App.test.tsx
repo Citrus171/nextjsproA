@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import App from "@/App";
 import React, { useEffect } from "react";
+import { authControllerRefresh } from "../../../packages/api-client/src/index";
 
 vi.mock("../../../packages/api-client/src/index", () => ({
   authControllerRefresh: vi.fn().mockRejectedValue(new Error("no cookie")),
@@ -86,6 +87,22 @@ describe("App", () => {
 
     expect(
       await screen.findByRole("button", { name: "ログイン" })
+    ).toBeInTheDocument();
+  });
+
+  it("isRestoring: true の間、PrivateRoute はスピナーを表示すること", () => {
+    vi.mocked(authControllerRefresh).mockImplementation(
+      () => new Promise(() => {})
+    );
+    const Wrapper = createWrapper(null, "/posts");
+    render(
+      <Wrapper>
+        <App />
+      </Wrapper>
+    );
+
+    expect(
+      screen.getByRole("status", { name: "読み込み中" })
     ).toBeInTheDocument();
   });
 });
