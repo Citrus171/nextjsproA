@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { vi } from "vitest";
+import { render, screen, waitFor, act } from "@testing-library/react";
+import { vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthProvider";
 
@@ -35,7 +35,31 @@ function NicknameDisplay() {
   return <span data-testid="nickname">{nickname ?? "null"}</span>;
 }
 
+function RefreshButton() {
+  const { refresh } = useAuth();
+  return (
+    <button data-testid="refresh-btn" onClick={() => void refresh()}>
+      refresh
+    </button>
+  );
+}
+
 describe("AuthProvider", () => {
+  beforeEach(async () => {
+    const { authControllerRefresh } =
+      await import("../../../../packages/api-client/src/index");
+    vi.mocked(authControllerRefresh).mockResolvedValue({
+      data: {
+        accessToken: makeTestToken({
+          sub: "user-1",
+          email: "test@example.com",
+          role: "user",
+          nickname: "Alice",
+        }),
+      },
+    } as never);
+  });
+
   it("JWTにnicknameが含まれる場合、AuthProviderがnicknameを公開すること", async () => {
     render(
       <MemoryRouter>
@@ -74,5 +98,78 @@ describe("AuthProvider", () => {
     await waitFor(() => {
       expect(screen.getByTestId("nickname").textContent).toBe("null");
     });
+  });
+
+  it("refresh() が context 経由で呼び出せること", async () => {
+    const { authControllerRefresh } =
+      await import("../../../../packages/api-client/src/index");
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <RefreshButton />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() =>
+      expect(vi.mocked(authControllerRefresh)).toHaveBeenCalled()
+    );
+
+    const prevCallCount = vi.mocked(authControllerRefresh).mock.calls.length;
+
+    await act(async () => {
+      screen.getByTestId("refresh-btn").click();
+    });
+
+    expect(vi.mocked(authControllerRefresh)).toHaveBeenCalledTimes(
+      prevCallCount + 1
+    );
+  });
+
+  it("refresh() が同時に複数回呼ばれた時、authControllerRefresh は1回だけ呼ばれること", async () => {
+    const { authControllerRefresh } =
+      await import("../../../../packages/api-client/src/index");
+
+    let capturedRefresh: (() => Promise<string | null>) | null = null;
+    function CaptureRefresh() {
+      const { refresh } = useAuth();
+      capturedRefresh = refresh;
+      return null;
+    }
+
+    render(
+      <MemoryRouter>
+        <AuthProvider>
+          <CaptureRefresh />
+        </AuthProvider>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(capturedRefresh).not.toBeNull());
+    await waitFor(() =>
+      expect(vi.mocked(authControllerRefresh)).toHaveBeenCalled()
+    );
+
+    let resolveRefresh!: () => void;
+    const slowPromise = new Promise<void>((res) => {
+      resolveRefresh = res;
+    });
+    vi.mocked(authControllerRefresh).mockImplementationOnce(async () => {
+      await slowPromise;
+      return {
+        data: { accessToken: makeTestToken({ sub: "u1" }) },
+      } as never;
+    });
+
+    vi.mocked(authControllerRefresh).mockClear();
+
+    const p1 = capturedRefresh!();
+    const p2 = capturedRefresh!();
+
+    resolveRefresh();
+    await Promise.all([p1, p2]);
+
+    expect(vi.mocked(authControllerRefresh)).toHaveBeenCalledTimes(1);
   });
 });

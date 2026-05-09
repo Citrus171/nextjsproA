@@ -44,6 +44,8 @@ export type ClientOptions = {
   getToken?: () => Promise<string | null> | string | null;
   setToken?: (t: string | null) => void;
   onUnauthorized?: () => void;
+  /** AuthProvider の refresh 関数を注入して refresh 競合を防ぐ */
+  refreshToken?: () => Promise<string | null>;
 };
 
 export function createClient(options: ClientOptions) {
@@ -72,9 +74,15 @@ export function createClient(options: ClientOptions) {
     }
     isRefreshing = true;
     try {
-      const r = await authControllerRefresh();
-      const t = r?.data?.accessToken ?? null;
-      if (t && options.setToken) options.setToken(t);
+      let t: string | null;
+      if (options.refreshToken) {
+        // AuthProvider 経由で refresh — AuthProvider が token 保存とミューテックスを管理
+        t = await options.refreshToken();
+      } else {
+        const r = await authControllerRefresh();
+        t = r?.data?.accessToken ?? null;
+        if (t && options.setToken) options.setToken(t);
+      }
       refreshQueue.forEach((cb) => cb(t));
       refreshQueue = [];
       return t;
