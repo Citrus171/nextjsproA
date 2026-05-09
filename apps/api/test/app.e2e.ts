@@ -179,7 +179,7 @@ describe("API E2E", () => {
         .send({ email: OWNER_EMAIL, password: "wrongpass123" });
 
       expect(res.status).toBe(401);
-      expect(res.body.error).toBe("Unauthorized");
+      expect(res.body.code).toBe("E_AUTH_INVALID_CREDENTIALS");
     });
 
     it("存在しないメールアドレスは 401 を返す", async () => {
@@ -188,7 +188,7 @@ describe("API E2E", () => {
         .send({ email: "no-such-user@example.com", password: PASSWORD });
 
       expect(res.status).toBe(401);
-      expect(res.body.error).toBe("Unauthorized");
+      expect(res.body.code).toBe("E_AUTH_INVALID_CREDENTIALS");
     });
 
     it("不正なメール形式は 400 を返す", async () => {
