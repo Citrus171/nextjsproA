@@ -813,6 +813,7 @@
 - [x] App で未認証で /posts にアクセスしたとき、/login にリダイレクトされること
 - [x] App で認証済みで /posts にアクセスしたとき、Posts ページが表示されること
 - [x] App で未認証で /create にアクセスしたとき、/login にリダイレクトされること
+- [x] App で isRestoring: true の間、PrivateRoute はスピナーを表示すること
 - [x] CreatePost で必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し /posts へ戻る
 - [x] CreatePost で投稿APIが失敗した時、エラートーストを表示して遷移しないこと
 - [x] CreatePost で埋め込み地図が表示されず、地図ピッカー起動ボタンが表示されること

@@ -533,7 +533,8 @@ apps/web/src/
 │   └── App
 │       ├── 未認証で /posts にアクセスしたとき、/login にリダイレクトされること
 │       ├── 認証済みで /posts にアクセスしたとき、Posts ページが表示されること
-│       └── 未認証で /create にアクセスしたとき、/login にリダイレクトされること
+│       ├── 未認証で /create にアクセスしたとき、/login にリダイレクトされること
+│       └── isRestoring: true の間、PrivateRoute はスピナーを表示すること
 ├── CreatePost.test.tsx
 │   └── CreatePost
 │       ├── 必須項目を入力して送信した時、lostDate を正規化して cat投稿として作成し一覧へ遷移すること
