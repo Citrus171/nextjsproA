@@ -16,6 +16,7 @@ import { useApiClient } from "../api/orvalClient";
 import PostDetailSheet from "../components/PostDetailSheet";
 import SightingModal from "../components/SightingModal";
 import { reverseGeocode } from "../lib/reverseGeocode";
+import { QUERY_KEYS } from "../lib/queryKeys";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -134,10 +135,11 @@ export default function Map() {
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
   const { data: unreadData } = useQuery({
-    queryKey: ["unread-count"],
+    queryKey: QUERY_KEYS.unreadCount(),
     queryFn: () => api.getUnreadCount(),
     enabled: !!currentUserId,
-    refetchInterval: 30000,
+    staleTime: 10_000,
+    refetchInterval: 30_000,
   });
 
   // flyTo on initial load from query params

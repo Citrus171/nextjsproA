@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SightingResponseDto } from "../../../../packages/api-client/src/index";
 import { useApiClient } from "../api/orvalClient";
+import { QUERY_KEYS } from "../lib/queryKeys";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,7 +46,7 @@ export default function SightingList({
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const { data: sightings, isLoading } = useQuery({
-    queryKey: ["sightings", postId],
+    queryKey: QUERY_KEYS.sightings(postId),
     queryFn: () => api.findSightingsByPost(postId),
   });
 

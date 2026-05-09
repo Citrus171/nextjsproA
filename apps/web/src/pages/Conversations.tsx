@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useApiClient } from "../api/orvalClient";
 import { useAuth } from "../auth/AuthProvider";
 import BottomNav from "../components/BottomNav";
+import { QUERY_KEYS } from "../lib/queryKeys";
 import type { ConversationListItemDto } from "../../../../packages/api-client/src/index";
 
 export function formatDate(dateStr: string): string {
@@ -30,8 +31,9 @@ export default function Conversations() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["conversations"],
+    queryKey: QUERY_KEYS.conversations(),
     queryFn: () => client.listConversations(),
+    staleTime: 5_000,
     refetchInterval: (query) => (query.state.error ? false : 5000),
   });
 
