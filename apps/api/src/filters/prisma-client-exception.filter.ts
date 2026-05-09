@@ -13,10 +13,16 @@ export class PrismaClientExceptionFilter {
     _host: ArgumentsHost
   ): void {
     if (exception.code === "P2025") {
-      throw new NotFoundException({ error: "リソースが見つかりません" });
+      throw new NotFoundException({
+        code: "E_RESOURCE_NOT_FOUND",
+        message: "リソースが見つかりません",
+      });
     }
     if (exception.code === "P2002") {
-      throw new ConflictException({ error: "リソースが重複しています" });
+      throw new ConflictException({
+        code: "E_RESOURCE_DUPLICATE",
+        message: "リソースが重複しています",
+      });
     }
     throw exception;
   }

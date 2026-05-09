@@ -13,18 +13,16 @@ describe("AppThrottlerGuard", () => {
   });
 
   it("制限超過時に日本語メッセージ付き ThrottlerException をスローすること", async () => {
-    await expect(
-      (
+    try {
+      await (
         guard as unknown as { throwThrottlingException: () => Promise<void> }
-      ).throwThrottlingException()
-    ).rejects.toThrow(ThrottlerException);
-
-    await expect(
-      (
-        guard as unknown as { throwThrottlingException: () => Promise<void> }
-      ).throwThrottlingException()
-    ).rejects.toThrow(
-      "リクエスト数が制限を超えました。しばらく待ってから再試行してください。"
-    );
+      ).throwThrottlingException();
+      fail("例外がスローされるべき");
+    } catch (e) {
+      expect(e).toBeInstanceOf(ThrottlerException);
+      expect((e as ThrottlerException).message).toBe(
+        "リクエスト数が制限を超えました。しばらく待ってから再試行してください。"
+      );
+    }
   });
 });

@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { ImageProcessingService } from "./image-processing.service";
+import { ERROR_CODES } from "../common/error-codes";
 
 export abstract class FileStorageBase {
   protected readonly uploadsBase = path.resolve(__dirname, "../../uploads");
@@ -16,7 +17,10 @@ export abstract class FileStorageBase {
     const relDir = this.subdir ? `${this.subdir}/${id}` : id;
     const uploadDir = path.resolve(this.uploadsBase, relDir);
     if (!uploadDir.startsWith(this.uploadsBase + path.sep)) {
-      throw new BadRequestException(this.invalidIdMessage);
+      throw new BadRequestException({
+        code: ERROR_CODES.FILE_INVALID_ID,
+        message: this.invalidIdMessage,
+      });
     }
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
@@ -27,7 +31,10 @@ export abstract class FileStorageBase {
     const fileName = `${uuidv4()}.jpg`;
     const filePath = path.resolve(uploadDir, fileName);
     if (!filePath.startsWith(this.uploadsBase + path.sep)) {
-      throw new BadRequestException("不正なファイルパスです");
+      throw new BadRequestException({
+        code: ERROR_CODES.FILE_INVALID_PATH,
+        message: "不正なファイルパスです",
+      });
     }
     fs.writeFileSync(filePath, processedBuffer);
     return `uploads/${relDir}/${fileName}`;

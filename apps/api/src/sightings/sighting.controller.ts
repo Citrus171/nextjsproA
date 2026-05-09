@@ -29,6 +29,7 @@ import {
 import { CreateSightingDto } from "./dto/create-sighting.dto";
 import { SightingResponseDto } from "./dto/sighting-response.dto";
 import { SightingsService } from "./sighting.service";
+import { ERROR_CODES } from "../common/error-codes";
 
 @ApiTags("sightings")
 @Controller("sightings")
@@ -74,7 +75,11 @@ export class SightingsController {
   })
   @ApiResponse({ status: 200, type: [SightingResponseDto] })
   findByPost(@Query("postId") postId: string) {
-    if (!postId) throw new BadRequestException("postIdは必須です");
+    if (!postId)
+      throw new BadRequestException({
+        code: ERROR_CODES.SIGHTING_POST_ID_REQUIRED,
+        message: "postIdは必須です",
+      });
     return this.sightingsService.findByPost(postId);
   }
 

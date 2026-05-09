@@ -7,6 +7,7 @@ import {
 import { PrismaService } from "../prisma.service";
 import { CreateSightingDto } from "./dto/create-sighting.dto";
 import { MAX_FAVORITES_LIMIT } from "../common/constants";
+import { ERROR_CODES } from "../common/error-codes";
 
 @Injectable()
 export class SightingsService {
@@ -18,9 +19,16 @@ export class SightingsService {
       const post = await this.prisma.post.findUnique({
         where: { id: dto.postId },
       });
-      if (!post) throw new NotFoundException("投稿が見つかりません");
+      if (!post)
+        throw new NotFoundException({
+          code: ERROR_CODES.POST_NOT_FOUND,
+          message: "投稿が見つかりません",
+        });
       if (post.userId === userId)
-        throw new ForbiddenException("投稿者本人はSightingを作成できません");
+        throw new ForbiddenException({
+          code: ERROR_CODES.SIGHTING_SELF_CREATE,
+          message: "投稿者本人はSightingを作成できません",
+        });
     }
 
     return this.prisma.sighting.create({
@@ -41,7 +49,11 @@ export class SightingsService {
       where: { id },
       include: { user: { select: { nickname: true } } },
     });
-    if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
+    if (!sighting)
+      throw new NotFoundException({
+        code: ERROR_CODES.SIGHTING_NOT_FOUND,
+        message: "目撃情報が見つかりません",
+      });
     const { user, ...rest } = sighting;
     return { ...rest, nickname: user.nickname };
   }
@@ -57,9 +69,16 @@ export class SightingsService {
     const sighting = await this.prisma.sighting.findUnique({
       where: { id: sightingId },
     });
-    if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
+    if (!sighting)
+      throw new NotFoundException({
+        code: ERROR_CODES.SIGHTING_NOT_FOUND,
+        message: "目撃情報が見つかりません",
+      });
     if (sighting.userId === userId)
-      throw new ForbiddenException("自分の目撃情報はお気に入りできません");
+      throw new ForbiddenException({
+        code: ERROR_CODES.SIGHTING_SELF_FAVORITE,
+        message: "自分の目撃情報はお気に入りできません",
+      });
 
     const existing = await this.prisma.sightingFavorite.findUnique({
       where: { userId_sightingId: { userId, sightingId } },
@@ -75,7 +94,10 @@ export class SightingsService {
     await this.prisma.$transaction(async (tx) => {
       const count = await tx.sightingFavorite.count({ where: { userId } });
       if (count >= MAX_FAVORITES_LIMIT)
-        throw new BadRequestException("お気に入りは20件までです");
+        throw new BadRequestException({
+          code: ERROR_CODES.SIGHTING_FAVORITE_LIMIT,
+          message: "お気に入りは20件までです",
+        });
       await tx.sightingFavorite.create({ data: { userId, sightingId } });
     });
     return { favorited: true };
@@ -83,9 +105,16 @@ export class SightingsService {
 
   async remove(userId: string, id: string, isAdmin = false) {
     const sighting = await this.prisma.sighting.findUnique({ where: { id } });
-    if (!sighting) throw new NotFoundException("目撃情報が見つかりません");
+    if (!sighting)
+      throw new NotFoundException({
+        code: ERROR_CODES.SIGHTING_NOT_FOUND,
+        message: "目撃情報が見つかりません",
+      });
     if (sighting.userId !== userId && !isAdmin)
-      throw new ForbiddenException("削除できるのは本人のみです");
+      throw new ForbiddenException({
+        code: ERROR_CODES.SIGHTING_NOT_OWNER,
+        message: "削除できるのは本人のみです",
+      });
 
     await this.prisma.sighting.delete({ where: { id } });
   }

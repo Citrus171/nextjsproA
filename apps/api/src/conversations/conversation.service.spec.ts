@@ -102,9 +102,17 @@ describe("ConversationsService", () => {
     it("存在しないpostIdはNotFoundException", async () => {
       mockPrisma.post.findUnique.mockResolvedValue(null);
 
-      await expect(service.create("owner-1", dto)).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.create("owner-1", dto);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しないsightingIdはNotFoundException", async () => {
@@ -114,9 +122,17 @@ describe("ConversationsService", () => {
       });
       mockPrisma.sighting.findUnique.mockResolvedValue(null);
 
-      await expect(service.create("owner-1", dto)).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.create("owner-1", dto);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_SIGHTING_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("会話参加者以外（無関係なユーザー）はForbiddenException", async () => {
@@ -130,9 +146,17 @@ describe("ConversationsService", () => {
         userId: "sighter-1",
       });
 
-      await expect(service.create("stranger", dto)).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.create("stranger", dto);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_CREATE_FORBIDDEN",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("standalone Sighting は NotFoundException で会話を作成できないこと", async () => {
@@ -146,9 +170,17 @@ describe("ConversationsService", () => {
         userId: "sighter-1",
       });
 
-      await expect(service.create("owner-1", dto)).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.create("owner-1", dto);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_SIGHTING_NOT_LINKED",
+          message: expect.any(String),
+        });
+      }
     });
   });
 
@@ -285,33 +317,67 @@ describe("ConversationsService", () => {
     });
 
     it("bodyもimageUrlも両方なしはBadRequestException", async () => {
-      await expect(
-        service.createMessage("user-1", "conv-1", {})
-      ).rejects.toThrow(BadRequestException);
+      try {
+        await service.createMessage("user-1", "conv-1", {});
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_CONTENT_REQUIRED",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("bodyが1000文字超過はBadRequestException", async () => {
       mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
 
-      await expect(
-        service.createMessage("user-1", "conv-1", { body: "a".repeat(1001) })
-      ).rejects.toThrow(BadRequestException);
+      try {
+        await service.createMessage("user-1", "conv-1", {
+          body: "a".repeat(1001),
+        });
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_CONTENT_TOO_LONG",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("会話参加者以外のメッセージ送信はForbiddenException", async () => {
       mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
 
-      await expect(
-        service.createMessage("stranger", "conv-1", { body: "test" })
-      ).rejects.toThrow(ForbiddenException);
+      try {
+        await service.createMessage("stranger", "conv-1", { body: "test" });
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_MESSAGE_FORBIDDEN",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しない会話へのメッセージはNotFoundException", async () => {
       mockPrisma.conversation.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.createMessage("user-1", "conv-999", { body: "test" })
-      ).rejects.toThrow(NotFoundException);
+      try {
+        await service.createMessage("user-1", "conv-999", { body: "test" });
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("imageUrlのみ指定でメッセージを送信できること", async () => {
@@ -395,17 +461,33 @@ describe("ConversationsService", () => {
     it("会話参加者以外のメッセージ一覧取得はForbiddenException", async () => {
       mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
 
-      await expect(service.findMessages("stranger", "conv-1")).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.findMessages("stranger", "conv-1");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_NOT_PARTICIPANT",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しない会話のメッセージ一覧はNotFoundException", async () => {
       mockPrisma.conversation.findUnique.mockResolvedValue(null);
 
-      await expect(service.findMessages("user-1", "conv-999")).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.findMessages("user-1", "conv-999");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 
@@ -473,9 +555,17 @@ describe("ConversationsService", () => {
     it("参加者以外が会話を取得するとNotFoundException", async () => {
       mockPrisma.conversation.findFirst.mockResolvedValue(null);
 
-      await expect(
-        service.findOneForUser("stranger", "conv-1")
-      ).rejects.toThrow(NotFoundException);
+      try {
+        await service.findOneForUser("stranger", "conv-1");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 
@@ -507,17 +597,33 @@ describe("ConversationsService", () => {
     it("会話参加者以外はForbiddenException", async () => {
       mockPrisma.conversation.findUnique.mockResolvedValue(conversation);
 
-      await expect(service.markAsRead("stranger", "conv-1")).rejects.toThrow(
-        ForbiddenException
-      );
+      try {
+        await service.markAsRead("stranger", "conv-1");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+        const response = (e as ForbiddenException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_NOT_PARTICIPANT",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("存在しない会話はNotFoundException", async () => {
       mockPrisma.conversation.findUnique.mockResolvedValue(null);
 
-      await expect(service.markAsRead("user-1", "conv-999")).rejects.toThrow(
-        NotFoundException
-      );
+      try {
+        await service.markAsRead("user-1", "conv-999");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(NotFoundException);
+        const response = (e as NotFoundException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_CONV_NOT_FOUND",
+          message: expect.any(String),
+        });
+      }
     });
   });
 });

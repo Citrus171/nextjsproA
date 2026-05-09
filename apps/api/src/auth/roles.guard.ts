@@ -7,6 +7,7 @@ import {
 import { Reflector } from "@nestjs/core";
 import { Role } from "@prisma/client";
 import { ROLES_KEY } from "./roles.decorator";
+import { ERROR_CODES } from "../common/error-codes";
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -21,7 +22,10 @@ export class RolesGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
     if (!user || !required.includes(user.role)) {
-      throw new ForbiddenException("この操作には管理者権限が必要です");
+      throw new ForbiddenException({
+        code: ERROR_CODES.AUTH_ADMIN_REQUIRED,
+        message: "この操作には管理者権限が必要です",
+      });
     }
     return true;
   }

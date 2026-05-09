@@ -131,18 +131,34 @@ describe("IdentityService", () => {
       const user = await makeUser();
       mockPrisma.user.findUnique.mockResolvedValueOnce(user);
 
-      await expect(
-        service.login("user@example.com", "wrongpassword")
-      ).rejects.toThrow(UnauthorizedException);
+      try {
+        await service.login("user@example.com", "wrongpassword");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_INVALID_CREDENTIALS",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("パスワード不一致時に auth.login.failure イベントをログ出力すること", async () => {
       const user = await makeUser();
       mockPrisma.user.findUnique.mockResolvedValueOnce(user);
 
-      await expect(
-        service.login("user@example.com", "wrongpassword")
-      ).rejects.toThrow(UnauthorizedException);
+      try {
+        await service.login("user@example.com", "wrongpassword");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_INVALID_CREDENTIALS",
+          message: expect.any(String),
+        });
+      }
 
       expect(mockLogger.warn).toHaveBeenCalledWith("auth.login.failure", {
         event: "auth.login.failure",
@@ -154,17 +170,33 @@ describe("IdentityService", () => {
     it("存在しないメールアドレスでUnauthorizedExceptionを投げること", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.login("no@example.com", "password")).rejects.toThrow(
-        UnauthorizedException
-      );
+      try {
+        await service.login("no@example.com", "password");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_INVALID_CREDENTIALS",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("メールアドレス未登録時に auth.login.failure イベントをログ出力すること", async () => {
       mockPrisma.user.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.login("no@example.com", "password")).rejects.toThrow(
-        UnauthorizedException
-      );
+      try {
+        await service.login("no@example.com", "password");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_INVALID_CREDENTIALS",
+          message: expect.any(String),
+        });
+      }
 
       expect(mockLogger.warn).toHaveBeenCalledWith("auth.login.failure", {
         event: "auth.login.failure",
@@ -284,9 +316,17 @@ describe("IdentityService", () => {
     it("トークンが存在しない場合はUnauthorizedExceptionを投げること", async () => {
       mockPrisma.refreshToken.findUnique.mockResolvedValueOnce(null);
 
-      await expect(service.refresh("nonexistent")).rejects.toThrow(
-        UnauthorizedException
-      );
+      try {
+        await service.refresh("nonexistent");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_INVALID_REFRESH_TOKEN",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("期限切れトークンはUnauthorizedExceptionを投げること", async () => {
@@ -296,9 +336,17 @@ describe("IdentityService", () => {
         expiresAt: new Date(Date.now() - 1000),
       });
 
-      await expect(service.refresh("old-token")).rejects.toThrow(
-        UnauthorizedException
-      );
+      try {
+        await service.refresh("old-token");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_INVALID_REFRESH_TOKEN",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("再利用検知: delete失敗時にUnauthorizedExceptionを投げること", async () => {
@@ -313,9 +361,17 @@ describe("IdentityService", () => {
         new Error("already deleted")
       );
 
-      await expect(service.refresh("old-refresh-token")).rejects.toThrow(
-        UnauthorizedException
-      );
+      try {
+        await service.refresh("old-refresh-token");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_INVALID_REFRESH_TOKEN",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("再利用検知時に auth.refresh.reuse イベントをログ出力すること", async () => {
@@ -330,9 +386,17 @@ describe("IdentityService", () => {
         new Error("already deleted")
       );
 
-      await expect(service.refresh("old-refresh-token")).rejects.toThrow(
-        UnauthorizedException
-      );
+      try {
+        await service.refresh("old-refresh-token");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_INVALID_REFRESH_TOKEN",
+          message: expect.any(String),
+        });
+      }
 
       expect(mockLogger.warn).toHaveBeenCalledWith("auth.refresh.reuse", {
         event: "auth.refresh.reuse",
@@ -426,9 +490,17 @@ describe("IdentityService", () => {
       e.meta = { target: ["emailHash"] };
       mockPrisma.user.create.mockRejectedValueOnce(e);
 
-      await expect(
-        service.register("dup@example.com", "pass", "nick")
-      ).rejects.toThrow(ConflictException);
+      try {
+        await service.register("dup@example.com", "pass", "nick");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ConflictException);
+        const response = (e as ConflictException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_DUPLICATE_EMAIL",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("ニックネーム重複でConflictExceptionを投げること", async () => {
@@ -437,9 +509,17 @@ describe("IdentityService", () => {
       e.meta = { target: ["nickname"] };
       mockPrisma.user.create.mockRejectedValueOnce(e);
 
-      await expect(
-        service.register("a@example.com", "pass", "dup")
-      ).rejects.toThrow(ConflictException);
+      try {
+        await service.register("a@example.com", "pass", "dup");
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ConflictException);
+        const response = (e as ConflictException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_DUPLICATE_NICKNAME",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("登録成功時に auth.register.success イベントをログ出力すること", async () => {

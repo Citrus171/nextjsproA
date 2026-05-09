@@ -3,6 +3,8 @@
 ```
 apps/api/src/
 ├── common/
+│   ├── error-codes.ts
+│   │   └── 40種のエラーコード定数 (E_AUTH_*, E_POST_*, E_USER_*, E_CONV_*, E_SIGHTING_*, E_RESOURCE_*, E_FILE_*, E_IMAGE_*, E_RATE_LIMIT, E_VALIDATION, E_INTERNAL)
 │   └── openapi-examples.spec.ts
 │       └── OpenAPI example IDs
 │           ├── 用途別の OpenAPI 例示 ID が重複しないこと
@@ -116,14 +118,30 @@ apps/api/src/
 │               ├── 96文字の16進数文字列を生成すること (48 bytes)
 │               └── 毎回異なるトークンを生成すること
 ├── filters/
-│   └── prisma-client-exception.filter.spec.ts
-│       └── PrismaClientExceptionFilter
-│           ├── P2025（レコード不在）
-│           │   └── NotFoundException に変換すること
-│           ├── P2002（一意制約違反）
-│           │   └── ConflictException に変換すること
-│           └── 不明なPrismaエラーコード
-│               └── そのまま再スローすること
+│   ├── prisma-client-exception.filter.spec.ts
+│   │   └── PrismaClientExceptionFilter
+│   │       ├── P2025（レコード不在）
+│   │       │   └── code=E_RESOURCE_NOT_FOUND の NotFoundException に変換すること
+│   │       ├── P2002（一意制約違反）
+│   │       │   └── code=E_RESOURCE_DUPLICATE の ConflictException に変換すること
+│   │       └── 不明なPrismaエラーコード
+│   │           └── そのまま再スローすること
+│   └── all-exceptions.filter.spec.ts
+│       └── AllExceptionsFilter
+│           ├── HttpException（文字列メッセージ）の時
+│           │   ├── statusCode / code / message を含むエンベロープを返すこと
+│           │   ├── 4xx の時 Sentry.captureException が呼ばれないこと
+│           │   └── 5xx の時 Sentry.captureException が呼ばれること
+│           ├── HttpException（code 付きオブジェクト）の時
+│           │   └── 指定された code をそのまま返すこと
+│           ├── バリデーションエラー（message が配列）の時
+│           │   └── E_VALIDATION コードと details を返すこと
+│           ├── HttpException 以外の例外の時
+│           │   └── 500 ステータスと E_UNKNOWN を返し、Sentry に送信すること
+│           ├── details 付き例外の時
+│           │   └── details フィールドを含めて返すこと
+│           └── message フィールドが文字列でない場合のフォールバック
+│               └── error フィールドを message として使うこと
 ├── sentry/
 │   └── sentry.filter.spec.ts
 │       └── SentryFilter

@@ -148,9 +148,17 @@ describe("ConversationsController", () => {
         size: 100,
       } as Express.Multer.File;
 
-      await expect(
-        controller.createMessage(req, "conv-1", {}, file)
-      ).rejects.toThrow(BadRequestException);
+      try {
+        await controller.createMessage(req, "conv-1", {}, file);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_FILE_UNSUPPORTED_TYPE",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("GIF・WebP は許容されること", async () => {
@@ -176,9 +184,17 @@ describe("ConversationsController", () => {
         size: 21 * 1024 * 1024,
       } as Express.Multer.File;
 
-      await expect(
-        controller.createMessage(req, "conv-1", {}, file)
-      ).rejects.toThrow(BadRequestException);
+      try {
+        await controller.createMessage(req, "conv-1", {}, file);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_FILE_SIZE_EXCEEDED",
+          message: expect.any(String),
+        });
+      }
     });
   });
 

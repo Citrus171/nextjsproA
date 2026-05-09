@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { SentryModule } from "@sentry/nestjs/setup";
-import { SentryFilter } from "./sentry/sentry.filter";
 import { ThrottlerModule, minutes, hours } from "@nestjs/throttler";
 import { PrismaModule } from "./prisma.module";
 import { IdentityModule } from "./identity/identity.module";
@@ -15,6 +14,7 @@ import { LoggerModule } from "./logger/logger.module";
 import { AppThrottlerGuard } from "./auth/throttler.guard";
 import { LoggerInterceptor } from "./logger/logger.interceptor";
 import { PrismaClientExceptionFilter } from "./filters/prisma-client-exception.filter";
+import { AllExceptionsFilter } from "./filters/all-exceptions.filter";
 
 @Module({
   imports: [
@@ -47,7 +47,7 @@ import { PrismaClientExceptionFilter } from "./filters/prisma-client-exception.f
     ConversationsModule,
   ],
   providers: [
-    { provide: APP_FILTER, useClass: SentryFilter },
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
     { provide: APP_FILTER, useClass: PrismaClientExceptionFilter },
     { provide: APP_GUARD, useClass: AppThrottlerGuard },
     { provide: APP_INTERCEPTOR, useClass: LoggerInterceptor },

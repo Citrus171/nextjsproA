@@ -94,9 +94,15 @@ describe("FileStorageService", () => {
       imageProcessing.process.mockRejectedValue(
         new BadRequestException("画像処理に失敗しました")
       );
-      await expect(service.saveFile("post-1", makeFile())).rejects.toThrow(
-        BadRequestException
-      );
+      try {
+        await service.saveFile("post-1", makeFile());
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        expect((e as BadRequestException).message).toBe(
+          "画像処理に失敗しました"
+        );
+      }
     });
   });
 

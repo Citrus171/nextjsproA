@@ -10,6 +10,7 @@ import * as bcrypt from "bcrypt";
 import { Logger } from "nestjs-pino";
 import { PrismaService } from "../prisma.service";
 import { CryptoService } from "./crypto.service";
+import { ERROR_CODES } from "../common/error-codes";
 
 export interface CookieSpec {
   name: string;
@@ -71,7 +72,10 @@ export class IdentityService extends IIdentityService {
         email: normalized,
         reason: "email not found",
       });
-      throw new UnauthorizedException("認証情報が正しくありません");
+      throw new UnauthorizedException({
+        code: ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+        message: "認証情報が正しくありません",
+      });
     }
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
@@ -80,7 +84,10 @@ export class IdentityService extends IIdentityService {
         email: normalized,
         reason: "password mismatch",
       });
-      throw new UnauthorizedException("認証情報が正しくありません");
+      throw new UnauthorizedException({
+        code: ERROR_CODES.AUTH_INVALID_CREDENTIALS,
+        message: "認証情報が正しくありません",
+      });
     }
     const refreshToken = this.crypto.generateSecureToken();
     const tokenHash = this.crypto.sha256Hex(refreshToken);
@@ -118,7 +125,10 @@ export class IdentityService extends IIdentityService {
       },
     });
     if (!rec || rec.expiresAt <= new Date()) {
-      throw new UnauthorizedException("無効なリフレッシュトークンです");
+      throw new UnauthorizedException({
+        code: ERROR_CODES.AUTH_INVALID_REFRESH_TOKEN,
+        message: "無効なリフレッシュトークンです",
+      });
     }
     try {
       await this.prisma.refreshToken.delete({
@@ -130,7 +140,10 @@ export class IdentityService extends IIdentityService {
         userId: rec.userId,
         reason: "token already used",
       });
-      throw new UnauthorizedException("無効なリフレッシュトークンです");
+      throw new UnauthorizedException({
+        code: ERROR_CODES.AUTH_INVALID_REFRESH_TOKEN,
+        message: "無効なリフレッシュトークンです",
+      });
     }
     const newToken = this.crypto.generateSecureToken();
     const newHash = this.crypto.sha256Hex(newToken);
@@ -217,13 +230,15 @@ export class IdentityService extends IIdentityService {
           ? rawTarget.map(String).join(" ").toLowerCase()
           : "";
         if (target.includes("nickname")) {
-          throw new ConflictException(
-            "このニックネームはすでに使用されています"
-          );
+          throw new ConflictException({
+            code: ERROR_CODES.AUTH_DUPLICATE_NICKNAME,
+            message: "このニックネームはすでに使用されています",
+          });
         }
-        throw new ConflictException(
-          "このメールアドレスはすでに使用されています"
-        );
+        throw new ConflictException({
+          code: ERROR_CODES.AUTH_DUPLICATE_EMAIL,
+          message: "このメールアドレスはすでに使用されています",
+        });
       }
       throw e;
     }

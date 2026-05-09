@@ -102,9 +102,17 @@ describe("PostsController", () => {
     });
 
     it("mine=true 未認証の時、UnauthorizedException をスローする", async () => {
-      await expect(
-        controller.list("1", "10", "true", {} as any)
-      ).rejects.toThrow(UnauthorizedException);
+      try {
+        await controller.list("1", "10", "true", {} as any);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(UnauthorizedException);
+        const response = (e as UnauthorizedException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_AUTH_REQUIRED",
+          message: expect.any(String),
+        });
+      }
     });
   });
 
