@@ -4,6 +4,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { ChevronLeft, ImageIcon, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createConversationSocket } from "../lib/conversationSocket";
+import { QUERY_KEYS } from "../lib/queryKeys";
 import { useApiClient } from "../api/orvalClient";
 import { useAuth } from "../auth/AuthProvider";
 import type { MessageResponseDto } from "../../../../packages/api-client/src/index";
@@ -55,7 +56,7 @@ export default function ConversationChat() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: conversation } = useQuery({
-    queryKey: ["conversation", id],
+    queryKey: QUERY_KEYS.conversation(id!),
     queryFn: () => client.getConversation(id!),
     enabled: !!id,
   });
@@ -66,7 +67,7 @@ export default function ConversationChat() {
     error,
     refetch: refetchMessages,
   } = useQuery({
-    queryKey: ["messages", id],
+    queryKey: QUERY_KEYS.messages(id!),
     queryFn: () => client.getMessages(id!),
     enabled: !!id,
   });

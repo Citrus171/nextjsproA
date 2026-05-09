@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
 import SightingList from "./SightingList";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PREFECTURE_LABELS } from "../lib/constants";
+import { QUERY_KEYS } from "../lib/queryKeys";
 import { useApiClient } from "../api/orvalClient";
 
 interface PostDetailSheetProps {
@@ -64,7 +65,7 @@ export default function PostDetailSheet({
     markerType === "post" ? post?.title || "迷い猫投稿" : "目撃情報";
 
   const { data: sightingDetail } = useQuery({
-    queryKey: ["sighting", sightingId],
+    queryKey: QUERY_KEYS.sighting(sightingId!),
     queryFn: () => api.getSighting(sightingId!),
     enabled: markerType === "sighting" && !!sightingId,
   });

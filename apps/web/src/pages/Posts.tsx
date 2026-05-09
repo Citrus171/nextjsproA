@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { MapPinned } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
 import BottomNav from "../components/BottomNav";
+import { QUERY_KEYS } from "../lib/queryKeys";
 
 const PER_PAGE = 5;
 
@@ -41,7 +42,7 @@ export default function Posts() {
     isLoading,
     isError,
   } = useInfiniteQuery({
-    queryKey: ["posts", "infinite"],
+    queryKey: QUERY_KEYS.postsInfinite(),
     queryFn: ({ pageParam }: { pageParam: number }) =>
       api.listPosts(pageParam, PER_PAGE, true),
     initialPageParam: 1,
@@ -61,7 +62,7 @@ export default function Posts() {
     async (id: string) => {
       try {
         await api.deletePost(id);
-        queryClient.invalidateQueries({ queryKey: ["posts"] });
+        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.posts() });
         toast.success("削除しました");
       } catch (e) {
         toast.error("削除に失敗しました");
