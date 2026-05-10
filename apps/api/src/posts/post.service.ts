@@ -437,6 +437,11 @@ export class PostsService {
         code: ERROR_CODES.POST_NOT_OWNER,
         message: "投稿のオーナーではありません",
       });
+    if (post.status === "resolved")
+      throw new BadRequestException({
+        code: ERROR_CODES.POST_RESOLVED_IMAGE,
+        message: "解決済みの投稿には画像を追加できません",
+      });
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

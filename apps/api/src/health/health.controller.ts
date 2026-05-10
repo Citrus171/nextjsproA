@@ -14,7 +14,7 @@ const HEAP_THRESHOLD =
   process.env.NODE_ENV === "test" ? 1024 * 1024 * 1024 : 256 * 1024 * 1024;
 
 @ApiTags("health")
-@SkipThrottle()
+@SkipThrottle({ default: true, public: true })
 @Controller("health")
 export class HealthController {
   constructor(

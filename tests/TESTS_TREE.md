@@ -205,6 +205,7 @@ apps/api/src/
 │   │   │   ├── 画像を追加できる
 │   │   │   ├── 無料プランで追加後の合計が3枚を超えると ForbiddenException
 │   │   │   ├── premium ユーザーは10枚まで追加できる
+│   │   │   ├── resolved 状態の投稿には画像を追加できない（BadRequestException）
 │   │   │   ├── オーナー以外は ForbiddenException
 │   │   │   ├── 存在しない投稿は NotFoundException
 │   │   │   └── DB作成失敗時に保存済みファイルを削除する

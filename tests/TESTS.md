@@ -53,6 +53,7 @@
 - [x] 画像を追加できる
 - [x] 無料プランで追加後の合計が3枚を超えると ForbiddenException
 - [x] premium ユーザーは10枚まで追加できる
+- [x] resolved 状態の投稿には画像を追加できない（BadRequestException）
 - [x] オーナー以外は ForbiddenException
 - [x] 存在しない投稿は NotFoundException
 - [x] DB作成失敗時に保存済みファイルを削除する
