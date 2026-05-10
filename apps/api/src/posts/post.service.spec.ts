@@ -722,6 +722,7 @@ describe("PostsService", () => {
     const existingPost = {
       id: "post1",
       userId: "user1",
+      status: "lost",
       images: [],
     };
 
@@ -796,6 +797,26 @@ describe("PostsService", () => {
 
       expect(result.remainingSlots).toBe(0);
       expect(result.images).toHaveLength(1);
+    });
+
+    it("resolved 状態の投稿には画像を追加できない（BadRequestException）", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue({
+        ...existingPost,
+        status: "resolved",
+      });
+      const files = [{ originalname: "a.png", buffer: Buffer.from("") } as any];
+
+      try {
+        await service.addImages("post1", "user1", files);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException);
+        const response = (e as BadRequestException).getResponse();
+        expect(response).toMatchObject({
+          code: "E_POST_RESOLVED_IMAGE",
+          message: expect.any(String),
+        });
+      }
     });
 
     it("オーナー以外は ForbiddenException", async () => {
