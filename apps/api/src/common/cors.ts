@@ -5,7 +5,7 @@ export function isOriginAllowed(
   isDev: boolean,
   allowedOrigins: string[]
 ): boolean {
-  if (!origin) return isDev;
+  if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
   if (isDev && LOCALHOST_RE.test(origin)) return true;
   return false;
