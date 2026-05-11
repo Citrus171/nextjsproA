@@ -234,7 +234,20 @@ describe("ConversationsGateway", () => {
 
   // ─── 定期JWT検証 ─────────────────────────────────────────
   describe("定期JWT検証", () => {
-    it("トークンが期限切れの場合、60秒後に定期チェックで切断されること", () => {
+    it("JWT 再検証インターバルが 15000ms 以下で設定されること", () => {
+      const setIntervalSpy = jest.spyOn(global, "setInterval");
+      jwtService.verify.mockReturnValue({ sub: "user-1", email: "a@b.com" });
+      const client = makeSocket(undefined, "valid.token");
+
+      gateway.handleConnection(client);
+
+      const interval = setIntervalSpy.mock.calls[0]?.[1];
+      expect(interval).toBeDefined();
+      expect(interval).toBeLessThanOrEqual(15000);
+      setIntervalSpy.mockRestore();
+    });
+
+    it("トークンが期限切れの場合、定期チェックで切断されること", () => {
       jwtService.verify
         .mockReturnValueOnce({ sub: "user-1", email: "a@b.com" })
         .mockImplementationOnce(() => {
@@ -243,17 +256,17 @@ describe("ConversationsGateway", () => {
       const client = makeSocket(undefined, "valid.token");
       gateway.handleConnection(client);
 
-      jest.advanceTimersByTime(60000);
+      jest.advanceTimersByTime(15000);
 
       expect(client.disconnect).toHaveBeenCalled();
     });
 
-    it("有効なトークンを保持している場合、60秒経過後も切断されないこと", () => {
+    it("有効なトークンを保持している場合、15秒経過後も切断されないこと", () => {
       jwtService.verify.mockReturnValue({ sub: "user-1", email: "a@b.com" });
       const client = makeSocket(undefined, "valid.token");
       gateway.handleConnection(client);
 
-      jest.advanceTimersByTime(60000);
+      jest.advanceTimersByTime(15000);
 
       expect(client.disconnect).not.toHaveBeenCalled();
     });

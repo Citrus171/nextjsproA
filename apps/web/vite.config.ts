@@ -46,9 +46,19 @@ export default defineConfig(async () => {
     build: {
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ["react", "react-dom", "react-router-dom"],
-            tanstack: ["@tanstack/react-query"],
+          manualChunks: (id) => {
+            if (
+              id.includes("react-dom") ||
+              id.includes("react-router-dom") ||
+              (id.includes("node_modules/react/") &&
+                !id.includes("react-dom") &&
+                !id.includes("react-router"))
+            ) {
+              return "vendor";
+            }
+            if (id.includes("@tanstack/react-query")) {
+              return "tanstack";
+            }
           },
         },
       },

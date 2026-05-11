@@ -5,6 +5,18 @@ apps/api/src/
 ├── common/
 │   ├── error-codes.ts
 │   │   └── 40種のエラーコード定数 (E_AUTH_*, E_POST_*, E_USER_*, E_CONV_*, E_SIGHTING_*, E_RESOURCE_*, E_FILE_*, E_IMAGE_*, E_RATE_LIMIT, E_VALIDATION, E_INTERNAL)
+│   ├── cors.spec.ts
+│   │   └── isOriginAllowed
+│   │       ├── 本番環境 (isDev=false)
+│   │       │   ├── 許可オリジンからのリクエストを許可すること
+│   │       │   ├── origin なしのリクエストを拒否すること
+│   │       │   ├── localhost からのリクエストを拒否すること
+│   │       │   └── 未知のオリジンを拒否すること
+│   │       └── 開発環境 (isDev=true)
+│   │           ├── origin なしのリクエストを許可すること
+│   │           ├── localhost の任意ポートを許可すること
+│   │           ├── 許可オリジンを許可すること
+│   │           └── 未知の非 localhost オリジンを拒否すること
 │   └── openapi-examples.spec.ts
 │       └── OpenAPI example IDs
 │           ├── 用途別の OpenAPI 例示 ID が重複しないこと
@@ -364,8 +376,9 @@ apps/api/src/
 │   │   │   ├── 切断時に userSocketMap から該当エントリが削除されること
 │   │   │   └── 別のソケットで上書きされている場合は削除しないこと
     │   │   ├── 定期JWT検証
-    │   │   │   ├── トークンが期限切れの場合、60秒後に定期チェックで切断されること
-    │   │   │   ├── 有効なトークンを保持している場合、60秒経過後も切断されないこと
+    │   │   │   ├── JWT 再検証インターバルが 15000ms 以下で設定されること
+    │   │   │   ├── トークンが期限切れの場合、定期チェックで切断されること
+    │   │   │   ├── 有効なトークンを保持している場合、15秒経過後も切断されないこと
     │   │   │   └── 切断時に定期チェックのタイマーが解除されること
     │   │   ├── refreshToken
     │   │   │   ├── 有効なトークンで client.data.token が更新され、tokenRefreshed が emit されること

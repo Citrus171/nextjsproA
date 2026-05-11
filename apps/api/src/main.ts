@@ -5,14 +5,17 @@ import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "@nestjs/common";
 import * as cookieParser from "cookie-parser";
+import helmet from "helmet";
 import * as path from "path";
 import { Logger } from "nestjs-pino";
 import { applyParameterExamples } from "./common/openapi-document";
+import { isOriginAllowed } from "./common/cors";
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
   app.useLogger(app.get(Logger));
+  app.use(helmet());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.setGlobalPrefix("api");
   app.useStaticAssets(path.join(__dirname, "..", "uploads"), {
@@ -20,17 +23,16 @@ async function bootstrap() {
   });
   app.use(cookieParser());
   // Allow browser (Vite) origin to send cookies. Use env override or accept multiple dev ports.
+  const isDev = process.env.NODE_ENV !== "production";
   const webOrigin = process.env.WEB_ORIGIN || "http://localhost:5173";
-  const additionalOrigins = ["http://localhost:5174", "http://localhost:5175"];
-  const allowedOrigins = [webOrigin, ...additionalOrigins];
+  const allowedOrigins = [
+    webOrigin,
+    "http://localhost:5174",
+    "http://localhost:5175",
+  ];
   app.enableCors({
     origin: (origin, cb) => {
-      // allow requests with no origin (e.g. curl, mobile)
-      if (!origin) return cb(null, true);
-      // Allow configured origins
-      if (allowedOrigins.indexOf(origin) !== -1) return cb(null, true);
-      // In development, allow any localhost origin (different Vite ports)
-      if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
+      if (isOriginAllowed(origin, isDev, allowedOrigins)) return cb(null, true);
       return cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
