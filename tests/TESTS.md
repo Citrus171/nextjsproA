@@ -64,6 +64,8 @@
 - [x] オーナー以外は ForbiddenException
 - [x] 存在しない投稿は NotFoundException
 - [x] 別の投稿に属する画像は NotFoundException
+- [x] admin は他ユーザーの投稿画像を削除できる
+- [x] admin でないユーザーが他ユーザーの画像を削除しようとすると ForbiddenException
 
 ### ImageProcessingService (`src/shared/image-processing.service.spec.ts`)
 
@@ -691,6 +693,12 @@
 - [x] DBが異常なとき、status:errorを返すこと
 - [x] check()はHealthCheckService.check()を呼び出すこと
 - [x] レスポンスにuptime（秒）が含まれること
+
+## PrismaHealthIndicator (`src/health/prisma-health.indicator.spec.ts`)
+
+- [x] DB が正常なとき、status:up を返すこと
+- [x] DB が異常なとき、HealthCheckError をスローすること
+- [x] DB エラー時のステータスに message を含まないこと
 
 ---
 

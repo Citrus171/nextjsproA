@@ -258,7 +258,8 @@ export class PostsController {
     @Param("id") id: string,
     @Param("imageId") imageId: string
   ) {
-    return this.posts.removeImage(id, imageId, req.user.id);
+    const isAdmin = req.user?.role === "admin";
+    return this.posts.removeImage(id, imageId, req.user.id, isAdmin);
   }
 
   @HttpPost(":id/favorite")

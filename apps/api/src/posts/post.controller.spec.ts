@@ -378,7 +378,8 @@ describe("PostsController", () => {
       expect(mockPostsService.removeImage).toHaveBeenCalledWith(
         "post1",
         "img1",
-        "user1"
+        "user1",
+        false
       );
       expect(result).toEqual(image);
     });

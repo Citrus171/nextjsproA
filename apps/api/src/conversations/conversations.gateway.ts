@@ -7,6 +7,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from "@nestjs/websockets";
+import { Logger } from "@nestjs/common";
 import { Server, Socket } from "socket.io";
 import { JwtService } from "@nestjs/jwt";
 import { Message } from "@prisma/client";
@@ -26,6 +27,7 @@ export class ConversationsGateway
   // userId → socketId の1対1マッピング。
   // 同一ユーザーが複数タブ/ブラウザで接続した場合は後勝ちとなる。
   // 意図的な単一接続制約であり、複数接続が必要な場合は Map<string, Set<string>> に変更する。
+  private readonly logger = new Logger(ConversationsGateway.name);
   private readonly userSocketMap = new Map<string, string>();
 
   constructor(
@@ -74,7 +76,7 @@ export class ConversationsGateway
       return true;
     } catch {
       const userId = client.data.userId as string | undefined;
-      console.warn(`[WS] JWT期限切れのため切断: userId=${userId ?? "unknown"}`);
+      this.logger.warn(`JWT期限切れのため切断: userId=${userId ?? "unknown"}`);
       client.disconnect();
       return false;
     }
