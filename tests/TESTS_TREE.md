@@ -149,13 +149,18 @@ apps/api/src/
 │           ├── 4xx HttpException の時、Sentry.captureException が呼ばれないこと
 │           └── HttpException 以外の Error の時、Sentry.captureException が呼ばれること
 ├── health/
-│   └── health.controller.spec.ts
-│       └── HealthController
-│           └── check()
-│               ├── 全チェックが正常なとき、status:okを返すこと
-│               ├── DBが異常なとき、status:errorを返すこと
-│               ├── check()はHealthCheckService.check()を呼び出すこと
-│               └── レスポンスにuptime（秒）が含まれること
+│   ├── health.controller.spec.ts
+│   │   └── HealthController
+│   │       └── check()
+│   │           ├── 全チェックが正常なとき、status:okを返すこと
+│   │           ├── DBが異常なとき、status:errorを返すこと
+│   │           ├── check()はHealthCheckService.check()を呼び出すこと
+│   │           └── レスポンスにuptime（秒）が含まれること
+│   └── prisma-health.indicator.spec.ts
+│       └── PrismaHealthIndicator
+│           ├── DB が正常なとき、status:up を返すこと
+│           ├── DB が異常なとき、HealthCheckError をスローすること
+│           └── DB エラー時のステータスに message を含まないこと
 ├── shared/
 │   └── image-processing.service.spec.ts
 │       ├── processが処理済みBufferを返すこと
@@ -213,7 +218,9 @@ apps/api/src/
 │   │   │   ├── オーナーが画像を削除できる
 │   │   │   ├── オーナー以外は ForbiddenException
 │   │   │   ├── 存在しない投稿は NotFoundException
-│   │   │   └── 別の投稿に属する画像は NotFoundException
+│   │   │   ├── 別の投稿に属する画像は NotFoundException
+│   │   │   ├── admin は他ユーザーの投稿画像を削除できる
+│   │   │   └── admin でないユーザーが他ユーザーの画像を削除しようとすると ForbiddenException
 │   │   ├── update
 │   │   │   ├── オーナーが更新できる
 │   │   │   ├── オーナー以外は ForbiddenException

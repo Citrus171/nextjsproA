@@ -20,7 +20,7 @@ export class PrismaHealthIndicator extends HealthIndicator {
     } catch (e) {
       throw new HealthCheckError(
         "DB接続チェック失敗",
-        this.getStatus(key, false, { message: (e as Error).message })
+        this.getStatus(key, false)
       );
     }
   }

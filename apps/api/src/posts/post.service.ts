@@ -506,14 +506,19 @@ export class PostsService {
     }
   }
 
-  async removeImage(postId: string, imageId: string, userId: string) {
+  async removeImage(
+    postId: string,
+    imageId: string,
+    userId: string,
+    isAdmin = false
+  ) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post)
       throw new NotFoundException({
         code: ERROR_CODES.POST_NOT_FOUND,
         message: "投稿が見つかりません",
       });
-    if (post.userId !== userId)
+    if (post.userId !== userId && !isAdmin)
       throw new ForbiddenException({
         code: ERROR_CODES.POST_NOT_OWNER,
         message: "投稿のオーナーではありません",

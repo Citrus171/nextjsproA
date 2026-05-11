@@ -48,7 +48,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   applyParameterExamples(document);
-  SwaggerModule.setup("api", app, document);
+  if (process.env.NODE_ENV !== "production") {
+    SwaggerModule.setup("api", app, document);
+  }
 
   await app.listen(3000);
   app.get(Logger).log("API listening on http://localhost:3000");

@@ -970,6 +970,36 @@ describe("PostsService", () => {
         });
       }
     });
+
+    it("admin は他ユーザーの投稿画像を削除できる", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+      mockPrisma.image.findUnique.mockResolvedValue(existingImage);
+      mockPrisma.image.delete.mockResolvedValue(existingImage);
+
+      const result = await service.removeImage(
+        "post1",
+        "img1",
+        "other-user",
+        true
+      );
+
+      expect(mockFileStorage.deleteFile).toHaveBeenCalled();
+      expect(result).toEqual({
+        ...existingImage,
+        url: "/uploads/post1/abc.png",
+      });
+    });
+
+    it("admin でないユーザーが他ユーザーの画像を削除しようとすると ForbiddenException", async () => {
+      mockPrisma.post.findUnique.mockResolvedValue(existingPost);
+
+      try {
+        await service.removeImage("post1", "img1", "other-user", false);
+        fail("例外がスローされるべき");
+      } catch (e) {
+        expect(e).toBeInstanceOf(ForbiddenException);
+      }
+    });
   });
 
   // ─── update ─────────────────────────────────────────────────
