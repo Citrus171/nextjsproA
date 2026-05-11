@@ -16,10 +16,10 @@ export class RegisterDto {
   @ApiProperty({
     example: "P@ssw0rd1234",
     description:
-      "12文字以上、大文字・小文字・数字・記号をそれぞれ1文字以上含むこと",
+      "8文字以上、大文字・小文字・数字・記号をそれぞれ1文字以上含むこと",
   })
   @IsStrongPassword({
-    minLength: 12,
+    minLength: 8,
     minLowercase: 1,
     minUppercase: 1,
     minNumbers: 1,
