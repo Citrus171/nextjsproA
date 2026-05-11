@@ -5,6 +5,13 @@ apps/api/src/
 ├── common/
 │   ├── error-codes.ts
 │   │   └── 40種のエラーコード定数 (E_AUTH_*, E_POST_*, E_USER_*, E_CONV_*, E_SIGHTING_*, E_RESOURCE_*, E_FILE_*, E_IMAGE_*, E_RATE_LIMIT, E_VALIDATION, E_INTERNAL)
+│   ├── startup-guard.spec.ts
+│   │   └── assertSecrets
+│   │       ├── development では何もしない
+│   │       ├── NODE_ENV 未設定では何もしない
+│   │       ├── 本番かつ JWT_SECRET が未設定なら throw する
+│   │       ├── 本番かつ JWT_SECRET が change-me を含むなら throw する
+│   │       └── 本番かつ強い JWT_SECRET なら throw しない
 │   ├── cors.spec.ts
 │   │   └── isOriginAllowed
 │   │       ├── 本番環境 (isDev=false)
