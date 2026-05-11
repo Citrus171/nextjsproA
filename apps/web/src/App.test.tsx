@@ -73,7 +73,7 @@ describe("App", () => {
     );
 
     expect(
-      await screen.findByRole("link", { name: "新規投稿" })
+      await screen.findByText("まだ迷い猫投稿はありません")
     ).toBeInTheDocument();
   });
 

@@ -330,9 +330,7 @@ describe("Posts", () => {
       });
       render(<Posts />, { wrapper: createWrapper() });
       expect(
-        screen.getByText(
-          "まだ投稿がありません。新規投稿ボタンから投稿を作成してみましょう。"
-        )
+        screen.getByText("まだ迷い猫投稿はありません")
       ).toBeInTheDocument();
     });
   });

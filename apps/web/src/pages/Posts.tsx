@@ -130,12 +130,6 @@ export default function Posts() {
               {nickname}様の投稿
             </span>
           )}
-          <Link
-            to="/create"
-            className="inline-flex items-center rounded-full bg-primary px-5 py-2 min-h-[44px] text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-          >
-            新規投稿
-          </Link>
         </div>
 
         {/* カードグリッド */}
@@ -279,7 +273,7 @@ export default function Posts() {
 
         {!hasNextPage && allItems.length === 0 && (
           <p className="mt-12 text-center text-muted-foreground">
-            まだ投稿がありません。新規投稿ボタンから投稿を作成してみましょう。
+            まだ迷い猫投稿はありません
           </p>
         )}
 
