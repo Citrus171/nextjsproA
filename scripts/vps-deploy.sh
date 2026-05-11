@@ -103,6 +103,7 @@ do_rollback() {
 
   # 前バージョンをリビルド・再起動
   echo "前バージョンをリビルド中..."
+  npm install --ignore-scripts || true
   npm run build --workspace=apps/api || true
   set -a && source "$PROJECT_DIR/apps/api/.env" && set +a && pm2 restart "$PM2_NAME" --update-env || true
 
@@ -161,7 +162,9 @@ git pull --ff-only origin main
 # 3. 依存インストール ----------------------------------------------------------------
 echo ""
 echo "Step 3/10: npm ci"
-NODE_ENV=development npm ci --ignore-scripts
+NODE_ENV=development npm ci --ignore-scripts || true
+echo "fallback: npm install（npm ci で不足した devDependencies を補完）"
+npm install --ignore-scripts
 
 # 3.5. bcrypt ネイティブバイナリのリビルド（--ignore-scripts でスキップされるため）
 echo ""
