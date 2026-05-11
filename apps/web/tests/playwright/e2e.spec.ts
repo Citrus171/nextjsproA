@@ -8,7 +8,7 @@ test("basic E2E flow: register → login → create post → view posts", async 
   const email = `e2e-${crypto.randomUUID()}@test.com`;
   const postTitle = `E2E Test Post ${crypto.randomUUID()}`;
   const postDescription = "This is a test post content";
-  const password = "password123";
+  const password = "P@ssw0rd1234";
 
   // 1. Register
   await page.goto(`${baseUrl}/register`);
