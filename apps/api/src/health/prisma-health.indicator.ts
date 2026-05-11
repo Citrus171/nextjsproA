@@ -17,7 +17,7 @@ export class PrismaHealthIndicator extends HealthIndicator {
       await this.prisma.$queryRaw`SELECT 1`;
       await this.prisma.$queryRaw`SELECT 1 FROM "_prisma_migrations" LIMIT 1`;
       return this.getStatus(key, true);
-    } catch (e) {
+    } catch {
       throw new HealthCheckError(
         "DB接続チェック失敗",
         this.getStatus(key, false)
