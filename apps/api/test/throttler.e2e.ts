@@ -73,7 +73,7 @@ describe("レート制限 E2E", () => {
           .post("/api/users/register")
           .send({
             email: makeEmail(i),
-            password: "password123",
+            password: "P@ssw0rd1234",
             nickname: `throttle-user-${i}`,
           });
         expect(res.status).not.toBe(429);
@@ -88,7 +88,7 @@ describe("レート制限 E2E", () => {
         .post("/api/users/register")
         .send({
           email: makeEmail(99),
-          password: "password123",
+          password: "P@ssw0rd1234",
           nickname: "throttle-user-99",
         });
       expect(res.status).toBe(429);
