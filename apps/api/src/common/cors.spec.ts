@@ -10,8 +10,8 @@ describe("isOriginAllowed", () => {
       ).toBe(true);
     });
 
-    it("origin なしのリクエストを拒否すること", () => {
-      expect(isOriginAllowed(undefined, false, allowedOrigins)).toBe(false);
+    it("origin なしのリクエストを許可すること（サーバー間通信のため）", () => {
+      expect(isOriginAllowed(undefined, false, allowedOrigins)).toBe(true);
     });
 
     it("localhost からのリクエストを拒否すること", () => {
