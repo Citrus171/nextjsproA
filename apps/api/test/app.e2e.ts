@@ -7,7 +7,7 @@ import { PrismaService } from "../src/prisma.service";
 
 const OWNER_EMAIL = `e2e-owner-${Date.now()}@test.example`;
 const OTHER_EMAIL = `e2e-other-${Date.now()}@test.example`;
-const PASSWORD = "testpass123";
+const PASSWORD = "P@ssw0rd1234";
 
 // 1x1 PNG の最小バイナリ
 const TINY_PNG = Buffer.from(
@@ -199,7 +199,7 @@ describe("API E2E", () => {
       expect(res.status).toBe(400);
     });
 
-    it("8文字未満のパスワードは 400 を返す", async () => {
+    it("弱いパスワード（強度不足）は 400 を返す", async () => {
       const res = await request(app.getHttpServer())
         .post("/api/auth/login")
         .send({ email: OWNER_EMAIL, password: "short" });

@@ -6,7 +6,7 @@ test("画像3枚で迷い猫投稿し、マーカークリックで登録内容�
   page,
 }) => {
   const email = `e2e-map-${crypto.randomUUID()}@test.com`;
-  const password = "password123";
+  const password = "P@ssw0rd1234";
   const uniqueToken = `E2E-${crypto.randomUUID()}`;
   const title = `${uniqueToken}-title`;
   const description = `${uniqueToken}-description`;
