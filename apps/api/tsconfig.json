@@ -10,7 +10,8 @@
     "outDir": "dist",
     "incremental": true,
     "skipLibCheck": true,
-    "strict": false
+    "strict": false,
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
