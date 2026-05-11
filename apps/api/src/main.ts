@@ -10,7 +10,10 @@ import * as path from "path";
 import { Logger } from "nestjs-pino";
 import { applyParameterExamples } from "./common/openapi-document";
 import { isOriginAllowed } from "./common/cors";
+import { assertSecrets } from "./common/startup-guard";
+
 async function bootstrap() {
+  assertSecrets();
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });

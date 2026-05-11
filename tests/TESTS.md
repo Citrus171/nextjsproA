@@ -11,6 +11,16 @@
 
 ---
 
+### assertSecrets (`src/common/startup-guard.spec.ts`)
+
+- [x] development では何もしない
+- [x] NODE_ENV 未設定では何もしない
+- [x] 本番かつ JWT_SECRET が未設定なら throw する
+- [x] 本番かつ JWT_SECRET が change-me を含むなら throw する
+- [x] 本番かつ強い JWT_SECRET なら throw しない
+
+---
+
 ### isOriginAllowed (`src/common/cors.spec.ts`)
 
 #### 本番環境 (isDev=false)
