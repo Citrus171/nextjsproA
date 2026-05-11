@@ -47,13 +47,17 @@ export class ConversationsGateway
 
     try {
       const token = raw.startsWith("Bearer ") ? raw.slice(7) : raw;
-      const payload = this.jwtService.verify<JwtPayload>(token);
+      const payload = this.jwtService.verify<JwtPayload>(token, {
+        algorithms: ["HS256"],
+      });
       client.data.userId = payload.sub;
       client.data.token = token;
       this.userSocketMap.set(payload.sub, client.id);
       const interval = setInterval(() => {
         try {
-          this.jwtService.verify<JwtPayload>(client.data.token);
+          this.jwtService.verify<JwtPayload>(client.data.token, {
+            algorithms: ["HS256"],
+          });
         } catch {
           clearInterval(interval);
           client.disconnect();
@@ -72,7 +76,7 @@ export class ConversationsGateway
       return false;
     }
     try {
-      this.jwtService.verify<JwtPayload>(token);
+      this.jwtService.verify<JwtPayload>(token, { algorithms: ["HS256"] });
       return true;
     } catch {
       const userId = client.data.userId as string | undefined;
@@ -136,7 +140,9 @@ export class ConversationsGateway
   ) {
     const token = rawToken.startsWith("Bearer ") ? rawToken.slice(7) : rawToken;
     try {
-      const payload = this.jwtService.verify<JwtPayload>(token);
+      const payload = this.jwtService.verify<JwtPayload>(token, {
+        algorithms: ["HS256"],
+      });
       client.data.token = token;
       client.data.userId = payload.sub;
       client.emit("tokenRefreshed", { success: true });

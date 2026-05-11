@@ -18,7 +18,8 @@ import { UsersController } from "../users/user.controller";
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>("JWT_SECRET"),
-        signOptions: { expiresIn: "15m" },
+        signOptions: { expiresIn: "15m", algorithm: "HS256" },
+        verifyOptions: { algorithms: ["HS256"] },
       }),
     }),
   ],
