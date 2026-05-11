@@ -45,8 +45,8 @@ describe("RegisterDto", () => {
       return dto;
     };
 
-    it("12文字未満はバリデーションエラー", async () => {
-      const errors = await validate(buildDto("P@ssw0rd1"));
+    it("8文字未満はバリデーションエラー", async () => {
+      const errors = await validate(buildDto("P@ssw0r"));
       expect(errors.some((e) => e.property === "password")).toBe(true);
     });
 
