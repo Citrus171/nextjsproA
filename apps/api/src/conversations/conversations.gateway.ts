@@ -58,7 +58,7 @@ export class ConversationsGateway
           clearInterval(interval);
           client.disconnect();
         }
-      }, 60000);
+      }, 15000);
       client.data.tokenCheckInterval = interval;
     } catch {
       client.disconnect();
