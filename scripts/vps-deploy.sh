@@ -104,7 +104,7 @@ do_rollback() {
   # 前バージョンをリビルド・再起動
   echo "前バージョンをリビルド中..."
   npm run build --workspace=apps/api || true
-  pm2 restart "$PM2_NAME" || true
+  set -a && source "$PROJECT_DIR/apps/api/.env" && set +a && pm2 restart "$PM2_NAME" --update-env || true
 
   echo ""
   echo "========================================"
@@ -199,7 +199,7 @@ echo "  必須環境変数: すべて確認済み"
 # 6. PM2 再起動 ----------------------------------------------------------------------
 echo ""
 echo "Step 6/10: PM2 再起動 ($PM2_NAME)"
-pm2 restart "$PM2_NAME"
+set -a && source "$PROJECT_DIR/apps/api/.env" && set +a && pm2 restart "$PM2_NAME" --update-env
 
 # 6.5. ヘルスチェック（失敗時自動ロールバック）--------------------------------------
 echo ""
