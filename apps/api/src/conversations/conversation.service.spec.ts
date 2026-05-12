@@ -105,7 +105,7 @@ describe("ConversationsService", () => {
       try {
         await service.create("owner-1", dto);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -125,7 +125,7 @@ describe("ConversationsService", () => {
       try {
         await service.create("owner-1", dto);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -149,7 +149,7 @@ describe("ConversationsService", () => {
       try {
         await service.create("stranger", dto);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -173,7 +173,7 @@ describe("ConversationsService", () => {
       try {
         await service.create("owner-1", dto);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -320,7 +320,7 @@ describe("ConversationsService", () => {
       try {
         await service.createMessage("user-1", "conv-1", {});
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -338,7 +338,7 @@ describe("ConversationsService", () => {
           body: "a".repeat(1001),
         });
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -354,7 +354,7 @@ describe("ConversationsService", () => {
       try {
         await service.createMessage("stranger", "conv-1", { body: "test" });
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -370,7 +370,7 @@ describe("ConversationsService", () => {
       try {
         await service.createMessage("user-1", "conv-999", { body: "test" });
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -464,7 +464,7 @@ describe("ConversationsService", () => {
       try {
         await service.findMessages("stranger", "conv-1");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -480,7 +480,7 @@ describe("ConversationsService", () => {
       try {
         await service.findMessages("user-1", "conv-999");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -558,7 +558,7 @@ describe("ConversationsService", () => {
       try {
         await service.findOneForUser("stranger", "conv-1");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -600,7 +600,7 @@ describe("ConversationsService", () => {
       try {
         await service.markAsRead("stranger", "conv-1");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -616,7 +616,7 @@ describe("ConversationsService", () => {
       try {
         await service.markAsRead("user-1", "conv-999");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({

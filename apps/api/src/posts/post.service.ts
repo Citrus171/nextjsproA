@@ -305,7 +305,7 @@ export class PostsService {
           }
         );
         break;
-      } catch (e) {
+      } catch (e: unknown) {
         if (isTransactionConflict(e) && attempt < MAX_TRANSACTION_RETRIES - 1) {
           continue;
         }
@@ -345,7 +345,7 @@ export class PostsService {
           url: this.prefixImageUrl(img.url),
         })),
       };
-    } catch (e) {
+    } catch (e: unknown) {
       for (const url of savedUrls) {
         try {
           this.fileStorage.deleteFile(url);
@@ -496,7 +496,7 @@ export class PostsService {
           url: this.prefixImageUrl(img.url),
         })),
       };
-    } catch (error) {
+    } catch (error: unknown) {
       for (const url of savedUrls) {
         try {
           this.fileStorage.deleteFile(url);

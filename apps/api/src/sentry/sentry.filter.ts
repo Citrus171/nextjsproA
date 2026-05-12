@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nestjs";
 
 @Catch()
 export class SentryFilter extends BaseExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost): void {
+  override catch(exception: unknown, host: ArgumentsHost): void {
     const is4xx =
       exception instanceof HttpException && exception.getStatus() < 500;
 

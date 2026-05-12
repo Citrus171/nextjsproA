@@ -100,7 +100,7 @@ describe("PostsService", () => {
     });
 
     it("items と total を返し、投稿者名を authorNickname に詰める", async () => {
-      const posts = [
+      const posts: Record<string, unknown>[] = [
         {
           id: "1",
           title: "T",
@@ -112,7 +112,7 @@ describe("PostsService", () => {
           updatedAt: new Date(),
           petDetail: null,
           location: null,
-          images: [],
+          images: [] as any[],
           user: { nickname: "Alice" },
         },
       ];
@@ -134,7 +134,7 @@ describe("PostsService", () => {
             updatedAt: posts[0].updatedAt,
             petDetail: null,
             location: null,
-            images: [],
+            images: [] as any[],
             authorNickname: "Alice",
           },
         ],
@@ -191,7 +191,7 @@ describe("PostsService", () => {
         id: "post1",
         petDetail: { name: "Mimi" },
         location: { city: "さいたま市" },
-        images: [],
+        images: [] as any[],
         user: { nickname: "Alice" },
       };
       mockPrisma.post.findUnique.mockResolvedValue(post);
@@ -211,7 +211,7 @@ describe("PostsService", () => {
         id: "post1",
         petDetail: { name: "Mimi" },
         location: { city: "さいたま市" },
-        images: [],
+        images: [] as any[],
         authorNickname: "Alice",
       });
     });
@@ -222,7 +222,7 @@ describe("PostsService", () => {
       try {
         await service.findById("no-such");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -250,11 +250,11 @@ describe("PostsService", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const withIncludes = {
+      const withIncludes: Record<string, unknown> = {
         ...created,
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       };
       mockPrisma.post.create.mockResolvedValue(created);
       mockPrisma.post.findUnique.mockResolvedValue(withIncludes);
@@ -287,11 +287,11 @@ describe("PostsService", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      const withIncludes = {
+      const withIncludes: Record<string, unknown> = {
         ...created,
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       };
       mockPrisma.post.create.mockResolvedValue(created);
       mockPrisma.post.findUnique.mockResolvedValue(withIncludes);
@@ -329,7 +329,7 @@ describe("PostsService", () => {
         ...created,
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
       mockPrisma.image.create.mockResolvedValue({});
       const files = [
@@ -354,7 +354,7 @@ describe("PostsService", () => {
         id: "post1",
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
       mockPrisma.image.create.mockResolvedValue({});
       const files = [
@@ -378,7 +378,7 @@ describe("PostsService", () => {
         id: "post1",
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
       const files = Array.from(
         { length: 4 },
@@ -392,7 +392,7 @@ describe("PostsService", () => {
           files
         );
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -409,7 +409,7 @@ describe("PostsService", () => {
         id: "post1",
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
       mockPrisma.image.create.mockResolvedValue({});
       const files = Array.from(
@@ -431,7 +431,7 @@ describe("PostsService", () => {
       try {
         await service.create("u1", { description: "C" } as any);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -455,7 +455,7 @@ describe("PostsService", () => {
           files
         );
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -481,7 +481,7 @@ describe("PostsService", () => {
         ...created,
         petDetail: {},
         location: {},
-        images: [],
+        images: [] as any[],
       });
       mockPrisma.petDetail.create.mockResolvedValue({});
       mockPrisma.location.create.mockResolvedValue({});
@@ -526,7 +526,7 @@ describe("PostsService", () => {
         id: "post1",
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
 
       await service.create("u1", { description: "C", lostDate: "2024-06-15" });
@@ -579,7 +579,7 @@ describe("PostsService", () => {
           lostDate: "2026-04-21",
         });
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -610,7 +610,7 @@ describe("PostsService", () => {
         id: "post1",
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
       const monthStart = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
@@ -656,7 +656,7 @@ describe("PostsService", () => {
         ...created,
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
       mockPrisma.$transaction
         .mockRejectedValueOnce(conflictError)
@@ -682,7 +682,7 @@ describe("PostsService", () => {
         ...created,
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
     });
 
@@ -703,7 +703,7 @@ describe("PostsService", () => {
         ...created,
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       });
 
       await service.create("u1", {
@@ -723,7 +723,7 @@ describe("PostsService", () => {
       id: "post1",
       userId: "user1",
       status: "lost",
-      images: [],
+      images: [] as any[],
     };
 
     it("画像を追加できる", async () => {
@@ -765,7 +765,7 @@ describe("PostsService", () => {
       try {
         await service.addImages("post1", "user1", files);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -809,7 +809,7 @@ describe("PostsService", () => {
       try {
         await service.addImages("post1", "user1", files);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -825,7 +825,7 @@ describe("PostsService", () => {
       try {
         await service.addImages("post1", "other-user", []);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -841,7 +841,7 @@ describe("PostsService", () => {
       try {
         await service.addImages("no-such", "user1", []);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -866,7 +866,7 @@ describe("PostsService", () => {
       try {
         await service.addImages("post1", "user1", files);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -925,7 +925,7 @@ describe("PostsService", () => {
       try {
         await service.removeImage("post1", "img1", "other-user");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -941,7 +941,7 @@ describe("PostsService", () => {
       try {
         await service.removeImage("no-such", "img1", "user1");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -961,7 +961,7 @@ describe("PostsService", () => {
       try {
         await service.removeImage("post1", "img1", "user1");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -996,7 +996,7 @@ describe("PostsService", () => {
       try {
         await service.removeImage("post1", "img1", "other-user", false);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
       }
     });
@@ -1004,7 +1004,7 @@ describe("PostsService", () => {
 
   // ─── update ─────────────────────────────────────────────────
   describe("update", () => {
-    const existingPost = {
+    const existingPost: Record<string, unknown> = {
       id: "post1",
       title: "Old",
       description: "Old description",
@@ -1018,12 +1018,12 @@ describe("PostsService", () => {
     };
 
     it("オーナーが更新でき、petDetail/location/images を含むレスポンスを返す", async () => {
-      const updatedWithIncludes = {
+      const updatedWithIncludes: Record<string, unknown> = {
         ...existingPost,
         title: "New",
         petDetail: null,
         location: null,
-        images: [],
+        images: [] as any[],
       };
       mockPrisma.post.findUnique
         .mockResolvedValueOnce(existingPost) // オーナー確認
@@ -1050,7 +1050,7 @@ describe("PostsService", () => {
           postType: "cat",
           petDetail: null,
           location: null,
-          images: [],
+          images: [] as any[],
         });
       mockPrisma.post.update.mockResolvedValue({});
 
@@ -1069,7 +1069,7 @@ describe("PostsService", () => {
       try {
         await service.update("post1", "other-user", { title: "Hacked" });
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -1085,7 +1085,7 @@ describe("PostsService", () => {
       try {
         await service.update("no-such-post", "user1", { title: "X" });
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(HttpException);
         const response = (e as HttpException).getResponse();
         expect(response).toMatchObject({
@@ -1103,7 +1103,7 @@ describe("PostsService", () => {
           lostDate: new Date("2024-06-15"),
           petDetail: null,
           location: null,
-          images: [],
+          images: [] as any[],
         });
       mockPrisma.post.update.mockResolvedValue({});
 
@@ -1124,7 +1124,7 @@ describe("PostsService", () => {
           status: "resolved",
           petDetail: null,
           location: null,
-          images: [],
+          images: [] as any[],
         });
       mockPrisma.post.update.mockResolvedValue({});
 
@@ -1149,7 +1149,7 @@ describe("PostsService", () => {
           resolvedAt: null,
           petDetail: null,
           location: null,
-          images: [],
+          images: [] as any[],
         });
       mockPrisma.post.update.mockResolvedValue({});
 
@@ -1169,7 +1169,7 @@ describe("PostsService", () => {
           ...existingPost,
           petDetail: { name: "Mimi" },
           location: null,
-          images: [],
+          images: [] as any[],
         });
       mockPrisma.post.update.mockResolvedValue({});
       mockPrisma.petDetail.upsert.mockResolvedValue({});
@@ -1196,7 +1196,7 @@ describe("PostsService", () => {
       try {
         await service.update("post1", "user1", { petDetail: { name: "Mimi" } });
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -1214,7 +1214,7 @@ describe("PostsService", () => {
           location: { city: "さいたま市" },
         });
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -1231,7 +1231,7 @@ describe("PostsService", () => {
           ...existingPost,
           petDetail: null,
           location: { city: "さいたま市" },
-          images: [],
+          images: [] as any[],
         });
       mockPrisma.post.update.mockResolvedValue({});
       mockPrisma.location.upsert.mockResolvedValue({});
@@ -1268,7 +1268,7 @@ describe("PostsService", () => {
       lostDate: new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
-      images: [],
+      images: [] as any[],
     };
 
     it("オーナーが削除できる", async () => {
@@ -1309,7 +1309,7 @@ describe("PostsService", () => {
       try {
         await service.remove("post1", "other-user");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -1325,7 +1325,7 @@ describe("PostsService", () => {
       try {
         await service.remove("no-such-post", "user1");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(HttpException);
         const response = (e as HttpException).getResponse();
         expect(response).toMatchObject({
@@ -1366,7 +1366,7 @@ describe("PostsService", () => {
           files
         );
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         expect((e as BadRequestException).message).toBe(
           "画像処理に失敗しました。ファイルが破損または無効な形式です。"
@@ -1415,7 +1415,7 @@ describe("PostsService", () => {
       try {
         await service.toggleFavorite(postOwner, postId);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -1433,7 +1433,7 @@ describe("PostsService", () => {
       try {
         await service.toggleFavorite(otherUser, postId);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -1449,7 +1449,7 @@ describe("PostsService", () => {
       try {
         await service.toggleFavorite(otherUser, postId);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({

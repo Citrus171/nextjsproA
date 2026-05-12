@@ -46,7 +46,9 @@ describe("migrateKeyVersioning", () => {
     });
 
     it("emailEncryptedがnullのユーザーはスキップされること", async () => {
-      const users = [{ id: "u3", emailEncrypted: null }];
+      const users: Record<string, unknown>[] = [
+        { id: "u3", emailEncrypted: null },
+      ];
       const prisma = makePrisma(users);
 
       const result = await migrateKeyVersioning(prisma as never);

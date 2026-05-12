@@ -70,7 +70,7 @@ describe("ConversationsController", () => {
   // ─── createMessage ──────────────────────────────────────────
   describe("createMessage", () => {
     it("メッセージ作成後にbroadcastMessageを呼び出すこと", async () => {
-      const message = {
+      const message: Record<string, unknown> = {
         id: "msg-1",
         conversationId: "conv-1",
         senderId: "user-1",
@@ -116,7 +116,7 @@ describe("ConversationsController", () => {
       mockFileStorage.saveFile.mockResolvedValue(
         "uploads/conversations/conv-1/uuid.jpg"
       );
-      const message = {
+      const message: Record<string, unknown> = {
         id: "msg-2",
         conversationId: "conv-1",
         senderId: "user-1",
@@ -151,7 +151,7 @@ describe("ConversationsController", () => {
       try {
         await controller.createMessage(req, "conv-1", {}, file);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -187,7 +187,7 @@ describe("ConversationsController", () => {
       try {
         await controller.createMessage(req, "conv-1", {}, file);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({

@@ -36,7 +36,7 @@ describe("RolesGuard", () => {
     try {
       guard.canActivate(makeContext("user"));
       fail("例外がスローされるべき");
-    } catch (e) {
+    } catch (e: unknown) {
       expect(e).toBeInstanceOf(ForbiddenException);
       const response = (e as ForbiddenException).getResponse();
       expect(response).toMatchObject({
@@ -51,7 +51,7 @@ describe("RolesGuard", () => {
     try {
       guard.canActivate(makeContext(undefined));
       fail("例外がスローされるべき");
-    } catch (e) {
+    } catch (e: unknown) {
       expect(e).toBeInstanceOf(ForbiddenException);
       const response = (e as ForbiddenException).getResponse();
       expect(response).toMatchObject({

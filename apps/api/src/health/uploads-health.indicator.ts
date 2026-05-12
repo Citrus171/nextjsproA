@@ -23,7 +23,7 @@ export class UploadsHealthIndicator extends HealthIndicator {
       fs.writeFileSync(tmpFile, "ok");
       fs.unlinkSync(tmpFile);
       return this.getStatus(key, true);
-    } catch (e) {
+    } catch (e: unknown) {
       throw new HealthCheckError(
         "uploadsディレクトリ書き込みチェック失敗",
         this.getStatus(key, false, { message: (e as Error).message })

@@ -29,7 +29,7 @@ describe("PrismaClientExceptionFilter", () => {
       try {
         filter.catch(err, host);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -51,7 +51,7 @@ describe("PrismaClientExceptionFilter", () => {
       try {
         filter.catch(err, host);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ConflictException);
         const response = (e as ConflictException).getResponse();
         expect(response).toMatchObject({

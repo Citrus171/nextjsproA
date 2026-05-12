@@ -18,7 +18,7 @@ describe("AppThrottlerGuard", () => {
         guard as unknown as { throwThrottlingException: () => Promise<void> }
       ).throwThrottlingException();
       fail("例外がスローされるべき");
-    } catch (e) {
+    } catch (e: unknown) {
       expect(e).toBeInstanceOf(ThrottlerException);
       expect((e as ThrottlerException).message).toBe(
         "リクエスト数が制限を超えました。しばらく待ってから再試行してください。"

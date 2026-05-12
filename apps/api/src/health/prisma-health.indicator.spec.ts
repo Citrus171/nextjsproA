@@ -39,7 +39,7 @@ describe("PrismaHealthIndicator", () => {
     try {
       await indicator.pingCheck("database");
       fail("HealthCheckError がスローされるべき");
-    } catch (e) {
+    } catch (e: unknown) {
       expect(e).toBeInstanceOf(HealthCheckError);
       const err = e as HealthCheckError;
       expect(err.causes).not.toHaveProperty("database.message");
