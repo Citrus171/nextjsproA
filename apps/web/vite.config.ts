@@ -19,7 +19,10 @@ async function getVisualizerPlugin(): Promise<Plugin | null> {
 export default defineConfig(async () => {
   const visualizerPlugin = await getVisualizerPlugin();
   return {
-    plugins: [react(), ...(visualizerPlugin ? [visualizerPlugin] : [])],
+    plugins: [
+      react(),
+      ...(visualizerPlugin ? [visualizerPlugin] : []),
+    ],
     server: {
       port: 5173,
       fs: {
