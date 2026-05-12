@@ -150,7 +150,7 @@ export class ConversationsService {
     });
 
     return conversations.map((conv) =>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       this.buildConversationItem(conv as any, userId)
     );
   }
@@ -185,7 +185,7 @@ export class ConversationsService {
       });
 
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       ...this.buildConversationItem(conv as any, userId),
       postStatus: conv.post.status ?? null,
     };

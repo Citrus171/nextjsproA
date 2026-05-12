@@ -78,12 +78,12 @@ export class UpdatePostDto {
 
   @ApiProperty({ required: false, type: UpdatePetDetailDto })
   @IsOptional()
-  @Transform(({ value }) => {
-    const parsed =
+  @Transform(({ value }: { value: unknown }) => {
+    const parsed: unknown =
       typeof value === "string"
         ? (() => {
             try {
-              return JSON.parse(value);
+              return JSON.parse(value) as unknown;
             } catch {
               return value;
             }
@@ -99,12 +99,12 @@ export class UpdatePostDto {
 
   @ApiProperty({ required: false, type: UpdateLocationDto })
   @IsOptional()
-  @Transform(({ value }) => {
-    const parsed =
+  @Transform(({ value }: { value: unknown }) => {
+    const parsed: unknown =
       typeof value === "string"
         ? (() => {
             try {
-              return JSON.parse(value);
+              return JSON.parse(value) as unknown;
             } catch {
               return value;
             }

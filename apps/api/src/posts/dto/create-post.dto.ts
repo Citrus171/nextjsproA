@@ -66,12 +66,12 @@ export class CreatePostDto {
 
   @ApiProperty({ required: false, type: CreatePetDetailDto })
   @IsOptional()
-  @Transform(({ value }) => {
-    const parsed =
+  @Transform(({ value }: { value: unknown }) => {
+    const parsed: unknown =
       typeof value === "string"
         ? (() => {
             try {
-              return JSON.parse(value);
+              return JSON.parse(value) as unknown;
             } catch {
               return value;
             }
@@ -87,12 +87,12 @@ export class CreatePostDto {
 
   @ApiProperty({ required: false, type: CreateLocationDto })
   @IsOptional()
-  @Transform(({ value }) => {
-    const parsed =
+  @Transform(({ value }: { value: unknown }) => {
+    const parsed: unknown =
       typeof value === "string"
         ? (() => {
             try {
-              return JSON.parse(value);
+              return JSON.parse(value) as unknown;
             } catch {
               return value;
             }

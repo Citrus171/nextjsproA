@@ -1,19 +1,25 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
+async function getVisualizerPlugin(): Promise<Plugin | null> {
+  try {
+    const { visualizer } = await import("rollup-plugin-visualizer");
+    return visualizer({
+      filename: "dist/stats.html",
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+    });
+  } catch {
+    return null;
+  }
+}
+
 export default defineConfig(async () => {
-  const { visualizer } = await import("rollup-plugin-visualizer");
+  const visualizerPlugin = await getVisualizerPlugin();
   return {
-    plugins: [
-      react(),
-      visualizer({
-        filename: "dist/stats.html",
-        open: false,
-        gzipSize: true,
-        brotliSize: true,
-      }),
-    ],
+    plugins: [react(), ...(visualizerPlugin ? [visualizerPlugin] : [])],
     server: {
       port: 5173,
       fs: {
