@@ -13,18 +13,18 @@ const OPT_IN_THROTTLERS = new Set(["login", "register"]);
 
 @Injectable()
 export class AppThrottlerGuard extends ThrottlerGuard {
-  protected async throwThrottlingException(): Promise<void> {
+  protected override async throwThrottlingException(): Promise<void> {
     throw new ThrottlerException(
       "リクエスト数が制限を超えました。しばらく待ってから再試行してください。"
     );
   }
 
-  protected async handleRequest(
+  protected override async handleRequest(
     requestProps: ThrottlerRequest
   ): Promise<boolean> {
     const { context, throttler } = requestProps;
 
-    if (OPT_IN_THROTTLERS.has(throttler.name)) {
+    if (throttler.name !== undefined && OPT_IN_THROTTLERS.has(throttler.name)) {
       const handler = context.getHandler();
       const classRef = context.getClass();
       const metaKey = THROTTLER_LIMIT_PREFIX + throttler.name;

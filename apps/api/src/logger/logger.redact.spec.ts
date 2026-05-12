@@ -1,4 +1,4 @@
-import * as pino from "pino";
+import pino from "pino";
 import { Writable } from "stream";
 import { REDACT_PATHS } from "./logger.module";
 

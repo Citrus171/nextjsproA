@@ -1,6 +1,11 @@
 import { Plan } from "@prisma/client";
 
-export const PLAN_LIMITS = {
+type PlanLimitEntry = {
+  monthlyPostLimit: number | null;
+  imageUploadLimit: number;
+};
+
+export const PLAN_LIMITS: Record<Plan, PlanLimitEntry> = {
   [Plan.free]: {
     monthlyPostLimit: 3,
     imageUploadLimit: 3,
@@ -9,7 +14,7 @@ export const PLAN_LIMITS = {
     monthlyPostLimit: null,
     imageUploadLimit: 10,
   },
-} as const;
+};
 
 export function getMonthlyPostLimit(plan: Plan): number | null {
   return PLAN_LIMITS[plan].monthlyPostLimit;

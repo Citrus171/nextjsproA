@@ -109,7 +109,7 @@ describe("migrateEmailHashToHmac", () => {
 
   describe("スキップケース", () => {
     it("emailEncryptedがnullのユーザーはスキップされること", async () => {
-      const users = [
+      const users: Record<string, unknown>[] = [
         { id: "user-3", emailEncrypted: null, emailHash: "any-hash" },
       ];
       const prisma = makePrisma(users);

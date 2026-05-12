@@ -8,7 +8,9 @@ import {
 import { PostsController, imageFileFilter } from "./post.controller";
 import { PostsService } from "./post.service";
 
-const makePost = (overrides = {}) => ({
+const makePost = (
+  overrides: Record<string, unknown> = {}
+): Record<string, unknown> => ({
   id: "post1",
   title: "Title",
   description: "Content",
@@ -105,7 +107,7 @@ describe("PostsController", () => {
       try {
         await controller.list("1", "10", "true", {} as any);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -455,7 +457,11 @@ describe("PostsController", () => {
   describe("imageFileFilter", () => {
     it("fileがnullの時、cb(null, false)を呼ぶこと", () => {
       const cb = jest.fn();
-      imageFileFilter({} as Express.Request, null, cb);
+      imageFileFilter(
+        {} as Express.Request,
+        null as unknown as Express.Multer.File,
+        cb
+      );
       expect(cb).toHaveBeenCalledWith(null, false);
     });
 

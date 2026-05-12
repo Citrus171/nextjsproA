@@ -30,7 +30,7 @@ export class ConversationsService {
           sighterId: sighting.userId,
         },
       });
-    } catch (e) {
+    } catch (e: unknown) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === "P2002"
@@ -150,7 +150,8 @@ export class ConversationsService {
     });
 
     return conversations.map((conv) =>
-      this.buildConversationItem(conv, userId)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.buildConversationItem(conv as any, userId)
     );
   }
 
@@ -184,7 +185,8 @@ export class ConversationsService {
       });
 
     return {
-      ...this.buildConversationItem(conv, userId),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...this.buildConversationItem(conv as any, userId),
       postStatus: conv.post.status ?? null,
     };
   }

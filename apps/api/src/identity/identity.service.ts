@@ -256,7 +256,7 @@ export class IdentityService extends IIdentityService {
     });
     return users.map((u) => ({
       id: u.id,
-      email: this.decryptSafely(u.emailEncrypted),
+      email: this.decryptSafely(u.emailEncrypted) ?? "",
       nickname: u.nickname,
       role: u.role,
       createdAt: u.createdAt,
@@ -276,7 +276,7 @@ export class IdentityService extends IIdentityService {
     });
     return {
       id: user.id,
-      email: this.decryptSafely(user.emailEncrypted),
+      email: this.decryptSafely(user.emailEncrypted) ?? "",
       nickname: user.nickname,
       role: user.role,
       createdAt: user.createdAt,

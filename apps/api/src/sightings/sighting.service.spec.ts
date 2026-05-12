@@ -112,7 +112,7 @@ describe("SightingsService", () => {
       try {
         await service.create("other-user", dtoWithEmptyPostId as never);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -135,7 +135,7 @@ describe("SightingsService", () => {
       try {
         await service.create("owner-1", dto);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -151,7 +151,7 @@ describe("SightingsService", () => {
       try {
         await service.create("other-user", dto);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -227,7 +227,7 @@ describe("SightingsService", () => {
       try {
         await service.findOne("nonexistent");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -262,7 +262,7 @@ describe("SightingsService", () => {
       try {
         await service.remove("other-user", "s-1");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -278,7 +278,7 @@ describe("SightingsService", () => {
       try {
         await service.remove("user-1", "s-1");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({
@@ -344,7 +344,7 @@ describe("SightingsService", () => {
       try {
         await service.toggleFavorite(userId, sightingId);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ForbiddenException);
         const response = (e as ForbiddenException).getResponse();
         expect(response).toMatchObject({
@@ -362,7 +362,7 @@ describe("SightingsService", () => {
       try {
         await service.toggleFavorite(userId, sightingId);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(BadRequestException);
         const response = (e as BadRequestException).getResponse();
         expect(response).toMatchObject({
@@ -378,7 +378,7 @@ describe("SightingsService", () => {
       try {
         await service.toggleFavorite(userId, sightingId);
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(NotFoundException);
         const response = (e as NotFoundException).getResponse();
         expect(response).toMatchObject({

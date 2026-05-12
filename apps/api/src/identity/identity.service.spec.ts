@@ -134,7 +134,7 @@ describe("IdentityService", () => {
       try {
         await service.login("user@example.com", "wrongpassword");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -151,7 +151,7 @@ describe("IdentityService", () => {
       try {
         await service.login("user@example.com", "wrongpassword");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -173,7 +173,7 @@ describe("IdentityService", () => {
       try {
         await service.login("no@example.com", "password");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -189,7 +189,7 @@ describe("IdentityService", () => {
       try {
         await service.login("no@example.com", "password");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -319,7 +319,7 @@ describe("IdentityService", () => {
       try {
         await service.refresh("nonexistent");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -339,7 +339,7 @@ describe("IdentityService", () => {
       try {
         await service.refresh("old-token");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -364,7 +364,7 @@ describe("IdentityService", () => {
       try {
         await service.refresh("old-refresh-token");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -389,7 +389,7 @@ describe("IdentityService", () => {
       try {
         await service.refresh("old-refresh-token");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(UnauthorizedException);
         const response = (e as UnauthorizedException).getResponse();
         expect(response).toMatchObject({
@@ -493,7 +493,7 @@ describe("IdentityService", () => {
       try {
         await service.register("dup@example.com", "pass", "nick");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ConflictException);
         const response = (e as ConflictException).getResponse();
         expect(response).toMatchObject({
@@ -512,7 +512,7 @@ describe("IdentityService", () => {
       try {
         await service.register("a@example.com", "pass", "dup");
         fail("例外がスローされるべき");
-      } catch (e) {
+      } catch (e: unknown) {
         expect(e).toBeInstanceOf(ConflictException);
         const response = (e as ConflictException).getResponse();
         expect(response).toMatchObject({

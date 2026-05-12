@@ -96,7 +96,7 @@ describe("ImageProcessingService", () => {
     try {
       await service.process(Buffer.from("bad"));
       fail("例外がスローされるべき");
-    } catch (e) {
+    } catch (e: unknown) {
       expect(e).toBeInstanceOf(BadRequestException);
       const response = (e as BadRequestException).getResponse();
       expect(response).toMatchObject({
