@@ -12,6 +12,8 @@ import {
   IsBoolean,
   IsEnum,
   ValidateIf,
+  Max,
+  Min,
 } from "class-validator";
 
 export class UpdatePetDetailDto {
@@ -43,8 +45,18 @@ export class UpdateLocationDto {
   prefecture?: string;
   @ApiProperty({ required: false }) @IsOptional() @IsString() city?: string;
   @ApiProperty({ required: false }) @IsOptional() @IsString() address?: string;
-  @ApiProperty({ required: false }) @IsOptional() @IsNumber() lat?: number;
-  @ApiProperty({ required: false }) @IsOptional() @IsNumber() lng?: number;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(-90)
+  @Max(90)
+  lat?: number;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng?: number;
 }
 
 export class UpdatePostDto {

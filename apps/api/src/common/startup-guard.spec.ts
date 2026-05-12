@@ -26,12 +26,49 @@ describe("assertSecrets", () => {
     ).toThrow("JWT_SECRET");
   });
 
-  it("本番かつ強い JWT_SECRET なら throw しない", () => {
+  it("本番かつ強い JWT_SECRET かつ必要なシークレットが揃っていれば throw しない", () => {
     expect(() =>
       assertSecrets({
         NODE_ENV: "production",
         JWT_SECRET: "super-secret-random-value-abc123XYZ!@#",
+        ENCRYPTION_KEY_V1: "encryption-key-at-least-32-chars-long!!",
+        HMAC_SECRET: "hmac-secret-value-here",
+        DATABASE_URL: "postgresql://localhost:5432/mydb",
       })
     ).not.toThrow();
+  });
+
+  it("本番かつ ENCRYPTION_KEY_V1 が短すぎるなら throw する", () => {
+    expect(() =>
+      assertSecrets({
+        NODE_ENV: "production",
+        JWT_SECRET: "super-secret-random-value-abc123XYZ!@#",
+        ENCRYPTION_KEY_V1: "short",
+        HMAC_SECRET: "hmac-secret",
+        DATABASE_URL: "postgresql://localhost:5432/mydb",
+      })
+    ).toThrow("ENCRYPTION_KEY_V1");
+  });
+
+  it("本番かつ HMAC_SECRET が未設定なら throw する", () => {
+    expect(() =>
+      assertSecrets({
+        NODE_ENV: "production",
+        JWT_SECRET: "super-secret-random-value-abc123XYZ!@#",
+        ENCRYPTION_KEY_V1: "encryption-key-at-least-32-chars-long!!",
+        DATABASE_URL: "postgresql://localhost:5432/mydb",
+      })
+    ).toThrow("HMAC_SECRET");
+  });
+
+  it("本番かつ DATABASE_URL が未設定なら throw する", () => {
+    expect(() =>
+      assertSecrets({
+        NODE_ENV: "production",
+        JWT_SECRET: "super-secret-random-value-abc123XYZ!@#",
+        ENCRYPTION_KEY_V1: "encryption-key-at-least-32-chars-long!!",
+        HMAC_SECRET: "hmac-secret",
+      })
+    ).toThrow("DATABASE_URL");
   });
 });
