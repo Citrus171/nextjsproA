@@ -155,6 +155,7 @@ fi
 # 2. Git 更新 ------------------------------------------------------------------------
 echo ""
 echo "Step 2/10: Git 更新"
+git checkout -- apps/api/package.json package-lock.json 2>/dev/null || true
 git fetch origin
 git checkout main
 git pull --ff-only origin main
