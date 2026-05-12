@@ -109,7 +109,6 @@ describe("IdentityService", () => {
       expect(mockLogger.log).toHaveBeenCalledWith("auth.login.success", {
         event: "auth.login.success",
         userId: "user-1",
-        email: "user@example.com",
       });
     });
 
@@ -162,7 +161,6 @@ describe("IdentityService", () => {
 
       expect(mockLogger.warn).toHaveBeenCalledWith("auth.login.failure", {
         event: "auth.login.failure",
-        email: "user@example.com",
         reason: "password mismatch",
       });
     });
@@ -200,7 +198,6 @@ describe("IdentityService", () => {
 
       expect(mockLogger.warn).toHaveBeenCalledWith("auth.login.failure", {
         event: "auth.login.failure",
-        email: "no@example.com",
         reason: "email not found",
       });
     });

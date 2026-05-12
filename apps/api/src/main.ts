@@ -67,4 +67,6 @@ async function bootstrap() {
   app.get(Logger).log("API listening on http://localhost:3000");
 }
 
-void bootstrap();
+bootstrap().catch(() => {
+  process.exitCode = 1;
+});

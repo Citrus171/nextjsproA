@@ -69,7 +69,6 @@ export class IdentityService extends IIdentityService {
     if (!user) {
       this.logger.warn("auth.login.failure", {
         event: "auth.login.failure",
-        email: normalized,
         reason: "email not found",
       });
       throw new UnauthorizedException({
@@ -81,7 +80,6 @@ export class IdentityService extends IIdentityService {
     if (!match) {
       this.logger.warn("auth.login.failure", {
         event: "auth.login.failure",
-        email: normalized,
         reason: "password mismatch",
       });
       throw new UnauthorizedException({
@@ -108,7 +106,6 @@ export class IdentityService extends IIdentityService {
     this.logger.log("auth.login.success", {
       event: "auth.login.success",
       userId: user.id,
-      email: this.decryptSafely(user.emailEncrypted),
     });
     return {
       accessToken,

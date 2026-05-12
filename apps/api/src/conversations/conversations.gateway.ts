@@ -14,6 +14,17 @@ import { Message } from "@prisma/client";
 import { JwtPayload } from "../auth/interfaces/jwt-payload.interface";
 import { ConversationsService } from "./conversation.service";
 
+interface SocketData {
+  userId?: string;
+  token?: string;
+  tokenCheckInterval?: ReturnType<typeof setInterval>;
+}
+
+interface HandshakeAuth {
+  auth?: { token?: string };
+  headers?: { authorization?: string };
+}
+
 @WebSocketGateway({
   cors: { origin: process.env.WEB_ORIGIN || "http://localhost:5173" },
   namespace: "/conversations",
@@ -36,9 +47,8 @@ export class ConversationsGateway
   ) {}
 
   handleConnection(client: Socket) {
-    const raw =
-      client.handshake.auth?.token ??
-      (client.handshake.headers?.authorization as string | undefined);
+    const hs = client.handshake as unknown as HandshakeAuth;
+    const raw = hs.auth?.token ?? hs.headers?.authorization;
 
     if (!raw) {
       client.disconnect();
@@ -50,12 +60,13 @@ export class ConversationsGateway
       const payload = this.jwtService.verify<JwtPayload>(token, {
         algorithms: ["HS256"],
       });
-      client.data.userId = payload.sub;
-      client.data.token = token;
+      const data = client.data as unknown as SocketData;
+      data.userId = payload.sub;
+      data.token = token;
       this.userSocketMap.set(payload.sub, client.id);
       const interval = setInterval(() => {
         try {
-          this.jwtService.verify<JwtPayload>(client.data.token, {
+          this.jwtService.verify<JwtPayload>(data.token!, {
             algorithms: ["HS256"],
           });
         } catch {
@@ -63,14 +74,15 @@ export class ConversationsGateway
           client.disconnect();
         }
       }, 15000);
-      client.data.tokenCheckInterval = interval;
+      data.tokenCheckInterval = interval;
     } catch {
       client.disconnect();
     }
   }
 
   private reVerifyOrDisconnect(client: Socket): boolean {
-    const token = client.data.token as string | undefined;
+    const data = client.data as unknown as SocketData;
+    const token = data.token;
     if (!token) {
       client.disconnect();
       return false;
@@ -79,7 +91,7 @@ export class ConversationsGateway
       this.jwtService.verify<JwtPayload>(token, { algorithms: ["HS256"] });
       return true;
     } catch {
-      const userId = client.data.userId as string | undefined;
+      const userId = data.userId;
       this.logger.warn(`JWT期限切れのため切断: userId=${userId ?? "unknown"}`);
       client.disconnect();
       return false;
@@ -87,13 +99,12 @@ export class ConversationsGateway
   }
 
   handleDisconnect(client: Socket) {
-    const interval = client.data.tokenCheckInterval as
-      | ReturnType<typeof setInterval>
-      | undefined;
+    const data = client.data as unknown as SocketData;
+    const interval = data.tokenCheckInterval;
     if (interval) {
       clearInterval(interval);
     }
-    const userId = client.data.userId as string | undefined;
+    const userId = data.userId;
     if (userId && this.userSocketMap.get(userId) === client.id) {
       this.userSocketMap.delete(userId);
     }
@@ -105,7 +116,8 @@ export class ConversationsGateway
     @ConnectedSocket() client: Socket
   ) {
     if (!this.reVerifyOrDisconnect(client)) return;
-    const userId = client.data.userId as string | undefined;
+    const data = client.data as unknown as SocketData;
+    const userId = data.userId;
     if (!userId) {
       client.disconnect();
       return;
@@ -125,7 +137,8 @@ export class ConversationsGateway
     @ConnectedSocket() client: Socket
   ) {
     if (!this.reVerifyOrDisconnect(client)) return;
-    const userId = client.data.userId as string | undefined;
+    const data = client.data as unknown as SocketData;
+    const userId = data.userId;
     if (!userId) {
       client.disconnect();
       return;
@@ -143,8 +156,9 @@ export class ConversationsGateway
       const payload = this.jwtService.verify<JwtPayload>(token, {
         algorithms: ["HS256"],
       });
-      client.data.token = token;
-      client.data.userId = payload.sub;
+      const data = client.data as unknown as SocketData;
+      data.token = token;
+      data.userId = payload.sub;
       client.emit("tokenRefreshed", { success: true });
     } catch {
       client.emit("tokenRefreshed", { success: false });

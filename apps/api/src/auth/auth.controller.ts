@@ -44,7 +44,8 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    const token = req.cookies?.refreshToken;
+    const cookies = req.cookies as Record<string, string> | undefined;
+    const token = cookies?.refreshToken;
     if (!token)
       throw new UnauthorizedException({
         code: "E_AUTH_NO_REFRESH_TOKEN",
@@ -59,7 +60,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, type: LogoutResponseDto })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const token = req.cookies?.refreshToken;
+    const cookies = req.cookies as Record<string, string> | undefined;
+    const token = cookies?.refreshToken;
     if (token) await this.identity.logout(token);
     res.clearCookie("refreshToken", { path: "/" });
     return { ok: true };

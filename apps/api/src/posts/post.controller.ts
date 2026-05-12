@@ -155,7 +155,7 @@ export class PostsController {
     @Req() req?: AuthenticatedRequest
   ) {
     const p = parseInt(page, 10) || 1;
-    const pp = parseInt(perPage, 10) || 10;
+    const pp = Math.min(parseInt(perPage, 10) || 10, 100);
     if (mine === "true") {
       if (!req?.user) {
         throw new UnauthorizedException({
