@@ -19,7 +19,13 @@ async function bootstrap() {
   });
   app.useLogger(app.get(Logger));
   app.use(helmet());
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    })
+  );
   app.setGlobalPrefix("api");
   app.useStaticAssets(path.join(__dirname, "..", "uploads"), {
     prefix: "/uploads",

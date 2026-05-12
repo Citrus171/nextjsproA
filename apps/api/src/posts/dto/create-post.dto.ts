@@ -11,6 +11,8 @@ import {
   IsNumber,
   IsBoolean,
   IsEnum,
+  Max,
+  Min,
 } from "class-validator";
 
 export class CreatePetDetailDto {
@@ -39,8 +41,8 @@ export class CreateLocationDto {
   @ApiProperty({ enum: ["saitama"] }) @IsEnum(["saitama"]) prefecture: string;
   @ApiProperty() @IsString() city: string;
   @ApiProperty() @IsString() address: string;
-  @ApiProperty() @IsNumber() lat: number;
-  @ApiProperty() @IsNumber() lng: number;
+  @ApiProperty() @IsNumber() @Min(-90) @Max(90) lat: number;
+  @ApiProperty() @IsNumber() @Min(-180) @Max(180) lng: number;
 }
 
 export class CreatePostDto {
