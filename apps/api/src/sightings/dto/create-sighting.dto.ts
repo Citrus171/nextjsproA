@@ -5,6 +5,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Max,
+  Min,
 } from "class-validator";
 import { OPENAPI_POST_ID_EXAMPLE } from "../../common/openapi-examples";
 
@@ -14,8 +16,12 @@ export class CreateSightingDto {
   @IsString()
   @IsNotEmpty()
   postId?: string;
-  @ApiProperty({ example: 35.8617 }) @IsNumber() lat: number;
-  @ApiProperty({ example: 139.6455 }) @IsNumber() lng: number;
+  @ApiProperty({ example: 35.8617 }) @IsNumber() @Min(-90) @Max(90) lat: number;
+  @ApiProperty({ example: 139.6455 })
+  @IsNumber()
+  @Min(-180)
+  @Max(180)
+  lng: number;
   @ApiProperty({ required: false, example: "Saitama City, Urawa-ku" })
   @IsOptional()
   @IsString()
