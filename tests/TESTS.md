@@ -320,11 +320,10 @@
 
 ### CreateMessageDto (`src/conversations/dto/create-message.dto.spec.ts`)
 
-- [x] bodyもimageUrlも両方nullの場合、バリデーションエラーになること
+- [x] bodyもなしでもDTOバリデーションは通過すること（空メッセージチェックはサービス層で行う）
 - [x] bodyのみ指定でバリデーションが通過すること
-- [x] imageUrlのみ指定でバリデーションが通過すること
-- [x] bodyとimageUrl両方指定でバリデーションが通過すること
 - [x] bodyが1000文字を超える場合はバリデーションエラーになること
+- [x] imageUrlを含む入力を渡してもDTOに imageUrl プロパティが存在しないこと（セキュリティ: 外部URL注入防止）
 
 ---
 
@@ -451,11 +450,14 @@
 
 #### createMessage
 
+- [x] ボディに imageUrl を含めても、サービスには imageUrl が渡されないこと（セキュリティ: 外部URL注入防止）
 - [x] メッセージ作成後にbroadcastMessageを呼び出すこと
 - [x] サービスが例外を投げた場合はbroadcastMessageを呼ばないこと
 - [x] 画像ファイルが添付された場合はfileStorageに保存してimageUrlを含むDTOでcreateMessageを呼ぶこと
-- [x] JPEG・PNG以外のファイルは400エラーになること
-- [x] 2MB超のファイルは400エラーになること
+- [x] ファイルあり・ボディに外部imageUrlを含めても、サーバー生成URLのみがサービスに渡されること（セキュリティ: 外部URL注入防止）
+- [x] 未対応のファイル形式（HEIC等）は400エラーになること
+- [x] GIF・WebP は許容されること
+- [x] 20MB超のファイルは400エラーになること
 
 #### markAsRead
 

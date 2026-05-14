@@ -1,6 +1,7 @@
 import { BadRequestException } from "@nestjs/common";
 import { ConversationsController } from "./conversation.controller";
 import { ConversationFileStorageService } from "./conversation-file-storage.service";
+import { CreateMessageDto } from "./dto/create-message.dto";
 
 const mockService = {
   create: jest.fn(),
@@ -69,6 +70,25 @@ describe("ConversationsController", () => {
 
   // ─── createMessage ──────────────────────────────────────────
   describe("createMessage", () => {
+    it("ボディに imageUrl を含めても、サービスには imageUrl が渡されないこと", async () => {
+      mockService.createMessage.mockResolvedValue({
+        id: "msg-1",
+        body: "hello",
+      });
+
+      // ValidationPipe の whitelist 相当: imageUrl はユーザー入力から除去済みのはずだが
+      // 念のためコントローラー層でも素通りしないことを確認する
+      const dto = { body: "hello" } as CreateMessageDto;
+      await controller.createMessage(req, "conv-1", dto);
+
+      const [, , passedInput] = mockService.createMessage.mock.calls[0];
+      expect(passedInput).not.toHaveProperty(
+        "imageUrl",
+        "http://evil.com/track.gif"
+      );
+      expect(passedInput).toEqual({ body: "hello" });
+    });
+
     it("メッセージ作成後にbroadcastMessageを呼び出すこと", async () => {
       const message: Record<string, unknown> = {
         id: "msg-1",
@@ -138,6 +158,30 @@ describe("ConversationsController", () => {
         }
       );
       expect(result).toBe(message);
+    });
+
+    it("ファイルあり・ボディに外部imageUrlを含めても、サーバー生成URLのみがサービスに渡されること", async () => {
+      const file = {
+        buffer: Buffer.from("image"),
+        originalname: "photo.jpg",
+        mimetype: "image/jpeg",
+        size: 100,
+      } as Express.Multer.File;
+      mockFileStorage.saveFile.mockResolvedValue(
+        "uploads/conversations/conv-1/server-uuid.jpg"
+      );
+      mockService.createMessage.mockResolvedValue({ id: "msg-safe" });
+
+      // body に外部URLを混入させようとするが DTO は imageUrl を持たないため
+      // コントローラーは dto.body のみを使い、imageUrl はサーバー生成値を使う
+      const dto = { body: "テスト" } as CreateMessageDto;
+      await controller.createMessage(req, "conv-1", dto, file);
+
+      const [, , passedInput] = mockService.createMessage.mock.calls[0];
+      expect(passedInput).toEqual({
+        body: "テスト",
+        imageUrl: "/uploads/conversations/conv-1/server-uuid.jpg",
+      });
     });
 
     it("未対応のファイル形式（HEIC等）は400エラーになること", async () => {

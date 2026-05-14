@@ -337,11 +337,10 @@ apps/api/src/
 ├── conversations/
 │   ├── dto/
 │   │   └── create-message.dto.spec.ts
-│   │       ├── bodyもimageUrlも両方nullの場合、バリデーションエラーになること
+│   │       ├── bodyもなしでもDTOバリデーションは通過すること（空メッセージチェックはサービス層で行う）
 │   │       ├── bodyのみ指定でバリデーションが通過すること
-│   │       ├── imageUrlのみ指定でバリデーションが通過すること
-│   │       ├── bodyとimageUrl両方指定でバリデーションが通過すること
-│   │       └── bodyが1000文字を超える場合はバリデーションエラーになること
+│   │       ├── bodyが1000文字を超える場合はバリデーションエラーになること
+│   │       └── imageUrlを含む入力を渡してもDTOに imageUrl プロパティが存在しないこと（セキュリティ: 外部URL注入防止）
 │   ├── conversation.service.spec.ts
 │   │   ├── create
 │   │   │   ├── 有効なデータで会話を作成できること
@@ -420,11 +419,14 @@ apps/api/src/
 │   │       └── 不正なパスでパストラバーサルを防ぐこと
 │   └── conversation.controller.spec.ts
 │       ├── createMessage
+│       │   ├── ボディに imageUrl を含めても、サービスには imageUrl が渡されないこと（セキュリティ: 外部URL注入防止）
 │       │   ├── メッセージ作成後にbroadcastMessageを呼び出すこと
 │       │   ├── サービスが例外を投げた場合はbroadcastMessageを呼ばないこと
 │       │   ├── 画像ファイルが添付された場合はfileStorageに保存してimageUrlを含むDTOでcreateMessageを呼ぶこと
-│       │   ├── JPEG・PNG以外のファイルは400エラーになること
-│       │   └── 2MB超のファイルは400エラーになること
+│       │   ├── ファイルあり・ボディに外部imageUrlを含めても、サーバー生成URLのみがサービスに渡されること（セキュリティ: 外部URL注入防止）
+│       │   ├── 未対応のファイル形式（HEIC等）は400エラーになること
+│       │   ├── GIF・WebP は許容されること
+│       │   └── 20MB超のファイルは400エラーになること
 │       ├── markAsRead
 │       │   └── 既読更新結果を返すこと
 │       └── getUnreadCount
