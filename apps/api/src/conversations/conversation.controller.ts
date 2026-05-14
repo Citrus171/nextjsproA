@@ -37,7 +37,10 @@ import {
   ConversationListItemDto,
 } from "./dto/conversation-response.dto";
 import { MessageResponseDto } from "./dto/message-response.dto";
-import { ConversationsService } from "./conversation.service";
+import {
+  ConversationsService,
+  CreateMessageInput,
+} from "./conversation.service";
 import { ConversationsGateway } from "./conversations.gateway";
 import { ConversationFileStorageService } from "./conversation-file-storage.service";
 import { AuthenticatedRequest } from "../auth/interfaces/authenticated-request.interface";
@@ -163,6 +166,7 @@ export class ConversationsController {
     @Body() dto: CreateMessageDto,
     @UploadedFile() file?: Express.Multer.File
   ) {
+    let imageUrl: string | undefined;
     if (file) {
       if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
         throw new BadRequestException({
@@ -177,13 +181,14 @@ export class ConversationsController {
         });
       }
       const savedUrl = await this.conversationFileStorage.saveFile(id, file);
-      dto = { ...dto, imageUrl: `/${savedUrl}` };
+      imageUrl = `/${savedUrl}`;
     }
 
+    const input: CreateMessageInput = { body: dto.body, imageUrl };
     const message = await this.conversationsService.createMessage(
       this.getAuthenticatedUserId(req),
       id,
-      dto
+      input
     );
     this.conversationsGateway.broadcastMessage(id, message);
     return message;

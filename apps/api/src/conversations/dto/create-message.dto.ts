@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Exclude } from "class-transformer";
 import { IsOptional, IsString, MaxLength } from "class-validator";
 
 export class CreateMessageDto {
@@ -13,12 +14,7 @@ export class CreateMessageDto {
   @MaxLength(1000)
   body?: string | null;
 
-  @ApiProperty({
-    required: false,
-    nullable: true,
-    example: "/uploads/conversations/conv-1/uuid.jpg",
-  })
-  @IsOptional()
-  @IsString()
-  imageUrl?: string | null;
+  // imageUrl はサーバーが設定する内部値のためユーザー入力から除外
+  @Exclude()
+  declare readonly imageUrl?: never;
 }

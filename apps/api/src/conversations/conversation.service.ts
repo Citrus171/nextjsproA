@@ -7,8 +7,12 @@ import {
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { CreateConversationDto } from "./dto/create-conversation.dto";
-import { CreateMessageDto } from "./dto/create-message.dto";
 import { ERROR_CODES } from "../common/error-codes";
+
+export type CreateMessageInput = {
+  body?: string | null;
+  imageUrl?: string | null;
+};
 
 @Injectable()
 export class ConversationsService {
@@ -194,7 +198,7 @@ export class ConversationsService {
   async createMessage(
     userId: string,
     conversationId: string,
-    dto: CreateMessageDto
+    dto: CreateMessageInput
   ) {
     if (!dto.body && !dto.imageUrl) {
       throw new BadRequestException({
