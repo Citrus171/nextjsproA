@@ -486,6 +486,17 @@
 
 ---
 
+### MapController (`src/map/map.controller.spec.ts`)
+
+#### getMarkers スロットル設定
+
+- [x] @SkipThrottle が public に設定されていないこと
+- [x] @SkipThrottle が default に設定されていないこと
+- [x] public スロットルの limit が 600 であること
+- [x] public スロットルの ttl が 60000 であること
+
+---
+
 ### RolesGuard (`src/auth/roles.guard.spec.ts`)
 
 - [x] @Roles デコレータがない場合は通す

@@ -322,18 +322,24 @@ apps/api/src/
 │           ├── オーナー以外は ForbiddenException を伝播する
 │           └── 存在しない投稿は HttpException を伝播する
 ├── map/
-│   └── map.service.spec.ts
-│       └── getMarkers
-│           ├── bbox内のPostマーカーが type='post' で返ること
-│           ├── bbox内のSightingマーカーが type='sighting' で返ること
-│           ├── standalone Sighting は statusなしで lost として返ること
-│           ├── statusフィルタ指定時にPostクエリのwhereにstatusが含まれること
-│           ├── statusフィルタ指定時にSightingクエリのwhereにpost.statusが含まれること
-│           ├── bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
-│           ├── bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
-│           ├── bboxクエリが文字列でも数値フィルタとして渡ること
-│           ├── 空白文字列と非有限数はbboxフィルタに含めないこと
-│           └── フィルタなしで全マーカー（Post+Sighting）が返ること
+│   ├── map.service.spec.ts
+│   │   └── getMarkers
+│   │       ├── bbox内のPostマーカーが type='post' で返ること
+│   │       ├── bbox内のSightingマーカーが type='sighting' で返ること
+│   │       ├── standalone Sighting は statusなしで lost として返ること
+│   │       ├── statusフィルタ指定時にPostクエリのwhereにstatusが含まれること
+│   │       ├── statusフィルタ指定時にSightingクエリのwhereにpost.statusが含まれること
+│   │       ├── bboxクエリ条件がPostのlocation.lat/lngフィルタとして渡ること
+│   │       ├── bboxクエリ条件がSightingのlat/lngフィルタとして渡ること
+│   │       ├── bboxクエリが文字列でも数値フィルタとして渡ること
+│   │       ├── 空白文字列と非有限数はbboxフィルタに含めないこと
+│   │       └── フィルタなしで全マーカー（Post+Sighting）が返ること
+│   └── map.controller.spec.ts
+│       └── getMarkers スロットル設定
+│           ├── @SkipThrottle が public に設定されていないこと
+│           ├── @SkipThrottle が default に設定されていないこと
+│           ├── public スロットルの limit が 600 であること
+│           └── public スロットルの ttl が 60000 であること
 ├── conversations/
 │   ├── dto/
 │   │   └── create-message.dto.spec.ts
