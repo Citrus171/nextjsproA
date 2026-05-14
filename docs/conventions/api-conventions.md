@@ -372,60 +372,7 @@ throw new NotFoundException({ error: "投稿が見つかりません" });
 
 ## 11. 型安全規約
 
-### 11.1 現状の strict 設定
-
-| パッケージ | strict | 理由 |
-|-----------|--------|------|
-| `apps/web` | `true` | Vite テンプレートデフォルト。新規コードは strict 前提 |
-| `apps/api` | `true` | ADR-0008 に基づき移行完了。`strictPropertyInitialization` のみ `false` |
-
-### 11.2 tsconfig の strict フラグ管理方針
-
-`strict: true` をベースに、必要なフラグのみ個別に上書きする。
-
-| フラグ | 値 | 状態 |
-|--------|-----|------|
-| `strict` | `true` | ベース |
-| `strictPropertyInitialization` | `false` | DTO required フィールド用。恒久的に false |
-| `strictNullChecks` | `true` | Step 2 対応済み |
-| `noImplicitAny` | `true` | Step 1 対応済み |
-| `noImplicitOverride` | `true` | 有効 |
-| `noFallthroughCasesInSwitch` | `true` | 有効 |
-| `esModuleInterop` | `true` | 有効 |
-| `forceConsistentCasingInFileNames` | `true` | 有効 |
-
-### 11.3 実装規約
-
-- `any` の使用禁止（`unknown` で受け、型ガードで絞り込む）
-- `catch` 節では必ず `catch (e: unknown)` と型注釈を付与する
-- 関数の戻り値・引数には明示的に型注釈を付与する
-- `null` / `undefined` を扱う場合は `??` / `?.` で安全に処理する
-- DTO の全フィールドに `@ApiProperty` で型を明示する
-- 非 null アサーション `!` の使用は、実行時保証が明確な場合に限る
-
-### 11.4 移行計画
-
-詳細は ADR-0008 参照。残りの移行ステップ:
-
-1. ✅ Step 1: `noImplicitAny: true` — `catch(e)` → `catch(e: unknown)` 修正
-2. ✅ Step 2: `strictNullChecks: true` — null 非安全アクセス修正
-3. ✅ Step 3: 全 strict フラグ有効化完了（`strictPropertyInitialization: false` のみ残存）
-
-### 11.5 NG 例
-
-```typescript
-// NG: 暗黙的 any
-function process(data) { return data.id; }
-
-// NG: catch 節の型注釈なし
-catch (e) { console.log(e.message); }
-
-// NG: null 非安全
-const name = post.user.name; // user が null の可能性
-
-// NG: 型アサーション乱用
-const post = await this.prisma.post.findUnique(...) as any;
-```
+tsconfig 設定・フラグ管理方針は [`docs/conventions/tsconfig.md`](./tsconfig.md) を参照。
 
 ---
 

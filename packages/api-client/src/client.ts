@@ -22,7 +22,8 @@ import {
   conversationsControllerFindMessages,
   conversationsControllerCreateMessage,
   conversationsControllerMarkAsRead,
-  type ConversationsControllerCreateMessageBody,
+  type ConversationsControllerCreateMessageBodyOne,
+  type PostsControllerListParams,
   sightingsControllerCreate,
   sightingsControllerFindByPost,
   sightingsControllerFindOne,
@@ -148,9 +149,12 @@ export function createClient(options: ClientOptions) {
       return doRefresh();
     },
     listPosts: async (page = 1, perPage = 10, mine?: boolean) => {
-      const params: Record<string, string | number> = { page, perPage };
+      const params: Partial<PostsControllerListParams> & {
+        page?: number;
+        perPage?: number;
+      } = { page, perPage };
       if (mine) params.mine = "true";
-      const r = await postsControllerList({ params });
+      const r = await postsControllerList(params as PostsControllerListParams);
       return r.data;
     },
     createPost: async (data: PostsControllerCreateBody) => {
@@ -206,7 +210,7 @@ export function createClient(options: ClientOptions) {
     },
     sendMessage: async (
       id: string,
-      body: ConversationsControllerCreateMessageBody
+      body: ConversationsControllerCreateMessageBodyOne
     ) => {
       const r = await conversationsControllerCreateMessage(id, body);
       return r.data;

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "orval": "^6.0.0"
+    "orval": "^8.10.0"
   },
   "scripts": {
     "generate": "orval"
