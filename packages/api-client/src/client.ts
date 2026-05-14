@@ -212,6 +212,17 @@ export function createClient(options: ClientOptions) {
       id: string,
       body: ConversationsControllerCreateMessageBodyOne
     ) => {
+      if (body.image) {
+        const formData = new FormData();
+        if (body.body) formData.append("body", body.body);
+        formData.append("image", body.image);
+        const r = await axios.post(
+          `/api/conversations/${id}/messages`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        return r.data;
+      }
       const r = await conversationsControllerCreateMessage(id, body);
       return r.data;
     },
