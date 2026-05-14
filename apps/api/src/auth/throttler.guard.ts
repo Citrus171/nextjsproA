@@ -34,7 +34,9 @@ export class AppThrottlerGuard extends ThrottlerGuard {
 
     if (BYPASS_IPS.size > 0) {
       const req = context.switchToHttp().getRequest<{ ip: string }>();
-      if (BYPASS_IPS.has(req.ip)) return true;
+      // IPv4-mapped IPv6 (::ffff:127.0.0.1) を正規化して比較
+      const ip = (req.ip ?? "").replace(/^::ffff:/, "");
+      if (BYPASS_IPS.has(ip)) return true;
     }
 
     if (throttler.name !== undefined && OPT_IN_THROTTLERS.has(throttler.name)) {

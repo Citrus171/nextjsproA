@@ -43,6 +43,27 @@ export function login(user = USERS.owner) {
 }
 
 /**
+ * Login and return both the access token and the refresh token cookie value.
+ * Use this when the refresh flow needs to be tested over http:// (Secure cookie workaround).
+ */
+export function loginWithCookie(user = USERS.owner) {
+  const res = http.post(
+    `${BASE_URL}/api/auth/login`,
+    JSON.stringify({ email: user.email, password: user.password }),
+    {
+      headers: { "Content-Type": "application/json" },
+      tags: { type: "auth" },
+    }
+  );
+
+  check(res, { "login 200": (r) => r.status === 200 });
+
+  const body = JSON.parse(res.body);
+  const refreshToken = res.cookies["refreshToken"]?.[0]?.value ?? null;
+  return { token: body.accessToken ?? null, refreshToken };
+}
+
+/**
  * Logout (invalidates the refresh token cookie).
  */
 export function logout(token) {
