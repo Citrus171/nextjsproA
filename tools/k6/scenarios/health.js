@@ -8,12 +8,15 @@ import { BASE_URL } from "../lib/auth.js";
  */
 export function healthCheck() {
   const res = http.get(`${BASE_URL}/api/health`, {
+    // 403 = reverse proxy blocks public access to health endpoint (production)
+    responseCallback: http.expectedStatuses(200, 403),
     tags: { type: "read", scenario: "health" },
   });
 
   check(res, {
-    "health 200": (r) => r.status === 200,
+    "health reachable": (r) => r.status === 200 || r.status === 403,
     "health status ok": (r) => {
+      if (r.status !== 200) return true; // proxy-blocked is acceptable
       try {
         return JSON.parse(r.body).status === "ok";
       } catch {
