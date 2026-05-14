@@ -1,6 +1,20 @@
 # テスト一覧（ツリー形式）
 
 ```
+tools/k6/
+├── lib/
+│   ├── thresholds.js    # SLO 定義（エラー率 <1%, p95 read <300ms, p95 auth <800ms）
+│   └── auth.js          # login / logout / authParams ヘルパー
+├── scenarios/
+│   ├── health.js        # GET /api/health — 200 & status:ok
+│   ├── auth_flow.js     # login → refresh → logout
+│   ├── posts_read.js    # GET /api/posts, GET /api/posts/:id — 200
+│   ├── sightings_read.js # GET /api/sightings, GET /api/sightings/:id — 200
+│   └── map_markers.js   # GET /api/map/markers — 200
+└── main.js              # 全シナリオ統合（setup / teardown 含む）
+```
+
+```
 apps/api/src/
 ├── common/
 │   ├── error-codes.ts

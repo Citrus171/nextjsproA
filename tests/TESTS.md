@@ -1,5 +1,21 @@
 # テスト一覧
 
+## k6 Performance Tests (`tools/k6/`)
+
+### SLO チェック（thresholds）
+
+- [ ] エラー率 < 1%（`http_req_failed`）
+- [ ] p95 読み取り系 < 300ms（`type:read` タグ付きリクエスト）
+- [ ] p95 auth / 書き込み系 < 800ms（`type:auth` / `type:write` タグ付きリクエスト）
+
+### シナリオ別チェック
+
+- [ ] health: `GET /api/health` が 200 かつ `status: ok` を返すこと（常時 2 VU）
+- [ ] auth_flow: login → refresh → logout が全て成功すること（最大 10 VU）
+- [ ] posts_read: `GET /api/posts` / `GET /api/posts/:id` が 200 を返すこと（最大 100 VU）
+- [ ] sightings_read: `GET /api/sightings` / `GET /api/sightings/:id` が 200 を返すこと（最大 20 VU）
+- [ ] map_markers: `GET /api/map/markers` が 200 を返すこと（常時 10 VU）
+
 ## apps/api
 
 ## エラーコード体系 (`src/common/error-codes.ts`)
