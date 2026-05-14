@@ -233,6 +233,55 @@ GET /posts?pageNo=1&pageSize=10
 - `Date` 型のまま返すと NestJS の JSON 変換で自動変換されるため許容
 - DTO の `@ApiProperty` には `{ type: String, format: 'date-time' }` を明記
 
+### タイムゾーン変換の方針
+
+```
+DB保存 → UTC
+API レスポンス → UTC のまま ISO8601 で返す
+JST 表示 → フロントエンド側で変換する
+```
+
+**API 側で JST 変換は行わない。** フロントエンドでは `toLocaleString` を使って表示時のみ変換する。
+
+```typescript
+// フロントエンド（OK）
+new Date(iso).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+
+// API 側（NG）— JST に変換してから返さない
+new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })
+```
+
+日付ライブラリ（date-fns / Luxon 等）は現時点では未導入。`new Date()` / `Date.UTC()` で対応できる範囲に留める。cron・予約・タイムゾーン跨ぎが必要になった時点で `date-fns-tz` または `Luxon` の導入を検討する。
+
+---
+
+## 6.1 並行更新の方針
+
+### 方針：`updatedAt` ベースの楽観的ロック
+
+同一リソースを複数クライアントが同時編集した場合、後勝ちによるデータ消失を防ぐため、更新時に `updatedAt` を条件に含める。
+
+```typescript
+// Service 内での更新（OK）
+await this.prisma.post.updateMany({
+  where: { id, updatedAt: dto.updatedAt },  // クライアントが持つ updatedAt と一致する場合のみ更新
+  data: { ... },
+});
+// 0件更新 → 競合発生 → 409 を返す
+```
+
+```typescript
+// クライアントが送る DTO に updatedAt を含める
+class UpdatePostDto {
+  @IsDateString()
+  updatedAt: string;  // クライアントが最後に取得した updatedAt
+}
+```
+
+**競合時のレスポンス：** `409 Conflict` / `E_RESOURCE_CONFLICT`
+
+**適用対象：** 投稿編集など複数端末から同時更新が起きうるリソース。単一ユーザーのみが更新するリソース（refreshToken 等）は不要。
+
 ---
 
 ## 7. Controller / Service の責務分担
