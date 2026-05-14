@@ -1,0 +1,157 @@
+name: Performance Tests (k6)
+
+on:
+  schedule:
+    # 毎日 JST 03:00 (UTC 18:00) に実行 — CI 混雑を避ける
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "API base URL (空欄 = localhost:3000)"
+        required: false
+        default: ""
+
+jobs:
+  perf:
+    name: k6 Load Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Setup test database
+        run: npx prisma migrate deploy
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+
+      - name: Seed test data
+        run: npm run seed
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          HMAC_SECRET: ${{ secrets.HMAC_SECRET || 'ci-hmac-secret' }}
+          ENCRYPTION_KEY_V1: ${{ secrets.ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
+          ENCRYPTION_KEY_CURRENT: v1
+
+      - name: Build API
+        run: npm run build --workspace=apps/api
+
+      - name: Start API server
+        run: npm run start > /tmp/api-perf.log 2>&1 &
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test?connection_limit=50
+          NODE_ENV: production
+          JWT_SECRET: ci-test-secret
+          HMAC_SECRET: ${{ secrets.HMAC_SECRET || 'ci-hmac-secret' }}
+          ENCRYPTION_KEY_V1: ${{ secrets.ENCRYPTION_KEY || 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=' }}
+          ENCRYPTION_KEY_CURRENT: v1
+
+      - name: Wait for API
+        run: npx wait-on -t 60000 http://localhost:3000/api/health || (cat /tmp/api-perf.log && exit 1)
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 \
+            --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Run k6 performance tests
+        id: k6
+        run: |
+          BASE_URL="${{ github.event.inputs.base_url || 'http://localhost:3000' }}"
+          k6 run \
+            --env BASE_URL="${BASE_URL}" \
+            --out json=/tmp/k6-results.json \
+            tools/k6/main.js \
+            2>&1 | tee /tmp/k6-output.log
+        continue-on-error: true
+
+      - name: Parse and summarize results
+        if: always()
+        run: |
+          python3 << 'EOF'
+          import json, re
+
+          log = open('/tmp/k6-output.log').read()
+
+          # k6 の summary 部分を抽出して GitHub Step Summary に出力
+          summary_lines = []
+          in_summary = False
+          for line in log.splitlines():
+              if '█' in line or 'scenarios' in line.lower() or 'checks' in line.lower() \
+                 or 'http_req' in line or 'thresholds' in line.lower() \
+                 or 'PASS' in line or 'FAIL' in line or 'iteration' in line:
+                  summary_lines.append(line)
+
+          passed = 'PASS' in log or 'passed' in log.lower()
+          status = '✅ PASSED' if passed else '❌ FAILED'
+
+          with open('/tmp/k6-summary.md', 'w') as f:
+              f.write(f'## k6 Performance Test — {status}\n\n')
+              f.write('```\n')
+              f.write('\n'.join(summary_lines[:80]))
+              f.write('\n```\n\n')
+              f.write('**SLO thresholds**\n')
+              f.write('| Metric | Threshold |\n')
+              f.write('|---|---|\n')
+              f.write('| http_req_failed | < 1% |\n')
+              f.write('| p(95) read endpoints | < 300ms |\n')
+              f.write('| p(95) auth/write endpoints | < 800ms |\n')
+
+          print(open('/tmp/k6-summary.md').read())
+          EOF
+
+          cat /tmp/k6-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-results-${{ github.run_id }}
+          path: |
+            /tmp/k6-results.json
+            /tmp/k6-output.log
+          retention-days: 30
+
+      - name: Fail if k6 thresholds breached
+        if: steps.k6.outcome == 'failure'
+        run: |
+          echo "❌ k6 thresholds breached — check the summary above"
+          cat /tmp/k6-output.log | tail -30
+          exit 1

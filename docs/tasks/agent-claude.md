@@ -1,5 +1,23 @@
 # Claude Code タスクログ
 
+## [DONE] k6 性能テスト基盤の構築
+- 開始: 2026-05-14 10:40
+- 終了: 2026-05-14 11:00
+- 状態: DONE
+- 編集ファイル:
+  - `tools/k6/lib/auth.js`（新規）
+  - `tools/k6/lib/thresholds.js`（新規）
+  - `tools/k6/scenarios/health.js`（新規）
+  - `tools/k6/scenarios/auth_flow.js`（新規）
+  - `tools/k6/scenarios/posts_read.js`（新規）
+  - `tools/k6/scenarios/sightings_read.js`（新規）
+  - `tools/k6/scenarios/map_markers.js`（新規）
+  - `tools/k6/main.js`（新規）
+  - `tools/k6/README.md`（新規）
+  - `.github/workflows/perf.yml`（新規）
+  - `tests/TESTS.md`
+  - `tests/TESTS_TREE.md`
+
 ## [DONE] tsconfig 設計規約ドキュメント整備
 - 開始: 2026-05-14 00:00
 - 終了: 2026-05-14 00:10
