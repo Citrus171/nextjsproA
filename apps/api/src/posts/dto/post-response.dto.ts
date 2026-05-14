@@ -14,12 +14,24 @@ export class PetDetailResponseDto {
   @ApiProperty() color: string;
   @ApiProperty() age: string;
   @ApiProperty() features: string;
-  @ApiProperty({ required: false, nullable: true }) gender: string | null;
-  @ApiProperty({ required: false, nullable: true }) breed: string | null;
-  @ApiProperty({ required: false, nullable: true }) size: string | null;
-  @ApiProperty({ required: false, nullable: true }) collar: string | null;
-  @ApiProperty({ required: false, nullable: true }) microchip: boolean | null;
-  @ApiProperty({ required: false, nullable: true }) neutered: boolean | null;
+  @ApiProperty({ required: false, nullable: true, type: String }) gender:
+    | string
+    | null;
+  @ApiProperty({ required: false, nullable: true, type: String }) breed:
+    | string
+    | null;
+  @ApiProperty({ required: false, nullable: true, type: String }) size:
+    | string
+    | null;
+  @ApiProperty({ required: false, nullable: true, type: String }) collar:
+    | string
+    | null;
+  @ApiProperty({ required: false, nullable: true, type: Boolean }) microchip:
+    | boolean
+    | null;
+  @ApiProperty({ required: false, nullable: true, type: Boolean }) neutered:
+    | boolean
+    | null;
 }
 
 export class LocationResponseDto {
@@ -38,7 +50,7 @@ export class PostResponseDto {
   @ApiProperty({ enum: PostType })
   postType: PostType;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({ required: false, nullable: true, type: String })
   title: string | null;
 
   @ApiProperty()
@@ -47,7 +59,7 @@ export class PostResponseDto {
   @ApiProperty()
   userId: string;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({ required: false, nullable: true, type: String })
   authorNickname?: string | null;
 
   @ApiProperty()
@@ -56,7 +68,12 @@ export class PostResponseDto {
   @ApiProperty()
   lostDate: Date;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    type: String,
+    format: "date-time",
+  })
   resolvedAt: Date | null;
 
   @ApiProperty({ required: false, nullable: true, type: PetDetailResponseDto })

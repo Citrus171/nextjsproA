@@ -1,6 +1,160 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "サービス正常\n\nThe Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "サービス異常\n\nThe Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": ["status"],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": ["health"]
+      }
+    },
     "/api/auth/login": {
       "post": {
         "operationId": "AuthController_login",
@@ -93,12 +247,12 @@
             "description": "管理者のみ"
           }
         },
-        "tags": ["users"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["users"]
       }
     },
     "/api/users/{id}": {
@@ -130,12 +284,12 @@
             "description": "ユーザーが見つかりません"
           }
         },
-        "tags": ["users"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["users"]
       }
     },
     "/api/users/register": {
@@ -275,16 +429,25 @@
             "description": "プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）"
           }
         },
-        "tags": ["posts"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["posts"]
       },
       "get": {
         "operationId": "PostsController_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "mine",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -297,12 +460,12 @@
             }
           }
         },
-        "tags": ["posts"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["posts"]
       }
     },
     "/api/posts/{id}": {
@@ -332,12 +495,12 @@
             }
           }
         },
-        "tags": ["posts"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["posts"]
       },
       "patch": {
         "operationId": "PostsController_update",
@@ -378,12 +541,12 @@
             "description": "Forbidden: not the post owner"
           }
         },
-        "tags": ["posts"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["posts"]
       },
       "delete": {
         "operationId": "PostsController_remove",
@@ -414,12 +577,12 @@
             "description": "Forbidden: not the post owner or admin"
           }
         },
-        "tags": ["posts"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["posts"]
       }
     },
     "/api/posts/{id}/images": {
@@ -477,12 +640,12 @@
             "description": "Forbidden: not the post owner or プラン上限超過（無料プランは3枚まで、有料プランは10枚まで）"
           }
         },
-        "tags": ["posts"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["posts"]
       }
     },
     "/api/posts/{id}/images/{imageId}": {
@@ -528,12 +691,12 @@
             "description": "Image not found"
           }
         },
-        "tags": ["posts"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["posts"]
       }
     },
     "/api/posts/{id}/favorite": {
@@ -576,12 +739,12 @@
             "description": "Post not found"
           }
         },
-        "tags": ["posts"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "tags": ["posts"]
       }
     },
     "/api/map/markers": {
@@ -625,8 +788,8 @@
             "required": false,
             "in": "query",
             "schema": {
-              "enum": ["lost", "resolved"],
-              "type": "string"
+              "type": "string",
+              "enum": ["lost", "resolved"]
             }
           }
         ],
@@ -651,7 +814,6 @@
     "/api/sightings": {
       "post": {
         "operationId": "SightingsController_create",
-        "summary": "目撃情報を作成する",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -676,16 +838,16 @@
             "description": ""
           }
         },
-        "tags": ["sightings"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "目撃情報を作成する",
+        "tags": ["sightings"]
       },
       "get": {
         "operationId": "SightingsController_findByPost",
-        "summary": "postId別の目撃情報一覧を取得する",
         "parameters": [
           {
             "name": "postId",
@@ -713,13 +875,13 @@
             }
           }
         },
+        "summary": "postId別の目撃情報一覧を取得する",
         "tags": ["sightings"]
       }
     },
     "/api/sightings/{id}": {
       "get": {
         "operationId": "SightingsController_findOne",
-        "summary": "目撃情報の詳細を取得する",
         "parameters": [
           {
             "name": "id",
@@ -747,11 +909,11 @@
             "description": "目撃情報が見つかりません"
           }
         },
+        "summary": "目撃情報の詳細を取得する",
         "tags": ["sightings"]
       },
       "delete": {
         "operationId": "SightingsController_remove",
-        "summary": "目撃情報を削除する（本人または管理者）",
         "parameters": [
           {
             "name": "id",
@@ -769,18 +931,18 @@
             "description": ""
           }
         },
-        "tags": ["sightings"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "目撃情報を削除する（本人または管理者）",
+        "tags": ["sightings"]
       }
     },
     "/api/sightings/{id}/favorite": {
       "post": {
         "operationId": "SightingsController_toggleFavorite",
-        "summary": "目撃情報のお気に入りをトグルする",
         "parameters": [
           {
             "name": "id",
@@ -815,18 +977,18 @@
             "description": "Sighting not found"
           }
         },
-        "tags": ["sightings"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "目撃情報のお気に入りをトグルする",
+        "tags": ["sightings"]
       }
     },
     "/api/conversations": {
       "post": {
         "operationId": "ConversationsController_create",
-        "summary": "会話を作成する",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -865,16 +1027,16 @@
             }
           }
         },
-        "tags": ["conversations"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "会話を作成する",
+        "tags": ["conversations"]
       },
       "get": {
         "operationId": "ConversationsController_findAll",
-        "summary": "自分が参加する会話一覧を取得する",
         "parameters": [],
         "responses": {
           "200": {
@@ -891,18 +1053,18 @@
             }
           }
         },
-        "tags": ["conversations"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "自分が参加する会話一覧を取得する",
+        "tags": ["conversations"]
       }
     },
     "/api/conversations/unread-count": {
       "get": {
         "operationId": "ConversationsController_getUnreadCount",
-        "summary": "未読メッセージの合計数を取得する",
         "parameters": [],
         "responses": {
           "200": {
@@ -921,18 +1083,18 @@
             }
           }
         },
-        "tags": ["conversations"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "未読メッセージの合計数を取得する",
+        "tags": ["conversations"]
       }
     },
     "/api/conversations/{id}": {
       "get": {
         "operationId": "ConversationsController_findOne",
-        "summary": "会話を取得する",
         "parameters": [
           {
             "name": "id",
@@ -957,18 +1119,18 @@
             }
           }
         },
-        "tags": ["conversations"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "会話を取得する",
+        "tags": ["conversations"]
       }
     },
     "/api/conversations/{id}/messages": {
       "post": {
         "operationId": "ConversationsController_createMessage",
-        "summary": "メッセージを送信する",
         "parameters": [
           {
             "name": "id",
@@ -984,18 +1146,36 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": ["body"],
-                "example": {
-                  "body": "こんにちは、見つかりましたか？"
-                },
                 "properties": {
                   "body": {
                     "type": "string",
                     "maxLength": 1000,
                     "example": "こんにちは、見つかりましたか？"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "JPEG/PNG、2MB以下"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "body": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "example": "こんにちは、見つかりましたか？"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "JPEG/PNG、2MB以下"
                   }
                 }
               }
@@ -1014,16 +1194,16 @@
             }
           }
         },
-        "tags": ["conversations"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "メッセージを送信する（テキストまたは画像）",
+        "tags": ["conversations"]
       },
       "get": {
         "operationId": "ConversationsController_findMessages",
-        "summary": "メッセージ一覧を取得する",
         "parameters": [
           {
             "name": "id",
@@ -1051,18 +1231,18 @@
             }
           }
         },
-        "tags": ["conversations"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "メッセージ一覧を取得する",
+        "tags": ["conversations"]
       }
     },
     "/api/conversations/{id}/messages/read": {
       "patch": {
         "operationId": "ConversationsController_markAsRead",
-        "summary": "会話内の未読メッセージを既読にする",
         "parameters": [
           {
             "name": "id",
@@ -1080,12 +1260,13 @@
             "description": ""
           }
         },
-        "tags": ["conversations"],
         "security": [
           {
             "bearer": []
           }
-        ]
+        ],
+        "summary": "会話内の未読メッセージを既読にする",
+        "tags": ["conversations"]
       }
     }
   },
@@ -1278,12 +1459,13 @@
             "type": "string"
           },
           "resolvedAt": {
-            "format": "date-time",
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "format": "date-time"
           },
           "petDetail": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/PetDetailResponseDto"
@@ -1292,6 +1474,7 @@
           },
           "location": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/LocationResponseDto"
@@ -1603,6 +1786,7 @@
           },
           "lastMessage": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/LastMessageDto"
@@ -1640,7 +1824,12 @@
             "type": "string"
           },
           "body": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
           },
           "readAt": {
             "type": "string",
@@ -1657,6 +1846,7 @@
           "conversationId",
           "senderId",
           "body",
+          "imageUrl",
           "readAt",
           "createdAt"
         ]

@@ -13,6 +13,7 @@ export class SightingResponseDto {
     example: OPENAPI_POST_ID_EXAMPLE,
     required: false,
     nullable: true,
+    type: String,
   })
   postId: string | null;
 
@@ -29,6 +30,7 @@ export class SightingResponseDto {
     example: "埼玉県さいたま市浦和区",
     required: false,
     nullable: true,
+    type: String,
   })
   address: string | null;
 
@@ -43,6 +45,7 @@ export class SightingResponseDto {
     example: "公園付近で目撃しました",
     required: false,
     nullable: true,
+    type: String,
   })
   comment: string | null;
 
