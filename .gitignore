@@ -22,3 +22,7 @@ CLAUDE.md
 apps/web/test-results/
 schema-coverage.html
 apps/api/scripts/decrypt-emails.ts
+
+*storybook.log
+storybook-static
+kilo.json

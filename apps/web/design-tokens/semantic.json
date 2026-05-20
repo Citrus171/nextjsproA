@@ -1,0 +1,22 @@
+{
+  "background": { "value": "0 0% 100%", "type": "color" },
+  "foreground": { "value": "222 84% 5%", "type": "color" },
+  "card": { "value": "0 0% 100%", "type": "color" },
+  "card-foreground": { "value": "222 84% 5%", "type": "color" },
+  "popover": { "value": "0 0% 100%", "type": "color" },
+  "popover-foreground": { "value": "222 84% 5%", "type": "color" },
+  "primary": { "value": "217 89% 51%", "type": "color" },
+  "primary-foreground": { "value": "0 0% 100%", "type": "color" },
+  "secondary": { "value": "210 40% 96%", "type": "color" },
+  "secondary-foreground": { "value": "222 47% 11%", "type": "color" },
+  "muted": { "value": "210 40% 96%", "type": "color" },
+  "muted-foreground": { "value": "215 16% 47%", "type": "color" },
+  "accent": { "value": "210 40% 96%", "type": "color" },
+  "accent-foreground": { "value": "222 47% 11%", "type": "color" },
+  "destructive": { "value": "4 67% 48%", "type": "color" },
+  "destructive-foreground": { "value": "0 0% 100%", "type": "color" },
+  "border": { "value": "214 32% 91%", "type": "color" },
+  "input": { "value": "214 32% 91%", "type": "color" },
+  "ring": { "value": "217 89% 51%", "type": "color" },
+  "radius": { "value": "0.5rem" }
+}
