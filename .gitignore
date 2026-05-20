@@ -26,3 +26,4 @@ apps/api/scripts/decrypt-emails.ts
 *storybook.log
 storybook-static
 kilo.json
+.mcp.json
