@@ -11,6 +11,15 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-nestjs_dev}",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -24,5 +33,73 @@ services:
     depends_on:
       - db
 
+  # ---------- 以下はアプリ起動確認用（docker compose --profile app up -d --build） ----------
+  # 日常開発はホストの npm run start:api / start:web を使う。docs/docker.md 参照。
+
+  # Prisma マイグレーション（one-shot。k8s では initContainer / Job に対応）
+  migrate:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: build
+    container_name: nestjs_migrate
+    command: npx prisma migrate deploy --schema apps/api/prisma/schema.prisma
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-nestjs_dev}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: nestjs_api
+    restart: unless-stopped
+    env_file: apps/api/.env
+    environment:
+      # NODE_ENV=production だと refresh Cookie が Secure になり
+      # http://localhost では認証不能のため development で起動する
+      NODE_ENV: development
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-nestjs_dev}
+      WEB_ORIGIN: http://localhost:8080
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - uploads_data:/app/apps/api/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  web:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: nestjs_web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  uploads_data:
