@@ -12,6 +12,18 @@ import { PrismaService } from "../prisma.service";
 import { CryptoService } from "./crypto.service";
 import { ERROR_CODES } from "../common/error-codes";
 
+export const REFRESH_TOKEN_MAX_AGE_MS = 60 * 60 * 24 * 30 * 1000;
+
+export function refreshTokenCookieOptions(isProd: boolean) {
+  return {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: (isProd ? "none" : "lax") as "lax" | "none",
+    path: "/",
+    maxAge: REFRESH_TOKEN_MAX_AGE_MS,
+  };
+}
+
 export interface CookieSpec {
   name: string;
   value: string;
@@ -93,7 +105,7 @@ export class IdentityService extends IIdentityService {
       data: {
         tokenHash,
         userId: user.id,
-        expiresAt: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS),
       },
     });
     const payload = {
@@ -148,7 +160,7 @@ export class IdentityService extends IIdentityService {
       data: {
         tokenHash: newHash,
         userId: rec.userId,
-        expiresAt: new Date(Date.now() + 60 * 60 * 24 * 30 * 1000),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS),
       },
     });
     const payload = {
@@ -310,13 +322,7 @@ export class IdentityService extends IIdentityService {
     return {
       name: "refreshToken",
       value: token,
-      options: {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? "none" : "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 30,
-      },
+      options: refreshTokenCookieOptions(isProd),
     };
   }
 }
