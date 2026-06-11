@@ -27,3 +27,6 @@ apps/api/scripts/decrypt-emails.ts
 storybook-static
 kilo.json
 .mcp.json
+
+# k8s Secret は実値を含むためコミットしない（docs/docker.md sec28 原則）
+k8s/secret.yaml

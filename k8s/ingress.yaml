@@ -1,0 +1,21 @@
+# 外部公開（compose の web の ports: 8080:80 に相当）
+# k3d の 8081:80 マッピング → Traefik → この Ingress → web Service の経路
+# /api 等のプロキシは web 内の nginx が担うため、ルールは web への1本だけでよい
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web
+spec:
+  ingressClassName: traefik # k3s 内蔵の Traefik を使う
+  rules:
+    # Host ヘッダで振り分け（複数プロジェクトを namespace 分離しても 8081 を共有できる）
+    - host: nextjsproa.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80

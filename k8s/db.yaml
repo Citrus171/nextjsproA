@@ -1,0 +1,58 @@
+# PostgreSQL（compose の db サービスに相当）
+# DB のような「個体の同一性が必要なもの」は Deployment ではなく StatefulSet を使う
+---
+# StatefulSet が要求する headless Service（clusterIP: None）
+# Service 名 "db" が namespace 内 DNS 名になる（compose のサービス名解決と同じ役割）
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  clusterIP: None
+  selector:
+    app: db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+spec:
+  serviceName: db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: app-secrets
+          # compose の healthcheck: pg_isready に相当
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "nestjs_dev"]
+            periodSeconds: 5
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  # compose の named volume postgres_data に相当（PVC を Pod ごとに自動生成）
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
