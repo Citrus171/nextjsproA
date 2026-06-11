@@ -10,6 +10,7 @@ import * as path from "path";
 import { Logger } from "nestjs-pino";
 import { applyParameterExamples } from "./common/openapi-document";
 import { isOriginAllowed } from "./common/cors";
+import { resolvePort } from "./common/port";
 import { assertSecrets } from "./common/startup-guard";
 
 async function bootstrap() {
@@ -63,7 +64,7 @@ async function bootstrap() {
     SwaggerModule.setup("api", app, document);
   }
 
-  const port = parseInt(process.env.PORT ?? "3000", 10);
+  const port = resolvePort(process.env.PORT);
   await app.listen(port);
   app.get(Logger).log(`API listening on http://localhost:${port}`);
 }

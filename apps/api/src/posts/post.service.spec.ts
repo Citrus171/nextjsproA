@@ -204,6 +204,50 @@ describe("PostsService", () => {
         expect.objectContaining({ skip: 0, take: 10 })
       );
     });
+
+    it("perPage=-5 かつ page=2 でも skip が負にならず take=1 にクランプされる", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.post.count.mockResolvedValue(0);
+
+      await service.findAll(2, -5);
+
+      expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 1, take: 1 })
+      );
+    });
+
+    it("perPage=0 でも take=1 にクランプされる", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.post.count.mockResolvedValue(0);
+
+      await service.findAll(1, 0);
+
+      expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 1 })
+      );
+    });
+
+    it("page/perPage が NaN でもデフォルト値 (skip=0, take=10) で処理される", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.post.count.mockResolvedValue(0);
+
+      await service.findAll(NaN, NaN);
+
+      expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10 })
+      );
+    });
+
+    it("page/perPage が小数でも整数に切り捨てて処理される", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.post.count.mockResolvedValue(0);
+
+      await service.findAll(2.7, 5.9);
+
+      expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 5, take: 5 })
+      );
+    });
   });
 
   // ─── findById ───────────────────────────────────────────────

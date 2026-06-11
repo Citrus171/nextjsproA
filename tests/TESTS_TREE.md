@@ -38,10 +38,19 @@ apps/api/src/
 │   │           ├── localhost の任意ポートを許可すること
 │   │           ├── 許可オリジンを許可すること
 │   │           └── 未知の非 localhost オリジンを拒否すること
-│   └── openapi-examples.spec.ts
-│       └── OpenAPI example IDs
-│           ├── 用途別の OpenAPI 例示 ID が重複しないこと
-│           └── 汎用 ID 例示は投稿 ID 例示と一致すること
+│   ├── openapi-examples.spec.ts
+│   │   └── OpenAPI example IDs
+│   │       ├── 用途別の OpenAPI 例示 ID が重複しないこと
+│   │       └── 汎用 ID 例示は投稿 ID 例示と一致すること
+│   └── port.spec.ts
+│       └── resolvePort
+│           ├── 未設定（undefined）の時はデフォルトの 3000 を返すこと
+│           ├── 空文字の時はデフォルトの 3000 を返すこと
+│           ├── 数値文字列の時はその値を返すこと
+│           ├── 非数値文字列の時はデフォルトの 3000 を返すこと
+│           ├── 0 以下の時はデフォルトの 3000 を返すこと
+│           ├── 65535 を超える時はデフォルトの 3000 を返すこと
+│           └── ポート範囲の境界値（1 と 65535）はそのまま返すこと
 ├── auth/
 │   ├── roles.guard.spec.ts
 │   │   └── RolesGuard
@@ -233,7 +242,11 @@ apps/api/src/
 │   │   │   ├── userId 指定時は where に userId を含めて検索する
 │   │   │   ├── userId 指定時でもページネーションが正しく機能する
 │   │   │   ├── page=0 を渡しても skip=0 (先頭ページ) として処理される
-│   │   │   └── page=-1 を渡しても skip=0 (先頭ページ) として処理される
+│   │   │   ├── page=-1 を渡しても skip=0 (先頭ページ) として処理される
+│   │   │   ├── perPage=-5 かつ page=2 でも skip が負にならず take=1 にクランプされる
+│   │   │   ├── perPage=0 でも take=1 にクランプされる
+│   │   │   ├── page/perPage が NaN でもデフォルト値 (skip=0, take=10) で処理される
+│   │   │   └── page/perPage が小数でも整数に切り捨てて処理される
 │   │   ├── findById
 │   │   │   └── petDetail/location/images と user.nickname を取得し authorNickname を返す
 │   │   ├── create
