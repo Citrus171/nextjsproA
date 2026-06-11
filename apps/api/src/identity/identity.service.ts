@@ -14,11 +14,29 @@ import { ERROR_CODES } from "../common/error-codes";
 
 export const REFRESH_TOKEN_MAX_AGE_MS = 60 * 60 * 24 * 30 * 1000;
 
-export function refreshTokenCookieOptions(isProd: boolean) {
+// COOKIE_SECURE が明示されていればそれを優先し、なければ NODE_ENV で判定する。
+// http しか使えない検証環境（k3d/compose）を NODE_ENV=production で運用するための分離（issue #292）
+export function resolveCookieSecure(
+  cookieSecure: string | undefined,
+  nodeEnv: string | undefined
+): boolean {
+  if (cookieSecure === "true") return true;
+  if (cookieSecure === "false") return false;
+  return nodeEnv === "production";
+}
+
+export function cookieSecureFromConfig(config: ConfigService): boolean {
+  return resolveCookieSecure(
+    config.get<string>("COOKIE_SECURE"),
+    config.get<string>("NODE_ENV")
+  );
+}
+
+export function refreshTokenCookieOptions(secure: boolean) {
   return {
     httpOnly: true,
-    secure: isProd,
-    sameSite: (isProd ? "none" : "lax") as "lax" | "none",
+    secure,
+    sameSite: (secure ? "none" : "lax") as "lax" | "none",
     path: "/",
     maxAge: REFRESH_TOKEN_MAX_AGE_MS,
   };
@@ -318,11 +336,10 @@ export class IdentityService extends IIdentityService {
   }
 
   private buildRefreshCookie(token: string): CookieSpec {
-    const isProd = this.config.get<string>("NODE_ENV") === "production";
     return {
       name: "refreshToken",
       value: token,
-      options: refreshTokenCookieOptions(isProd),
+      options: refreshTokenCookieOptions(cookieSecureFromConfig(this.config)),
     };
   }
 }

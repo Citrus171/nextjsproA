@@ -60,9 +60,10 @@ services:
     restart: unless-stopped
     env_file: apps/api/.env
     environment:
-      # NODE_ENV=production だと refresh Cookie が Secure になり
-      # http://localhost では認証不能のため development で起動する
-      NODE_ENV: development
+      # 本番同等の JSON ログで運用する。http://localhost のため
+      # Cookie の Secure だけ COOKIE_SECURE=false で無効化する（issue #292）
+      NODE_ENV: production
+      COOKIE_SECURE: "false"
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-nestjs_dev}
       WEB_ORIGIN: http://localhost:8080
     ports:

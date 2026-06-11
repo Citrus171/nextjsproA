@@ -13,6 +13,7 @@ import { SkipThrottle, Throttle } from "@nestjs/throttler";
 import { ConfigService } from "@nestjs/config";
 import {
   IIdentityService,
+  cookieSecureFromConfig,
   refreshTokenCookieOptions,
 } from "../identity/identity.service";
 import { LoginDto } from "./dto/login.dto";
@@ -70,8 +71,10 @@ export class AuthController {
     const cookies = req.cookies as Record<string, string> | undefined;
     const token = cookies?.refreshToken;
     if (token) await this.identity.logout(token);
-    const isProd = this.config.get<string>("NODE_ENV") === "production";
-    res.clearCookie("refreshToken", refreshTokenCookieOptions(isProd));
+    res.clearCookie(
+      "refreshToken",
+      refreshTokenCookieOptions(cookieSecureFromConfig(this.config))
+    );
     return { ok: true };
   }
 
