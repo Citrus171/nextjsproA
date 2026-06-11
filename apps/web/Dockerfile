@@ -28,3 +28,5 @@ FROM nginx:1.29-alpine
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 80
+# ベースイメージの CMD と同一だが、起動方法を Dockerfile 単体で読めるよう明示する
+CMD ["nginx", "-g", "daemon off;"]
