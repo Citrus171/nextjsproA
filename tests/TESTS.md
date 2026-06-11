@@ -58,6 +58,16 @@
 - [x] 用途別の OpenAPI 例示 ID が重複しないこと
 - [x] 汎用 ID 例示は投稿 ID 例示と一致すること
 
+### resolvePort (`src/common/port.spec.ts`)
+
+- [x] 未設定（undefined）の時はデフォルトの 3000 を返すこと
+- [x] 空文字の時はデフォルトの 3000 を返すこと
+- [x] 数値文字列の時はその値を返すこと
+- [x] 非数値文字列の時はデフォルトの 3000 を返すこと
+- [x] 0 以下の時はデフォルトの 3000 を返すこと
+- [x] 65535 を超える時はデフォルトの 3000 を返すこと
+- [x] ポート範囲の境界値（1 と 65535）はそのまま返すこと
+
 ### PostsService (`src/posts/post.service.spec.ts`)
 
 #### findAll
@@ -69,6 +79,10 @@
 - [x] userId 指定時でもページネーションが正しく機能する
 - [x] page=0 を渡しても skip=0 (先頭ページ) として処理される
 - [x] page=-1 を渡しても skip=0 (先頭ページ) として処理される
+- [x] perPage=-5 かつ page=2 でも skip が負にならず take=1 にクランプされる
+- [x] perPage=0 でも take=1 にクランプされる
+- [x] page/perPage が NaN でもデフォルト値 (skip=0, take=10) で処理される
+- [x] page/perPage が小数でも整数に切り捨てて処理される
 
 #### findById
 

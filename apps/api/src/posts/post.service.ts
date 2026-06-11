@@ -357,13 +357,16 @@ export class PostsService {
   }
 
   async findAll(page = 1, perPage = 10, userId?: string) {
-    const safePage = Math.max(1, page);
-    const skip = (safePage - 1) * perPage;
+    const safePage = Number.isFinite(page) ? Math.max(1, Math.trunc(page)) : 1;
+    const safePerPage = Number.isFinite(perPage)
+      ? Math.max(1, Math.trunc(perPage))
+      : 10;
+    const skip = (safePage - 1) * safePerPage;
     const where = userId ? { userId } : {};
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
         skip,
-        take: perPage,
+        take: safePerPage,
         where,
         orderBy: { createdAt: "desc" },
         include: {
