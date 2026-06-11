@@ -63,10 +63,12 @@ async function bootstrap() {
     SwaggerModule.setup("api", app, document);
   }
 
-  await app.listen(3000);
-  app.get(Logger).log("API listening on http://localhost:3000");
+  const port = parseInt(process.env.PORT ?? "3000", 10);
+  await app.listen(port);
+  app.get(Logger).log(`API listening on http://localhost:${port}`);
 }
 
-bootstrap().catch(() => {
+bootstrap().catch((err: unknown) => {
+  console.error("起動に失敗しました:", err);
   process.exitCode = 1;
 });

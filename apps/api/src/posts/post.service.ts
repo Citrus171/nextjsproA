@@ -39,6 +39,10 @@ function getMonthRange(date = new Date()) {
   return { start, end };
 }
 
+function setField<T, K extends keyof T>(obj: T, key: K, value: T[K]): void {
+  obj[key] = value;
+}
+
 function isTransactionConflict(error: unknown) {
   return (
     typeof error === "object" &&
@@ -90,14 +94,14 @@ function buildPetDetailUpsertData(postId: string, pd: UpdatePetDetailDto) {
     const val = pd[key];
     if (val !== undefined) {
       const v = transform ? transform(val) : val;
-      (create as Record<string, unknown>)[key] = v;
-      (update as Record<string, unknown>)[key] = v;
+      setField(create, key, v as (typeof create)[typeof key]);
+      setField(update, key, v as (typeof update)[typeof key]);
     }
   }
 
   for (const key of ["name", "color", "age", "features"] as const) {
     if (pd[key] !== undefined)
-      (update as Record<string, unknown>)[key] = pd[key];
+      setField(update, key, pd[key] as (typeof update)[typeof key]);
   }
 
   return { create, update };
@@ -126,9 +130,8 @@ function buildLocationUpsertData(postId: string, loc: UpdateLocationDto) {
   for (const { key, transform } of fields) {
     const val = loc[key];
     if (val !== undefined) {
-      (update as Record<string, unknown>)[key] = transform
-        ? transform(val)
-        : val;
+      const v = transform ? transform(val) : val;
+      setField(update, key, v as (typeof update)[typeof key]);
     }
   }
   return { create, update };
@@ -216,17 +219,12 @@ function buildPetDetailCreateData(
     features: pd.features,
   };
 
-  if (pd.gender !== undefined)
-    (data as Record<string, unknown>).gender = pd.gender as Gender;
-  if (pd.breed !== undefined)
-    (data as Record<string, unknown>).breed = pd.breed;
-  if (pd.size !== undefined) (data as Record<string, unknown>).size = pd.size;
-  if (pd.collar !== undefined)
-    (data as Record<string, unknown>).collar = pd.collar;
-  if (pd.microchip !== undefined)
-    (data as Record<string, unknown>).microchip = pd.microchip;
-  if (pd.neutered !== undefined)
-    (data as Record<string, unknown>).neutered = pd.neutered;
+  if (pd.gender !== undefined) data.gender = pd.gender as Gender;
+  if (pd.breed !== undefined) data.breed = pd.breed;
+  if (pd.size !== undefined) data.size = pd.size;
+  if (pd.collar !== undefined) data.collar = pd.collar;
+  if (pd.microchip !== undefined) data.microchip = pd.microchip;
+  if (pd.neutered !== undefined) data.neutered = pd.neutered;
 
   return data;
 }
@@ -359,7 +357,8 @@ export class PostsService {
   }
 
   async findAll(page = 1, perPage = 10, userId?: string) {
-    const skip = (page - 1) * perPage;
+    const safePage = Math.max(1, page);
+    const skip = (safePage - 1) * perPage;
     const where = userId ? { userId } : {};
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
@@ -627,7 +626,7 @@ export class PostsService {
       if (count >= MAX_FAVORITES_LIMIT)
         throw new BadRequestException({
           code: ERROR_CODES.POST_FAVORITE_LIMIT,
-          message: "お気に入りは20件までです",
+          message: `お気に入りは${MAX_FAVORITES_LIMIT}件までです`,
         });
       await tx.postFavorite.create({ data: { userId, postId } });
     });

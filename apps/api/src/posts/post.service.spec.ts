@@ -182,6 +182,28 @@ describe("PostsService", () => {
         where: { userId: "user1" },
       });
     });
+
+    it("page=0 を渡しても skip=0 (先頭ページ) として処理される", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.post.count.mockResolvedValue(0);
+
+      await service.findAll(0, 10);
+
+      expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10 })
+      );
+    });
+
+    it("page=-1 を渡しても skip=0 (先頭ページ) として処理される", async () => {
+      mockPrisma.post.findMany.mockResolvedValue([]);
+      mockPrisma.post.count.mockResolvedValue(0);
+
+      await service.findAll(-1, 10);
+
+      expect(mockPrisma.post.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: 0, take: 10 })
+      );
+    });
   });
 
   // ─── findById ───────────────────────────────────────────────

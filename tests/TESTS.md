@@ -67,6 +67,8 @@
 - [x] items と total を返し、投稿者名を authorNickname に詰める
 - [x] userId 指定時は where に userId を含めて検索する
 - [x] userId 指定時でもページネーションが正しく機能する
+- [x] page=0 を渡しても skip=0 (先頭ページ) として処理される
+- [x] page=-1 を渡しても skip=0 (先頭ページ) として処理される
 
 #### findById
 
@@ -508,6 +510,14 @@
 
 - [x] 制限超過時に日本語メッセージ付き ThrottlerException をスローすること
 
+### AuthController (`src/auth/auth.controller.spec.ts`)
+
+#### logout
+
+- [x] clearCookie が refreshTokenCookieOptions と同じ属性で呼ばれること（非production）
+- [x] clearCookie が refreshTokenCookieOptions と同じ属性で呼ばれること（production）
+- [x] Cookie がなければ clearCookie は属性付きで呼ばれ、logout は呼ばれないこと
+
 ---
 
 ### IdentityService (`src/identity/identity.service.spec.ts`)
@@ -515,11 +525,12 @@
 #### login
 
 - [x] 正しいメールとパスワードでAuthResultを返すこと
+- [x] CookieのmaxAgeが30日（ミリ秒）で設定されること
 - [x] DBにはtokenHashが保存され、平文トークンは保存されないこと
 - [x] パスワード不一致でUnauthorizedExceptionを投げること
 - [x] 存在しないメールアドレスでUnauthorizedExceptionを投げること
 - [x] HMACのみで検索し、SHA256フォールバックを行わないこと
-- [x] production環境ではCookieのsecureとsameSiteが適切に設定されること
+- [x] production環境ではCookieのsecure/sameSite/maxAgeが適切に設定されること
 - [x] ログイン成功時に auth.login.success イベントをログ出力すること
 - [x] パスワード不一致時に auth.login.failure イベントをログ出力すること
 - [x] メールアドレス未登録時に auth.login.failure イベントをログ出力すること
@@ -557,6 +568,12 @@
 #### deleteUser
 
 - [x] ユーザーを削除しUserDtoを返すこと
+
+#### refreshTokenCookieOptions
+
+- [x] 非production環境では secure=false, sameSite=lax を返すこと
+- [x] production環境では secure=true, sameSite=none を返すこと
+- [x] maxAge がミリ秒単位で30日に等しいこと
 
 ### emailHashマイグレーション (`src/identity/email-hash-migration.spec.ts`)
 

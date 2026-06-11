@@ -76,30 +76,31 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     refresh().finally(() => setIsRestoring(false));
   }, [refresh]);
 
-  const setToken = (t: string | null) => setTokenState(t);
-  const clearToken = () => {
+  const setToken = useCallback((t: string | null) => setTokenState(t), []);
+  const clearToken = useCallback(() => {
     setTokenState(null);
     navigate("/login");
-  };
+  }, [navigate]);
 
   const payload = decodePayload(token);
   const userId = (payload?.sub as string) ?? null;
   const nickname = (payload?.nickname as string) ?? null;
 
+  const contextValue = React.useMemo(
+    () => ({
+      token,
+      userId,
+      nickname,
+      isRestoring,
+      setToken,
+      clearToken,
+      refresh,
+    }),
+    [token, userId, nickname, isRestoring, setToken, clearToken, refresh]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        userId,
-        nickname,
-        isRestoring,
-        setToken,
-        clearToken,
-        refresh,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };
 

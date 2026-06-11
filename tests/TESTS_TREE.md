@@ -49,9 +49,15 @@ apps/api/src/
 │   │       ├── ロールが一致する場合は通す
 │   │       ├── ロールが一致しない場合は ForbiddenException をスローする
 │   │       └── ユーザーが未設定の場合は ForbiddenException をスローする
-│   └── throttler.guard.spec.ts
-│       └── AppThrottlerGuard
-│           └── 制限超過時に日本語メッセージ付き ThrottlerException をスローすること
+│   ├── throttler.guard.spec.ts
+│   │   └── AppThrottlerGuard
+│   │       └── 制限超過時に日本語メッセージ付き ThrottlerException をスローすること
+│   └── auth.controller.spec.ts
+│       └── AuthController
+│           └── logout
+│               ├── clearCookie が refreshTokenCookieOptions と同じ属性で呼ばれること（非production）
+│               ├── clearCookie が refreshTokenCookieOptions と同じ属性で呼ばれること（production）
+│               └── Cookie がなければ clearCookie は属性付きで呼ばれ、logout は呼ばれないこと
 ├── identity/
 │   ├── email-hash-migration.spec.ts
 │   │   └── migrateEmailHashToHmac
@@ -220,7 +226,9 @@ apps/api/src/
 │   │   │   ├── ページ3・perPage5 で skip=10 を渡す
 │   │   │   ├── items と total を返し、投稿者名を authorNickname に詰める
 │   │   │   ├── userId 指定時は where に userId を含めて検索する
-│   │   │   └── userId 指定時でもページネーションが正しく機能する
+│   │   │   ├── userId 指定時でもページネーションが正しく機能する
+│   │   │   ├── page=0 を渡しても skip=0 (先頭ページ) として処理される
+│   │   │   └── page=-1 を渡しても skip=0 (先頭ページ) として処理される
 │   │   ├── findById
 │   │   │   └── petDetail/location/images と user.nickname を取得し authorNickname を返す
 │   │   ├── create
