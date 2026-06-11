@@ -92,11 +92,12 @@ apps/api/src/
 │   │   └── IdentityService
 │   │       ├── login
 │   │       │   ├── 正しいメールとパスワードでAuthResultを返すこと
+│   │       │   ├── CookieのmaxAgeが30日（ミリ秒）で設定されること
 │   │       │   ├── DBにはtokenHashが保存され、平文トークンは保存されないこと
 │   │       │   ├── パスワード不一致でUnauthorizedExceptionを投げること
 │   │       │   ├── 存在しないメールアドレスでUnauthorizedExceptionを投げること
 │   │       │   ├── HMACのみで検索し、SHA256フォールバックを行わないこと
-│   │       │   ├── production環境ではCookieのsecureとsameSiteが適切に設定されること
+│   │       │   ├── production環境ではCookieのsecure/sameSite/maxAgeが適切に設定されること
 │   │       │   ├── ログイン成功時に auth.login.success イベントをログ出力すること
 │   │       │   ├── パスワード不一致時に auth.login.failure イベントをログ出力すること
 │   │       │   ├── メールアドレス未登録時に auth.login.failure イベントをログ出力すること
@@ -122,8 +123,12 @@ apps/api/src/
 │   │       │   └── 登録成功時に auth.register.success イベントをログ出力すること
 │   │       ├── findAll
 │   │       │   └── 全ユーザーをパスワードなしで返すこと
-│   │       └── deleteUser
-│   │           └── ユーザーを削除しUserDtoを返すこと
+│   │       ├── deleteUser
+│   │       │   └── ユーザーを削除しUserDtoを返すこと
+│   │       └── refreshTokenCookieOptions
+│   │           ├── 非production環境では secure=false, sameSite=lax を返すこと
+│   │           ├── production環境では secure=true, sameSite=none を返すこと
+│   │           └── maxAge がミリ秒単位で30日に等しいこと
 │   └── crypto.service.spec.ts
 │       └── CryptoService
 │           ├── normalizeEmail
