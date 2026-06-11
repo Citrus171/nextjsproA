@@ -40,10 +40,6 @@ COPY apps/web/package.json apps/web/
 COPY packages/api-client/package.json packages/api-client/
 # husky(devDep) の prepare スクリプトは本番依存のみの環境では実行不能なため除去
 RUN npm pkg delete scripts.prepare && npm ci --omit=dev
-# compose では NODE_ENV=development で起動する（Cookie の Secure 回避）が、
-# その場合 logger が pino-pretty(devDep) を要求するためイメージにのみ追加する
-# （--no-save: リポジトリの package.json / lock は変更しない）
-RUN npm i --no-save pino-pretty@13
 
 # ---------- runtime: 実行のみ ----------
 FROM node:22-slim AS runtime

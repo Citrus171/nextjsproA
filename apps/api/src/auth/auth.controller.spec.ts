@@ -11,10 +11,11 @@ const mockIdentity = {
   logout: jest.fn(),
 } as unknown as jest.Mocked<IIdentityService>;
 
-function mockConfig(env: string) {
+function mockConfig(env: string, cookieSecure?: string) {
   return {
     get: jest.fn((key: string) => {
       if (key === "NODE_ENV") return env;
+      if (key === "COOKIE_SECURE") return cookieSecure;
       return undefined;
     }),
     getOrThrow: jest.fn(),
@@ -56,6 +57,24 @@ describe("AuthController", () => {
       await controller.logout(req, res);
 
       const expected = refreshTokenCookieOptions(true);
+      expect(res.clearCookie).toHaveBeenCalledWith("refreshToken", expected);
+    });
+
+    it("COOKIE_SECURE=false なら production でも secure=false の属性で clearCookie が呼ばれること", async () => {
+      controller = new AuthController(
+        mockIdentity,
+        mockConfig("production", "false")
+      );
+      const res = {
+        clearCookie: jest.fn(),
+      } as any;
+      const req = {
+        cookies: { refreshToken: "some-token" },
+      } as any;
+
+      await controller.logout(req, res);
+
+      const expected = refreshTokenCookieOptions(false);
       expect(res.clearCookie).toHaveBeenCalledWith("refreshToken", expected);
     });
 

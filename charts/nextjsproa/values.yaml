@@ -34,8 +34,9 @@ ingress:
 
 # 秘密でない設定値（ConfigMap になる）
 config:
-  # production だと refresh Cookie が Secure になり http では認証不能（docs/docker.md 参照）
-  NODE_ENV: development
+  NODE_ENV: production
+  # http Ingress のため Cookie の Secure だけ無効化（NODE_ENV から分離、issue #292）
+  COOKIE_SECURE: "false"
   PORT: "3000"
   # Ingress 経由のオリジン。k3d のポートマッピングが 8081 のため
   WEB_ORIGIN: http://nextjsproa.localhost:8081

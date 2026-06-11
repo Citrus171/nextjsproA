@@ -530,6 +530,7 @@
 
 - [x] clearCookie が refreshTokenCookieOptions と同じ属性で呼ばれること（非production）
 - [x] clearCookie が refreshTokenCookieOptions と同じ属性で呼ばれること（production）
+- [x] COOKIE_SECURE=false なら production でも secure=false の属性で clearCookie が呼ばれること
 - [x] Cookie がなければ clearCookie は属性付きで呼ばれ、logout は呼ばれないこと
 
 ---
@@ -582,6 +583,18 @@
 #### deleteUser
 
 - [x] ユーザーを削除しUserDtoを返すこと
+
+#### resolveCookieSecure
+
+- [x] COOKIE_SECURE 未設定なら NODE_ENV=production で true を返すこと
+- [x] COOKIE_SECURE 未設定なら NODE_ENV=development で false を返すこと
+- [x] COOKIE_SECURE=true なら NODE_ENV=development でも true を返すこと
+- [x] COOKIE_SECURE=false なら NODE_ENV=production でも false を返すこと
+- [x] COOKIE_SECURE が不正値・空文字なら NODE_ENV 判定にフォールバックすること
+
+#### login（COOKIE_SECURE=false × NODE_ENV=production）
+
+- [x] production でも secure=false / sameSite=lax の Cookie を発行すること
 
 #### refreshTokenCookieOptions
 
