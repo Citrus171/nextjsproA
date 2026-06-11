@@ -10,7 +10,11 @@ import {
 } from "@nestjs/common";
 import { ApiTags, ApiResponse } from "@nestjs/swagger";
 import { SkipThrottle, Throttle } from "@nestjs/throttler";
-import { IIdentityService } from "../identity/identity.service";
+import { ConfigService } from "@nestjs/config";
+import {
+  IIdentityService,
+  refreshTokenCookieOptions,
+} from "../identity/identity.service";
 import { LoginDto } from "./dto/login.dto";
 import {
   AccessTokenResponseDto,
@@ -21,7 +25,10 @@ import { Request, Response } from "express";
 @ApiTags("auth")
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly identity: IIdentityService) {}
+  constructor(
+    private readonly identity: IIdentityService,
+    private readonly config: ConfigService
+  ) {}
 
   @Post("login")
   @Throttle({ login: {} })
@@ -63,7 +70,8 @@ export class AuthController {
     const cookies = req.cookies as Record<string, string> | undefined;
     const token = cookies?.refreshToken;
     if (token) await this.identity.logout(token);
-    res.clearCookie("refreshToken", { path: "/" });
+    const isProd = this.config.get<string>("NODE_ENV") === "production";
+    res.clearCookie("refreshToken", refreshTokenCookieOptions(isProd));
     return { ok: true };
   }
 

@@ -3,7 +3,11 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcrypt";
 import { Logger } from "nestjs-pino";
-import { IdentityService } from "./identity.service";
+import {
+  IdentityService,
+  refreshTokenCookieOptions,
+  REFRESH_TOKEN_MAX_AGE_MS,
+} from "./identity.service";
 import { CryptoService } from "./crypto.service";
 import { PrismaService } from "../prisma.service";
 
@@ -97,6 +101,9 @@ describe("IdentityService", () => {
       expect(result.setCookies[0].value).toBe("a".repeat(96));
       expect(result.setCookies[0].options.httpOnly).toBe(true);
       expect(result.setCookies[0].options.sameSite).toBe("lax");
+      expect(result.setCookies[0].options.maxAge).toBe(
+        60 * 60 * 24 * 30 * 1000
+      );
     });
 
     it("ログイン成功時に auth.login.success イベントをログ出力すること", async () => {
@@ -251,6 +258,9 @@ describe("IdentityService", () => {
 
       expect(result.setCookies[0].options.secure).toBe(true);
       expect(result.setCookies[0].options.sameSite).toBe("none");
+      expect(result.setCookies[0].options.maxAge).toBe(
+        60 * 60 * 24 * 30 * 1000
+      );
     });
   });
 
@@ -558,6 +568,36 @@ describe("IdentityService", () => {
 
       expect(result.id).toBe("u1");
       expect(result.nickname).toBe("Alice");
+    });
+  });
+
+  describe("refreshTokenCookieOptions", () => {
+    it("非production環境では secure=false, sameSite=lax を返すこと", () => {
+      const opts = refreshTokenCookieOptions(false);
+
+      expect(opts.secure).toBe(false);
+      expect(opts.sameSite).toBe("lax");
+      expect(opts.httpOnly).toBe(true);
+      expect(opts.path).toBe("/");
+      expect(opts.maxAge).toBe(REFRESH_TOKEN_MAX_AGE_MS);
+      expect(opts.maxAge).toBe(60 * 60 * 24 * 30 * 1000);
+    });
+
+    it("production環境では secure=true, sameSite=none を返すこと", () => {
+      const opts = refreshTokenCookieOptions(true);
+
+      expect(opts.secure).toBe(true);
+      expect(opts.sameSite).toBe("none");
+      expect(opts.httpOnly).toBe(true);
+      expect(opts.path).toBe("/");
+      expect(opts.maxAge).toBe(REFRESH_TOKEN_MAX_AGE_MS);
+    });
+
+    it("maxAge がミリ秒単位で30日に等しいこと", () => {
+      const opts = refreshTokenCookieOptions(false);
+      const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+      expect(opts.maxAge).toBe(thirtyDaysMs);
     });
   });
 });
