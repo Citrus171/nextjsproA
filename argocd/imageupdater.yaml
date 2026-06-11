@@ -1,0 +1,54 @@
+# Argo CD Image Updater の設定（issue #302）
+# application.yaml と同様にこれ1つだけ手動で適用する: kubectl apply -f argocd/imageupdater.yaml
+#
+# 役割: GHCR の sha- タグ（docker-publish.yml が main マージごとに push）を監視し、
+# 新イメージを検出したら Application のパラメータ上書きで自動デプロイする。
+# branch protection（enforce_admins + 必須チェック）により CI から main へ直接 push
+# できないため、write-back は git ではなく argocd 方式（クラスタ内で完結、git コミットなし）。
+#
+# 前提: argocd-image-updater controller が argocd namespace に導入済みであること
+#   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/v1.2.1/config/install.yaml
+#
+# ロールバック: argocd app set nextjsproa --helm-set api.image.tag=sha-XXXXXXX
+# （Image Updater が次の周期で最新に戻すため、恒久ロールバックは git revert → CI 再ビルド）
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: nextjsproa
+  namespace: argocd
+spec:
+  applicationRefs:
+    - namePattern: "nextjsproa"
+      commonUpdateSettings:
+        updateStrategy: "newest-build"
+        allowTags: "regexp:^sha-"
+        platforms: ["linux/amd64"]
+      writeBackConfig:
+        method: "argocd"
+      images:
+        - alias: "api"
+          imageName: "ghcr.io/citrus171/nextjsproa-api"
+          manifestTargets:
+            helm:
+              name: "api.image.repository"
+              tag: "api.image.tag"
+        - alias: "web"
+          imageName: "ghcr.io/citrus171/nextjsproa-web"
+          manifestTargets:
+            helm:
+              name: "web.image.repository"
+              tag: "web.image.tag"
+        - alias: "migrate"
+          imageName: "ghcr.io/citrus171/nextjsproa-migrate"
+          commonUpdateSettings:
+            # migrate は PostSync hook の Job で、稼働中ワークロードに存在しないため
+            # forceUpdate がないと「使用中でない」と判定されスキップされる。
+            # per-image 設定は applicationRef 設定を継承せず置き換えるため全項目を再掲する
+            updateStrategy: "newest-build"
+            allowTags: "regexp:^sha-"
+            platforms: ["linux/amd64"]
+            forceUpdate: true
+          manifestTargets:
+            helm:
+              name: "migrate.image.repository"
+              tag: "migrate.image.tag"

@@ -3,9 +3,9 @@
 api:
   image:
     repository: ghcr.io/citrus171/nextjsproa-api
+    # 初期値。実際のタグは Argo CD Image Updater が sha- タグで上書きする（issue #302）
     tag: latest
-    # latest 運用のため毎回レジストリを確認する（sha タグ運用に変えたら IfNotPresent に戻す）
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   # uploads PVC が ReadWriteOnce のため 1 固定（増やすには RWX ストレージか S3 化が必要）
   replicas: 1
   uploadsStorage: 1Gi
@@ -14,7 +14,7 @@ web:
   image:
     repository: ghcr.io/citrus171/nextjsproa-web
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   replicas: 1
 
 db:
@@ -25,7 +25,7 @@ migrate:
   image:
     repository: ghcr.io/citrus171/nextjsproa-migrate
     tag: latest
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
 ingress:
   className: traefik

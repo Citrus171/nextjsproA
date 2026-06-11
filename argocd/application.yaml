@@ -6,6 +6,7 @@ kind: Application
 metadata:
   name: nextjsproa
   namespace: argocd
+  # イメージの自動更新は argocd/imageupdater.yaml（Argo CD Image Updater CR）が担う（issue #302）
 spec:
   project: default
   source:
