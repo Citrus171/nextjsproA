@@ -1,16 +1,20 @@
 # 既定値（k3d ローカル検証向け）。環境差分は -f や --set で上書きする
+# イメージは CI（.github/workflows/docker-publish.yml）が GHCR へ push したものを使う
 api:
   image:
-    repository: nextjsproa-api
-    tag: local
+    repository: ghcr.io/citrus171/nextjsproa-api
+    tag: latest
+    # latest 運用のため毎回レジストリを確認する（sha タグ運用に変えたら IfNotPresent に戻す）
+    pullPolicy: Always
   # uploads PVC が ReadWriteOnce のため 1 固定（増やすには RWX ストレージか S3 化が必要）
   replicas: 1
   uploadsStorage: 1Gi
 
 web:
   image:
-    repository: nextjsproa-web
-    tag: local
+    repository: ghcr.io/citrus171/nextjsproa-web
+    tag: latest
+    pullPolicy: Always
   replicas: 1
 
 db:
@@ -19,8 +23,9 @@ db:
 
 migrate:
   image:
-    repository: nextjsproa-migrate
-    tag: local
+    repository: ghcr.io/citrus171/nextjsproa-migrate
+    tag: latest
+    pullPolicy: Always
 
 ingress:
   className: traefik
@@ -36,7 +41,4 @@ config:
   WEB_ORIGIN: http://nextjsproa.localhost:8081
   ENCRYPTION_KEY_CURRENT: v1
 
-# 秘密情報（Secret になる）。実値は values-secret.yaml（gitignore 対象）で渡す
-# 使い方: cp values-secret.example.yaml values-secret.yaml して実値を設定
-#         helm install ... -f charts/nextjsproa/values-secret.yaml
-secrets: {}
+# 秘密情報は templates/sealedsecret.yaml（暗号化済み）で管理する。values では渡さない

@@ -27,6 +27,3 @@ apps/api/scripts/decrypt-emails.ts
 storybook-static
 kilo.json
 .mcp.json
-
-# Helm の Secret 実値はコミットしない（docs/docker.md sec28 原則）
-charts/nextjsproa/values-secret.yaml

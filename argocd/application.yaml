@@ -1,0 +1,23 @@
+# Argo CD への「何をどこに同期するか」の宣言（issue #295）
+# これ1つだけ手動で適用する: kubectl apply -f argocd/application.yaml
+# 以降は main の charts/nextjsproa/ が変わると Argo CD が自動でクラスタへ反映する
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nextjsproa
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Citrus171/nextjsproA.git
+    targetRevision: main
+    path: charts/nextjsproa
+  destination:
+    server: https://kubernetes.default.svc # 同一クラスタ
+    namespace: nextjsproa
+  syncPolicy:
+    automated:
+      prune: true # Git から消えたリソースをクラスタからも削除
+      selfHeal: true # クラスタ側を手で変更しても Git の状態に戻す
+    syncOptions:
+      - CreateNamespace=true

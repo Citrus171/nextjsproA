@@ -23,7 +23,7 @@ spec:
       containers:
         - name: migrate
           image: {{ .Values.migrate.image.repository }}:{{ .Values.migrate.image.tag }}
-          imagePullPolicy: IfNotPresent  # k3d image import 済みのローカルイメージを使う
+          imagePullPolicy: {{ .Values.migrate.image.pullPolicy }}
           workingDir: /app
           command: ["npx", "prisma", "migrate", "deploy", "--schema", "apps/api/prisma/schema.prisma"]
           env:
