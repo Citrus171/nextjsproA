@@ -66,6 +66,7 @@ apps/api/src/
 │           └── logout
 │               ├── clearCookie が refreshTokenCookieOptions と同じ属性で呼ばれること（非production）
 │               ├── clearCookie が refreshTokenCookieOptions と同じ属性で呼ばれること（production）
+│               ├── COOKIE_SECURE=false なら production でも secure=false の属性で clearCookie が呼ばれること
 │               └── Cookie がなければ clearCookie は属性付きで呼ばれ、logout は呼ばれないこと
 ├── identity/
 │   ├── email-hash-migration.spec.ts
@@ -134,6 +135,14 @@ apps/api/src/
 │   │       │   └── 全ユーザーをパスワードなしで返すこと
 │   │       ├── deleteUser
 │   │       │   └── ユーザーを削除しUserDtoを返すこと
+│   │       ├── resolveCookieSecure
+│   │       │   ├── COOKIE_SECURE 未設定なら NODE_ENV=production で true を返すこと
+│   │       │   ├── COOKIE_SECURE 未設定なら NODE_ENV=development で false を返すこと
+│   │       │   ├── COOKIE_SECURE=true なら NODE_ENV=development でも true を返すこと
+│   │       │   ├── COOKIE_SECURE=false なら NODE_ENV=production でも false を返すこと
+│   │       │   └── COOKIE_SECURE が不正値・空文字なら NODE_ENV 判定にフォールバックすること
+│   │       ├── login（COOKIE_SECURE=false × NODE_ENV=production）
+│   │       │   └── production でも secure=false / sameSite=lax の Cookie を発行すること
 │   │       └── refreshTokenCookieOptions
 │   │           ├── 非production環境では secure=false, sameSite=lax を返すこと
 │   │           ├── production環境では secure=true, sameSite=none を返すこと

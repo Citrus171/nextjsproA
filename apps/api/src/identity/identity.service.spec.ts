@@ -6,6 +6,7 @@ import { Logger } from "nestjs-pino";
 import {
   IdentityService,
   refreshTokenCookieOptions,
+  resolveCookieSecure,
   REFRESH_TOKEN_MAX_AGE_MS,
 } from "./identity.service";
 import { CryptoService } from "./crypto.service";
@@ -568,6 +569,61 @@ describe("IdentityService", () => {
 
       expect(result.id).toBe("u1");
       expect(result.nickname).toBe("Alice");
+    });
+  });
+
+  describe("resolveCookieSecure", () => {
+    it("COOKIE_SECURE 未設定なら NODE_ENV=production で true を返すこと", () => {
+      expect(resolveCookieSecure(undefined, "production")).toBe(true);
+    });
+
+    it("COOKIE_SECURE 未設定なら NODE_ENV=development で false を返すこと", () => {
+      expect(resolveCookieSecure(undefined, "development")).toBe(false);
+      expect(resolveCookieSecure(undefined, undefined)).toBe(false);
+    });
+
+    it("COOKIE_SECURE=true なら NODE_ENV=development でも true を返すこと", () => {
+      expect(resolveCookieSecure("true", "development")).toBe(true);
+    });
+
+    it("COOKIE_SECURE=false なら NODE_ENV=production でも false を返すこと", () => {
+      expect(resolveCookieSecure("false", "production")).toBe(false);
+    });
+
+    it("COOKIE_SECURE が不正値・空文字なら NODE_ENV 判定にフォールバックすること", () => {
+      expect(resolveCookieSecure("1", "production")).toBe(true);
+      expect(resolveCookieSecure("", "production")).toBe(true);
+      expect(resolveCookieSecure("yes", "development")).toBe(false);
+      expect(resolveCookieSecure("", "development")).toBe(false);
+    });
+  });
+
+  describe("login（COOKIE_SECURE=false × NODE_ENV=production）", () => {
+    it("production でも secure=false / sameSite=lax の Cookie を発行すること", async () => {
+      const k3dConfig = {
+        get: jest.fn((key: string) => {
+          if (key === "NODE_ENV") return "production";
+          if (key === "COOKIE_SECURE") return "false";
+          if (key === "JWT_SECRET") return "jwt-secret";
+          return undefined;
+        }),
+        getOrThrow: jest.fn(),
+      } as unknown as ConfigService;
+      const k3dService = new IdentityService(
+        mockPrisma as any,
+        mockJwt as unknown as JwtService,
+        k3dConfig,
+        mockCrypto as unknown as CryptoService,
+        mockLogger
+      );
+
+      const user = await makeUser();
+      mockPrisma.user.findUnique.mockResolvedValueOnce(user);
+
+      const result = await k3dService.login("user@example.com", "password123");
+
+      expect(result.setCookies[0].options.secure).toBe(false);
+      expect(result.setCookies[0].options.sameSite).toBe("lax");
     });
   });
 
