@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:16-alpine
+          image: {{ .Values.db.image }}
           ports:
             - containerPort: 5432
           envFrom:
@@ -55,4 +55,4 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 1Gi
+            storage: {{ .Values.db.storage }}

@@ -1,0 +1,8 @@
+apiVersion: v2
+name: nextjsproa
+description: nextjsproA（NestJS API + React Web + PostgreSQL）の k3d 学習用 Chart
+type: application
+# Chart 自体のバージョン（テンプレート構造を変えたら上げる）
+version: 0.1.0
+# アプリのバージョン（イメージタグとは独立。参考情報）
+appVersion: "0.0.0"

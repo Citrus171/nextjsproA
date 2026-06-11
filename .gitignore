@@ -28,5 +28,5 @@ storybook-static
 kilo.json
 .mcp.json
 
-# k8s Secret は実値を含むためコミットしない（docs/docker.md sec28 原則）
-k8s/secret.yaml
+# Helm の Secret 実値はコミットしない（docs/docker.md sec28 原則）
+charts/nextjsproa/values-secret.yaml
