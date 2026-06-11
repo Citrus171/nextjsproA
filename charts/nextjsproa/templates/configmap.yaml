@@ -1,0 +1,9 @@
+# 秘密でない設定値（compose の environment: に相当）
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  {{- range $key, $value := .Values.config }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

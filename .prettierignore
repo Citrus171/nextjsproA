@@ -1,0 +1,2 @@
+# Helm テンプレートは Go template 構文を含み YAML としてパースできない
+charts/*/templates/

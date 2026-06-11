@@ -1,0 +1,42 @@
+# 既定値（k3d ローカル検証向け）。環境差分は -f や --set で上書きする
+api:
+  image:
+    repository: nextjsproa-api
+    tag: local
+  # uploads PVC が ReadWriteOnce のため 1 固定（増やすには RWX ストレージか S3 化が必要）
+  replicas: 1
+  uploadsStorage: 1Gi
+
+web:
+  image:
+    repository: nextjsproa-web
+    tag: local
+  replicas: 1
+
+db:
+  image: postgres:16-alpine
+  storage: 1Gi
+
+migrate:
+  image:
+    repository: nextjsproa-migrate
+    tag: local
+
+ingress:
+  className: traefik
+  # Host ヘッダで振り分け（複数プロジェクトを namespace 分離しても 8081 を共有できる）
+  host: nextjsproa.localhost
+
+# 秘密でない設定値（ConfigMap になる）
+config:
+  # production だと refresh Cookie が Secure になり http では認証不能（docs/docker.md 参照）
+  NODE_ENV: development
+  PORT: "3000"
+  # Ingress 経由のオリジン。k3d のポートマッピングが 8081 のため
+  WEB_ORIGIN: http://nextjsproa.localhost:8081
+  ENCRYPTION_KEY_CURRENT: v1
+
+# 秘密情報（Secret になる）。実値は values-secret.yaml（gitignore 対象）で渡す
+# 使い方: cp values-secret.example.yaml values-secret.yaml して実値を設定
+#         helm install ... -f charts/nextjsproa/values-secret.yaml
+secrets: {}

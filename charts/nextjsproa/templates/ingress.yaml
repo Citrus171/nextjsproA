@@ -6,10 +6,9 @@ kind: Ingress
 metadata:
   name: web
 spec:
-  ingressClassName: traefik # k3s 内蔵の Traefik を使う
+  ingressClassName: {{ .Values.ingress.className }}
   rules:
-    # Host ヘッダで振り分け（複数プロジェクトを namespace 分離しても 8081 を共有できる）
-    - host: nextjsproa.localhost
+    - host: {{ .Values.ingress.host }}
       http:
         paths:
           - path: /
