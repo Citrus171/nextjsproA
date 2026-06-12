@@ -20,6 +20,13 @@
     --accent-foreground: 222 46% 11%;
     --destructive: 4 67% 48%;
     --destructive-foreground: 0 0% 100%;
+    --destructive-soft: 3 100% 97%;
+    --destructive-muted: 354 72% 86%;
+    --success: 142 76% 36%;
+    --control: 215 28% 17%;
+    --control-hover: 221 39% 11%;
+    --control-active: 217 19% 27%;
+    --control-foreground: 0 0% 100%;
     --border: 214 30% 91%;
     --input: 214 30% 91%;
     --ring: 217 89% 51%;

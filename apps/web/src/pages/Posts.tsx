@@ -162,11 +162,11 @@ export default function Posts() {
                     {p.petDetail?.name ?? "名前不明"}
                   </h3>
                   {p.status === "lost" ? (
-                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
+                    <span className="rounded-full bg-destructive-soft px-2 py-0.5 text-xs font-semibold text-destructive">
                       迷子中
                     </span>
                   ) : (
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                       解決済み
                     </span>
                   )}
@@ -198,7 +198,7 @@ export default function Posts() {
                         type="button"
                         onClick={() => resolveMutation.mutate(p.id)}
                         disabled={resolveMutation.isPending}
-                        className="text-sm font-semibold text-green-600 hover:text-green-700 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
+                        className="text-sm font-semibold text-success hover:text-success/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded min-h-[44px]"
                       >
                         解決済みにする
                       </button>

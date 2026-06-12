@@ -300,12 +300,10 @@ export default function CreatePost() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="aspect-square rounded-2xl bg-[rgba(83,169,239,0.29)] flex flex-col items-center justify-center cursor-pointer hover:bg-[rgba(83,169,239,0.4)] transition-colors"
+                    className="aspect-square rounded-2xl bg-primary/20 flex flex-col items-center justify-center cursor-pointer hover:bg-primary/30 transition-colors"
                   >
-                    <Upload size={24} className="text-[#53A9EF] mb-1" />
-                    <span className="text-xs font-bold text-[#53A9EF]">
-                      追加
-                    </span>
+                    <Upload size={24} className="text-primary mb-1" />
+                    <span className="text-xs font-bold text-primary">追加</span>
                   </button>
                 )}
                 {Array.from({
@@ -313,7 +311,7 @@ export default function CreatePost() {
                 }).map((_, i) => (
                   <div
                     key={`placeholder-${i}`}
-                    className="aspect-square rounded-2xl bg-[#D9D9D9] flex items-center justify-center"
+                    className="aspect-square rounded-2xl bg-border flex items-center justify-center"
                   >
                     <Plus size={20} className="text-white" />
                   </div>
