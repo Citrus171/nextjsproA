@@ -43,7 +43,7 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
   return (
     <>
       <nav
-        className="fixed left-0 right-0 bottom-0 z-[1300] grid grid-cols-4 gap-2 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-white via-white/[0.94] to-white/[0.02]"
+        className="fixed left-0 right-0 bottom-0 z-[1300] grid grid-cols-4 gap-2 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-background via-background/90 to-background/0"
         aria-label="ページナビゲーション"
       >
         {TABS.map(({ path, label, Icon }) => {
@@ -52,10 +52,10 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
             <button
               key={path}
               type="button"
-              className={`inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)] transition-colors ${
+              className={`inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border text-xs font-bold shadow-float cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors ${
                 isActive
                   ? "border-primary/30 bg-primary/10 text-primary"
-                  : "border-[#e4e7eb] bg-white text-[#202124]"
+                  : "border-border bg-background text-foreground"
               }`}
               onClick={() => navigate(path)}
               aria-label={label}
@@ -68,7 +68,7 @@ export default function BottomNav({ currentPath }: BottomNavProps) {
         })}
         <button
           type="button"
-          className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#5f6368] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+          className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-border bg-background text-muted-foreground text-xs font-bold shadow-float cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="ログアウト"
           onClick={() => setShowLogoutDialog(true)}
         >

@@ -301,12 +301,12 @@ export default function Map() {
   return (
     <div className="relative w-full min-h-dvh overflow-hidden map-page">
       <header className="fixed top-0 left-0 right-0 z-[1300] px-4 pt-4 md:px-5 md:pt-5 pointer-events-none">
-        <div className="flex items-center gap-2.5 p-2.5 rounded-[20px] bg-white/[0.98] shadow-[0_8px_26px_rgba(15,23,42,0.18)] backdrop-blur-[12px] pointer-events-auto md:max-w-[640px]">
-          <span className="text-sm font-bold text-[#3c4043] flex-1">
+        <div className="flex items-center gap-2.5 p-2.5 rounded-[20px] bg-background/95 shadow-overlay backdrop-blur-[12px] pointer-events-auto md:max-w-[640px]">
+          <span className="text-sm font-bold text-foreground flex-1">
             ねこ探しマップ
           </span>
           {nickname && (
-            <span className="text-xs text-[#5f6368] font-medium">
+            <span className="text-xs text-muted-foreground font-medium">
               {nickname} 様
             </span>
           )}
@@ -320,7 +320,7 @@ export default function Map() {
           {FILTER_OPTIONS.map((option) => {
             const isActive = filter === option.value;
             const activeColors: Record<string, string> = {
-              all: "bg-[#3c4043]",
+              all: "bg-foreground",
               lost: "bg-destructive",
               sighting: "bg-primary",
             };
@@ -332,9 +332,9 @@ export default function Map() {
                   ${
                     isActive
                       ? `${activeColors[option.value]} text-white border-transparent`
-                      : "border-[#d8dde3] bg-white/[0.96] text-[#3c4043] shadow-[0_1px_3px_rgba(15,23,42,0.08)]"
+                      : "border-border bg-background/95 text-foreground shadow-chip"
                   }
-                  focus-visible:shadow-[0_0_0_2px_hsl(var(--ring))]`}
+                  focus-visible:ring-2 focus-visible:ring-ring`}
                 aria-pressed={isActive}
                 onClick={() => setFilter(option.value)}
               >
@@ -347,7 +347,7 @@ export default function Map() {
 
       {error && (
         <p
-          className="fixed top-[112px] left-4 right-4 md:top-[116px] md:left-5 md:right-auto md:max-w-[420px] z-[1250] m-0 px-3 py-2.5 rounded-xl border border-[#f5c2c7] bg-[rgba(255,240,239,0.98)] text-[#b3261e] text-[13px] shadow-[0_6px_20px_rgba(15,23,42,0.16)]"
+          className="fixed top-[112px] left-4 right-4 md:top-[116px] md:left-5 md:right-auto md:max-w-[420px] z-[1250] m-0 px-3 py-2.5 rounded-xl border border-destructive-muted bg-destructive-soft/95 text-destructive text-[13px] shadow-overlay"
           role="status"
         >
           {error}
@@ -355,7 +355,7 @@ export default function Map() {
       )}
       {locationError && (
         <p
-          className="fixed top-[164px] left-4 right-4 md:top-[168px] md:left-5 md:right-auto md:max-w-[420px] z-[1250] m-0 px-3 py-2.5 rounded-xl border border-[#f5c2c7] bg-[rgba(255,240,239,0.98)] text-[#b3261e] text-[13px] shadow-[0_6px_20px_rgba(15,23,42,0.16)]"
+          className="fixed top-[164px] left-4 right-4 md:top-[168px] md:left-5 md:right-auto md:max-w-[420px] z-[1250] m-0 px-3 py-2.5 rounded-xl border border-destructive-muted bg-destructive-soft/95 text-destructive text-[13px] shadow-overlay"
           role="status"
         >
           {locationError}
@@ -420,19 +420,19 @@ export default function Map() {
 
           {mapInstance && (
             <div className="absolute top-4 right-4 md:top-5 md:right-5 z-[1100] pointer-events-auto flex flex-col gap-2">
-              <div className="flex flex-col rounded-md overflow-hidden shadow-[0_4px_14px_rgba(15,23,42,0.2)]">
+              <div className="flex flex-col rounded-md overflow-hidden shadow-control">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center w-11 h-11 p-0 border-0 bg-[rgba(31,41,55,0.96)] text-white cursor-pointer outline-none hover:bg-[rgba(17,24,39,0.98)] active:bg-[rgba(55,65,81,0.96)] focus-visible:shadow-[inset_0_0_0_2px_hsl(var(--ring))]"
+                  className="inline-flex items-center justify-center w-11 h-11 p-0 border-0 bg-control/95 text-control-foreground cursor-pointer outline-none hover:bg-control-hover active:bg-control-active focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                   aria-label="ズームイン"
                   onClick={handleZoomIn}
                 >
                   <ZoomInIcon />
                 </button>
-                <div className="h-px bg-white/15" />
+                <div className="h-px bg-control-foreground/15" />
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center w-11 h-11 p-0 border-0 bg-[rgba(31,41,55,0.96)] text-white cursor-pointer outline-none hover:bg-[rgba(17,24,39,0.98)] active:bg-[rgba(55,65,81,0.96)] focus-visible:shadow-[inset_0_0_0_2px_hsl(var(--ring))]"
+                  className="inline-flex items-center justify-center w-11 h-11 p-0 border-0 bg-control/95 text-control-foreground cursor-pointer outline-none hover:bg-control-hover active:bg-control-active focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                   aria-label="ズームアウト"
                   onClick={handleZoomOut}
                 >
@@ -441,7 +441,7 @@ export default function Map() {
               </div>
               <button
                 type="button"
-                className="relative inline-flex items-center justify-center w-11 h-11 p-0 border-0 rounded-md bg-[rgba(31,41,55,0.96)] text-white shadow-[0_4px_14px_rgba(15,23,42,0.2)] cursor-pointer outline-none hover:bg-[rgba(17,24,39,0.98)] focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_14px_rgba(15,23,42,0.2)] disabled:opacity-70 disabled:cursor-progress"
+                className="relative inline-flex items-center justify-center w-11 h-11 p-0 border-0 rounded-md bg-control/95 text-control-foreground shadow-control cursor-pointer outline-none hover:bg-control-hover focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-70 disabled:cursor-progress"
                 aria-label="現在地へ移動"
                 onClick={handleCurrentLocationClick}
                 disabled={isLocating}
@@ -454,12 +454,12 @@ export default function Map() {
       </main>
 
       <nav
-        className={`fixed left-0 right-0 bottom-0 z-[1300] grid gap-2 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-white via-white/[0.94] to-white/[0.02] md:left-4 md:right-4 md:bottom-4 md:max-w-[720px] md:mx-auto md:rounded-3xl md:shadow-[0_12px_32px_rgba(15,23,42,0.18)] ${currentUserId ? "grid-cols-5" : "grid-cols-2"}`}
+        className={`fixed left-0 right-0 bottom-0 z-[1300] grid gap-2 px-4 pb-[calc(14px+env(safe-area-inset-bottom))] pt-3.5 bg-gradient-to-t from-background via-background/90 to-background/0 md:left-4 md:right-4 md:bottom-4 md:max-w-[720px] md:mx-auto md:rounded-3xl md:shadow-overlay ${currentUserId ? "grid-cols-5" : "grid-cols-2"}`}
         aria-label="投稿アクション"
       >
         <button
           type="button"
-          className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#f5c2c7] bg-[#fff0ef] text-[#d93025] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.12)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.12)]"
+          className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-destructive-muted bg-destructive-soft text-destructive text-xs font-bold shadow-float cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring"
           onClick={() => {
             if (!currentUserId) {
               toast("投稿を作成するにはログインが必要です");
@@ -474,7 +474,7 @@ export default function Map() {
         </button>
         <button
           type="button"
-          className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#dadce0] bg-white text-[#202124] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+          className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-border bg-background text-foreground text-xs font-bold shadow-float cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring"
           onClick={() => {
             if (!currentUserId) {
               toast("目撃を報告するにはログインが必要です");
@@ -492,7 +492,7 @@ export default function Map() {
           <>
             <button
               type="button"
-              className="relative inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#202124] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+              className="relative inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-border bg-background text-foreground text-xs font-bold shadow-float cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring"
               onClick={() => navigate("/conversations")}
             >
               <ChatIcon />
@@ -505,7 +505,7 @@ export default function Map() {
             </button>
             <button
               type="button"
-              className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#202124] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+              className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-border bg-background text-foreground text-xs font-bold shadow-float cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="自分の投稿"
               onClick={() => navigate("/posts")}
             >
@@ -514,7 +514,7 @@ export default function Map() {
             </button>
             <button
               type="button"
-              className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-[#e4e7eb] bg-white text-[#5f6368] text-xs font-bold shadow-[0_4px_16px_rgba(15,23,42,0.08)] cursor-pointer outline-none focus-visible:shadow-[0_0_0_2px_hsl(var(--ring)),0_4px_16px_rgba(15,23,42,0.08)]"
+              className="inline-flex flex-col items-center justify-center gap-1 min-h-[58px] rounded-2xl border border-border bg-background text-muted-foreground text-xs font-bold shadow-float cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="ログアウト"
               onClick={() => setShowLogoutDialog(true)}
             >
@@ -526,7 +526,7 @@ export default function Map() {
 
       {pickingLocation && (
         <div
-          className="fixed top-0 left-0 right-0 z-[1400] py-2.5 px-4 bg-primary/[0.96] text-white text-sm font-bold text-center shadow-[0_4px_14px_rgba(15,23,42,0.2)]"
+          className="fixed top-0 left-0 right-0 z-[1400] py-2.5 px-4 bg-primary/95 text-primary-foreground text-sm font-bold text-center shadow-control"
           aria-live="polite"
         >
           タップして場所を選択
@@ -627,7 +627,7 @@ export default function Map() {
           <div className="px-6 pt-6 pb-8 space-y-3">
             <button
               type="button"
-              className="w-full py-3.5 text-base font-bold text-center rounded-2xl border border-[#f5c2c7] bg-[#fff0ef] text-[#d93025]"
+              className="w-full py-3.5 text-base font-bold text-center rounded-2xl border border-destructive-muted bg-destructive-soft text-destructive"
               onClick={() => {
                 setContextMenuOpen(false);
                 if (!currentUserId) {
@@ -642,7 +642,7 @@ export default function Map() {
             </button>
             <button
               type="button"
-              className="w-full py-3.5 text-base font-bold text-center rounded-2xl border border-[#dadce0] bg-white text-[#202124]"
+              className="w-full py-3.5 text-base font-bold text-center rounded-2xl border border-border bg-background text-foreground"
               onClick={() => {
                 setContextMenuOpen(false);
                 if (!currentUserId) {
