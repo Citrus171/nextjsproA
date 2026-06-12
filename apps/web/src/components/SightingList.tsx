@@ -13,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import EmptyState from "./EmptyState";
 
 interface SightingListProps {
   postId: string;
@@ -68,11 +69,7 @@ export default function SightingList({
   }
 
   if (!sightings || sightings.length === 0) {
-    return (
-      <p className="text-muted-foreground text-sm mt-4">
-        まだ目撃情報はありません
-      </p>
-    );
+    return <EmptyState title="まだ目撃情報はありません" className="py-6" />;
   }
 
   return (

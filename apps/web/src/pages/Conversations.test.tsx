@@ -154,6 +154,26 @@ describe("Conversations", () => {
       render(<Conversations />);
 
       expect(screen.getByText("会話の取得に失敗しました")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "会話の取得に失敗しました"
+      );
+    });
+
+    it("取得エラーの時、再試行ボタンのクリックでrefetchが呼ばれること", async () => {
+      const refetch = vi.fn();
+      vi.mocked(useQuery).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error("Network Error"),
+        refetch,
+      } as unknown as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: "再試行" }));
+
+      expect(refetch).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -343,6 +343,25 @@ describe("Posts", () => {
     });
   });
 
+  describe("エラー表示", () => {
+    it("取得エラー時は role=alert の領域に「エラーが発生しました」が表示されること", () => {
+      mockInfiniteQuery({ isError: true });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "エラーが発生しました"
+      );
+    });
+
+    it("再試行ボタンをクリックした時、refetchが呼ばれること", async () => {
+      const refetch = vi.fn();
+      mockInfiniteQuery({ isError: true, refetch });
+      render(<Posts />, { wrapper: createWrapper() });
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: "再試行" }));
+      expect(refetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe("削除フロー", () => {
     it("Deleteボタンをクリックした時、AlertDialogが表示されること", async () => {
       mockInfiniteQuery({
