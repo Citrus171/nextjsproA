@@ -121,6 +121,7 @@ function setupQueryMocks({
   messagesLoading = false,
   conversationError = null,
   messagesError = null,
+  messagesRefetch = vi.fn(),
 }: {
   conversation?: ConversationListItemDto | null;
   messages?: MessageResponseDto[];
@@ -128,6 +129,7 @@ function setupQueryMocks({
   messagesLoading?: boolean;
   conversationError?: Error | null;
   messagesError?: Error | null;
+  messagesRefetch?: ReturnType<typeof vi.fn>;
 } = {}) {
   vi.mocked(useQuery).mockImplementation(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,7 +147,7 @@ function setupQueryMocks({
         data: messages,
         isLoading: messagesLoading,
         error: messagesError,
-        refetch: vi.fn(),
+        refetch: messagesRefetch,
       } as unknown as ReturnType<typeof useQuery>;
     }
   );
@@ -652,23 +654,23 @@ describe("ConversationChat", () => {
   });
 
   describe("ローディング・エラー", () => {
-    it("メッセージローディング中は「読み込み中...」が統一されたスタイルで表示されること", () => {
+    it("メッセージローディング中はチャットバブル形のスケルトンが表示されること", () => {
       setupQueryMocks({ messagesLoading: true, messages: [] });
 
       render(<ConversationChat />);
 
-      expect(screen.getByText("読み込み中...")).toBeInTheDocument();
+      expect(screen.getByTestId("chat-loading-skeleton")).toBeInTheDocument();
+      expect(screen.queryByText("読み込み中...")).not.toBeInTheDocument();
     });
 
-    it("ローディング表示が統一されたスタイルであること", () => {
+    it("スケルトンは role=status と読み込み中ラベルでスクリーンリーダーに通知されること", () => {
       setupQueryMocks({ messagesLoading: true, messages: [] });
 
       render(<ConversationChat />);
 
-      const loader = screen.getByText("読み込み中...");
-      expect(loader.closest("div")).toHaveClass("text-center");
-      expect(loader).toHaveClass("text-muted-foreground");
-      expect(loader).toHaveClass("text-sm");
+      expect(
+        screen.getByRole("status", { name: "読み込み中" })
+      ).toBeInTheDocument();
     });
 
     it("メッセージ取得エラー時は「メッセージの取得に失敗しました」が統一されたスタイルで表示されること", () => {
@@ -696,6 +698,22 @@ describe("ConversationChat", () => {
       expect(errorText.closest("div")).toHaveClass("text-center");
       expect(errorText).toHaveClass("text-destructive");
       expect(errorText).toHaveClass("text-sm");
+    });
+
+    it("エラー時に再試行ボタンをクリックするとメッセージのrefetchが呼ばれること", async () => {
+      const messagesRefetch = vi.fn();
+      setupQueryMocks({
+        messagesError: new Error("Network Error"),
+        messages: [],
+        messagesRefetch,
+      });
+
+      render(<ConversationChat />);
+
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: "再試行" }));
+
+      expect(messagesRefetch).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -114,7 +114,7 @@ describe("Conversations", () => {
       ).toBeInTheDocument();
     });
 
-    it("ローディング中はスピナー表示されること", () => {
+    it("ローディング中は会話カード形のスケルトンが表示されること", () => {
       vi.mocked(useQuery).mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -123,7 +123,13 @@ describe("Conversations", () => {
 
       render(<Conversations />);
 
-      expect(screen.getByText("読み込み中...")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("conversations-loading-skeleton")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("status", { name: "読み込み中" })
+      ).toBeInTheDocument();
+      expect(screen.queryByText("読み込み中...")).not.toBeInTheDocument();
     });
 
     it("会話がない時は空メッセージが表示されること", () => {
@@ -148,6 +154,26 @@ describe("Conversations", () => {
       render(<Conversations />);
 
       expect(screen.getByText("会話の取得に失敗しました")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "会話の取得に失敗しました"
+      );
+    });
+
+    it("取得エラーの時、再試行ボタンのクリックでrefetchが呼ばれること", async () => {
+      const refetch = vi.fn();
+      vi.mocked(useQuery).mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error("Network Error"),
+        refetch,
+      } as unknown as ReturnType<typeof useQuery>);
+
+      render(<Conversations />);
+
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: "再試行" }));
+
+      expect(refetch).toHaveBeenCalledTimes(1);
     });
   });
 

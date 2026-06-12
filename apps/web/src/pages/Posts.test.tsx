@@ -191,10 +191,18 @@ describe("Posts", () => {
   });
 
   describe("読み込み状態", () => {
-    it("データ取得中はローディングスピナーが表示されること", () => {
+    it("データ取得中は投稿カード形のスケルトンが表示されること", () => {
       mockInfiniteQuery({ isLoading: true });
       render(<Posts />, { wrapper: createWrapper() });
-      expect(screen.getByTestId("posts-loading-spinner")).toBeInTheDocument();
+      expect(screen.getByTestId("posts-loading-skeleton")).toBeInTheDocument();
+    });
+
+    it("スケルトンは role=status と読み込み中ラベルでスクリーンリーダーに通知されること", () => {
+      mockInfiniteQuery({ isLoading: true });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(
+        screen.getByRole("status", { name: "読み込み中" })
+      ).toBeInTheDocument();
     });
   });
 
@@ -332,6 +340,25 @@ describe("Posts", () => {
       expect(
         screen.getByText("まだ迷い猫投稿はありません")
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("エラー表示", () => {
+    it("取得エラー時は role=alert の領域に「エラーが発生しました」が表示されること", () => {
+      mockInfiniteQuery({ isError: true });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "エラーが発生しました"
+      );
+    });
+
+    it("再試行ボタンをクリックした時、refetchが呼ばれること", async () => {
+      const refetch = vi.fn();
+      mockInfiniteQuery({ isError: true, refetch });
+      render(<Posts />, { wrapper: createWrapper() });
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: "再試行" }));
+      expect(refetch).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -19,9 +19,12 @@ import {
   AlertDialogCancel,
 } from "../components/ui/alert-dialog";
 import { toast } from "sonner";
-import { MapPinned } from "lucide-react";
+import { Cat, MapPinned } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
+import { Skeleton } from "../components/ui/skeleton";
 import BottomNav from "../components/BottomNav";
+import EmptyState from "../components/EmptyState";
+import ErrorState from "../components/ErrorState";
 import { QUERY_KEYS } from "../lib/queryKeys";
 
 const PER_PAGE = 5;
@@ -41,6 +44,7 @@ export default function Posts() {
     isFetchingNextPage,
     isLoading,
     isError,
+    refetch,
   } = useInfiniteQuery({
     queryKey: QUERY_KEYS.postsInfinite(),
     queryFn: ({ pageParam }: { pageParam: number }) =>
@@ -101,19 +105,38 @@ export default function Posts() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="min-h-screen bg-background">
         <div
-          data-testid="posts-loading-spinner"
-          className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-primary"
-        />
+          role="status"
+          aria-label="読み込み中"
+          data-testid="posts-loading-skeleton"
+          className="mx-auto max-w-4xl space-y-6 px-4 py-6 pb-24"
+        >
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="overflow-hidden rounded-2xl bg-card shadow-sm"
+            >
+              <Skeleton className="h-44 w-full rounded-none" />
+              <div className="space-y-3 p-4">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="flex h-screen items-center justify-center text-destructive bg-background">
-        エラーが発生しました
+      <div className="flex h-screen items-center justify-center bg-background">
+        <ErrorState
+          message="エラーが発生しました"
+          onRetry={() => void refetch()}
+        />
       </div>
     );
   }
@@ -272,9 +295,7 @@ export default function Posts() {
         )}
 
         {!hasNextPage && allItems.length === 0 && (
-          <p className="mt-12 text-center text-muted-foreground">
-            まだ迷い猫投稿はありません
-          </p>
+          <EmptyState icon={Cat} title="まだ迷い猫投稿はありません" />
         )}
 
         {/* IntersectionObserver センチネル */}

@@ -1035,9 +1035,10 @@
 - [x] Conversations で会話一覧が表示される時、相手ニックネームと投稿タイトルが表示されること
 - [x] Conversations で lastMessageがある時、最新メッセージ本文が表示されること
 - [x] Conversations で lastMessageがない時、メッセージなし文言が表示されること
-- [x] Conversations でローディング中はスピナー表示されること
+- [x] Conversations でローディング中は会話カード形のスケルトンが表示されること
 - [x] Conversations で会話がない時は空メッセージが表示されること
 - [x] Conversations で取得エラーの時、エラーメッセージが表示されること
+- [x] Conversations で取得エラーの時、再試行ボタンのクリックでrefetchが呼ばれること
 - [x] Conversations でunreadCountが1以上の時、未読バッジが表示されること
 - [x] Conversations でunreadCountが1以上の時、未読バッジが青色の丸スタイルで表示されること
 - [x] Conversations でunreadCountが0の時、未読バッジが表示されないこと
@@ -1075,10 +1076,11 @@
 - [x] ConversationChat で送信ボタンクリック時、mutate が呼ばれること
 - [x] ConversationChat で1000文字超の入力は送信ボタンが無効になること
 - [x] ConversationChat でページを開いた時に markAsRead が呼ばれること
-- [x] ConversationChat でメッセージローディング中は「読み込み中...」が統一されたスタイルで表示されること
-- [x] ConversationChat でローディング表示が統一されたスタイルであること
+- [x] ConversationChat でメッセージローディング中はチャットバブル形のスケルトンが表示されること
+- [x] ConversationChat でスケルトンは role=status と読み込み中ラベルでスクリーンリーダーに通知されること
 - [x] ConversationChat でメッセージ取得エラー時は「メッセージの取得に失敗しました」が統一されたスタイルで表示されること
 - [x] ConversationChat でエラー表示が統一されたスタイルであること
+- [x] ConversationChat でエラー時に再試行ボタンをクリックするとメッセージのrefetchが呼ばれること
 - [x] ConversationChat で入力エリアに画像選択ボタンが表示されること
 - [x] ConversationChat で画像選択後、プレビュー画像が表示されること
 - [x] ConversationChat で画像のみ選択して送信する時、image を含む mutate が呼ばれること
@@ -1121,7 +1123,8 @@
 - [x] Posts でstatus=lostの投稿に「迷子中」バッジが表示されること
 - [x] Posts でstatus=resolvedの投稿に「解決済み」バッジが表示されること
 - [x] Posts でニックネームを使って「{nickname}様の投稿」が表示されること
-- [x] Posts でデータ取得中はローディングスピナーが表示されること
+- [x] Posts でデータ取得中は投稿カード形のスケルトンが表示されること
+- [x] Posts でスケルトンは role=status と読み込み中ラベルでスクリーンリーダーに通知されること
 - [x] Posts で投稿データがカード形式で表示されること
 - [x] Posts で画像がない時は「画像がありません」と表示されること
 - [x] Posts でペット名がない時は「名前不明」と表示されること
@@ -1129,6 +1132,8 @@
 - [x] Posts で追加フェッチ中はローディングスピナーが表示されること
 - [x] Posts で全件表示後は「これ以上ありません」と表示されること
 - [x] Posts で投稿が0件の時は新規投稿を促す案内メッセージが表示されること
+- [x] Posts で取得エラー時は role=alert の領域に「エラーが発生しました」が表示されること
+- [x] Posts で再試行ボタンをクリックした時、refetchが呼ばれること
 - [x] Posts でDeleteボタンをクリックした時、AlertDialogが表示されること
 - [x] Posts でAlertDialogでキャンセルをクリックした時、削除が実行されないこと
 - [x] Posts でAlertDialogで削除を確認した時、投稿が削除され削除完了トーストが表示されること
@@ -1159,6 +1164,27 @@
 - [x] 確認ダイアログでログアウトを実行した時、logout API と clearToken が呼ばれること
 - [x] 確認ダイアログでキャンセルした時、ログアウトが実行されないこと
 - [x] logout API が失敗した時でも clearToken が呼ばれること
+
+---
+
+## Web Unit — EmptyState (`apps/web/src/components/EmptyState.test.tsx`)
+
+- [x] タイトルが表示されること
+- [x] description を渡すと説明文が表示されること
+- [x] description を渡さない場合は説明文が表示されないこと
+- [x] icon を渡すとアイコンが装飾として（aria-hidden で）表示されること
+- [x] icon を渡さない場合は svg が描画されないこと
+- [x] action を渡すとアクション要素が表示されること
+- [x] className が追加で適用されること
+
+## Web Unit — ErrorState (`apps/web/src/components/ErrorState.test.tsx`)
+
+- [x] メッセージが role=alert の領域に表示されること
+- [x] メッセージが destructive スタイルで表示されること
+- [x] description を渡すと説明文が表示されること
+- [x] onRetry を渡すと再試行ボタンが表示され、クリックで呼ばれること
+- [x] onRetry を渡さない場合は再試行ボタンが表示されないこと
+- [x] className が追加で適用されること
 
 ---
 
