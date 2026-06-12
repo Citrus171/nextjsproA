@@ -121,6 +121,7 @@ function setupQueryMocks({
   messagesLoading = false,
   conversationError = null,
   messagesError = null,
+  messagesRefetch = vi.fn(),
 }: {
   conversation?: ConversationListItemDto | null;
   messages?: MessageResponseDto[];
@@ -128,6 +129,7 @@ function setupQueryMocks({
   messagesLoading?: boolean;
   conversationError?: Error | null;
   messagesError?: Error | null;
+  messagesRefetch?: ReturnType<typeof vi.fn>;
 } = {}) {
   vi.mocked(useQuery).mockImplementation(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -145,7 +147,7 @@ function setupQueryMocks({
         data: messages,
         isLoading: messagesLoading,
         error: messagesError,
-        refetch: vi.fn(),
+        refetch: messagesRefetch,
       } as unknown as ReturnType<typeof useQuery>;
     }
   );
@@ -696,6 +698,22 @@ describe("ConversationChat", () => {
       expect(errorText.closest("div")).toHaveClass("text-center");
       expect(errorText).toHaveClass("text-destructive");
       expect(errorText).toHaveClass("text-sm");
+    });
+
+    it("エラー時に再試行ボタンをクリックするとメッセージのrefetchが呼ばれること", async () => {
+      const messagesRefetch = vi.fn();
+      setupQueryMocks({
+        messagesError: new Error("Network Error"),
+        messages: [],
+        messagesRefetch,
+      });
+
+      render(<ConversationChat />);
+
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("button", { name: "再試行" }));
+
+      expect(messagesRefetch).toHaveBeenCalledTimes(1);
     });
   });
 });

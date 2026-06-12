@@ -19,10 +19,12 @@ import {
   AlertDialogCancel,
 } from "../components/ui/alert-dialog";
 import { toast } from "sonner";
-import { MapPinned } from "lucide-react";
+import { Cat, MapPinned } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
 import { Skeleton } from "../components/ui/skeleton";
 import BottomNav from "../components/BottomNav";
+import EmptyState from "../components/EmptyState";
+import ErrorState from "../components/ErrorState";
 import { QUERY_KEYS } from "../lib/queryKeys";
 
 const PER_PAGE = 5;
@@ -42,6 +44,7 @@ export default function Posts() {
     isFetchingNextPage,
     isLoading,
     isError,
+    refetch,
   } = useInfiniteQuery({
     queryKey: QUERY_KEYS.postsInfinite(),
     queryFn: ({ pageParam }: { pageParam: number }) =>
@@ -129,8 +132,11 @@ export default function Posts() {
 
   if (isError) {
     return (
-      <div className="flex h-screen items-center justify-center text-destructive bg-background">
-        エラーが発生しました
+      <div className="flex h-screen items-center justify-center bg-background">
+        <ErrorState
+          message="エラーが発生しました"
+          onRetry={() => void refetch()}
+        />
       </div>
     );
   }
@@ -289,9 +295,7 @@ export default function Posts() {
         )}
 
         {!hasNextPage && allItems.length === 0 && (
-          <p className="mt-12 text-center text-muted-foreground">
-            まだ迷い猫投稿はありません
-          </p>
+          <EmptyState icon={Cat} title="まだ迷い猫投稿はありません" />
         )}
 
         {/* IntersectionObserver センチネル */}
