@@ -7,6 +7,7 @@ import { createConversationSocket } from "../lib/conversationSocket";
 import { QUERY_KEYS } from "../lib/queryKeys";
 import { useApiClient } from "../api/orvalClient";
 import { useAuth } from "../auth/AuthProvider";
+import { Skeleton } from "../components/ui/skeleton";
 import type { MessageResponseDto } from "../../../../packages/api-client/src/index";
 
 type SendMessageInput = { body?: string; image?: File };
@@ -195,8 +196,18 @@ export default function ConversationChat() {
 
   if (isLoading)
     return (
-      <div className="max-w-2xl mx-auto p-4 sm:p-8 text-center h-screen flex items-center justify-center">
-        <p className="text-muted-foreground text-sm">読み込み中...</p>
+      <div className="max-w-2xl mx-auto p-4 sm:p-8 h-screen">
+        <div
+          role="status"
+          aria-label="読み込み中"
+          data-testid="chat-loading-skeleton"
+          className="space-y-3 pt-16"
+        >
+          <Skeleton className="h-12 w-3/5 rounded-[1.25rem] rounded-bl-sm" />
+          <Skeleton className="ml-auto h-12 w-1/2 rounded-[1.25rem] rounded-br-sm" />
+          <Skeleton className="h-12 w-3/5 rounded-[1.25rem] rounded-bl-sm" />
+          <Skeleton className="ml-auto h-12 w-2/5 rounded-[1.25rem] rounded-br-sm" />
+        </div>
       </div>
     );
   if (error)

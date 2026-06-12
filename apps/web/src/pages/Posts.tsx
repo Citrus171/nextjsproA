@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { MapPinned } from "lucide-react";
 import { useAuth } from "../auth/AuthProvider";
+import { Skeleton } from "../components/ui/skeleton";
 import BottomNav from "../components/BottomNav";
 import { QUERY_KEYS } from "../lib/queryKeys";
 
@@ -101,11 +102,27 @@ export default function Posts() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="min-h-screen bg-background">
         <div
-          data-testid="posts-loading-spinner"
-          className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-primary"
-        />
+          role="status"
+          aria-label="読み込み中"
+          data-testid="posts-loading-skeleton"
+          className="mx-auto max-w-4xl space-y-6 px-4 py-6 pb-24"
+        >
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="overflow-hidden rounded-2xl bg-card shadow-sm"
+            >
+              <Skeleton className="h-44 w-full rounded-none" />
+              <div className="space-y-3 p-4">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

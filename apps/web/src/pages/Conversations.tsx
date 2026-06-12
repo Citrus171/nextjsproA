@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useApiClient } from "../api/orvalClient";
 import { useAuth } from "../auth/AuthProvider";
 import BottomNav from "../components/BottomNav";
+import { Skeleton } from "../components/ui/skeleton";
 import { QUERY_KEYS } from "../lib/queryKeys";
 import type { ConversationListItemDto } from "../../../../packages/api-client/src/index";
 
@@ -40,9 +41,25 @@ export default function Conversations() {
   if (isLoading) {
     return (
       <div className="max-w-2xl mx-auto p-4 sm:p-8">
-        <p className="text-center text-muted-foreground text-sm">
-          読み込み中...
-        </p>
+        <div
+          role="status"
+          aria-label="読み込み中"
+          data-testid="conversations-loading-skeleton"
+          className="space-y-3"
+        >
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="bg-card rounded-3xl shadow-sm p-4 flex items-center gap-4"
+            >
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+              <Skeleton className="h-3 w-10 shrink-0" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
