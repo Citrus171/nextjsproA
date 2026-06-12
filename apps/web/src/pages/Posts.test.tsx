@@ -191,10 +191,18 @@ describe("Posts", () => {
   });
 
   describe("読み込み状態", () => {
-    it("データ取得中はローディングスピナーが表示されること", () => {
+    it("データ取得中は投稿カード形のスケルトンが表示されること", () => {
       mockInfiniteQuery({ isLoading: true });
       render(<Posts />, { wrapper: createWrapper() });
-      expect(screen.getByTestId("posts-loading-spinner")).toBeInTheDocument();
+      expect(screen.getByTestId("posts-loading-skeleton")).toBeInTheDocument();
+    });
+
+    it("スケルトンは role=status と読み込み中ラベルでスクリーンリーダーに通知されること", () => {
+      mockInfiniteQuery({ isLoading: true });
+      render(<Posts />, { wrapper: createWrapper() });
+      expect(
+        screen.getByRole("status", { name: "読み込み中" })
+      ).toBeInTheDocument();
     });
   });
 

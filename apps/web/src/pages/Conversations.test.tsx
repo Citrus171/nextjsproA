@@ -114,7 +114,7 @@ describe("Conversations", () => {
       ).toBeInTheDocument();
     });
 
-    it("ローディング中はスピナー表示されること", () => {
+    it("ローディング中は会話カード形のスケルトンが表示されること", () => {
       vi.mocked(useQuery).mockReturnValue({
         data: undefined,
         isLoading: true,
@@ -123,7 +123,13 @@ describe("Conversations", () => {
 
       render(<Conversations />);
 
-      expect(screen.getByText("読み込み中...")).toBeInTheDocument();
+      expect(
+        screen.getByTestId("conversations-loading-skeleton")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("status", { name: "読み込み中" })
+      ).toBeInTheDocument();
+      expect(screen.queryByText("読み込み中...")).not.toBeInTheDocument();
     });
 
     it("会話がない時は空メッセージが表示されること", () => {

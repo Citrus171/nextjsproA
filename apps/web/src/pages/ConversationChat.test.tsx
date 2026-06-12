@@ -652,23 +652,23 @@ describe("ConversationChat", () => {
   });
 
   describe("ローディング・エラー", () => {
-    it("メッセージローディング中は「読み込み中...」が統一されたスタイルで表示されること", () => {
+    it("メッセージローディング中はチャットバブル形のスケルトンが表示されること", () => {
       setupQueryMocks({ messagesLoading: true, messages: [] });
 
       render(<ConversationChat />);
 
-      expect(screen.getByText("読み込み中...")).toBeInTheDocument();
+      expect(screen.getByTestId("chat-loading-skeleton")).toBeInTheDocument();
+      expect(screen.queryByText("読み込み中...")).not.toBeInTheDocument();
     });
 
-    it("ローディング表示が統一されたスタイルであること", () => {
+    it("スケルトンは role=status と読み込み中ラベルでスクリーンリーダーに通知されること", () => {
       setupQueryMocks({ messagesLoading: true, messages: [] });
 
       render(<ConversationChat />);
 
-      const loader = screen.getByText("読み込み中...");
-      expect(loader.closest("div")).toHaveClass("text-center");
-      expect(loader).toHaveClass("text-muted-foreground");
-      expect(loader).toHaveClass("text-sm");
+      expect(
+        screen.getByRole("status", { name: "読み込み中" })
+      ).toBeInTheDocument();
     });
 
     it("メッセージ取得エラー時は「メッセージの取得に失敗しました」が統一されたスタイルで表示されること", () => {
