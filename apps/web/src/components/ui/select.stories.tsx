@@ -19,7 +19,7 @@ type Story = StoryObj<typeof Select>;
 export const Default: Story = {
   render: () => (
     <Select>
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-48" aria-label="フルーツを選択">
         <SelectValue placeholder="選択してください" />
       </SelectTrigger>
       <SelectContent>
@@ -34,7 +34,7 @@ export const Default: Story = {
 export const Disabled: Story = {
   render: () => (
     <Select disabled>
-      <SelectTrigger className="w-48">
+      <SelectTrigger className="w-48" aria-label="選択（無効）">
         <SelectValue placeholder="Disabled" />
       </SelectTrigger>
       <SelectContent>

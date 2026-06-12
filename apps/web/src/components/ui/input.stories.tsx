@@ -28,4 +28,6 @@ export const Password: Story = {
 export const Disabled: Story = {
   args: { placeholder: "Disabled", disabled: true },
 };
-export const WithValue: Story = { args: { defaultValue: "Some value" } };
+export const WithValue: Story = {
+  args: { defaultValue: "Some value", "aria-label": "テキスト入力" },
+};
