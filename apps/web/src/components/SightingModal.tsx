@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { MapPin, LocateFixed } from "lucide-react";
 import { useApiClient } from "../api/orvalClient";
+import { reverseGeocode } from "../lib/reverseGeocode";
 import { Sheet, SheetContent, SheetTitle } from "./ui/sheet";
 import { toast } from "sonner";
 
@@ -21,8 +23,7 @@ interface SightingModalProps {
 }
 
 interface FormErrors {
-  lat?: string;
-  lng?: string;
+  location?: string;
   sightedAt?: string;
 }
 
@@ -42,29 +43,51 @@ export default function SightingModal({
   const [address, setAddress] = useState("");
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
-  const [hasLocationFromMap, setHasLocationFromMap] = useState(false);
+  const [hasLocation, setHasLocation] = useState(false);
 
   useEffect(() => {
     if (!pickedLocation) return;
     setLat(String(pickedLocation.lat));
     setLng(String(pickedLocation.lng));
-    setHasLocationFromMap(true);
+    setHasLocation(true);
     if (pickedLocation.address !== undefined)
       setAddress(pickedLocation.address);
     if (pickedLocation.geocodeError) setError(pickedLocation.geocodeError);
   }, [pickedLocation]);
 
+  const handleCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError("このブラウザでは現在地を取得できません");
+      return;
+    }
+    setIsLocating(true);
+    setError(null);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setLat(String(latitude));
+        setLng(String(longitude));
+        setHasLocation(true);
+        const result = await reverseGeocode(latitude, longitude);
+        if ("address" in result) setAddress(result.address);
+        else setError(result.geocodeError);
+        setIsLocating(false);
+      },
+      () => {
+        setError("現在地の取得に失敗しました");
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
   const validate = (): boolean => {
     const errors: FormErrors = {};
-    if (!lat.trim()) errors.lat = "緯度を入力してください";
-    if (!lng.trim()) errors.lng = "経度を入力してください";
+    if (!lat || !lng) errors.location = "位置情報を指定してください";
     if (!sightedAt) errors.sightedAt = "目撃日時を入力してください";
-    if (lat.trim() && isNaN(parseFloat(lat)))
-      errors.lat = "緯度は正しい数値を入力してください";
-    if (lng.trim() && isNaN(parseFloat(lng)))
-      errors.lng = "経度は正しい数値を入力してください";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -99,7 +122,8 @@ export default function SightingModal({
   const handleClose = () => {
     setFieldErrors({});
     setError(null);
-    setHasLocationFromMap(false);
+    setHasLocation(false);
+    setIsLocating(false);
     onClose();
   };
 
@@ -134,73 +158,64 @@ export default function SightingModal({
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <button
-              type="button"
-              aria-label="地図から選択"
-              onClick={onSelectFromMap}
-              className="w-full min-h-[44px] rounded-xl border border-primary text-primary font-bold text-sm hover:bg-accent"
-            >
-              地図から選択
-            </button>
-
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="sighting-lat"
-                className="text-sm font-bold text-foreground"
-              >
-                緯度
-              </label>
-              <input
-                id="sighting-lat"
-                aria-label="緯度"
-                type="text"
-                inputMode="decimal"
-                value={lat}
-                onChange={(e) => setLat(e.target.value)}
-                readOnly={hasLocationFromMap}
-                className={`border rounded-lg px-3 py-2 text-sm ${hasLocationFromMap ? "bg-muted text-muted-foreground" : ""} ${fieldErrors.lat ? "border-destructive" : ""}`}
-                placeholder="例: 35.9062"
-              />
-              {fieldErrors.lat && (
-                <p className="text-xs text-destructive">{fieldErrors.lat}</p>
+            {/* 位置情報（プライマリアクション） */}
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-bold text-foreground">
+                位置情報 <span className="text-destructive">*</span>
+              </span>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  aria-label="地図から選択"
+                  onClick={onSelectFromMap}
+                  className="min-h-[52px] rounded-xl bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] transition-all"
+                >
+                  <MapPin size={16} aria-hidden="true" />
+                  地図から選択
+                </button>
+                <button
+                  type="button"
+                  aria-label="現在地を使う"
+                  onClick={handleCurrentLocation}
+                  disabled={isLocating}
+                  className="min-h-[52px] rounded-xl border border-primary text-primary font-bold text-sm flex items-center justify-center gap-2 hover:bg-accent disabled:opacity-50 active:scale-[0.98] transition-all"
+                >
+                  <LocateFixed size={16} aria-hidden="true" />
+                  {isLocating ? "取得中…" : "現在地を使う"}
+                </button>
+              </div>
+              {hasLocation && lat && lng && (
+                <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-xl text-sm">
+                  <MapPin
+                    size={14}
+                    className="text-primary shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-foreground truncate">
+                    {address ||
+                      `${parseFloat(lat).toFixed(5)}, ${parseFloat(lng).toFixed(5)}`}
+                  </span>
+                </div>
+              )}
+              {fieldErrors.location && (
+                <p className="text-xs text-destructive">
+                  {fieldErrors.location}
+                </p>
               )}
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor="sighting-lng"
-                className="text-sm font-bold text-foreground"
-              >
-                経度
-              </label>
-              <input
-                id="sighting-lng"
-                aria-label="経度"
-                type="text"
-                inputMode="decimal"
-                value={lng}
-                onChange={(e) => setLng(e.target.value)}
-                readOnly={hasLocationFromMap}
-                className={`border rounded-lg px-3 py-2 text-sm ${hasLocationFromMap ? "bg-muted text-muted-foreground" : ""} ${fieldErrors.lng ? "border-destructive" : ""}`}
-                placeholder="例: 139.6236"
-              />
-              {fieldErrors.lng && (
-                <p className="text-xs text-destructive">{fieldErrors.lng}</p>
-              )}
-            </div>
-
+            {/* 目撃日時 */}
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-sightedAt"
                 className="text-sm font-bold text-foreground"
               >
-                目撃日時
+                目撃日時 <span className="text-destructive">*</span>
               </label>
               <input
                 id="sighting-sightedAt"
                 aria-label="目撃日時"
                 type="datetime-local"
-                required
                 value={sightedAt}
                 onChange={(e) => setSightedAt(e.target.value)}
                 className={`border rounded-lg px-3 py-2 text-sm ${fieldErrors.sightedAt ? "border-destructive" : ""}`}
@@ -212,6 +227,7 @@ export default function SightingModal({
               )}
             </div>
 
+            {/* 住所（任意） */}
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-address"
@@ -230,6 +246,7 @@ export default function SightingModal({
               />
             </div>
 
+            {/* コメント（任意） */}
             <div className="flex flex-col gap-1">
               <label
                 htmlFor="sighting-comment"

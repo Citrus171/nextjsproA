@@ -99,6 +99,7 @@ export default function CreatePost() {
   const api = useApiClient();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   // PetDetail
   const [name, setName] = useState("");
@@ -212,7 +213,18 @@ export default function CreatePost() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validate()) {
+      requestAnimationFrame(() => {
+        const el =
+          formRef.current?.querySelector<HTMLElement>(
+            '[aria-invalid="true"]'
+          ) ??
+          formRef.current?.querySelector<HTMLElement>("p.text-destructive");
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (el?.matches("input, textarea")) el.focus();
+      });
+      return;
+    }
 
     const normalizedLostDate = new Date(lostDate).toISOString();
 
@@ -267,7 +279,7 @@ export default function CreatePost() {
         </h1>
       </div>
 
-      <form onSubmit={submit} className="space-y-12">
+      <form ref={formRef} onSubmit={submit} className="space-y-12">
         {/* 1. お写真 */}
         <section className="space-y-4">
           <div className="flex items-center gap-2">
@@ -356,6 +368,7 @@ export default function CreatePost() {
                 placeholder="例：レオ"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                aria-invalid={!!errors.name}
                 className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
               {errors.name && (
@@ -426,6 +439,7 @@ export default function CreatePost() {
                 placeholder="例：推定2歳"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
+                aria-invalid={!!errors.age}
                 className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
               {errors.age && (
@@ -444,6 +458,7 @@ export default function CreatePost() {
                 placeholder="例：茶トラ、白黒ハチワレ"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
+                aria-invalid={!!errors.color}
                 className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
               {errors.color && (
@@ -465,6 +480,7 @@ export default function CreatePost() {
               placeholder="例：かぎしっぽです。少し人見知りですが、おやつを見せると寄ってきます。"
               value={features}
               onChange={(e) => setFeatures(e.target.value)}
+              aria-invalid={!!errors.features}
               className="min-h-[100px] border-none bg-muted rounded-2xl p-4 focus-visible:ring-2 focus-visible:ring-ring resize-none"
             />
             {errors.features && (
@@ -484,6 +500,7 @@ export default function CreatePost() {
               placeholder="例：首輪なし。人懐こい性格で、名前を呼ぶと振り向きます。"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              aria-invalid={!!errors.description}
               className="min-h-[80px] border-none bg-muted rounded-2xl p-4 focus-visible:ring-2 focus-visible:ring-ring resize-none"
             />
             {errors.description && (
@@ -543,6 +560,7 @@ export default function CreatePost() {
                 type="datetime-local"
                 value={lostDate}
                 onChange={(e) => setLostDate(e.target.value)}
+                aria-invalid={!!errors.lostDate}
                 className="h-12 border-none bg-muted rounded-2xl pl-12 focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
@@ -584,6 +602,7 @@ export default function CreatePost() {
                   placeholder="例：さいたま市"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
+                  aria-invalid={!!errors.city}
                   className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
                 />
                 {errors.city && (
@@ -603,6 +622,7 @@ export default function CreatePost() {
                 placeholder="例：〇〇1-2-3 〇〇公園付近"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
+                aria-invalid={!!errors.address}
                 className="h-12 border-none bg-muted rounded-2xl px-4 focus-visible:ring-2 focus-visible:ring-ring"
               />
               {errors.address && (
