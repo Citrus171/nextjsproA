@@ -1029,6 +1029,10 @@
 - [x] createMarkerIcon で isOwn=falseの時、map-marker--ownクラスが付与されないこと
 - [x] createMarkerIcon で解決済みの自分のマーカーにもmap-marker--ownクラスが付与されること
 - [x] createMarkerIcon で自分の目撃投稿マーカーにもmap-marker--ownクラスが付与されること
+- [x] createClusterIcon で指定した件数がaria-labelに含まれること
+- [x] createClusterIcon で指定した件数がspan内に表示されること
+- [x] マーカークラスタリング: 離れたマーカーはクラスタリングされず個別に表示されること
+- [x] マーカークラスタリング: クラスターマーカーをクリックすると flyTo が呼ばれること（密集マーカーの展開）
 - [x] reverseGeocode で正常時、Nominatim から住所文字列を返すこと
 - [x] reverseGeocode で HTTP エラー時、geocodeError を返すこと
 - [x] reverseGeocode でネットワークエラー時、geocodeError を返すこと
