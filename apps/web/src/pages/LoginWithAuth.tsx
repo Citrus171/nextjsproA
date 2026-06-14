@@ -30,14 +30,16 @@ export default function LoginWithAuth() {
         setAuthError("ログインに失敗しました");
       }
     } catch (err: unknown) {
-      const status =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { status?: number } }).response?.status
-          : undefined;
-      const msg =
-        err && typeof err === "object" && "message" in err
-          ? String((err as { message: unknown }).message)
-          : String(err);
+      const axiosErr = err as {
+        response?: {
+          status?: number;
+          data?: { message?: string; error?: string };
+        };
+        message?: string;
+      };
+      const status = axiosErr.response?.status;
+      const apiMessage =
+        axiosErr.response?.data?.message || axiosErr.response?.data?.error;
       if (status === 429) {
         setAuthError(
           "リクエスト回数が多すぎます。しばらく待ってから再試行してください。"
@@ -48,9 +50,7 @@ export default function LoginWithAuth() {
         );
       } else {
         setAuthError(
-          msg === "Unauthorized"
-            ? "メールアドレスまたはパスワードが正しくありません"
-            : `エラー: ${msg}`
+          apiMessage || "メールアドレスまたはパスワードが正しくありません"
         );
       }
     } finally {
