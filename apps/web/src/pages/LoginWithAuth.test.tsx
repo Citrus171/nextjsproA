@@ -98,4 +98,66 @@ describe("LoginWithAuth", () => {
       ).toBeInTheDocument();
     });
   });
+
+  it("APIから返された日本語エラーメッセージを表示すること", async () => {
+    mockLogin.mockRejectedValue({
+      response: {
+        status: 401,
+        data: { message: "認証情報が正しくありません" },
+      },
+    });
+    const user = userEvent.setup();
+    render(<LoginWithAuth />);
+
+    await user.type(
+      screen.getByLabelText("メールアドレス"),
+      "test@example.com"
+    );
+    await user.type(screen.getByLabelText("パスワード"), "wrongpass");
+    await user.click(screen.getByRole("button", { name: /ログイン/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText("認証情報が正しくありません")
+      ).toBeInTheDocument();
+    });
+  });
+
+  it("APIがerrorフィールドでエラーメッセージを返した場合それを使用すること", async () => {
+    mockLogin.mockRejectedValue({
+      response: { status: 401, data: { error: "無効なリクエストです" } },
+    });
+    const user = userEvent.setup();
+    render(<LoginWithAuth />);
+
+    await user.type(
+      screen.getByLabelText("メールアドレス"),
+      "test@example.com"
+    );
+    await user.type(screen.getByLabelText("パスワード"), "wrongpass");
+    await user.click(screen.getByRole("button", { name: /ログイン/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("無効なリクエストです")).toBeInTheDocument();
+    });
+  });
+
+  it("APIメッセージがない場合フォールバック日本語メッセージを表示すること", async () => {
+    mockLogin.mockRejectedValue(new Error("Network Error"));
+    const user = userEvent.setup();
+    render(<LoginWithAuth />);
+
+    await user.type(
+      screen.getByLabelText("メールアドレス"),
+      "test@example.com"
+    );
+    await user.type(screen.getByLabelText("パスワード"), "wrongpass");
+    await user.click(screen.getByRole("button", { name: /ログイン/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/メールアドレスまたはパスワードが正しくありません/i)
+      ).toBeInTheDocument();
+    });
+  });
 });
