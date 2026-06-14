@@ -567,9 +567,7 @@ describe("Map", () => {
       expect(
         await screen.findByRole("heading", { name: "目撃を報告する" })
       ).toBeInTheDocument();
-      expect(screen.getByLabelText("緯度")).toHaveValue("35.91");
-      expect(screen.getByLabelText("経度")).toHaveValue("139.61");
-      expect(screen.getByLabelText("住所")).toHaveValue("埼玉県さいたま市");
+      expect(await screen.findByText("埼玉県さいたま市")).toBeInTheDocument();
     });
 
     it("Nominatim 失敗時、lat/lng セット済みでモーダルが再表示され、エラーメッセージが表示されること", async () => {
@@ -591,9 +589,6 @@ describe("Map", () => {
       expect(
         await screen.findByRole("heading", { name: "目撃を報告する" })
       ).toBeInTheDocument();
-      await waitFor(() => {
-        expect(screen.getByLabelText("緯度")).toHaveValue("35.91");
-      });
       expect(await screen.findByRole("alert")).toHaveTextContent(
         "住所の自動取得に失敗しました。手動で入力してください"
       );

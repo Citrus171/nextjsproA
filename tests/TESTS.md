@@ -1009,18 +1009,20 @@
 - [x] SightingList で削除成功後に onSightingDeleted コールバックが呼ばれること
 - [x] SightingList で削除処理中は確認ダイアログの削除ボタンが無効化されること
 - [x] SightingList で削除 API が失敗した時、エラーメッセージが表示されること
-- [x] SightingModal で isOpen=true の時、フォームが表示されること
+- [x] SightingModal で isOpen=true の時、フォームが表示されること（「地図から選択」「現在地を使う」ボタン含む）
 - [x] SightingModal で postId が渡された時、postId フィールドが非表示であること
 - [x] SightingModal で必須項目を入力して送信すると、createSighting が正しく呼ばれること
 - [x] SightingModal で必須項目未入力で送信しても、createSighting が呼ばれないこと
+- [x] SightingModal で位置情報未指定で送信すると「位置情報を指定してください」エラーが表示されること
 - [x] SightingModal で閉じるボタンを押した時、onClose が呼ばれること
-- [x] SightingModal で緯度が数値でない時、エラーメッセージが表示されること
 - [x] SightingModal で postId なしで送信すると、postId を含まずに createSighting が呼ばれること
 - [x] SightingModal で「地図から選択」ボタンが表示されること（postId あり・なし両方）
 - [x] SightingModal で「地図から選択」クリックで onSelectFromMap が呼ばれること
-- [x] SightingModal で pickedLocation が更新された時、lat/lng/address フィールドに反映されること
+- [x] SightingModal で pickedLocation が更新された時、選択位置の表示が更新されること
 - [x] SightingModal で pickedLocation に geocodeError がある時、エラーメッセージが表示されること
 - [x] SightingModal で forceMount 時、isOpen=false → true でフォーム値が保持されること
+- [x] SightingModal で「現在地を使う」クリックで geolocation が呼ばれ、位置が表示されること
+- [x] SightingModal で geolocation 失敗時、エラーメッセージが表示されること
 - [x] Map で「目撃投稿」ボタンクリックで SightingModal が開くこと
 - [x] Map で「地図から選択」クリック後、「タップして場所を選択」バナーが表示されること
 - [x] Map で地図クリックで lat/lng・住所が SightingModal にセットされ再表示されること

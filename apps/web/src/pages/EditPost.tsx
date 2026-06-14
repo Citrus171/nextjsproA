@@ -82,6 +82,7 @@ export default function EditPost() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
   const apiRef = useRef(api);
   apiRef.current = api;
 
@@ -160,6 +161,12 @@ export default function EditPost() {
       mapRef.current.flyTo([pinPos.lat, pinPos.lng], 15);
     }
   }, [pinPos]);
+
+  useEffect(() => {
+    if (error) {
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [error]);
 
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
@@ -285,7 +292,10 @@ export default function EditPost() {
       </div>
 
       {error && (
-        <p className="mb-4 text-sm text-destructive bg-destructive/10 p-3 rounded-xl flex items-start gap-2">
+        <p
+          ref={errorRef}
+          className="mb-4 text-sm text-destructive bg-destructive/10 p-3 rounded-xl flex items-start gap-2"
+        >
           <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
           <span>{error}</span>
         </p>

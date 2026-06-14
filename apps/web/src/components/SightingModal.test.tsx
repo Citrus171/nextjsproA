@@ -1,14 +1,28 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import SightingModal from "./SightingModal";
 
 const mockCreateSighting = vi.fn();
+const mockGetCurrentPosition = vi.fn();
+const { mockReverseGeocode } = vi.hoisted(() => ({
+  mockReverseGeocode:
+    vi.fn<
+      (
+        lat: number,
+        lng: number
+      ) => Promise<{ address?: string; geocodeError?: string }>
+    >(),
+}));
 
 vi.mock("../api/orvalClient", () => ({
   useApiClient: () => ({
     createSighting: mockCreateSighting,
   }),
+}));
+
+vi.mock("../lib/reverseGeocode", () => ({
+  reverseGeocode: mockReverseGeocode,
 }));
 
 function renderModal(props: Partial<Parameters<typeof SightingModal>[0]> = {}) {
@@ -26,13 +40,24 @@ describe("SightingModal", () => {
   beforeEach(() => {
     mockCreateSighting.mockReset();
     mockCreateSighting.mockResolvedValue(undefined);
+    mockReverseGeocode.mockReset();
+    mockReverseGeocode.mockResolvedValue({ address: "埼玉県さいたま市" });
+    mockGetCurrentPosition.mockReset();
+    Object.defineProperty(window.navigator, "geolocation", {
+      configurable: true,
+      value: { getCurrentPosition: mockGetCurrentPosition },
+    });
   });
 
   it("isOpen=true の時、フォームが表示されること", () => {
     renderModal();
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByLabelText("緯度")).toBeInTheDocument();
-    expect(screen.getByLabelText("経度")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "地図から選択" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "現在地を使う" })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("目撃日時")).toBeInTheDocument();
   });
 
@@ -44,14 +69,13 @@ describe("SightingModal", () => {
   it("必須項目を入力して送信すると、createSighting が正しく呼ばれること", async () => {
     const user = userEvent.setup();
     const onSuccess = vi.fn();
-    renderModal({ postId: "post-1", onSuccess });
+    renderModal({
+      postId: "post-1",
+      onSuccess,
+      pickedLocation: { lat: 35.9, lng: 139.6, address: "埼玉県さいたま市" },
+    });
 
-    await user.clear(screen.getByLabelText("緯度"));
-    await user.type(screen.getByLabelText("緯度"), "35.9");
-    await user.clear(screen.getByLabelText("経度"));
-    await user.type(screen.getByLabelText("経度"), "139.6");
     await user.type(screen.getByLabelText("目撃日時"), "2026-04-26T10:00");
-
     await user.click(screen.getByRole("button", { name: "送信" }));
 
     await waitFor(() => {
@@ -76,27 +100,25 @@ describe("SightingModal", () => {
     expect(mockCreateSighting).not.toHaveBeenCalled();
   });
 
-  it("緯度が数値でない時、エラーメッセージが表示されること", async () => {
+  it("位置情報未指定で送信すると「位置情報を指定してください」エラーが表示されること", async () => {
     const user = userEvent.setup();
     renderModal();
 
-    await user.type(screen.getByLabelText("緯度"), "abc");
-    await user.type(screen.getByLabelText("経度"), "139.6");
     await user.type(screen.getByLabelText("目撃日時"), "2026-04-26T10:00");
     await user.click(screen.getByRole("button", { name: "送信" }));
 
     expect(
-      await screen.findByText("緯度は正しい数値を入力してください")
+      await screen.findByText("位置情報を指定してください")
     ).toBeInTheDocument();
     expect(mockCreateSighting).not.toHaveBeenCalled();
   });
 
   it("postId なしで送信すると、postId を含まずに createSighting が呼ばれること", async () => {
     const user = userEvent.setup();
-    renderModal();
+    renderModal({
+      pickedLocation: { lat: 35.9, lng: 139.6 },
+    });
 
-    await user.type(screen.getByLabelText("緯度"), "35.9");
-    await user.type(screen.getByLabelText("経度"), "139.6");
     await user.type(screen.getByLabelText("目撃日時"), "2026-04-26T10:00");
     await user.click(screen.getByRole("button", { name: "送信" }));
 
@@ -145,7 +167,7 @@ describe("SightingModal", () => {
       expect(onSelectFromMap).toHaveBeenCalledTimes(1);
     });
 
-    it("pickedLocation が更新された時、lat/lng/address フィールドに反映されること", async () => {
+    it("pickedLocation が更新された時、選択位置の表示が更新されること", async () => {
       const { rerender } = renderModal();
 
       rerender(
@@ -161,9 +183,7 @@ describe("SightingModal", () => {
         />
       );
 
-      expect(screen.getByLabelText("緯度")).toHaveValue("35.9");
-      expect(screen.getByLabelText("経度")).toHaveValue("139.6");
-      expect(screen.getByLabelText("住所")).toHaveValue("埼玉県さいたま市");
+      expect(await screen.findByText("埼玉県さいたま市")).toBeInTheDocument();
     });
 
     it("pickedLocation に geocodeError がある時、エラーメッセージが表示されること", async () => {
@@ -212,6 +232,56 @@ describe("SightingModal", () => {
       );
 
       expect(screen.getByLabelText("コメント")).toHaveValue("テストコメント");
+    });
+  });
+
+  describe("現在地を使う", () => {
+    it("「現在地を使う」クリックで geolocation が呼ばれ、位置が表示されること", async () => {
+      const user = userEvent.setup();
+      mockGetCurrentPosition.mockImplementation((success: PositionCallback) => {
+        success({
+          coords: {
+            latitude: 35.92,
+            longitude: 139.62,
+            accuracy: 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+            toJSON: () => ({}),
+          },
+          timestamp: Date.now(),
+          toJSON: () => ({}),
+        });
+      });
+
+      renderModal();
+      await user.click(screen.getByRole("button", { name: "現在地を使う" }));
+
+      expect(await screen.findByText("埼玉県さいたま市")).toBeInTheDocument();
+      expect(mockReverseGeocode).toHaveBeenCalledWith(35.92, 139.62);
+    });
+
+    it("geolocation 失敗時、エラーメッセージが表示されること", async () => {
+      const user = userEvent.setup();
+      mockGetCurrentPosition.mockImplementation(
+        (_: unknown, error: PositionErrorCallback) => {
+          error({
+            code: 1,
+            message: "denied",
+            PERMISSION_DENIED: 1,
+            POSITION_UNAVAILABLE: 2,
+            TIMEOUT: 3,
+          });
+        }
+      );
+
+      renderModal();
+      await user.click(screen.getByRole("button", { name: "現在地を使う" }));
+
+      expect(
+        await screen.findByText("現在地の取得に失敗しました")
+      ).toBeInTheDocument();
     });
   });
 });

@@ -22,3 +22,7 @@ if (typeof globalThis.ResizeObserver === "undefined") {
 if (!Element.prototype.setPointerCapture) {
   Element.prototype.setPointerCapture = () => {};
 }
+
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}
