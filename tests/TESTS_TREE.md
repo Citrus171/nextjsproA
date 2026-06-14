@@ -671,11 +671,17 @@ apps/web/src/
     │           ├── 「地図から選択」クリック後、「タップして場所を選択」バナーが表示されること
     │           ├── 選択モード中に地図クリックで lat/lng・住所が SightingModal にセットされ再表示されること
     │           └── Nominatim 失敗時、lat/lng セット済みでモーダルが再表示されエラーメッセージが表示されること
-    │   └── createMarkerIcon
-    │       ├── isOwn=trueの時、map-marker--ownクラスが付与されること
-    │       ├── isOwn=falseの時、map-marker--ownクラスが付与されないこと
-    │       ├── 解決済みの自分のマーカーにもmap-marker--ownクラスが付与されること
-    │       └── 自分の目撃投稿マーカーにもmap-marker--ownクラスが付与されること
+    │   ├── createMarkerIcon
+    │   │   ├── isOwn=trueの時、map-marker--ownクラスが付与されること
+    │   │   ├── isOwn=falseの時、map-marker--ownクラスが付与されないこと
+    │   │   ├── 解決済みの自分のマーカーにもmap-marker--ownクラスが付与されること
+    │   │   └── 自分の目撃投稿マーカーにもmap-marker--ownクラスが付与されること
+    │   ├── createClusterIcon
+    │   │   ├── 指定した件数がaria-labelに含まれること
+    │   │   └── 指定した件数がspan内に表示されること
+    │   └── マーカークラスタリング
+    │       ├── 離れたマーカーはクラスタリングされず個別に表示されること
+    │       └── クラスターマーカーをクリックすると flyTo が呼ばれること
     ├── components/PostDetailSheet.test.tsx
     │   └── PostDetailSheet
     │       ├── isOpen=true の時、ダイアログが表示されること

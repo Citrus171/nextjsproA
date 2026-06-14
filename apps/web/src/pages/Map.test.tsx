@@ -35,6 +35,7 @@ const mockMapInstance = {
     getWest: () => 139.3,
     getEast: () => 139.7,
   })),
+  getZoom: vi.fn(() => 13),
   dragging: { enable: vi.fn(), disable: vi.fn() },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: vi.fn((event: string, handler: (...args: any[]) => void) => {
@@ -148,24 +149,24 @@ const sampleMarkers = [
     id: "post-1",
     type: "post",
     status: "lost",
-    lat: 35.9,
-    lng: 139.6,
+    lat: 35.85,
+    lng: 139.35,
     userId: "user-1",
   },
   {
     id: "post-2",
     type: "post",
     status: "resolved",
-    lat: 35.905,
-    lng: 139.605,
+    lat: 35.9,
+    lng: 139.5,
     userId: "user-2",
   },
   {
     id: "sighting-1",
     type: "sighting",
     status: "lost",
-    lat: 35.91,
-    lng: 139.61,
+    lat: 35.95,
+    lng: 139.65,
     userId: "user-1",
   },
 ] as const;
@@ -186,7 +187,7 @@ const samplePost = {
   location: null,
 };
 
-import Map, { createMarkerIcon } from "./Map";
+import Map, { createMarkerIcon, createClusterIcon } from "./Map";
 import type { MapMarkerDto } from "../../../../packages/api-client/src/index";
 
 describe("Map", () => {
@@ -651,5 +652,117 @@ describe("createMarkerIcon", () => {
     };
     const icon = createMarkerIcon(marker, true);
     expect(icon.options.html).toContain("map-marker--own");
+  });
+});
+
+describe("createClusterIcon", () => {
+  it("指定した件数がaria-labelに含まれること", () => {
+    const icon = createClusterIcon(5);
+    expect(icon.options.html).toContain("5件のマーカー");
+  });
+
+  it("指定した件数がspan内に表示されること", () => {
+    const icon = createClusterIcon(12);
+    expect(icon.options.html).toContain(">12<");
+  });
+});
+
+describe("マーカークラスタリング", () => {
+  function renderMap() {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <Map />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+  }
+
+  beforeEach(() => {
+    mockGetMapMarkers.mockResolvedValue([]);
+    mockGetPost.mockResolvedValue({
+      authorNickname: "テスト",
+      id: "post-1",
+      createdAt: "2026-04-23T00:00:00.000Z",
+      updatedAt: "2026-04-23T00:00:00.000Z",
+      description: "テスト",
+      images: [],
+      lostDate: "2026-04-22T00:00:00.000Z",
+      postType: "cat",
+      status: "lost",
+      title: "テスト投稿",
+      userId: "user-1",
+      petDetail: null,
+      location: null,
+    });
+  });
+
+  it("離れたマーカーはクラスタリングされず個別に表示されること", async () => {
+    mockGetMapMarkers.mockResolvedValue(sampleMarkers as unknown as never[]);
+    renderMap();
+
+    expect(
+      await screen.findAllByRole("button", { name: "迷子投稿" })
+    ).toHaveLength(2);
+    expect(
+      await screen.findAllByRole("button", { name: "目撃情報" })
+    ).toHaveLength(1);
+    expect(
+      screen.queryByRole("button", { name: /件のマーカー/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it("クラスターマーカーをクリックすると flyTo が呼ばれること", async () => {
+    const user = userEvent.setup();
+    const clusteredMarkers = [
+      {
+        id: "post-a",
+        type: "post",
+        status: "lost",
+        lat: 35.9,
+        lng: 139.6,
+        userId: "user-1",
+      },
+      {
+        id: "post-b",
+        type: "post",
+        status: "lost",
+        lat: 35.901,
+        lng: 139.601,
+        userId: "user-2",
+      },
+      {
+        id: "post-c",
+        type: "post",
+        status: "lost",
+        lat: 35.902,
+        lng: 139.602,
+        userId: "user-3",
+      },
+      {
+        id: "post-d",
+        type: "post",
+        status: "lost",
+        lat: 35.903,
+        lng: 139.603,
+        userId: "user-4",
+      },
+    ];
+    mockGetMapMarkers.mockResolvedValue(clusteredMarkers as unknown as never[]);
+    mockFlyTo.mockReset();
+
+    renderMap();
+
+    const clusterBtn = await screen.findByRole("button", {
+      name: /件のマーカー/,
+    });
+    await user.click(clusterBtn);
+
+    expect(mockFlyTo).toHaveBeenCalledTimes(1);
+    const [, zoom] = mockFlyTo.mock.calls[0] as [unknown, number, unknown];
+    expect(zoom).toBeGreaterThan(13);
   });
 });

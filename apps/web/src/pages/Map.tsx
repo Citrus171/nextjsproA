@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import type { Map as LeafletMap, LeafletMouseEvent } from "leaflet";
+import Supercluster from "supercluster";
 import type {
   MapMarkerDto,
   PostResponseDto,
@@ -38,6 +39,9 @@ L.Icon.Default.mergeOptions({
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
+
+type ClusterBBox = [number, number, number, number]; // [west, south, east, north]
+type MarkerPoint = { marker: MapMarkerDto };
 
 const DEFAULT_CENTER: [number, number] = [35.9062, 139.6236];
 const DEFAULT_ZOOM = 13;
@@ -98,6 +102,15 @@ export function createMarkerIcon(marker: MapMarkerDto, isOwn: boolean) {
   });
 }
 
+export function createClusterIcon(count: number): L.DivIcon {
+  return L.divIcon({
+    html: `<div class="map-cluster" role="button" aria-label="${count}件のマーカー"><span class="map-cluster__count">${count}</span></div>`,
+    className: "map-cluster-icon",
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
+  });
+}
+
 export default function Map() {
   const api = useApiClient();
   const { userId: currentUserId, nickname, clearToken } = useAuth();
@@ -133,6 +146,8 @@ export default function Map() {
   );
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [mapBounds, setMapBounds] = useState<ClusterBBox | null>(null);
+  const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
 
   const { data: unreadData } = useQuery({
     queryKey: QUERY_KEYS.unreadCount(),
@@ -141,6 +156,13 @@ export default function Map() {
     staleTime: 10_000,
     refetchInterval: 30_000,
   });
+
+  useEffect(() => {
+    if (!mapInstance) return;
+    const b = mapInstance.getBounds();
+    setMapBounds([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()]);
+    setMapZoom(mapInstance.getZoom());
+  }, [mapInstance]);
 
   // flyTo on initial load from query params
   useEffect(() => {
@@ -210,6 +232,23 @@ export default function Map() {
     if (filter === "lost") return markers.filter((m) => m.type === "post");
     return markers.filter((m) => m.type === "sighting");
   }, [filter, markers]);
+
+  const clusterIndex = useMemo(() => {
+    const index = new Supercluster<MarkerPoint>({ radius: 60, maxZoom: 16 });
+    index.load(
+      visibleMarkers.map((m) => ({
+        type: "Feature" as const,
+        geometry: { type: "Point" as const, coordinates: [m.lng, m.lat] },
+        properties: { marker: m },
+      }))
+    );
+    return index;
+  }, [visibleMarkers]);
+
+  const clusters = useMemo(() => {
+    if (!mapBounds) return [];
+    return clusterIndex.getClusters(mapBounds, Math.floor(mapZoom));
+  }, [clusterIndex, mapBounds, mapZoom]);
 
   const handleCurrentLocationClick = () => {
     if (!mapInstance) {
@@ -392,7 +431,13 @@ export default function Map() {
                 setSightingModalOpen(true);
               }}
             />
-            <MapMoveHandler onMove={fetchMarkersWithBounds} />
+            <MapMoveHandler
+              onMove={fetchMarkersWithBounds}
+              onViewChange={(bbox, zoom) => {
+                setMapBounds(bbox);
+                setMapZoom(zoom);
+              }}
+            />
             <MapContextMenuHandler
               enabled={
                 !pickingLocation &&
@@ -405,17 +450,57 @@ export default function Map() {
               attribution="&copy; OpenStreetMap contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {visibleMarkers.map((marker) => (
-              <Marker
-                key={`${marker.type}-${marker.id}`}
-                position={[marker.lat, marker.lng]}
-                icon={createMarkerIcon(marker, marker.userId === currentUserId)}
-                title={marker.type === "post" ? "迷子投稿" : "目撃情報"}
-                eventHandlers={{
-                  click: () => setSelectedMarker(marker),
-                }}
-              />
-            ))}
+            {clusters.map((feature) => {
+              const [lng, lat] = feature.geometry.coordinates;
+              const isCluster =
+                "cluster" in feature.properties &&
+                feature.properties.cluster === true;
+
+              if (isCluster) {
+                const clusterId = (
+                  feature.properties as Supercluster.ClusterProperties
+                ).cluster_id;
+                const pointCount = (
+                  feature.properties as Supercluster.ClusterProperties
+                ).point_count;
+                return (
+                  <Marker
+                    key={`cluster-${clusterId}`}
+                    position={[lat, lng]}
+                    icon={createClusterIcon(pointCount)}
+                    title={`${pointCount}件のマーカー`}
+                    eventHandlers={{
+                      click: () => {
+                        if (!mapInstance) return;
+                        const expansionZoom = Math.min(
+                          clusterIndex.getClusterExpansionZoom(clusterId),
+                          19
+                        );
+                        mapInstance.flyTo([lat, lng], expansionZoom, {
+                          animate: true,
+                        });
+                      },
+                    }}
+                  />
+                );
+              }
+
+              const { marker } = feature.properties as MarkerPoint;
+              return (
+                <Marker
+                  key={`${marker.type}-${marker.id}`}
+                  position={[lat, lng]}
+                  icon={createMarkerIcon(
+                    marker,
+                    marker.userId === currentUserId
+                  )}
+                  title={marker.type === "post" ? "迷子投稿" : "目撃情報"}
+                  eventHandlers={{
+                    click: () => setSelectedMarker(marker),
+                  }}
+                />
+              );
+            })}
           </MapContainer>
 
           {mapInstance && (
@@ -871,6 +956,7 @@ function MapContextMenuHandler({
 
 function MapMoveHandler({
   onMove,
+  onViewChange,
 }: {
   onMove: (bounds: {
     south: number;
@@ -878,6 +964,7 @@ function MapMoveHandler({
     west: number;
     east: number;
   }) => void;
+  onViewChange?: (bbox: ClusterBBox, zoom: number) => void;
 }) {
   const map = useMap();
 
@@ -890,13 +977,17 @@ function MapMoveHandler({
         west: b.getWest(),
         east: b.getEast(),
       });
+      onViewChange?.(
+        [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+        map.getZoom()
+      );
     };
 
     map.on("moveend", handler);
     return () => {
       map.off("moveend", handler);
     };
-  }, [onMove, map]);
+  }, [onMove, onViewChange, map]);
 
   return null;
 }
