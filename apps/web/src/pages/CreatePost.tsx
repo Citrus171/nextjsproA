@@ -345,10 +345,14 @@ export default function CreatePost() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-name"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 お名前 <span className="text-destructive">*</span>
               </Label>
               <Input
+                id="pet-name"
                 placeholder="例：レオ"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -359,10 +363,14 @@ export default function CreatePost() {
               )}
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-breed"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 種類
               </Label>
               <Input
+                id="pet-breed"
                 placeholder="例：日本猫、スコティッシュ等"
                 value={breed}
                 onChange={(e) => setBreed(e.target.value)}
@@ -407,10 +415,14 @@ export default function CreatePost() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-age"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 年齢（推定可）<span className="text-destructive">*</span>
               </Label>
               <Input
+                id="pet-age"
                 placeholder="例：推定2歳"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
@@ -421,10 +433,14 @@ export default function CreatePost() {
               )}
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-color"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 毛色 <span className="text-destructive">*</span>
               </Label>
               <Input
+                id="pet-color"
                 placeholder="例：茶トラ、白黒ハチワレ"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
@@ -437,11 +453,15 @@ export default function CreatePost() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-features"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               特徴（しっぽの形、鳴き声、性格など）
               <span className="text-destructive">*</span>
             </Label>
             <Textarea
+              id="pet-features"
               placeholder="例：かぎしっぽです。少し人見知りですが、おやつを見せると寄ってきます。"
               value={features}
               onChange={(e) => setFeatures(e.target.value)}
@@ -453,10 +473,14 @@ export default function CreatePost() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-description"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               詳しい説明 <span className="text-destructive">*</span>
             </Label>
             <Textarea
+              id="pet-description"
               placeholder="例：首輪なし。人懐こい性格で、名前を呼ぶと振り向きます。"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -503,7 +527,10 @@ export default function CreatePost() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-lost-date"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               いなくなった日時 <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
@@ -512,6 +539,7 @@ export default function CreatePost() {
                 size={18}
               />
               <Input
+                id="pet-lost-date"
                 type="datetime-local"
                 value={lostDate}
                 onChange={(e) => setLostDate(e.target.value)}
@@ -526,11 +554,17 @@ export default function CreatePost() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-muted-foreground ml-1">
+                <Label
+                  htmlFor="pet-prefecture"
+                  className="text-xs font-bold text-muted-foreground ml-1"
+                >
                   都道府県
                 </Label>
                 <Select defaultValue="saitama" disabled>
-                  <SelectTrigger className="h-12 border-none bg-muted rounded-2xl px-4">
+                  <SelectTrigger
+                    id="pet-prefecture"
+                    className="h-12 border-none bg-muted rounded-2xl px-4"
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -539,10 +573,14 @@ export default function CreatePost() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-muted-foreground ml-1">
+                <Label
+                  htmlFor="pet-city"
+                  className="text-xs font-bold text-muted-foreground ml-1"
+                >
                   市区町村 <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  id="pet-city"
                   placeholder="例：さいたま市"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
@@ -554,10 +592,14 @@ export default function CreatePost() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-address"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 それ以降の住所・目印 <span className="text-destructive">*</span>
               </Label>
               <Input
+                id="pet-address"
                 placeholder="例：〇〇1-2-3 〇〇公園付近"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
@@ -632,10 +674,14 @@ export default function CreatePost() {
 
           {/* タイトル（任意） */}
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-title"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               投稿タイトル（任意・最大100文字）
             </Label>
             <Input
+              id="pet-title"
               placeholder="例：白猫のミケを探しています"
               value={title}
               maxLength={100}

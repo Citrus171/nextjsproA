@@ -127,6 +127,11 @@ describe("CreatePost", () => {
       expect(screen.getByText("取得中…")).toBeInTheDocument();
     });
 
+    // Wait for geocode to resolve
+    await waitFor(() => {
+      expect(screen.getByText("さいたま市中央区1-2-3")).toBeInTheDocument();
+    });
+
     // Confirm location
     await user.click(screen.getByRole("button", { name: "この場所に決める" }));
 
@@ -176,7 +181,7 @@ describe("CreatePost", () => {
     };
     expect(location.prefecture).toBe("saitama");
     expect(location.city).toBe("さいたま市");
-    expect(location.address).toBe("中央区1-2-3");
+    expect(location.address).toBe("さいたま市中央区1-2-3");
     expect(location.lat).toBe(35.91);
     expect(location.lng).toBe(139.63);
 

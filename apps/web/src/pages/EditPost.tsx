@@ -408,20 +408,28 @@ export default function EditPost() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-name"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 お名前
               </Label>
               <Input
+                id="pet-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="h-12 border-none bg-muted rounded-2xl px-4"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-breed"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 種類
               </Label>
               <Input
+                id="pet-breed"
                 value={breed}
                 onChange={(e) => setBreed(e.target.value)}
                 className="h-12 border-none bg-muted rounded-2xl px-4"
@@ -465,20 +473,28 @@ export default function EditPost() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-age"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 年齢
               </Label>
               <Input
+                id="pet-age"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
                 className="h-12 border-none bg-muted rounded-2xl px-4"
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-bold text-muted-foreground ml-1">
+              <Label
+                htmlFor="pet-color"
+                className="text-xs font-bold text-muted-foreground ml-1"
+              >
                 毛色
               </Label>
               <Input
+                id="pet-color"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
                 className="h-12 border-none bg-muted rounded-2xl px-4"
@@ -487,10 +503,14 @@ export default function EditPost() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-features"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               特徴
             </Label>
             <Textarea
+              id="pet-features"
               value={features}
               onChange={(e) => setFeatures(e.target.value)}
               className="min-h-[80px] border-none bg-muted rounded-2xl p-4 resize-none"
@@ -498,10 +518,14 @@ export default function EditPost() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-description"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               詳しい説明
             </Label>
             <Textarea
+              id="pet-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="min-h-[80px] border-none bg-muted rounded-2xl p-4 resize-none"
@@ -542,7 +566,10 @@ export default function EditPost() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-lost-date"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               いなくなった日時
             </Label>
             <div className="relative">
@@ -551,6 +578,7 @@ export default function EditPost() {
                 size={18}
               />
               <Input
+                id="pet-lost-date"
                 type="datetime-local"
                 value={lostDate}
                 onChange={(e) => setLostDate(e.target.value)}
@@ -560,10 +588,14 @@ export default function EditPost() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-city"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               市区町村
             </Label>
             <Input
+              id="pet-city"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               className="h-12 border-none bg-muted rounded-2xl px-4"
@@ -571,10 +603,14 @@ export default function EditPost() {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold text-muted-foreground ml-1">
+            <Label
+              htmlFor="pet-address"
+              className="text-xs font-bold text-muted-foreground ml-1"
+            >
               住所・目印
             </Label>
             <Input
+              id="pet-address"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               className="h-12 border-none bg-muted rounded-2xl px-4"
