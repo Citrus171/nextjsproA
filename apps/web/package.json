@@ -8,6 +8,7 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:related": "vitest run --changed HEAD",
     "test:ui": "vitest --ui",
     "test:e2e": "npx playwright test --project=chromium --reporter=list",
     "storybook": "storybook dev -p 6006",

@@ -13,6 +13,8 @@
     "test": "npm run test:api && npm run test:web",
     "test:api": "npm run test --workspace=apps/api",
     "test:web": "npm run test:run --workspace=apps/web",
+    "test:web:related": "npm run test:related --workspace=apps/web",
+    "test:pre-commit": "npm run test:api && npm run test:web:related",
     "test:contract": "npm run dredd",
     "test:ci": "npm run test && npm run test:contract",
     "test:e2e": "npm run test:e2e:web && npm run test:e2e:api",

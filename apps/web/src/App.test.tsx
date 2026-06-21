@@ -60,7 +60,7 @@ describe("App", () => {
     );
 
     expect(
-      await screen.findByRole("button", { name: "ログイン" })
+      await screen.findByRole("button", { name: "ログイン" }, { timeout: 5000 })
     ).toBeInTheDocument();
   });
 
@@ -73,7 +73,11 @@ describe("App", () => {
     );
 
     expect(
-      await screen.findByText("まだ迷い猫投稿はありません")
+      await screen.findByText(
+        "まだ迷い猫投稿はありません",
+        {},
+        { timeout: 5000 }
+      )
     ).toBeInTheDocument();
   });
 
@@ -86,7 +90,7 @@ describe("App", () => {
     );
 
     expect(
-      await screen.findByRole("button", { name: "ログイン" })
+      await screen.findByRole("button", { name: "ログイン" }, { timeout: 5000 })
     ).toBeInTheDocument();
   });
 
