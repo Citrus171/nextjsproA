@@ -7,7 +7,7 @@ set -euo pipefail
 # PM2 / API / Web サイト / SSL 証明書期限 / ディスク容量 を確認
 # =============================================================================
 
-DOMAIN="${DOMAIN:-finder.miyaoo.com}"
+DOMAIN="${DOMAIN:-your-domain.example.com}"
 PM2_NAME="${PM2_NAME:-api}"
 VERBOSE="${VERBOSE:-false}"
 
