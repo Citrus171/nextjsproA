@@ -13,7 +13,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="${PROJECT_DIR:-$(dirname "$SCRIPT_DIR")}"
 export PROJECT_DIR
 PM2_NAME="${PM2_NAME:-api}"
-DOMAIN="${DOMAIN:-finder.miyaoo.com}"
+DOMAIN="${DOMAIN:-your-domain.example.com}"
 SKIP_BACKUP="${SKIP_BACKUP:-false}"
 SKIP_WEB="${SKIP_WEB:-false}"
 SKIP_ROLLBACK="${SKIP_ROLLBACK:-false}"
@@ -38,14 +38,14 @@ Options:
   --skip-backup         デプロイ前のバックアップをスキップ
   --skip-web            Webフロントエンドのビルド・デプロイをスキップ（APIのみ更新）
   --skip-rollback       ヘルスチェック失敗時の自動ロールバックを無効化
-  --domain DOMAIN       ヘルスチェック対象のドメイン（デフォルト: finder.miyaoo.com）
+  --domain DOMAIN       ヘルスチェック対象のドメイン（デフォルト: your-domain.example.com）
   --pm2-name NAME       PM2 プロセス名（デフォルト: api）
   --help, -h            このヘルプを表示
 
 Environment Variables:
   PROJECT_DIR           プロジェクトルートパス（未設定時はスクリプト位置から自動検出）
   PM2_NAME              PM2 プロセス名（デフォルト: api）
-  DOMAIN                本番ドメイン（デフォルト: finder.miyaoo.com）
+  DOMAIN                本番ドメイン（デフォルト: your-domain.example.com）
   SKIP_BACKUP           true でバックアップをスキップ
   SKIP_WEB              true で Web デプロイをスキップ
   SKIP_ROLLBACK         true で自動ロールバックを無効化

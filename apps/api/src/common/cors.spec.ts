@@ -1,12 +1,12 @@
 import { isOriginAllowed } from "./cors";
 
-const allowedOrigins = ["https://finder.miyaoo.com"];
+const allowedOrigins = ["https://your-domain.example.com"];
 
 describe("isOriginAllowed", () => {
   describe("本番環境 (isDev=false)", () => {
     it("許可オリジンからのリクエストを許可すること", () => {
       expect(
-        isOriginAllowed("https://finder.miyaoo.com", false, allowedOrigins)
+        isOriginAllowed("https://your-domain.example.com", false, allowedOrigins)
       ).toBe(true);
     });
 
@@ -46,7 +46,7 @@ describe("isOriginAllowed", () => {
 
     it("許可オリジンを許可すること", () => {
       expect(
-        isOriginAllowed("https://finder.miyaoo.com", true, allowedOrigins)
+        isOriginAllowed("https://your-domain.example.com", true, allowedOrigins)
       ).toBe(true);
     });
 
