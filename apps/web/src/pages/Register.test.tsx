@@ -31,10 +31,10 @@ describe("Register", () => {
     mockRegister.mockClear();
   });
 
-  it("フォームが正しくレンダリングされること（名前は任意、ログインへのリンクあり）", () => {
+  it("フォームが正しくレンダリングされること（ログインへのリンクあり）", () => {
     render(<Register />);
     expect(screen.getByLabelText(/お名前/i)).toBeInTheDocument();
-    expect(screen.getByText(/任意/i)).toBeInTheDocument();
+    expect(screen.queryByText(/任意/i)).not.toBeInTheDocument();
     expect(screen.getByLabelText("メールアドレス")).toBeInTheDocument();
     expect(screen.getByLabelText("パスワード")).toBeInTheDocument();
     expect(screen.getByLabelText("パスワード（確認）")).toBeInTheDocument();
@@ -42,6 +42,29 @@ describe("Register", () => {
       screen.getByRole("button", { name: /アカウントを作成/i })
     ).toBeInTheDocument();
     expect(screen.getByText(/ログイン/i)).toBeInTheDocument();
+  });
+
+  it("名前が空の時、フィールド下にエラーが表示されること", async () => {
+    const user = userEvent.setup();
+    render(<Register />);
+
+    await user.type(
+      screen.getByLabelText("メールアドレス"),
+      "test@example.com"
+    );
+    await user.type(screen.getByLabelText("パスワード"), "Password123!");
+    await user.type(
+      screen.getByLabelText("パスワード（確認）"),
+      "Password123!"
+    );
+    await user.click(screen.getByRole("button", { name: /アカウントを作成/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/ニックネームを入力してください/i)
+      ).toBeInTheDocument();
+    });
+    expect(mockRegister).not.toHaveBeenCalled();
   });
 
   it("メール形式が不正な時、フィールド下にエラーが表示されること", async () => {
@@ -107,6 +130,7 @@ describe("Register", () => {
     const user = userEvent.setup();
     render(<Register />);
 
+    await user.type(screen.getByLabelText(/お名前/i), "テストユーザー");
     await user.type(
       screen.getByLabelText("メールアドレス"),
       "test@example.com"
@@ -119,7 +143,7 @@ describe("Register", () => {
       expect(mockRegister).toHaveBeenCalledWith({
         email: "test@example.com",
         password: "password123",
-        name: undefined,
+        name: "テストユーザー",
       });
       expect(mockNavigate).toHaveBeenCalledWith("/login");
     });
