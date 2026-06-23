@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 interface FormErrors {
+  name?: string;
   email?: string;
   password?: string;
   confirm?: string;
@@ -29,6 +30,9 @@ export default function Register() {
 
   const validate = (): FormErrors => {
     const errs: FormErrors = {};
+    if (!name.trim()) {
+      errs.name = "ニックネームを入力してください";
+    }
     if (!EMAIL_RE.test(email)) {
       errs.email = "正しいメールアドレスを入力してください";
     }
@@ -53,7 +57,7 @@ export default function Register() {
     setSubmitting(true);
     try {
       await usersControllerRegister({
-        name: name || undefined,
+        name,
         email,
         password,
       });
@@ -98,17 +102,12 @@ export default function Register() {
 
           <form onSubmit={submit} noValidate className="space-y-5">
             <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <Label
-                  htmlFor="name"
-                  className="text-sm font-bold text-foreground"
-                >
-                  お名前
-                </Label>
-                <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">
-                  任意
-                </span>
-              </div>
+              <Label
+                htmlFor="name"
+                className="text-sm font-bold text-foreground"
+              >
+                お名前
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -118,6 +117,9 @@ export default function Register() {
                 className="h-12 bg-muted border-none rounded-xl text-foreground placeholder:text-muted-foreground"
                 autoComplete="nickname"
               />
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
