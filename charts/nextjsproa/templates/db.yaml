@@ -45,7 +45,7 @@ spec:
           # compose の healthcheck: pg_isready に相当
           readinessProbe:
             exec:
-              command: ["pg_isready", "-U", "postgres", "-d", "nestjs_dev"]
+              command: ["pg_isready", "-U", "postgres", "-d", "nextjsproa_prod"]
             periodSeconds: 5
             timeoutSeconds: 3
           volumeMounts:
