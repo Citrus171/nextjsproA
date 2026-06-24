@@ -1,0 +1,42 @@
+# 本番 k3s 向けオーバーライド値。values.yaml の既定値をここで上書きする。
+# SealedSecret は新クラスタの公開鍵で再封緘後にコミットすること（templates/sealedsecret.yaml）。
+
+ingress:
+  className: traefik
+  host: finder.miyaoo.com
+  tls: true
+  certIssuer: letsencrypt-prod
+
+config:
+  NODE_ENV: production
+  COOKIE_SECURE: "true"
+  PORT: "3000"
+  WEB_ORIGIN: https://finder.miyaoo.com
+  ENCRYPTION_KEY_CURRENT: v1
+
+api:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 384Mi
+
+web:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+db:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
