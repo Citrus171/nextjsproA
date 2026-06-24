@@ -1,12 +1,21 @@
-# 外部公開（compose の web の ports: 8080:80 に相当）
-# k3d の 8081:80 マッピング → Traefik → この Ingress → web Service の経路
-# /api 等のプロキシは web 内の nginx が担うため、ルールは web への1本だけでよい
+# 外部公開。/api 等のプロキシは web 内の nginx が担うため、ルールは web への1本だけ。
+# TLS: values.ingress.tls=true のとき cert-manager が Let's Encrypt 証明書を自動取得する。
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: web
+  {{- if .Values.ingress.tls }}
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer }}
+  {{- end }}
 spec:
   ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.host | replace "." "-" }}-tls
+  {{- end }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:

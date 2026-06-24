@@ -9,6 +9,8 @@ api:
   # uploads PVC が ReadWriteOnce のため 1 固定（増やすには RWX ストレージか S3 化が必要）
   replicas: 1
   uploadsStorage: 1Gi
+  # デフォルトは resource limits なし（k3d ローカル）。values-prod.yaml で上書きする
+  resources: {}
 
 web:
   image:
@@ -16,10 +18,12 @@ web:
     tag: latest
     pullPolicy: IfNotPresent
   replicas: 1
+  resources: {}
 
 db:
   image: postgres:16-alpine
   storage: 1Gi
+  resources: {}
 
 migrate:
   image:
@@ -31,6 +35,9 @@ ingress:
   className: traefik
   # Host ヘッダで振り分け（複数プロジェクトを namespace 分離しても 8081 を共有できる）
   host: nextjsproa.localhost
+  # TLS/cert-manager 設定。values-prod.yaml で true に上書きする
+  tls: false
+  certIssuer: letsencrypt-prod
 
 # 秘密でない設定値（ConfigMap になる）
 config:

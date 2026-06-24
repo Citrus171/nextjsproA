@@ -45,6 +45,10 @@ spec:
                 name: app-config
             - secretRef:
                 name: app-secrets
+          {{- with .Values.api.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           # compose の healthcheck に相当（start_period 20s → initialDelaySeconds）
           readinessProbe:
             httpGet:

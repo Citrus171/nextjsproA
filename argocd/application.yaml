@@ -13,6 +13,10 @@ spec:
     repoURL: https://github.com/Citrus171/nextjsproA.git
     targetRevision: main
     path: charts/nextjsproa
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
   destination:
     server: https://kubernetes.default.svc # 同一クラスタ
     namespace: nextjsproa

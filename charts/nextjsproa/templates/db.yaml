@@ -38,6 +38,10 @@ spec:
           envFrom:
             - secretRef:
                 name: app-secrets
+          {{- with .Values.db.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           # compose の healthcheck: pg_isready に相当
           readinessProbe:
             exec:
