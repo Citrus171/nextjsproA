@@ -10,6 +10,11 @@
 # ---------- build: Vite ビルド ----------
 FROM node:22-slim AS build
 ENV HUSKY=0
+# デモユーザーのプリフィル用（VITE_ プレフィックスは Vite ビルド時に埋め込まれる）
+ARG VITE_DEMO_EMAIL=demo@finder.miyaoo.com
+ARG VITE_DEMO_PASSWORD=Demo1234!
+ENV VITE_DEMO_EMAIL=$VITE_DEMO_EMAIL
+ENV VITE_DEMO_PASSWORD=$VITE_DEMO_PASSWORD
 WORKDIR /app
 
 COPY package.json package-lock.json ./
