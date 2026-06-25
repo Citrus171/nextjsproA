@@ -67,10 +67,12 @@ describe("LoginWithAuth", () => {
     const user = userEvent.setup();
     render(<LoginWithAuth />);
 
+    await user.clear(screen.getByLabelText("メールアドレス"));
     await user.type(
       screen.getByLabelText("メールアドレス"),
       "test@example.com"
     );
+    await user.clear(screen.getByLabelText("パスワード"));
     await user.type(screen.getByLabelText("パスワード"), "password123");
     await user.click(screen.getByRole("button", { name: /ログイン/i }));
 
@@ -85,10 +87,12 @@ describe("LoginWithAuth", () => {
     const user = userEvent.setup();
     render(<LoginWithAuth />);
 
+    await user.clear(screen.getByLabelText("メールアドレス"));
     await user.type(
       screen.getByLabelText("メールアドレス"),
       "test@example.com"
     );
+    await user.clear(screen.getByLabelText("パスワード"));
     await user.type(screen.getByLabelText("パスワード"), "wrongpass");
     await user.click(screen.getByRole("button", { name: /ログイン/i }));
 
@@ -109,10 +113,12 @@ describe("LoginWithAuth", () => {
     const user = userEvent.setup();
     render(<LoginWithAuth />);
 
+    await user.clear(screen.getByLabelText("メールアドレス"));
     await user.type(
       screen.getByLabelText("メールアドレス"),
       "test@example.com"
     );
+    await user.clear(screen.getByLabelText("パスワード"));
     await user.type(screen.getByLabelText("パスワード"), "wrongpass");
     await user.click(screen.getByRole("button", { name: /ログイン/i }));
 
@@ -130,10 +136,12 @@ describe("LoginWithAuth", () => {
     const user = userEvent.setup();
     render(<LoginWithAuth />);
 
+    await user.clear(screen.getByLabelText("メールアドレス"));
     await user.type(
       screen.getByLabelText("メールアドレス"),
       "test@example.com"
     );
+    await user.clear(screen.getByLabelText("パスワード"));
     await user.type(screen.getByLabelText("パスワード"), "wrongpass");
     await user.click(screen.getByRole("button", { name: /ログイン/i }));
 
@@ -147,10 +155,12 @@ describe("LoginWithAuth", () => {
     const user = userEvent.setup();
     render(<LoginWithAuth />);
 
+    await user.clear(screen.getByLabelText("メールアドレス"));
     await user.type(
       screen.getByLabelText("メールアドレス"),
       "test@example.com"
     );
+    await user.clear(screen.getByLabelText("パスワード"));
     await user.type(screen.getByLabelText("パスワード"), "wrongpass");
     await user.click(screen.getByRole("button", { name: /ログイン/i }));
 
